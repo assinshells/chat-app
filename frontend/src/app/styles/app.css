@@ -24,6 +24,14 @@ body {
     ),
     var(--body-background-color);
 }
+.dropdown-toggle.arrow-none::after,
+.dropup .dropdown-toggle.arrow-none::after,
+.dropend .dropdown-toggle.arrow-none::after {
+  display: none !important;
+}
+.dropstart .dropdown-toggle.arrow-none::before {
+  display: none !important;
+}
 /* =========================================================
    INPUTS / SELECT / TEXTAREA / RADIO / CHECKBOX / BUTTONS
    ========================================================= */
