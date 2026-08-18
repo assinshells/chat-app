@@ -1,11 +1,14 @@
 import { ChatLayout } from "@widgets/layouts";
+import { SideNav } from "@widgets/side-nav";
+import { ChatSidebar } from "@widgets/chat-sidebar";
+import { ChatWindow } from "@widgets/chat-window";
 
 export function ChatPage({ login, onLogout }) {
   return (
     <ChatLayout
-      onLogout={onLogout}
-      sidebarContent={
-        <>
+      sideNav={<SideNav onLogout={onLogout} />}
+      sidebar={
+        <ChatSidebar>
           <div
             className="tab-pane"
             id="pills-users"
@@ -32,9 +35,9 @@ export function ChatPage({ login, onLogout }) {
           >
             PrivateChat
           </div>
-        </>
+        </ChatSidebar>
       }
-      mainContent="User chat"
+      chatWindow={<ChatWindow>User chat</ChatWindow>}
     />
   );
 }
