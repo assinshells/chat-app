@@ -1,0 +1,123 @@
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--body-font-family);
+  color: var(--body-font-color);
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(139, 92, 246, 0.18),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(34, 211, 238, 0.1),
+      transparent 35%
+    ),
+    var(--body-background-color);
+}
+/* =========================================================
+   INPUTS / SELECT / TEXTAREA / RADIO / CHECKBOX / BUTTONS
+   ========================================================= */
+/* Input / Select / Textarea */
+.form-control:focus,
+.form-select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+/* Radio / Checkbox */
+.form-check-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.btn-outline-primary {
+  border-color: transparent;
+  color: var(--bs-primary);
+}
+.btn-outline-primary:hover {
+  border-color: transparent;
+  color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  border-color: transparent !important;
+  box-shadow: none;
+}
+/* =========================================================
+   SIDEBAR MENU
+   ========================================================= */
+.side-menu {
+  min-width: 75px;
+  max-width: 75px;
+  height: 100vh;
+  min-height: 570px;
+  background-color: var(--bs-sidebar-bg);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  z-index: 9;
+  -webkit-box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
+}
+@media (max-width: 991.98px) {
+  .side-menu {
+    position: fixed;
+    bottom: 0;
+    height: 60px;
+    min-width: 100%;
+    min-height: auto;
+    display: block;
+    border-top: 1px solid var(--bs-border-color);
+  }
+}
+/* =========================================================
+   SIDEBAR CHAT
+   ========================================================= */
+.chat-leftsidebar {
+  height: 100vh;
+  background-color: var(--bs-sidebar-sub-bg);
+}
+@media (min-width: 992px) {
+  .chat-leftsidebar {
+    min-width: 380px;
+    max-width: 380px;
+  }
+}
+/* =========================================================
+   USER CHAT
+   ========================================================= */
+.user-chat {
+  background-color: var(--bs-white);
+  -webkit-box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+}
+@media (max-width: 991.98px) {
+  .user-chat {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+    z-index: 99;
+  }
+  .user-chat.user-chat-show {
+    visibility: visible;
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
