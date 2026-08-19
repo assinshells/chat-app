@@ -37,7 +37,7 @@ export function ChatPage({ login, onLogout }) {
           </div>
         </ChatSidebar>
       }
-      chatWindow={<ChatWindow>User chat</ChatWindow>}
+      chatWindow={<ChatWindow>Messages</ChatWindow>}
     />
   );
 }
