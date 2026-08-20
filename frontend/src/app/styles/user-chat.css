@@ -207,22 +207,36 @@
   height: calc(100vh - 184px);
 }
 @media (max-width: 991.98px) {
-  .chat-conversation {
-    height: calc(100vh - 152px);
-    margin-top: 73px;
-    margin-bottom: 78px;
+  /* Раніше висота топбару/інпута компенсувалась магічними
+     margin-top/margin-bottom + position:fixed на .chat-input-section.
+     Реальна висота цих блоків не збігалась з "зашитими" 73px/78px —
+     звідси порожній простір під шапкою (подвійний відступ: сам топбар
+     у потоці + додатковий margin-top) і текст, що заїжджав за інпут
+     знизу (footer був вищий за зарезервовані 78px). Замість магічних
+     чисел — flex-колонка на всю висоту .user-chat: топбар і інпут
+     фіксованої (авто) висоти, стрічка повідомлень займає весь
+     залишок і сама скролиться. */
+  .user-chat > .d-lg-flex {
+    height: 100%;
   }
-}
-.chat-input-section {
-  background-color: var(--bs-white);
-}
-@media (max-width: 991.98px) {
+  .user-chat > .d-lg-flex > .w-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .user-chat-topbar {
+    flex: 0 0 auto;
+  }
+  .chat-conversation {
+    flex: 1 1 auto;
+    min-height: 0; /* дає SimpleBar порахувати реальну висоту і скролитись, а не розтягувати колонку */
+    height: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
   .chat-input-section {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
+    flex: 0 0 auto;
+    position: static;
   }
 }
 .chat-input-links .list-inline-item:not(:last-child) {
@@ -275,12 +289,12 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--secondary-color);
+  color: var(--bs-secondary-color);
   border-radius: 50%;
   line-height: 0;
 }
 .message-input-clear:hover {
-  color: var(--danger);
+  color: var(--bs-danger, #f46a6a);
   background-color: rgba(0, 0, 0, 0.05);
 }
 .message-input-counter {
@@ -288,8 +302,8 @@
   bottom: -18px;
   right: 4px;
   font-size: 11px;
-  color: var(--secondary-color);
+  color: var(--bs-secondary-color);
 }
 .message-input-counter.is-limit {
-  color: var(--danger);
+  color: var(--bs-danger, #f46a6a);
 }
