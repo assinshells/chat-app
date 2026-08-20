@@ -1,0 +1,66 @@
+/* =========================================================
+   SIDEBAR CHAT
+   ========================================================= */
+.chat-leftsidebar {
+  height: 100vh;
+  background-color: var(--sidebar-sub-bg);
+}
+@media (min-width: 992px) {
+  .chat-leftsidebar {
+    min-width: 380px;
+    max-width: 380px;
+  }
+}
+.chat-leftsidebar .user-status-box {
+  background-color: var(--light);
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 16px;
+  display: block;
+}
+.chat-leftsidebar .user-status-box .chat-user-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+/**************************rooms******************/
+.chat-message-list {
+  height: calc(100vh - 280px);
+}
+@media (max-width: 991.98px) {
+  .chat-message-list {
+    height: calc(100vh - 320px);
+  }
+}
+.chat-group-list {
+  height: calc(100vh - 160px);
+}
+@media (max-width: 991.98px) {
+  .chat-group-list {
+    height: calc(100vh - 194px);
+  }
+}
+.chat-list {
+  margin: 0;
+}
+.chat-list li.active a {
+  background-color: var(--light);
+}
+.chat-list li a {
+  position: relative;
+  display: block;
+  padding: 15px 20px;
+  color: var(--secondary-color);
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+  border-top: 1px solid var(--sidebar-sub-bg);
+  border-radius: 4px;
+}
+.chat-list li a:hover {
+  background-color: var(--light);
+}
+.chat-list li .chat-user-message {
+  font-size: 14px;
+}

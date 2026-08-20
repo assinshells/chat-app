@@ -44,13 +44,15 @@ export function RoomList({ activeRoomId, onSelectRoom }) {
   }, [setUserCounts]);
 
   return (
-    <div className="p-3">
+    <>
+    <div className="p-4">
+      <h4 class="mb-4">Кімнати</h4>
       {error && <p className="text-danger small mb-2">{error}</p>}
-
+</div>
       {loading && rooms.length === 0 ? (
         <p className="text-muted small">Завантаження кімнат...</p>
       ) : (
-        <SimpleBar className="chat-room-list">
+        <SimpleBar className="p-4 chat-message-list chat-group-list">
           <ul className="list-unstyled chat-list mb-0">
             {rooms.map((room) => (
               <RoomListItem
@@ -64,6 +66,6 @@ export function RoomList({ activeRoomId, onSelectRoom }) {
           </ul>
         </SimpleBar>
       )}
-    </div>
+    </>
   );
 }
