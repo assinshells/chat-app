@@ -228,3 +228,68 @@
 .chat-input-links .list-inline-item:not(:last-child) {
   margin: 0;
 }
+
+/* Плоская строка сообщения: "18:33:12 Никнейм сообщение" */
+.chat-conversation .message-line {
+  padding: 2px 0;
+}
+.chat-conversation .message-line .message-time {
+  color: var(--bs-secondary-color);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.chat-conversation .message-line .message-author {
+  font-weight: 600;
+  color: var(--bs-primary);
+}
+.chat-conversation .message-line-own .message-author {
+  color: var(--bs-danger, #f46a6a);
+}
+.chat-conversation .message-anchor {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.chat-conversation .message-line .message-text {
+  word-break: break-word;
+}
+
+/* Инпут сообщения: счётчик символов + кнопка очистки */
+.message-input-wrap {
+  position: relative;
+}
+.message-input-wrap .form-control {
+  padding-right: 64px;
+}
+.message-input-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--secondary-color);
+  border-radius: 50%;
+  line-height: 0;
+}
+.message-input-clear:hover {
+  color: var(--danger);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.message-input-counter {
+  position: absolute;
+  bottom: -18px;
+  right: 4px;
+  font-size: 11px;
+  color: var(--secondary-color);
+}
+.message-input-counter.is-limit {
+  color: var(--danger);
+}

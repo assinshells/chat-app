@@ -12,7 +12,11 @@ import { useChatSession } from "../model/useChatSession.js";
 const EMPTY_MESSAGES = [];
 
 const formatTime = (iso) =>
-  new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  new Date(iso).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
 /**
  * ChatWindow — основная область чата: лента сообщений активной комнаты
@@ -39,15 +43,13 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
   );
   const loadingRoomId = useMessagesStore((s) => s.loadingRoomId);
   const { sendMessage } = useChatSession(roomId);
-  const scrollRef = useRef(null);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
-    // scrollableNodeProps даёт прямой доступ к реальному overflow:auto
-    // узлу внутри SimpleBar (обычный ref на дочерний <li>, как раньше
-    // с plain div, тут не сработал бы — сам скролл-контейнер теперь
-    // на два уровня глубже, его создаёт SimpleBar).
-    const node = scrollRef.current;
-    if (node) node.scrollTop = node.scrollHeight;
+    // Якір в конці списку повідомлень: scrollIntoView сам знаходить
+    // прокручуваний контейнер SimpleBar, тож не потрібно тягнутись
+    // до внутрішнього overflow-вузла напряму.
+    bottomRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
 
   return (
@@ -93,19 +95,19 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
               {messages.map((message) => {
                 const isOwn = message.authorId === currentUserId;
                 return (
-                  <li key={message.id}>
-                    <div className="conversation-list">
-                      <div class="user-chat-content">
-                      <span className="">{formatTime(message.createdAt)}</span>
-                      <span className="">
-                        {isOwn ? "Ви" : message.authorLogin}
-                      </span>
-                      </div>
-                    
-                    <p className="mb-0">{message.content}</p></div>
+                  <li key={message.id} className={isOwn ? "message-line message-line-own" : "message-line"}>
+                    <p className="mb-0">
+                      <span className="message-time">{formatTime(message.createdAt)}</span>{" "}
+                      <span className="message-author">
+                        {message.authorLogin}
+                      </span>{" "}
+                      <span className="message-text">{message.content}</span>
+                    </p>
                   </li>
                 );
               })}
+              {/* Якір для автоскролу до останнього повідомлення */}
+              <li ref={bottomRef} aria-hidden="true" className="message-anchor" />
             </ul>
           </SimpleBar>
           <div className="chat-input-section p-3 p-lg-4 border-top mb-0">
