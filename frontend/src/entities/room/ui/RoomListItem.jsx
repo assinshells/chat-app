@@ -1,10 +1,16 @@
+import { Users } from "lucide-react";
+
 /**
  * RoomListItem — тупой компонент: одна строка списка комнат.
  * Разметка — тот же паттерн chat-user-img/avatar-title, что и в
  * остальном шаблоне (см. SideNav), чтобы список выглядел как часть
  * единого UI, а не отдельный кастомный виджет.
+ *
+ * userCount — сколько пользователей сейчас в этой комнате (см.
+ * useRoomsStore.userCounts, приходит по Socket.IO в реальном
+ * времени). Показывается бейджем справа от названия комнаты.
  */
-export function RoomListItem({ room, active, onSelect }) {
+export function RoomListItem({ room, active, onSelect, userCount = 0 }) {
   return (
     <li>
       <a
@@ -26,6 +32,13 @@ export function RoomListItem({ room, active, onSelect }) {
         </div>
         <div className="flex-grow-1 overflow-hidden">
           <p className="text-truncate mb-0">{room.name}</p>
+        </div>
+        <div
+          className="flex-shrink-0 ms-2 d-flex align-items-center gap-1 text-muted small"
+          title="Користувачів у кімнаті"
+        >
+          <Users size={14} strokeWidth={2} />
+          <span>{userCount}</span>
         </div>
       </a>
     </li>

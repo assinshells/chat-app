@@ -15,6 +15,12 @@ export const CHAT_LIMITS = Object.freeze({
 export const SOCKET_EVENTS = Object.freeze({
   ROOM_JOIN: "room:join",
   ROOM_LEAVE: "room:leave",
+  // Снимок { [roomId]: count } — сколько сокетов сейчас в каждой
+  // комнате. Шлётся новому соединению сразу при коннекте и всем
+  // клиентам заново при любом join/leave/disconnect, чтобы список
+  // комнат мог показывать актуальное число участников без отдельного
+  // REST-опроса.
+  ROOM_USER_COUNTS: "room:userCounts",
   MESSAGE_SEND: "message:send",
   MESSAGE_NEW: "message:new",
 });

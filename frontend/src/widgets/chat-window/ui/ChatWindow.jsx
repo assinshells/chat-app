@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import SimpleBar from "simplebar-react";
-import { useMessagesStore, MessageBubble } from "@entities/message";
+import { useMessagesStore } from "@entities/message";
 import { MessageInput } from "@features/message/send";
 import { useChatSession } from "../model/useChatSession.js";
 
@@ -10,12 +10,19 @@ import { useChatSession } from "../model/useChatSession.js";
 // это и давало "Maximum update depth exceeded" / getSnapshot loop.
 const EMPTY_MESSAGES = [];
 
+const formatTime = (iso) =>
+  new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
 /**
  * ChatWindow — основная область чата: лента сообщений активной комнаты
  * и поле отправки. Realtime join/leave/подписку на Socket.IO держит
  * useChatSession; сами сообщения (кэш по комнатам) живут в
  * entities/message (useMessagesStore) — переключение вкладок Rooms не
  * требует повторного REST-запроса истории, если она уже загружена.
+ *
+ * Сообщения рендерятся простой плоской строкой (автор + время сверху,
+ * текст под ними), без отдельного компонента-"пузыря" — вместо него
+ * тут инлайновая разметка ниже.
  *
  * roomId=null (комната ещё не выбрана) — валидное состояние: рендерим
  * пустое приглашение вместо ленты, инпут отправки заблокирован.
@@ -59,13 +66,20 @@ export function ChatWindow({ roomId, roomName, currentUserId }) {
                   Повідомлень ще немає — напишіть перше
                 </li>
               )}
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  isOwn={message.authorId === currentUserId}
-                />
-              ))}
+              {messages.map((message) => {
+                const isOwn = message.authorId === currentUserId;
+                return (
+                  <li key={message.id} className="py-2 border-bottom">
+                    <div className="d-flex justify-content-between align-items-baseline gap-2">
+                      <span className="fw-semibold small">
+                        {isOwn ? "Ви" : message.authorLogin}
+                      </span>
+                      <span className="text-muted small">{formatTime(message.createdAt)}</span>
+                    </div>
+                    <p className="mb-0">{message.content}</p>
+                  </li>
+                );
+              })}
             </ul>
           </SimpleBar>
           <div className="chat-input-section p-3 p-lg-4 border-top mb-0">

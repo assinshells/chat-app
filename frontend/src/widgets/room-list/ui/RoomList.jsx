@@ -1,18 +1,47 @@
 import { useEffect } from "react";
+import SimpleBar from "simplebar-react";
 import { useRoomsStore, RoomListItem } from "@entities/room";
+import { SocketClient } from "@shared/lib/socket.js";
+import { SOCKET_EVENTS } from "@shared/constants/socket.constants.js";
 
 /**
  * RoomList — содержимое вкладки "Rooms" в ChatSidebar: список
  * статических комнат (backend/src/constants/rooms.data.js). Создания
  * комнат нет — список фиксированный, поэтому виджет — просто загрузка
  * + рендер, без формы.
+ *
+ * Список комнат может быть длиннее видимой области сайдбара, поэтому
+ * прокручиваемая часть обёрнута в SimpleBar (тот же паттерн, что и
+ * лента сообщений в ChatWindow) — собственный скролл вместо
+ * системного, стилизованный под общий шаблон.
+ *
+ * Подписка на SOCKET_EVENTS.ROOM_USER_COUNTS живёт здесь, а не в
+ * useChatSession — счётчики нужны сразу при открытии вкладки Rooms,
+ * до того как пользователь выберет (и тем самым присоединится к)
+ * какую-либо конкретную комнату.
  */
 export function RoomList({ activeRoomId, onSelectRoom }) {
-  const { rooms, loading, error, loadRooms } = useRoomsStore();
+  const rooms = useRoomsStore((s) => s.rooms);
+  const loading = useRoomsStore((s) => s.loading);
+  const error = useRoomsStore((s) => s.error);
+  const loadRooms = useRoomsStore((s) => s.loadRooms);
+  const userCounts = useRoomsStore((s) => s.userCounts);
+  const setUserCounts = useRoomsStore((s) => s.setUserCounts);
 
   useEffect(() => {
     loadRooms();
   }, [loadRooms]);
+
+  useEffect(() => {
+    const socket = SocketClient.connect();
+
+    const handleUserCounts = (counts) => setUserCounts(counts);
+    socket.on(SOCKET_EVENTS.ROOM_USER_COUNTS, handleUserCounts);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.ROOM_USER_COUNTS, handleUserCounts);
+    };
+  }, [setUserCounts]);
 
   return (
     <div className="p-3">
@@ -21,16 +50,19 @@ export function RoomList({ activeRoomId, onSelectRoom }) {
       {loading && rooms.length === 0 ? (
         <p className="text-muted small">Завантаження кімнат...</p>
       ) : (
-        <ul className="list-unstyled chat-list mb-0">
-          {rooms.map((room) => (
-            <RoomListItem
-              key={room.id}
-              room={room}
-              active={room.id === activeRoomId}
-              onSelect={onSelectRoom}
-            />
-          ))}
-        </ul>
+        <SimpleBar className="chat-room-list">
+          <ul className="list-unstyled chat-list mb-0">
+            {rooms.map((room) => (
+              <RoomListItem
+                key={room.id}
+                room={room}
+                active={room.id === activeRoomId}
+                onSelect={onSelectRoom}
+                userCount={userCounts[room.id] ?? 0}
+              />
+            ))}
+          </ul>
+        </SimpleBar>
       )}
     </div>
   );

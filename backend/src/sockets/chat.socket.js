@@ -4,10 +4,30 @@ import { MessageService } from "../services/message.service.js";
 import { validateSendMessagePayload } from "../validators/chat.validator.js";
 import { SOCKET_EVENTS } from "../constants/chat.constants.js";
 import { BaseException } from "../exceptions/base.exception.js";
+import { CHAT_ROOMS } from "../constants/rooms.data.js";
 
 // Socket.IO room ≠ наша сущность "комната чата" — префикс избегает
 // путаницы с чужими io.to()-каналами, если они появятся в будущем.
 const roomChannel = (roomId) => `room:${roomId}`;
+
+/**
+ * getRoomUserCounts — сколько сокетов сейчас находятся в каждой
+ * комнате из статического списка (CHAT_ROOMS). Источник правды —
+ * io.sockets.adapter.rooms: отдельного счётчика в памяти не держим,
+ * чтобы не рассинхронизироваться с реальным состоянием Socket.IO при
+ * дисконнектах/реконнектах.
+ */
+const getRoomUserCounts = (io) => {
+  const counts = {};
+  for (const room of CHAT_ROOMS) {
+    counts[room.id] = io.sockets.adapter.rooms.get(roomChannel(room.id))?.size ?? 0;
+  }
+  return counts;
+};
+
+const broadcastRoomUserCounts = (io) => {
+  io.emit(SOCKET_EVENTS.ROOM_USER_COUNTS, getRoomUserCounts(io));
+};
 
 const toErrorPayload = (err) => {
   if (err instanceof BaseException) {
@@ -25,11 +45,17 @@ const toErrorPayload = (err) => {
  * упрощение, см. обсуждение приватных чатов в README).
  */
 export const registerChatHandlers = (io, socket) => {
+  // Новому соединению сразу отдаём текущий снимок счётчиков — иначе
+  // список комнат на клиенте будет пустым/нулевым, пока сам клиент
+  // не присоединится к какой-нибудь комнате.
+  socket.emit(SOCKET_EVENTS.ROOM_USER_COUNTS, getRoomUserCounts(io));
+
   socket.on(SOCKET_EVENTS.ROOM_JOIN, async (roomId, ack) => {
     try {
       await RoomService.assertRoomExists(roomId);
       socket.join(roomChannel(roomId));
       ack?.({ success: true });
+      broadcastRoomUserCounts(io);
     } catch (err) {
       ack?.({ success: false, error: toErrorPayload(err) });
     }
@@ -37,6 +63,7 @@ export const registerChatHandlers = (io, socket) => {
 
   socket.on(SOCKET_EVENTS.ROOM_LEAVE, (roomId) => {
     socket.leave(roomChannel(roomId));
+    broadcastRoomUserCounts(io);
   });
 
   socket.on(SOCKET_EVENTS.MESSAGE_SEND, async (payload, ack) => {
@@ -59,5 +86,8 @@ export const registerChatHandlers = (io, socket) => {
 
   socket.on("disconnect", () => {
     logger.debug(`Socket disconnected: user ${socket.userId}`);
+    // К этому моменту Socket.IO уже сам вывел сокет из всех комнат,
+    // поэтому снимок можно просто пересчитать и разослать заново.
+    broadcastRoomUserCounts(io);
   });
 };

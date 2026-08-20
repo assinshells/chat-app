@@ -15,6 +15,11 @@ export const useRoomsStore = create((set) => ({
   loading: false,
   error: null,
   activeRoomId: null,
+  // { [roomId]: count } — сколько пользователей сейчас в комнате.
+  // Приходит по Socket.IO (см. SOCKET_EVENTS.ROOM_USER_COUNTS,
+  // подписка в widgets/room-list/ui/RoomList.jsx), а не REST'ом —
+  // счётчик живой и должен обновляться в реальном времени.
+  userCounts: {},
 
   loadRooms: async () => {
     set({ loading: true, error: null });
@@ -30,5 +35,8 @@ export const useRoomsStore = create((set) => ({
 
   selectRoom: (roomId) => set({ activeRoomId: roomId }),
 
-  reset: () => set({ rooms: [], loading: false, error: null, activeRoomId: null }),
+  setUserCounts: (userCounts) => set({ userCounts }),
+
+  reset: () =>
+    set({ rooms: [], loading: false, error: null, activeRoomId: null, userCounts: {} }),
 }));
