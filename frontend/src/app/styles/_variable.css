@@ -1,22 +1,25 @@
 :root {
+  --bs-white: #fff;
+  --bs-primary: #7269ef;
+  --bs-danger: #ef476f;
+  --bs-light: #e6ebf5;
+  --bs-dark: #343a40;
+  --bs-secondary-color: #7a7f9a;
+  --bs-secondary-bg: #f5f7fb;
+  --bs-sidebar-sub-bg: #f5f7fb;
 
-  --danger: #f46a6a;
-  --light: #e6ebf5;
-  --secondary-color: #7a7f9a; 
-  --sidebar-sub-bg: #f5f7fb;
+  --bs-font-family:
+    Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --bs-background-color: #fff;
+  --bs-font-color: #495057;
+  --bs-font-size: 0.9357rem;
+  --bs-font-weight: 400;
+  --bs-line-height: 1.5;
 
-  --body-font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  --body-background-color: #fff;
-  --body-font-color: #495057;
-  --body-font-size: 0.9357rem;
-  --body-font-weight: 400;
-  --body-line-height: 1.5;
- 
-  --border-color: #f0eff5;
+  --bs-border-color: #f0eff5;
 
-  --sidebar-menu-bg: #fff;
-  --sidebar-menu-item-color: #878a92;
-  --sidebar-menu-item-active-bg: #f7f7ff;
-  --sidebar-menu-item-active-color: var(--primary);
-  
+  --bs-sidebar-menu-bg: #fff;
+  --bs-sidebar-menu-item-color: #878a92;
+  --bs-sidebar-menu-item-active-bg: #f7f7ff;
+  --bs-sidebar-menu-item-active-color: var(--bs-primary);
 }
