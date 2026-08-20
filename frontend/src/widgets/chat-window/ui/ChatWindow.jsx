@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import SimpleBar from "simplebar-react";
+import { ArrowLeft } from "lucide-react";
 import { useMessagesStore } from "@entities/message";
 import { MessageInput } from "@features/message/send";
 import { useChatSession } from "../model/useChatSession.js";
@@ -26,8 +27,13 @@ const formatTime = (iso) =>
  *
  * roomId=null (комната ещё не выбрана) — валидное состояние: рендерим
  * пустое приглашение вместо ленты, инпут отправки заблокирован.
+ *
+ * На мобильном (<992px) .user-chat по CSS спрятан за экраном и
+ * появляется только с классом user-chat-show (см. app/styles/user-chat.css) —
+ * навешиваем его, когда roomId выбран. onBack — кнопка "назад" в шапке,
+ * видима только на мобильном, сбрасывает activeRoomId в ChatPage.
  */
-export function ChatWindow({ roomId, roomName, currentUserId }) {
+export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
   const messages = useMessagesStore((s) =>
     roomId ? (s.messagesByRoom[roomId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
@@ -45,13 +51,31 @@ export function ChatWindow({ roomId, roomName, currentUserId }) {
   }, [messages.length]);
 
   return (
-    <div className="user-chat w-100 overflow-hidden">
+    <div className={`user-chat w-100 overflow-hidden${roomId ? " user-chat-show" : ""}`}>
       <div className="d-lg-flex">
         <div className="w-100 overflow-hidden position-relative">
           <div className="p-3 p-lg-4 border-bottom user-chat-topbar">
-            {roomId ? roomName : "Оберіть кімнату"}
+            <div className="row align-items-center">
+              <div className="col-sm-4 col-8">
+                <div className="d-flex align-items-center">
+                  <div className="d-block d-lg-none me-2 ms-0">
+            {roomId && (
+              <a href="#"
+                className="user-chat-remove text-muted font-size-16 p-2"
+                onClick={onBack}
+                aria-label="Назад до кімнат"
+              >
+                <ArrowLeft size={20} />
+              </a>
+            )}
+            </div>
+            <div className="flex-grow-1 overflow-hidden">
+            <h5 className="font-size-16 mb-0 text-truncate">{roomId ? roomName : "Оберіть кімнату"}</h5>
+          </div>          
           </div>
-          <SimpleBar className="chat-conversation p-3 p-lg-4" scrollableNodeProps={{ ref: scrollRef }}>
+          </div>{/* button */}</div></div>
+
+          <SimpleBar className="chat-conversation p-3 p-lg-4" >
             <ul className="list-unstyled mb-0">
               {!roomId && (
                 <li className="text-muted text-center">
@@ -69,14 +93,16 @@ export function ChatWindow({ roomId, roomName, currentUserId }) {
               {messages.map((message) => {
                 const isOwn = message.authorId === currentUserId;
                 return (
-                  <li key={message.id} className="py-2 border-bottom">
-                    <div className="d-flex justify-content-between align-items-baseline gap-2">
-                      <span className="fw-semibold small">
+                  <li key={message.id}>
+                    <div className="conversation-list">
+                      <div class="user-chat-content">
+                      <span className="">{formatTime(message.createdAt)}</span>
+                      <span className="">
                         {isOwn ? "Ви" : message.authorLogin}
                       </span>
-                      <span className="text-muted small">{formatTime(message.createdAt)}</span>
-                    </div>
-                    <p className="mb-0">{message.content}</p>
+                      </div>
+                    
+                    <p className="mb-0">{message.content}</p></div>
                   </li>
                 );
               })}

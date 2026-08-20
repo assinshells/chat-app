@@ -50,6 +50,7 @@ export function ChatPage({ user, onLogout }) {
           roomId={activeRoomId}
           roomName={activeRoom?.name}
           currentUserId={user.id}
+          onBack={() => selectRoom(null)}
         />
       }
     />
