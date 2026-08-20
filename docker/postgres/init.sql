@@ -9,3 +9,18 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id BIGSERIAL PRIMARY KEY,
+    -- Не FK: комнаты — статический список в коде
+    -- (backend/src/constants/rooms.data.js), не таблица БД.
+    -- Принадлежность списку проверяется в приложении (RoomService.assertRoomExists).
+    room_id VARCHAR(64) NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL CHECK (char_length(content) BETWEEN 1 AND 2000),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- room_id + id (не created_at) — под keyset-пагинацию истории
+-- (MessageRepository.findByRoom сортирует/фильтрует по id).
+CREATE INDEX IF NOT EXISTS idx_messages_room_id ON messages(room_id, id DESC);

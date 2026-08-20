@@ -5,6 +5,7 @@ import {
   toForgotPasswordDto,
   toVerifyOtpDto,
   toResetPasswordDto,
+  toUserResponseDto,
 } from "../dto/auth.dto.js";
 import {
   validateLoginRequest,
@@ -27,6 +28,15 @@ import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
  * в cookie). refreshToken в теле ответа никогда не возвращается.
  */
 export const AuthController = {
+  me: async (req, res, next) => {
+    try {
+      const user = await AuthService.getCurrentUser(req.userId);
+      res.status(HTTP_STATUS.OK).json({ success: true, user: toUserResponseDto(user) });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   login: async (req, res, next) => {
     try {
       validateLoginRequest(req.body);

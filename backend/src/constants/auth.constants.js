@@ -41,14 +41,7 @@ export const REDIS_KEYS = Object.freeze({
   otpAttempts: (uid) => `otp_attempts:${uid}`,
 });
 
-export const HTTP_STATUS = Object.freeze({
-  OK: 200,
-  CREATED: 201,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  TOO_MANY: 429,
-  INTERNAL: 500,
-});
+// HTTP_STATUS переехал в http.constants.js (используется не только
+// авторизацией); ре-экспортирован отсюда для обратной совместимости
+// существующих импортов `{ HTTP_STATUS } from "./auth.constants.js"`.
+export { HTTP_STATUS } from "./http.constants.js";

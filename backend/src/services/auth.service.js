@@ -12,6 +12,19 @@ import {
 import { AUTH_ERRORS } from "../constants/auth.constants.js";
 
 export const AuthService = {
+  /**
+   * Отдаёт профиль текущего пользователя по userId из authGuard.
+   * Нужен фронту, чтобы знать реальный id пользователя (для сравнения
+   * "моё сообщение / чужое" в чате) — раньше фронт для этого хранил в
+   * localStorage строку логина, введённую на форме, что не давало id
+   * и могло рассинхронизироваться с реальной сессией.
+   */
+  async getCurrentUser(userId) {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new NotFoundException();
+    return user;
+  },
+
   async login({ login, password }) {
     const user = await UserRepository.findByLogin(login);
     if (!user) throw new AuthenticationException();

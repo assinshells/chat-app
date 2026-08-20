@@ -36,5 +36,6 @@ router.post(
   AuthController.refresh,
 );
 router.post("/logout", authGuard, csrfProtection, AuthController.logout);
+router.get("/me", authGuard, AuthController.me);
 
 export default router;

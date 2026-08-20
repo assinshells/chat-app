@@ -53,6 +53,21 @@
  * @property {{ code: string, message: string, details?: string[] }} error
  */
 
+/**
+ * @typedef {Object} UserResponseDto
+ * @property {number} id
+ * @property {string} login
+ * @property {string|null} email
+ * @property {"male"|"female"|"unknown"} gender
+ */
+
+export const toUserResponseDto = (row) => ({
+  id: row.id,
+  login: row.login,
+  email: row.email,
+  gender: row.gender,
+});
+
 export const toLoginRequestDto = (body) => ({
   login: body.login,
   password: body.password,

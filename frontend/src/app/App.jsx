@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { AUTH_SCREENS, APP_NAME } from "@shared/constants/auth.constants.js";
-import { Storage } from "@shared/lib/storage.js";
 import { refreshAccessToken } from "@shared/api/axios.js";
+import { SocketClient } from "@shared/lib/socket.js";
+import { useSessionStore } from "@features/auth/session";
+import { useRoomsStore } from "@entities/room";
+import { useMessagesStore } from "@entities/message";
 
 import { LoginPage } from "@pages/LoginPage.jsx";
 import { RegisterPage } from "@pages/RegisterPage.jsx";
@@ -12,21 +15,26 @@ import { ChatPage } from "@pages/ChatPage.jsx";
 
 import "@app/styles/index.css";
 
-const USER_KEY = "userLogin";
-
 export default function App() {
-  // accessToken живёt только в памяти (AuthSession) и не переживает
+  // accessToken живёт только в памяти (AuthSession) и не переживает
   // перезагрузку страницы — поэтому при монтировании делаем "тихий"
   // refresh: если у браузера есть валидная httpOnly refreshToken-cookie,
-  // сессия восстановится сама, без повторного логина.
+  // сессия восстановится сама, без повторного логина. После успешного
+  // refresh подтягиваем профиль (/api/auth/me) — он нужен чату для
+  // currentUserId.
   const [booting, setBooting] = useState(true);
   const [screen, setScreen] = useState(AUTH_SCREENS.LOGIN);
   const [screenParams, setScreenParams] = useState({});
+
+  const user = useSessionStore((s) => s.user);
+  const loadCurrentUser = useSessionStore((s) => s.loadCurrentUser);
+  const clearSession = useSessionStore((s) => s.clear);
 
   useEffect(() => {
     let cancelled = false;
 
     refreshAccessToken()
+      .then(() => loadCurrentUser())
       .then(() => {
         if (!cancelled) setScreen(AUTH_SCREENS.APP);
       })
@@ -40,24 +48,29 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadCurrentUser]);
 
   const navigate = (newScreen, params = {}) => {
     setScreen(newScreen);
     setScreenParams(params);
   };
 
-  const handleLoginSuccess = (login) => {
-    Storage.set(USER_KEY, login);
+  const handleLoginSuccess = async () => {
+    await loadCurrentUser();
     navigate(AUTH_SCREENS.APP);
   };
 
   const handleLogout = () => {
-    Storage.remove(USER_KEY);
+    // LogoutButton (см. widgets/side-nav) уже отправил запрос на
+    // /api/auth/logout и очистил AuthSession к моменту этого вызова —
+    // здесь только локальный клиентский стейт: сессия, кэш чата и
+    // Socket.IO-соединение не должны пережить смену пользователя.
+    SocketClient.disconnect();
+    useRoomsStore.getState().reset();
+    useMessagesStore.getState().reset();
+    clearSession();
     navigate(AUTH_SCREENS.LOGIN);
   };
-
-  const currentLogin = Storage.get(USER_KEY) ?? "anonymous";
 
   if (booting) {
     return (
@@ -91,7 +104,10 @@ export default function App() {
       );
 
     case AUTH_SCREENS.APP:
-      return <ChatPage login={currentLogin} onLogout={handleLogout} />;
+      // user может на мгновение быть null между "screen переключился"
+      // и "loadCurrentUser резолвнулся" — обе точки входа сюда всегда
+      // await'ят loadCurrentUser перед навигацией, но подстраховываемся.
+      return user ? <ChatPage user={user} onLogout={handleLogout} /> : null;
 
     default:
       return (

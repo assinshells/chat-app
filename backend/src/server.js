@@ -5,6 +5,7 @@ import logger from "./config/logger.js";
 import { env, assertRequiredEnv } from "./config/env.js";
 import { connectDatabase, pool } from "./config/database.js";
 import { connectRedis, disconnectRedis } from "./config/redis.js";
+import { createSocketServer } from "./config/socket.js";
 
 try {
   assertRequiredEnv();
@@ -16,6 +17,7 @@ try {
 const PORT = env.port;
 
 const httpServer = http.createServer(app);
+const io = createSocketServer(httpServer);
 
 const shutdown = async (signal) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
@@ -28,6 +30,9 @@ const shutdown = async (signal) => {
   forceExitTimer.unref();
 
   try {
+    await new Promise((resolve) => io.close(resolve));
+    logger.info("Socket.IO server closed");
+
     await new Promise((resolve) => httpServer.close(resolve));
     logger.info("HTTP server closed");
 
