@@ -384,6 +384,9 @@
   min-width: 380px;
   max-width: 380px;
 }
+.user-profile-sidebar.show {
+  display: block;
+}
 @media (min-width: 992px) {
   .user-profile-sidebar {
     border-left: 4px solid var(--bs-border-color);

@@ -46,7 +46,13 @@ const formatTime = (iso) =>
  * уходят вместе с сообщением, и после отправки выбор сбрасывается —
  * это разовый реплай, а не постоянный "режим адресации".
  */
-export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
+export function ChatWindow({
+  roomId,
+  roomName,
+  currentUserId,
+  onBack,
+  onOpenProfile,
+}) {
   const messages = useMessagesStore((s) =>
     roomId ? (s.messagesByRoom[roomId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
@@ -93,7 +99,9 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
   };
 
   return (
-    <div className={`user-chat w-100 overflow-hidden${roomId ? " user-chat-show" : ""}`}>
+    <div
+      className={`user-chat w-100 overflow-hidden${roomId ? " user-chat-show" : ""}`}
+    >
       <div className="d-lg-flex">
         <div className="w-100 overflow-hidden position-relative">
           <div className="p-3 p-lg-4 border-bottom user-chat-topbar">
@@ -101,27 +109,65 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
               <div className="col-sm-4 col-8">
                 <div className="d-flex align-items-center">
                   <div className="d-block d-lg-none me-2 ms-0">
-            {roomId && (
-              <a href="#"
-                className="user-chat-remove text-muted font-size-16 p-2"
-                onClick={onBack}
-                aria-label="Назад до кімнат"
-              >
-                <ArrowLeft size={20} />
-              </a>
-            )}
+                    {roomId && (
+                      <a
+                        href="#"
+                        className="user-chat-remove text-muted font-size-16 p-2"
+                        onClick={onBack}
+                        aria-label="Назад до кімнат"
+                      >
+                        <ArrowLeft size={20} />
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex-grow-1 overflow-hidden">
+                    <h5 className="font-size-16 mb-0 text-truncate">
+                      {roomId ? roomName : "Оберіть кімнату"}
+                    </h5>
+                  </div>
+                </div>
+              </div>
+              <div className="col-sm-8 col-4">
+                <ul className="list-inline user-chat-nav text-end mb-0">
+                  <li className="">
+                    <button
+                      type="button"
+                      className="btn nav-btn user-profile-show"
+                      onClick={onOpenProfile}
+                      aria-label="Показати профіль"
+                    >
+                      показать
+                      <i className="ri-user-2-line" />
+                    </button>
+                  </li>
+                  <li className="list-inline-item">
+                    <div className="dropdown">
+                      <button
+                        className="btn nav-btn dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        <i className="ri-more-fill"></i>
+                      </button>
+                      <div className="dropdown-menu dropdown-menu-end">
+                        <a
+                          className="dropdown-item d-block d-lg-none user-profile-show"
+                          href="#"
+                        >
+                          View profile{" "}
+                          <i className="ri-user-2-line float-end text-muted"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="flex-grow-1 overflow-hidden">
-            <h5 className="font-size-16 mb-0 text-truncate">{roomId ? roomName : "Оберіть кімнату"}</h5>
-          </div>          
           </div>
-          </div>{/* button */}<li className="list-inline-item d-none d-lg-inline-block me-2 ms-0">
-                                            <button type="button" class="btn nav-btn user-profile-show">
-                                                <i class="ri-user-2-line">show user-profile-sidebar</i>
-                                            </button>
-                                        </li></div></div>
 
-          <SimpleBar className="chat-conversation p-3 p-lg-4" >
+          <SimpleBar className="chat-conversation p-3 p-lg-4">
             <ul className="list-unstyled mb-0">
               {!roomId && (
                 <li className="text-muted text-center">
@@ -129,7 +175,9 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
                 </li>
               )}
               {roomId && loadingRoomId === roomId && messages.length === 0 && (
-                <li className="text-muted text-center">Завантаження історії...</li>
+                <li className="text-muted text-center">
+                  Завантаження історії...
+                </li>
               )}
               {roomId && !loadingRoomId && messages.length === 0 && (
                 <li className="text-muted text-center">
@@ -138,32 +186,54 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
               )}
               {messages.map((message) => {
                 const isOwn = message.authorId === currentUserId;
-                const isAuthorSelected = selectedRecipients.some((r) => r.id === message.authorId);
-                const atLimit = selectedRecipients.length >= MAX_MESSAGE_RECIPIENTS;
+                const isAuthorSelected = selectedRecipients.some(
+                  (r) => r.id === message.authorId,
+                );
+                const atLimit =
+                  selectedRecipients.length >= MAX_MESSAGE_RECIPIENTS;
                 // Пары id+логин получателей этого сообщения — чтобы
                 // и в "→ Кому" их тоже можно было кликать (добавить в
                 // свой текущий выбор при ответе), а не только автора.
-                const recipientPairs = (message.recipientIds ?? []).map((id, i) => ({
-                  id,
-                  login: message.recipientLogins?.[i] ?? "?",
-                }));
+                const recipientPairs = (message.recipientIds ?? []).map(
+                  (id, i) => ({
+                    id,
+                    login: message.recipientLogins?.[i] ?? "?",
+                  }),
+                );
                 return (
-                  <li key={message.id} className={isOwn ? "message-line message-line-own" : "message-line"}>
+                  <li
+                    key={message.id}
+                    className={
+                      isOwn ? "message-line message-line-own" : "message-line"
+                    }
+                  >
                     <p className="mb-0">
-                      <span className="message-time">{formatTime(message.createdAt)}</span>{" "}
+                      <span className="message-time">
+                        {formatTime(message.createdAt)}
+                      </span>{" "}
                       <span
                         className={
                           "message-author" +
                           (isOwn ? " own-nick" : " message-author-clickable") +
                           (isAuthorSelected ? " message-author-selected" : "") +
-                          (!isOwn && !isAuthorSelected && atLimit ? " message-author-limit" : "")
+                          (!isOwn && !isAuthorSelected && atLimit
+                            ? " message-author-limit"
+                            : "")
                         }
                         onClick={
                           isOwn
                             ? undefined
-                            : () => toggleRecipient({ id: message.authorId, login: message.authorLogin })
+                            : () =>
+                                toggleRecipient({
+                                  id: message.authorId,
+                                  login: message.authorLogin,
+                                })
                         }
-                        title={isOwn ? undefined : "Натисніть, щоб адресувати відповідь"}
+                        title={
+                          isOwn
+                            ? undefined
+                            : "Натисніть, щоб адресувати відповідь"
+                        }
                       >
                         {message.authorLogin}
                       </span>{" "}
@@ -172,16 +242,26 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
                           →{" "}
                           {recipientPairs.map((r, i) => {
                             const isOwnRecipient = r.id === currentUserId;
-                            const isSelected = selectedRecipients.some((sel) => sel.id === r.id);
+                            const isSelected = selectedRecipients.some(
+                              (sel) => sel.id === r.id,
+                            );
                             return (
                               <span key={r.id}>
                                 <span
                                   className={
                                     "message-recipients-nick" +
-                                    (isOwnRecipient ? " own-nick" : " message-author-clickable") +
-                                    (isSelected ? " message-author-selected" : "")
+                                    (isOwnRecipient
+                                      ? " own-nick"
+                                      : " message-author-clickable") +
+                                    (isSelected
+                                      ? " message-author-selected"
+                                      : "")
                                   }
-                                  onClick={isOwnRecipient ? undefined : () => toggleRecipient(r)}
+                                  onClick={
+                                    isOwnRecipient
+                                      ? undefined
+                                      : () => toggleRecipient(r)
+                                  }
                                 >
                                   {r.login}
                                 </span>
@@ -197,7 +277,11 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
                 );
               })}
               {/* Якір для автоскролу до останнього повідомлення */}
-              <li ref={bottomRef} aria-hidden="true" className="message-anchor" />
+              <li
+                ref={bottomRef}
+                aria-hidden="true"
+                className="message-anchor"
+              />
             </ul>
           </SimpleBar>
           <div className="chat-input-section p-3 p-lg-4 border-top mb-0">
