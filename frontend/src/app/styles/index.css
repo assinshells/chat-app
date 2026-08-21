@@ -1,6 +1,5 @@
-/*@import './_variable.css';
+@import './_variable.css';
 @import './app.css';
 @import './sidebar-menu.css';
 @import './sidebar-chat.css';
-@import './user-chat.css';*/
-@import './main.css';
+@import './user-chat.css';
