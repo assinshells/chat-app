@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import SimpleBar from "simplebar-react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Repeat, Ellipsis } from "lucide-react";
 import { useMessagesStore } from "@entities/message";
 import { MessageInput } from "@features/message/send";
+import { LogoutButton } from "@features/auth/logout/ui/LogoutButton.jsx";
 import { MAX_MESSAGE_RECIPIENTS } from "@shared/constants/socket.constants.js";
 import { useChatSession } from "../model/useChatSession.js";
 
@@ -51,7 +52,8 @@ export function ChatWindow({
   roomName,
   currentUserId,
   onBack,
-  onOpenProfile,
+  onOpenRooms,
+  onLogout,
 }) {
   const messages = useMessagesStore((s) =>
     roomId ? (s.messagesByRoom[roomId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
@@ -72,7 +74,7 @@ export function ChatWindow({
   }
 
   useEffect(() => {
-    // Якір в конці списку повідомлень: scrollIntoView сам знаходить
+    // Якір в кінці списку повідомлень: scrollIntoView сам знаходить
     // прокручуваний контейнер SimpleBar, тож не потрібно тягнутись
     // до внутрішнього overflow-вузла напряму.
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -129,36 +131,43 @@ export function ChatWindow({
               </div>
               <div className="col-sm-8 col-4">
                 <ul className="list-inline user-chat-nav text-end mb-0">
-                  <li className="">
+                  <li className="list-inline-item">
                     <button
                       type="button"
                       className="btn nav-btn user-profile-show"
-                      onClick={onOpenProfile}
-                      aria-label="Показати профіль"
+                      onClick={onOpenRooms}
+                      title="Кімнати"
+                      aria-label="Показати кімнати"
                     >
-                      показать
-                      <i className="ri-user-2-line" />
+                      <Repeat size={18} />
                     </button>
                   </li>
-                  <li className="list-inline-item">
+                  <li className="list-inline-item d-none d-lg-inline-block me-2 ms-0">
                     <div className="dropdown">
                       <button
-                        className="btn nav-btn dropdown-toggle"
+                        className="btn nav-btn dropdown-toggle arrow-none"
                         type="button"
                         data-bs-toggle="dropdown"
                         aria-haspopup="true"
                         aria-expanded="false"
                       >
-                        <i className="ri-more-fill"></i>
+                        <Ellipsis className="float-end text-muted" size={16} />
                       </button>
                       <div className="dropdown-menu dropdown-menu-end">
                         <a
                           className="dropdown-item d-block d-lg-none user-profile-show"
                           href="#"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            onOpenRooms?.();
+                          }}
                         >
-                          View profile{" "}
-                          <i className="ri-user-2-line float-end text-muted"></i>
+                          Кімнати{" "}
+                          <Repeat className="float-end text-muted" size={16} />
                         </a>
+                        <div className="dropdown-divider d-block d-lg-none" />
+                        <LogoutButton onLoggedOut={onLogout} variant="menu-item" />
+                    
                       </div>
                     </div>
                   </li>

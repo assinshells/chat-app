@@ -5,10 +5,15 @@ import { SocketClient } from "@shared/lib/socket.js";
 import { SOCKET_EVENTS } from "@shared/constants/socket.constants.js";
 
 /**
- * RoomList — содержимое вкладки "Rooms" в ChatSidebar: список
- * статических комнат (backend/src/constants/rooms.data.js). Создания
- * комнат нет — список фиксированный, поэтому виджет — просто загрузка
- * + рендер, без формы.
+ * RoomList — список статических комнат (backend/src/constants/rooms.data.js).
+ * Рендерится внутри user-profile-sidebar (см. pages/ChatPage.jsx —
+ * roomsContent), открываемой кнопкой "Кімнати" в шапке ChatWindow.
+ * Создания комнат нет — список фиксированный, поэтому виджет — просто
+ * загрузка + рендер, без формы.
+ *
+ * onSelectRoom, приходящий из ChatPage, помимо выбора комнаты в сторе,
+ * закрывает саму панель — но только на мобильном (на десктопе панель
+ * остаётся открытой после выбора, см. handleSelectRoom в ChatPage).
  *
  * Список комнат может быть длиннее видимой области сайдбара, поэтому
  * прокручиваемая часть обёрнута в SimpleBar (тот же паттерн, что и
@@ -45,10 +50,10 @@ export function RoomList({ activeRoomId, onSelectRoom }) {
 
   return (
     <>
-    <div className="p-4">
-      <h4 class="mb-4">Кімнати</h4>
-      {error && <p className="text-danger small mb-2">{error}</p>}
-</div>
+      <div className="p-4">
+        <h4 className="mb-4">Кімнати</h4>
+        {error && <p className="text-danger small mb-2">{error}</p>}
+      </div>
       {loading && rooms.length === 0 ? (
         <p className="text-muted small">Завантаження кімнат...</p>
       ) : (

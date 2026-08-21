@@ -3,10 +3,15 @@ import { LogoutButton } from "@features/auth/logout/ui/LogoutButton.jsx";
 import logo from "@shared/assets/logo/logo.svg";
 
 const DEFAULT_TABS = [
-  { id: "pills-users", label: "Users", icon: Users },
-  { id: "pills-rooms", label: "Rooms", icon: Repeat, active: true },
+  { id: "pills-users", label: "Users", icon: Users, active: true },
+  { id: "pills-rooms", label: "Rooms", icon: Repeat },
   { id: "pills-private-chat", label: "Private Chats", icon: MessagesSquare },
 ];
+
+// Комнаты больше не отдельная bootstrap-вкладка в ChatSidebar — их список
+// переехал в user-profile-sidebar (см. pages/ChatPage.jsx), поэтому клик по
+// этой пилюле не переключает tab-pane, а открывает панель профиля.
+const ROOMS_TAB_ID = "pills-rooms";
 
 /**
  * ProfileMenu — содержимое выпадающего меню профиля (Profile / Setting /
@@ -52,7 +57,7 @@ function ProfileMenu({ onLogout, wrapperClassName }) {
  * tabs — конфиг иконок-вкладок; активную вкладку переключает сам Bootstrap
  * (data-bs-toggle="pill"), состояние наружу не поднимается.
  */
-export function SideNav({ onLogout, tabs = DEFAULT_TABS }) {
+export function SideNav({ onLogout, onRoomsClick, tabs = DEFAULT_TABS }) {
   return (
     <div className="side-menu flex-lg-column me-lg-1 ms-lg-0">
       {/* Start Logo */}
@@ -73,19 +78,30 @@ export function SideNav({ onLogout, tabs = DEFAULT_TABS }) {
       {/* Start side-menu nav (mobile: tabs + profile dropdown in one row) */}
       <div className="flex-lg-column my-auto">
         <ul className="nav nav-pills side-menu-nav justify-content-center" role="tablist">
-          {tabs.map(({ id, label, icon: Icon, active }) => (
-            <li className="nav-item" title={label} key={id}>
-              <a
-                className={`nav-link${active ? " active" : ""}`}
-                id={`${id}-tab`}
-                data-bs-toggle="pill"
-                href={`#${id}`}
-                role="tab"
-              >
-                <Icon />
-              </a>
-            </li>
-          ))}
+          {tabs.map(({ id, label, icon: Icon, active }) => {
+            const isRoomsTab = id === ROOMS_TAB_ID;
+            return (
+              <li className="nav-item" title={label} key={id}>
+                <a
+                  className={`nav-link${active ? " active" : ""}`}
+                  id={`${id}-tab`}
+                  data-bs-toggle={isRoomsTab ? undefined : "pill"}
+                  href={isRoomsTab ? "#" : `#${id}`}
+                  role="tab"
+                  onClick={
+                    isRoomsTab
+                      ? (event) => {
+                          event.preventDefault();
+                          onRoomsClick?.();
+                        }
+                      : undefined
+                  }
+                >
+                  <Icon />
+                </a>
+              </li>
+            );
+          })}
           <ProfileMenu
             onLogout={onLogout}
             wrapperClassName="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none"
