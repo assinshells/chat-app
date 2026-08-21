@@ -115,7 +115,11 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
             <h5 className="font-size-16 mb-0 text-truncate">{roomId ? roomName : "Оберіть кімнату"}</h5>
           </div>          
           </div>
-          </div>{/* button */}</div></div>
+          </div>{/* button */}<li className="list-inline-item d-none d-lg-inline-block me-2 ms-0">
+                                            <button type="button" class="btn nav-btn user-profile-show">
+                                                <i class="ri-user-2-line">show user-profile-sidebar</i>
+                                            </button>
+                                        </li></div></div>
 
           <SimpleBar className="chat-conversation p-3 p-lg-4" >
             <ul className="list-unstyled mb-0">

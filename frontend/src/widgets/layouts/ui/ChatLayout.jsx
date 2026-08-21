@@ -14,6 +14,16 @@ export function ChatLayout({ sideNav, sidebar, chatWindow }) {
       {sideNav}
       {sidebar}
       {chatWindow}
+      <div className="user-profile-sidebar">
+                        <div className="px-3 px-lg-4 pt-3 pt-lg-4">
+                            <div className="user-chat-nav text-end">
+                                <button type="button" className="btn nav-btn" id="user-profile-hide">
+                                    <i className="ri-close-line">X</i>
+                                </button>
+                            </div>
+                        </div>
+                        user-profile-sidebar
+                        </div>
     </div>
   );
 }

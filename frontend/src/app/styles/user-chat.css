@@ -376,3 +376,29 @@
 .message-input-counter.is-limit {
   color: var(--bs-danger, #f46a6a);
 }
+
+.user-profile-sidebar {
+  height: 100vh;
+  background-color: var(--bs-white);
+  display: none;
+  min-width: 380px;
+  max-width: 380px;
+}
+@media (min-width: 992px) {
+  .user-profile-sidebar {
+    border-left: 4px solid var(--bs-border-color);
+  }
+}
+@media (max-width: 1199.98px) {
+  .user-profile-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 99;
+  }
+}
+@media (max-width: 575.98px) {
+  .user-profile-sidebar {
+    min-width: 100%;
+  }
+}
