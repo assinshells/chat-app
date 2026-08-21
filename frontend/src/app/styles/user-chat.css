@@ -269,6 +269,75 @@
   word-break: break-word;
 }
 
+/* Адресация сообщения: кликабельные ники (клик — добавить/убрать из
+   получателей) и стрелка "→ Кому" у уже адресованных сообщений */
+.chat-conversation .message-author-clickable {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 2px;
+  margin: 0 -2px;
+  transition: background-color 0.15s ease;
+}
+.chat-conversation .message-author-clickable:hover {
+  background-color: rgba(85, 110, 230, 0.12);
+  text-decoration: underline;
+}
+.chat-conversation .message-author-selected {
+  background-color: rgba(85, 110, 230, 0.18);
+  text-decoration: underline;
+}
+.chat-conversation .message-author-limit {
+  opacity: 0.55;
+}
+.chat-conversation .message-recipients {
+  color: var(--bs-secondary-color);
+  font-size: 13px;
+}
+.chat-conversation .message-recipients-nick {
+  font-weight: 500;
+}
+
+/* Панель "Кому: ..." над инпутом — появляется, когда есть выбранные
+   адресаты (клик по нику в ленте выше) */
+.message-recipients-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  background-color: rgba(85, 110, 230, 0.08);
+  border: 1px solid rgba(85, 110, 230, 0.25);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.message-recipients-bar .message-recipients-label {
+  font-weight: 600;
+  color: var(--bs-primary);
+  flex-shrink: 0;
+}
+.message-recipients-bar .message-recipients-list {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+.message-recipients-clear {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.message-recipients-clear:hover {
+  color: var(--bs-danger, #f46a6a);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 /* Инпут сообщения: счётчик символов + кнопка очистки */
 .message-input-wrap {
   position: relative;

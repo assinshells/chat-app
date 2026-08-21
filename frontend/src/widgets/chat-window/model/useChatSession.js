@@ -32,10 +32,20 @@ export function useChatSession(roomId) {
     };
   }, [roomId, addMessage, loadHistory]);
 
-  const sendMessage = (content) => {
+  /**
+   * recipientIds — id пользователей, выбранных кликом по нику в чате
+   * (см. ChatWindow); [] или не передан → обычное сообщение "всем" в
+   * комнату. Финальная валидация/чистка (лимит, дубли, сам себе) —
+   * на бэкенде (MessageService), тут просто прокидываем как есть.
+   */
+  const sendMessage = (content, recipientIds = []) => {
     const trimmed = content.trim();
     if (!roomId || !trimmed) return;
-    SocketClient.get().emit(SOCKET_EVENTS.MESSAGE_SEND, { roomId, content: trimmed });
+    SocketClient.get().emit(SOCKET_EVENTS.MESSAGE_SEND, {
+      roomId,
+      content: trimmed,
+      recipientIds,
+    });
   };
 
   return { sendMessage };

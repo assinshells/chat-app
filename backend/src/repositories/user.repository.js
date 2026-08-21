@@ -25,6 +25,19 @@ export const UserRepository = {
     return rows[0] ?? null;
   },
 
+  /**
+   * Батч-версия findById для проверки recipientIds адресованного
+   * сообщения (MessageService) — один запрос вместо N, и заодно
+   * отсеивает id, которых в базе уже нет.
+   */
+  async findByIds(ids) {
+    if (!ids?.length) return [];
+    const { rows } = await pool.query("SELECT id, login FROM users WHERE id = ANY($1::int[])", [
+      ids,
+    ]);
+    return rows;
+  },
+
   async create({ login, passwordHash, email, gender }) {
     const client = await pool.connect();
     try {

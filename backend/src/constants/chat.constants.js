@@ -8,6 +8,10 @@ export const CHAT_LIMITS = Object.freeze({
   // Размер страницы истории сообщений (keyset-пагинация по id, см.
   // MessageRepository.findByRoom) — сколько сообщений отдаём за раз.
   HISTORY_PAGE_SIZE: 50,
+  // Сколько получателей можно адресовать одним сообщением (клик по
+  // никам в чате). Зеркало фронтенда — см.
+  // frontend/src/shared/constants/socket.constants.js.
+  MAX_RECIPIENTS: 3,
 });
 
 // Имена Socket.IO событий. Фронтенд держит идентичный список в

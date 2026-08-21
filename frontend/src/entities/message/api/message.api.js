@@ -1,6 +1,6 @@
 import { apiClient } from "@shared/api/axios.js";
 
-/** @returns {Promise<Array<{id:number,roomId:number,authorId:number,authorLogin:string,content:string,createdAt:string}>>} */
+/** @returns {Promise<Array<{id:number,roomId:number,authorId:number,authorLogin:string,content:string,createdAt:string,recipientIds:number[],recipientLogins:string[]}>>} */
 export const fetchMessages = (roomId, { beforeId } = {}) =>
   apiClient
     .get(`/api/rooms/${roomId}/messages`, {

@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { ArrowLeft } from "lucide-react";
 import { useMessagesStore } from "@entities/message";
 import { MessageInput } from "@features/message/send";
+import { MAX_MESSAGE_RECIPIENTS } from "@shared/constants/socket.constants.js";
 import { useChatSession } from "../model/useChatSession.js";
 
 // Стабильная ссылка на "нет сообщений". Если возвращать из селектора
@@ -36,6 +37,14 @@ const formatTime = (iso) =>
  * появляется только с классом user-chat-show (см. app/styles/user-chat.css) —
  * навешиваем его, когда roomId выбран. onBack — кнопка "назад" в шапке,
  * видима только на мобильном, сбрасывает activeRoomId в ChatPage.
+ *
+ * Адресация сообщения: ник в ленте (кроме своего) кликабелен — клик
+ * добавляет/убирает автора из selectedRecipients (до
+ * MAX_MESSAGE_RECIPIENTS человек, повторный клик по уже выбранному
+ * нику снимает выбор). Выбор отображается панелью "Кому:" над инпутом
+ * (MessageInput) с кнопкой "Очистити"; при отправке id получателей
+ * уходят вместе с сообщением, и после отправки выбор сбрасывается —
+ * это разовый реплай, а не постоянный "режим адресации".
  */
 export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
   const messages = useMessagesStore((s) =>
@@ -44,6 +53,17 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
   const loadingRoomId = useMessagesStore((s) => s.loadingRoomId);
   const { sendMessage } = useChatSession(roomId);
   const bottomRef = useRef(null);
+  const [selectedRecipients, setSelectedRecipients] = useState([]);
+  // Смена комнаты — выбор адресатов из предыдущей комнаты теряет
+  // смысл (это были ники из другой ленты). Сброс — прямо в теле
+  // рендера (паттерн React "adjusting state when a prop changes"), а
+  // не в useEffect: избегаем лишнего "мигающего" рендера со старым
+  // выбором поверх уже новой комнаты.
+  const [recipientsResetRoomId, setRecipientsResetRoomId] = useState(roomId);
+  if (roomId !== recipientsResetRoomId) {
+    setRecipientsResetRoomId(roomId);
+    setSelectedRecipients([]);
+  }
 
   useEffect(() => {
     // Якір в конці списку повідомлень: scrollIntoView сам знаходить
@@ -51,6 +71,26 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
     // до внутрішнього overflow-вузла напряму.
     bottomRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
+
+  const toggleRecipient = (user) => {
+    if (user.id === currentUserId) return; // свой ник не адресуем
+    setSelectedRecipients((prev) => {
+      const alreadySelected = prev.some((r) => r.id === user.id);
+      if (alreadySelected) return prev.filter((r) => r.id !== user.id);
+      if (prev.length >= MAX_MESSAGE_RECIPIENTS) return prev; // лимит — лишние клики игнорируем
+      return [...prev, user];
+    });
+  };
+
+  const clearRecipients = () => setSelectedRecipients([]);
+
+  const handleSend = (content) => {
+    sendMessage(
+      content,
+      selectedRecipients.map((r) => r.id),
+    );
+    setSelectedRecipients([]);
+  };
 
   return (
     <div className={`user-chat w-100 overflow-hidden${roomId ? " user-chat-show" : ""}`}>
@@ -94,13 +134,59 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
               )}
               {messages.map((message) => {
                 const isOwn = message.authorId === currentUserId;
+                const isAuthorSelected = selectedRecipients.some((r) => r.id === message.authorId);
+                const atLimit = selectedRecipients.length >= MAX_MESSAGE_RECIPIENTS;
+                // Пары id+логин получателей этого сообщения — чтобы
+                // и в "→ Кому" их тоже можно было кликать (добавить в
+                // свой текущий выбор при ответе), а не только автора.
+                const recipientPairs = (message.recipientIds ?? []).map((id, i) => ({
+                  id,
+                  login: message.recipientLogins?.[i] ?? "?",
+                }));
                 return (
                   <li key={message.id} className={isOwn ? "message-line message-line-own" : "message-line"}>
                     <p className="mb-0">
                       <span className="message-time">{formatTime(message.createdAt)}</span>{" "}
-                      <span className="message-author">
+                      <span
+                        className={
+                          "message-author" +
+                          (isOwn ? " own-nick" : " message-author-clickable") +
+                          (isAuthorSelected ? " message-author-selected" : "") +
+                          (!isOwn && !isAuthorSelected && atLimit ? " message-author-limit" : "")
+                        }
+                        onClick={
+                          isOwn
+                            ? undefined
+                            : () => toggleRecipient({ id: message.authorId, login: message.authorLogin })
+                        }
+                        title={isOwn ? undefined : "Натисніть, щоб адресувати відповідь"}
+                      >
                         {message.authorLogin}
                       </span>{" "}
+                      {recipientPairs.length > 0 && (
+                        <span className="message-recipients">
+                          →{" "}
+                          {recipientPairs.map((r, i) => {
+                            const isOwnRecipient = r.id === currentUserId;
+                            const isSelected = selectedRecipients.some((sel) => sel.id === r.id);
+                            return (
+                              <span key={r.id}>
+                                <span
+                                  className={
+                                    "message-recipients-nick" +
+                                    (isOwnRecipient ? " own-nick" : " message-author-clickable") +
+                                    (isSelected ? " message-author-selected" : "")
+                                  }
+                                  onClick={isOwnRecipient ? undefined : () => toggleRecipient(r)}
+                                >
+                                  {r.login}
+                                </span>
+                                {i < recipientPairs.length - 1 ? ", " : ""}
+                              </span>
+                            );
+                          })}
+                        </span>
+                      )}{" "}
                       <span className="message-text">{message.content}</span>
                     </p>
                   </li>
@@ -111,7 +197,12 @@ export function ChatWindow({ roomId, roomName, currentUserId, onBack }) {
             </ul>
           </SimpleBar>
           <div className="chat-input-section p-3 p-lg-4 border-top mb-0">
-            <MessageInput onSend={sendMessage} disabled={!roomId} />
+            <MessageInput
+              onSend={handleSend}
+              disabled={!roomId}
+              recipients={selectedRecipients}
+              onClearRecipients={clearRecipients}
+            />
           </div>
         </div>
       </div>

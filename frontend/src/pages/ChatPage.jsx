@@ -23,7 +23,7 @@ export function ChatPage({ user, onLogout }) {
             role="tabpanel"
             aria-labelledby="pills-users-tab"
           >
-            Ви увійшли як {user.login}
+            Ви увійшли як <span className="own-nick">{user.login}</span>
           </div>
 
           <div

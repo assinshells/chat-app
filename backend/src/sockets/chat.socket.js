@@ -73,6 +73,7 @@ export const registerChatHandlers = (io, socket) => {
         roomId: payload.roomId,
         userId: socket.userId,
         content: payload.content.trim(),
+        recipientIds: Array.isArray(payload.recipientIds) ? payload.recipientIds : [],
       });
       // Рассылаем всем в комнате, включая отправителя — так его
       // собственное сообщение попадает в ленту тем же путём (message:new),

@@ -18,7 +18,13 @@ CREATE TABLE IF NOT EXISTS messages (
     room_id VARCHAR(64) NOT NULL,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content TEXT NOT NULL CHECK (char_length(content) BETWEEN 1 AND 2000),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Кому адресовано сообщение (клик по нику в чате) — до
+    -- CHAT_LIMITS.MAX_RECIPIENTS id'шников users. Не FK-таблица
+    -- многие-ко-многим, а просто массив: адресация — не подписка и не
+    -- членство, отдельная связка тут избыточна. Пустой массив по
+    -- умолчанию — обычное сообщение "всем".
+    recipient_ids INTEGER[] NOT NULL DEFAULT '{}'
 );
 
 -- room_id + id (не created_at) — под keyset-пагинацию истории
