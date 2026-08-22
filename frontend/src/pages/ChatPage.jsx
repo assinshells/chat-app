@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { ChatLayout } from "@widgets/layouts";
-import { SideNav } from "@widgets/side-nav";
-import { ChatSidebar } from "@widgets/chat-sidebar";
 import { ChatWindow } from "@widgets/chat-window";
 import { RoomList } from "@widgets/room-list";
 import { useRoomsStore } from "@entities/room";
@@ -37,28 +35,6 @@ export function ChatPage({ user, onLogout }) {
 
   return (
     <ChatLayout
-      sideNav={<SideNav />}
-      sidebar={
-        <ChatSidebar>
-          <div
-            className="tab-pane active"
-            id="pills-users"
-            role="tabpanel"
-            aria-labelledby="pills-users-tab"
-          >
-            Ви увійшли як <span className="own-nick">{user.login}</span>
-          </div>
-
-          <div
-            className="tab-pane"
-            id="pills-private-chat"
-            role="tabpanel"
-            aria-labelledby="pills-private-chat-tab"
-          >
-            Приватні чати у розробці
-          </div>
-        </ChatSidebar>
-      }
       chatWindow={
         <ChatWindow
           roomId={activeRoomId}

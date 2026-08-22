@@ -32,12 +32,12 @@ const formatTime = (iso) =>
  * тут инлайновая разметка ниже.
  *
  * roomId=null (комната ещё не выбрана) — валидное состояние: рендерим
- * пустое приглашение вместо ленты, инпут отправки заблокирован.
- *
- * На мобильном (<992px) .user-chat по CSS спрятан за экраном и
- * появляется только с классом user-chat-show (см. app/styles/user-chat.css) —
- * навешиваем его, когда roomId выбран. onBack — кнопка "назад" в шапке,
- * видима только на мобильном, сбрасывает activeRoomId в ChatPage.
+ * пустое приглашение вместо ленты, инпут отправки заблокирован. Список
+ * комнат теперь открывается только по кнопке "Кімнати" в шапці (панель
+ * user-profile-sidebar) — окремого лівого сайдбару більше немає, тож
+ * .user-chat завжди видимий і займає весь доступний простір (див.
+ * app/styles/user-chat.css). onBack — кнопка "назад" в шапке, видима
+ * тільки на мобільному, скидає activeRoomId в ChatPage.
  *
  * Адресация сообщения: ник в ленте (кроме своего) кликабелен — клик
  * добавляет/убирает автора из selectedRecipients (до
@@ -101,9 +101,7 @@ export function ChatWindow({
   };
 
   return (
-    <div
-      className={`user-chat w-100 overflow-hidden${roomId ? " user-chat-show" : ""}`}
-    >
+    <div className="user-chat w-100 overflow-hidden">
       <div className="d-lg-flex">
         <div className="w-100 overflow-hidden position-relative">
           <div className="p-3 p-lg-4 border-bottom user-chat-topbar">
@@ -180,7 +178,7 @@ export function ChatWindow({
             <ul className="list-unstyled mb-0">
               {!roomId && (
                 <li className="text-muted text-center">
-                  Оберіть кімнату зі списку ліворуч
+                  Оберіть кімнату, натиснувши «Кімнати» вгорі
                 </li>
               )}
               {roomId && loadingRoomId === roomId && messages.length === 0 && (

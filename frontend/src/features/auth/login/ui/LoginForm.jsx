@@ -1,19 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
+import { useRoomsStore } from "@entities/room";
+
+// Комната по умолчанию — совпадает с id "Головної" кімнати на бекенді
+// (backend/src/constants/rooms.data.js). Якщо список кімнат ще не
+// встиг завантажитись до сабміту форми, юзер однаково потрапить сюди.
+const DEFAULT_ROOM_ID = "general";
+const DEFAULT_ROOM_NAME = "Головна";
 
 /**
  * LoginForm — тупой компонент.
  * onSuccess(login) — вызывается с логином после успешного входа.
+ *
+ * Список кімнат підвантажується тут же (useRoomsStore.loadRooms), щоб
+ * користувач міг одразу обрати кімнату, в яку потрапить після входу —
+ * без цього довелось би відкривати панель "Кімнати" вже всередині
+ * чату. Обраний roomId записується в useRoomsStore.activeRoomId ще до
+ * виклику onSuccess, тож ChatPage після навігації одразу відкриє
+ * потрібну кімнату.
  */
 export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [roomId, setRoomId] = useState(DEFAULT_ROOM_ID);
   const { loading, error, login: doLogin, clearError } = useLoginStore();
+
+  const rooms = useRoomsStore((s) => s.rooms);
+  const roomsLoading = useRoomsStore((s) => s.loading);
+  const loadRooms = useRoomsStore((s) => s.loadRooms);
+  const selectRoom = useRoomsStore((s) => s.selectRoom);
+
+  useEffect(() => {
+    loadRooms();
+  }, [loadRooms]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     clearError();
-    doLogin({ login, password }, () => onSuccess(login));
+    doLogin({ login, password }, () => {
+      selectRoom(roomId);
+      onSuccess(login);
+    });
   };
 
   return (
@@ -32,7 +59,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-3">
           <input
             id="passwordInput"
             type="password"
@@ -43,6 +70,30 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             required
           />
         </div>
+
+        <div className="mb-4">
+          <label htmlFor="roomSelect" className="form-label text-muted small mb-1">
+            Кімната
+          </label>
+          <select
+            id="roomSelect"
+            className="form-select"
+            value={roomId}
+            onChange={(e) => setRoomId(e.target.value)}
+            disabled={roomsLoading && rooms.length === 0}
+          >
+            {rooms.length === 0 ? (
+              <option value={DEFAULT_ROOM_ID}>{DEFAULT_ROOM_NAME}</option>
+            ) : (
+              rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
         <button
           type="submit"
           disabled={loading}

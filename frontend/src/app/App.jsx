@@ -61,7 +61,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    // LogoutButton (см. widgets/side-nav) уже отправил запрос на
+    // LogoutButton (см. widgets/chat-window) уже отправил запрос на
     // /api/auth/logout и очистил AuthSession к моменту этого вызова —
     // здесь только локальный клиентский стейт: сессия, кэш чата и
     // Socket.IO-соединение не должны пережить смену пользователя.

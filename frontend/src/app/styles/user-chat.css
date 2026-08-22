@@ -5,25 +5,10 @@
   background-color: var(--bs-white);
   -webkit-box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
   box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
-  -webkit-transition: all 0.4s;
-  transition: all 0.4s;
 }
 @media (max-width: 991.98px) {
   .user-chat {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    visibility: hidden;
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
-    z-index: 99;
-  }
-  .user-chat.user-chat-show {
-    visibility: visible;
-    -webkit-transform: translateX(0);
-    transform: translateX(0);
+    min-height: 100vh;
   }
 }
 .chat-conversation li {
