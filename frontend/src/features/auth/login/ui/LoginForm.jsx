@@ -22,7 +22,10 @@ const DEFAULT_ROOM_NAME = "Головна";
 export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [roomId, setRoomId] = useState(DEFAULT_ROOM_ID);
+  // Пустое значення = плейсхолдер "Виберіть кімнату" ще не змінили
+  // юзером. Якщо так і відправлять форму — підставляємо кімнату за
+  // замовчуванням (DEFAULT_ROOM_ID), сам плейсхолдер кімнатою не є.
+  const [roomId, setRoomId] = useState("");
   const { loading, error, login: doLogin, clearError } = useLoginStore();
 
   const rooms = useRoomsStore((s) => s.rooms);
@@ -38,7 +41,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
     e.preventDefault();
     clearError();
     doLogin({ login, password }, () => {
-      selectRoom(roomId);
+      selectRoom(roomId || DEFAULT_ROOM_ID);
       onSuccess(login);
     });
   };
@@ -72,9 +75,6 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
         </div>
 
         <div className="mb-4">
-          <label htmlFor="roomSelect" className="form-label text-muted small mb-1">
-            Кімната
-          </label>
           <select
             id="roomSelect"
             className="form-select"
@@ -82,6 +82,9 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             onChange={(e) => setRoomId(e.target.value)}
             disabled={roomsLoading && rooms.length === 0}
           >
+            <option value="" disabled hidden>
+              Виберіть кімнату
+            </option>
             {rooms.length === 0 ? (
               <option value={DEFAULT_ROOM_ID}>{DEFAULT_ROOM_NAME}</option>
             ) : (

@@ -5,10 +5,11 @@ import { authGuard } from "../guards/auth.guard.js";
 
 const router = Router();
 
-// Весь чат доступен только авторизованным пользователям.
-router.use(authGuard);
-
+// Список комнат — статический и не содержит приватных данных
+// (см. RoomController.list), поэтому доступен и до логина: LoginForm
+// подгружает его для селектора комнаты на форме входа. История же
+// сообщений остаётся только для авторизованных.
 router.get("/", RoomController.list);
-router.get("/:roomId/messages", MessageController.history);
+router.get("/:roomId/messages", authGuard, MessageController.history);
 
 export default router;
