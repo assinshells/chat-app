@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { LogOut, PanelLeft, X } from "lucide-react";
+import SimpleBar from "simplebar-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
@@ -102,10 +103,10 @@ export function Sidebar({
     >
       <div className="app-sidebar-inner">
 
-        {/* Верх панели: название сайта (только десктоп, без логотипа) /
+        {/* Верх панели: название сайта (десктоп и мобильный, без логотипа) /
             кнопка закрытия drawer'а (только мобильный). */}
         <div className="app-sidebar-top">
-          <span className="app-sidebar-site-name d-none d-lg-inline">
+          <span className="app-sidebar-site-name">
             {APP_NAME}
           </span>
 
@@ -137,60 +138,62 @@ export function Sidebar({
           </div>
 
           <div className="app-sidebar-tabs-body">
+            <SimpleBar style={{ height: "100%" }} autoHide={true}>
 
-            {activeTab === "rooms" && (
-              <div className="app-sidebar-list">
-                {ROOMS.map((room) => (
-                  
-                  <a  key={room.id}
-                    href="#"
-                    className={`app-sidebar-room-item ${
-                      room.id === activeRoom ? "is-active" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onSelectRoom(room.id);
-                    }}
-                  >
-                    <span className="app-sidebar-room-name">{room.name}</span>
-                    <span className="app-sidebar-room-count">
-                      {roomCounts[room.id] ?? 0}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            )}
-
-            {activeTab === "users" && (
-              <div className="app-sidebar-users">
-
-                <div className="app-sidebar-subtabs-nav">
-                  {USER_GROUPS.map((group) => (
-                    <button
-                      key={group.id}
-                      type="button"
-                      className={`app-sidebar-subtab-btn ${activeUserGroup === group.id ? "is-active" : ""}`}
-                      onClick={() => setActiveUserGroup(group.id)}
+              {activeTab === "rooms" && (
+                <div className="app-sidebar-list">
+                  {ROOMS.map((room) => (
+                    
+                    <a  key={room.id}
+                      href="#"
+                      className={`app-sidebar-room-item ${
+                        room.id === activeRoom ? "is-active" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSelectRoom(room.id);
+                      }}
                     >
-                      {group.label} · {usersByGroup[group.id].length}
-                    </button>
+                      <span className="app-sidebar-room-name">{room.name}</span>
+                      <span className="app-sidebar-room-count">
+                        {roomCounts[room.id] ?? 0}
+                      </span>
+                    </a>
                   ))}
                 </div>
+              )}
 
-                <div className="app-sidebar-list">
-                  {usersByGroup[activeUserGroup].length === 0 ? (
-                    <div className="app-sidebar-empty">Немає користувачів онлайн</div>
-                  ) : (
-                    usersByGroup[activeUserGroup].map((user) => (
-                      <div key={user.id} className="app-sidebar-online-item">
-                        <span className="app-sidebar-online-dot" />
-                        <span>{user.login}</span>
-                      </div>
-                    ))
-                  )}
+              {activeTab === "users" && (
+                <div className="app-sidebar-users">
+
+                  <div className="app-sidebar-subtabs-nav">
+                    {USER_GROUPS.map((group) => (
+                      <button
+                        key={group.id}
+                        type="button"
+                        className={`app-sidebar-subtab-btn ${activeUserGroup === group.id ? "is-active" : ""}`}
+                        onClick={() => setActiveUserGroup(group.id)}
+                      >
+                        {group.label} · {usersByGroup[group.id].length}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="app-sidebar-list">
+                    {usersByGroup[activeUserGroup].length === 0 ? (
+                      <div className="app-sidebar-empty">Немає користувачів онлайн</div>
+                    ) : (
+                      usersByGroup[activeUserGroup].map((user) => (
+                        <div key={user.id} className="app-sidebar-online-item">
+                          <span className="app-sidebar-online-dot" />
+                          <span>{user.login}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </SimpleBar>
           </div>
         </div>
 

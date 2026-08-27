@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
+import SimpleBar from "simplebar-react";
 
-import logo from "@shared/assets/logo/logo.svg";
 import { formatMessageTime } from "@shared/lib/message.js";
 
 export function ChatConversation({ messages = [], currentUser }) {
@@ -13,55 +13,48 @@ export function ChatConversation({ messages = [], currentUser }) {
 
   return (
     <main className="chat-conversation">
+      <SimpleBar style={{ height: "100%" }} autoHide={true}>
+        <div className="chat-messages">
 
-      <div className="chat-messages">
+          {messages.length === 0 ? (
+            <div className="chat-empty-state">
+              <p>No messages yet. Say hi!</p>
+            </div>
+          ) : (
+            <div className="message-list">
 
-        {messages.length === 0 ? (
-          <div className="chat-empty-state">
-            <img src={logo} alt="" />
-            <p>No messages yet. Say hi!</p>
-          </div>
-        ) : (
-          <div className="message-list">
+              {messages.map((message) => {
+                const isOwn = message.author === currentUser;
 
-            {messages.map((message) => {
-              const isOwn = message.author === currentUser;
+                return (
+                  <div
+                    key={message.id}
+                    className={`message ${isOwn ? "message-user" : "message-other"}`}
+                  >
 
-              return (
-                <div
-                  key={message.id}
-                  className={`message ${isOwn ? "message-user" : "message-other"}`}
-                >
-
-                  {!isOwn && (
-                    <div className="message-avatar">
-                      {message.author?.charAt(0).toUpperCase() || "?"}
+                    <div className="message-content">
+                      <span className="message-time">
+                        {formatMessageTime(message.timestamp)}
+                      </span>{" "}
+                      <span className="message-author">
+                        {message.author}
+                      </span>{" "}
+                      <span className="message-text">
+                        {message.text}
+                      </span>
                     </div>
-                  )}
 
-                  <div className="message-content">
-                    <span className="message-time">
-                      {formatMessageTime(message.timestamp)}
-                    </span>{" "}
-                    <span className="message-author">
-                      {message.author}
-                    </span>{" "}
-                    <span className="message-text">
-                      {message.text}
-                    </span>
                   </div>
+                );
+              })}
 
-                </div>
-              );
-            })}
+              <div ref={endRef} />
 
-            <div ref={endRef} />
+            </div>
+          )}
 
-          </div>
-        )}
-
-      </div>
-
+        </div>
+      </SimpleBar>
     </main>
   );
 }

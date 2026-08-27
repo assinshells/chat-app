@@ -267,14 +267,13 @@ body {
   width: 100%;
   min-height: 0;
 
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  padding: 1.5rem 1.5rem 2rem;
-
   scroll-behavior: smooth;
 
   background: var(--bs-body-bg);
+}
+
+.chat-conversation .simplebar-content {
+  padding: 1.5rem 1.5rem 2rem;
 }
 
 
@@ -319,18 +318,15 @@ body {
    ========================================================= */
 
 .message-user {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .message-user .message-content {
   max-width: 75%;
 
-  padding: 0.75rem 1rem;
+  padding: 0.15rem 0;
 
-  border-radius: 18px 18px 4px 18px;
-
-  background: var(--bs-primary);
-  color: #fff;
+  color: var(--bs-body-color);
 }
 
 
@@ -342,30 +338,6 @@ body {
   align-items: flex-start;
 
   gap: 0.75rem;
-}
-
-.message-avatar {
-  width: 32px;
-  height: 32px;
-
-  flex: 0 0 32px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 9px;
-
-  overflow: hidden;
-
-  background: var(--bs-secondary-bg);
-}
-
-.message-avatar img {
-  width: 25px;
-  height: 25px;
-
-  object-fit: contain;
 }
 
 .message-assistant .message-content {
@@ -679,7 +651,7 @@ body {
   }
 
 
-  .chat-conversation {
+  .chat-conversation .simplebar-content {
     padding: 1rem 0.85rem 1.5rem;
   }
 
@@ -700,7 +672,7 @@ body {
 
 
   .message-assistant .message-content {
-    max-width: calc(100% - 42px);
+    max-width: 100%;
   }
 
 
@@ -1308,25 +1280,13 @@ button:focus-visible,
  
  .message-other {
    align-items: flex-start;
- 
-   gap: 0.75rem;
- }
- 
- .message-other .message-avatar {
-   font-size: 0.85rem;
-   font-weight: 600;
- 
-   color: var(--bs-body-color);
  }
  
  .message-other .message-content {
    max-width: 80%;
  
-   padding: 0.6rem 0.85rem;
+   padding: 0.15rem 0;
  
-   border-radius: 4px 18px 18px 18px;
- 
-   background: var(--bs-secondary-bg);
    color: var(--bs-body-color);
  }
  
@@ -1369,11 +1329,4 @@ button:focus-visible,
  
    color: var(--bs-secondary-color);
    text-align: center;
- }
- 
- .chat-empty-state img {
-   width: 40px;
-   height: 40px;
- 
-   opacity: 0.6;
  }
