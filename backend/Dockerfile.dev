@@ -1,0 +1,15 @@
+# --- Development image for the backend service (hot reload via nodemon) ---
+FROM node:22-alpine
+WORKDIR /app
+ENV NODE_ENV=development
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+# Source is bind-mounted by docker-compose for live reload; this COPY only
+# matters if the image is run standalone without the volume mount.
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

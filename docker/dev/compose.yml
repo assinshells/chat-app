@@ -1,0 +1,115 @@
+name: chat-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: chat-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgre}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB:-postgre}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ../postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      # Двойная проверка с паузой: на первом запуске postgres поднимается,
+      # накатывает init.sql и ПЕРЕЗАПУСКАЕТСЯ сам. В окне между этими двумя
+      # стартами pg_isready может на секунду ответить "accepting connections"
+      # от временного инстанса — Docker пометит контейнер healthy раньше
+      # времени, backend подключится к уже умирающему серверу и упадёт.
+      # Требуем два успешных ответа подряд с разрывом — окно гонки перестаёт
+      # совпадать с моментом проверки.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgre} -d ${POSTGRES_DB:-postgre} -q && sleep 1 && pg_isready -U ${POSTGRES_USER:-postgre} -d ${POSTGRES_DB:-postgre} -q"]
+      interval: 5s
+      timeout: 5s
+      start_period: 5s
+      retries: 10
+    networks:
+      - chat-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: chat-redis-dev
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data_dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - chat-network
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile.dev
+    container_name: chat-backend-dev
+    restart: unless-stopped
+    env_file:
+      - path: ../../backend/.env
+        required: false
+    environment:
+      NODE_ENV: development
+      PORT: ${BACKEND_PORT:-3000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgre}:${POSTGRES_PASSWORD:-root}@postgres:5432/${POSTGRES_DB:-postgre}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ../../backend/src:/app/src
+      - ../../backend/package.json:/app/package.json
+      - ../../backend/nodemon.json:/app/nodemon.json
+      - backend_node_modules_dev:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    networks:
+      - chat-network
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.dev
+    container_name: chat-frontend-dev
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:${BACKEND_PORT:-3000}
+      VITE_SOCKET_URL: http://localhost:${BACKEND_PORT:-3000}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ../../frontend/src:/app/src
+      - ../../frontend/public:/app/public
+      - ../../frontend/index.html:/app/index.html
+      - ../../frontend/vite.config.js:/app/vite.config.js
+      - frontend_node_modules_dev:/app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+  redis_data_dev:
+  backend_node_modules_dev:
+  frontend_node_modules_dev:

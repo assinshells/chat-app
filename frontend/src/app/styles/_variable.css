@@ -1,0 +1,5 @@
+:root {
+  --bs-white: #fff;
+  --bs-font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --bs-background-color: var(--bs-white);
+}
