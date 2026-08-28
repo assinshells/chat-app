@@ -22,9 +22,10 @@ const ROOMS_STATE = "rooms:state";
  * roomUsers — участники ТОЛЬКО активной комнаты (с гендером), нужны для
  * вкладки "Користувачі" в сайдбаре.
  */
-export function useChatSocket({ enabled }) {
-  const [activeRoom, setActiveRoom] = useState(DEFAULT_ROOM);
-  const activeRoomRef = useRef(DEFAULT_ROOM);
+export function useChatSocket({ enabled, initialRoom }) {
+  const startRoom = initialRoom || DEFAULT_ROOM;
+  const [activeRoom, setActiveRoom] = useState(startRoom);
+  const activeRoomRef = useRef(startRoom);
 
   const [messages, setMessages] = useState([]);
   const [connected, setConnected] = useState(chatSocket.connected);

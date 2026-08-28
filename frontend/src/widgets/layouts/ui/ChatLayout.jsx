@@ -7,7 +7,7 @@ import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
-export function ChatLayout({ login, onLogout, selectedUser }) {
+export function ChatLayout({ login, initialRoom, onLogout, selectedUser }) {
   const {
     activeRoom,
     switchRoom,
@@ -18,6 +18,7 @@ export function ChatLayout({ login, onLogout, selectedUser }) {
     sendMessage,
   } = useChatSocket({
     enabled: Boolean(login),
+    initialRoom,
   });
 
   // pinned — сайдбар закреплён и виден на десктопе (по умолчанию — да).

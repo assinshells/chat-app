@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
+import { ROOMS, DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
 /**
  * LoginForm — тупой компонент.
- * onSuccess(login) — вызывается с логином после успешного входа.
+ * onSuccess(login, room) — вызывается с логином и выбранной комнатой
+ * после успешного входа, чтобы сразу открыть чат в нужной комнате.
  */
 export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [room, setRoom] = useState(DEFAULT_ROOM);
   const { loading, error, login: doLogin, clearError } = useLoginStore();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     clearError();
-    doLogin({ login, password }, () => onSuccess(login));
+    doLogin({ login, password }, () => onSuccess(login, room));
   };
 
   return (
@@ -32,7 +35,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-3">
           <input
             id="passwordInput"
             type="password"
@@ -43,6 +46,23 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             required
           />
         </div>
+
+        <div className="mb-4">
+          <select
+            id="roomSelect"
+            className="form-select"
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            aria-label="Кімната для входу"
+          >
+            {ROOMS.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <button
           type="submit"
           disabled={loading}

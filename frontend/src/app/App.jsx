@@ -3,6 +3,7 @@ import { AUTH_SCREENS, APP_NAME } from "@shared/constants/auth.constants.js";
 import { Storage } from "@shared/lib/storage.js";
 import { refreshAccessToken } from "@shared/api/axios.js";
 import { useLogoutStore } from "@features/auth/logout/model/useLogoutStore.js";
+import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
 import { LoginPage } from "@pages/LoginPage.jsx";
 import { RegisterPage } from "@pages/RegisterPage.jsx";
@@ -14,6 +15,7 @@ import { ChatPage } from "@pages/ChatPage.jsx";
 import "@app/styles/index.css";
 
 const USER_KEY = "userLogin";
+const ROOM_KEY = "userRoom";
 
 export default function App() {
   // accessToken живёt только в памяти (AuthSession) и не переживает
@@ -49,8 +51,9 @@ export default function App() {
     setScreenParams(params);
   };
 
-  const handleLoginSuccess = (login) => {
+  const handleLoginSuccess = (login, room) => {
     Storage.set(USER_KEY, login);
+    Storage.set(ROOM_KEY, room || DEFAULT_ROOM);
     navigate(AUTH_SCREENS.APP);
   };
 
@@ -64,6 +67,7 @@ export default function App() {
   };
 
   const currentLogin = Storage.get(USER_KEY) ?? "anonymous";
+  const currentRoom = Storage.get(ROOM_KEY) ?? DEFAULT_ROOM;
 
   if (booting) {
     return (
@@ -97,7 +101,13 @@ export default function App() {
       );
 
     case AUTH_SCREENS.APP:
-      return <ChatPage login={currentLogin} onLogout={handleLogout} />;
+      return (
+        <ChatPage
+          login={currentLogin}
+          initialRoom={currentRoom}
+          onLogout={handleLogout}
+        />
+      );
 
     default:
       return (

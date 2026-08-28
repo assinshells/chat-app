@@ -15,6 +15,70 @@ body,
   height: 100%;
 }
 
+
+/* =========================================================
+   SCROLLBARS — единый тонкий автоскрывающийся скроллбар нативными
+   средствами браузера (вместо SimpleBar). По умолчанию скроллбар
+   прозрачный (не виден), но занимает место в layout'е как обычно;
+   становится видимым при наведении (:hover) или во время скролла
+   (класс "is-scrolling" вешает useAutoHideScrollbar и снимает его
+   через паузу после окончания скролла — см. shared/lib/useAutoHideScrollbar.js).
+   .app-scrollbar — точечно на конкретных скролл-контейнерах;
+   правила на html — фолбэк для обычной прокрутки документа
+   (например auth-layout, у которого нет своего overflow-контейнера).
+   ========================================================= */
+
+html,
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  transition: scrollbar-color 0.2s ease;
+}
+
+html:hover,
+html.is-scrolling,
+.app-scrollbar:hover,
+.app-scrollbar.is-scrolling {
+  scrollbar-color: var(--bs-secondary-color) transparent;
+}
+
+::-webkit-scrollbar,
+.app-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track,
+.app-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb,
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+
+  transition: background-color 0.2s ease;
+}
+
+html:hover::-webkit-scrollbar-thumb,
+html.is-scrolling::-webkit-scrollbar-thumb,
+.app-scrollbar:hover::-webkit-scrollbar-thumb,
+.app-scrollbar.is-scrolling::-webkit-scrollbar-thumb {
+  background-color: var(--bs-secondary-color);
+  opacity: 0.4;
+}
+
+::-webkit-scrollbar-thumb:hover,
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--bs-body-color) !important;
+}
+
+
 body {
   min-height: 100vh;
   margin: 0;
@@ -267,13 +331,14 @@ body {
   width: 100%;
   min-height: 0;
 
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 1.5rem 1.5rem 2rem;
+
   scroll-behavior: smooth;
 
   background: var(--bs-body-bg);
-}
-
-.chat-conversation .simplebar-content {
-  padding: 1.5rem 1.5rem 2rem;
 }
 
 
@@ -595,37 +660,6 @@ body {
 
 
 /* =========================================================
-   SCROLLBAR
-   ========================================================= */
-
-.chat-conversation {
-  scrollbar-width: thin;
-
-  scrollbar-color:
-    var(--bs-secondary-bg)
-    transparent;
-}
-
-.chat-conversation::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chat-conversation::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chat-conversation::-webkit-scrollbar-thumb {
-  background: var(--bs-secondary-bg);
-
-  border-radius: 10px;
-}
-
-.chat-conversation::-webkit-scrollbar-thumb:hover {
-  background: var(--bs-secondary-color);
-}
-
-
-/* =========================================================
    MOBILE
    ========================================================= */
 
@@ -651,7 +685,7 @@ body {
   }
 
 
-  .chat-conversation .simplebar-content {
+  .chat-conversation {
     padding: 1rem 0.85rem 1.5rem;
   }
 
@@ -1330,3 +1364,4 @@ button:focus-visible,
    color: var(--bs-secondary-color);
    text-align: center;
  }
+ 

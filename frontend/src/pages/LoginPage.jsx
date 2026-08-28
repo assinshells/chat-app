@@ -10,9 +10,9 @@ export function LoginPage({ onNavigate, onLoginSuccess }) {
       subtitle="Тут усе пристойно. Майже. Це ж чат — а чати завжди трохи брудні."
     >
       <LoginForm
-        onSuccess={(login) => {
+        onSuccess={(login, room) => {
           if (onLoginSuccess) {
-            onLoginSuccess(login);
+            onLoginSuccess(login, room);
           } else {
             onNavigate(AUTH_SCREENS.APP);
           }
