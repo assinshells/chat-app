@@ -54,3 +54,9 @@ export const validateResetPasswordRequest = (body) => {
     errors.push("Passwords do not match");
   if (errors.length) throw new ValidationException("Validation failed", errors);
 };
+export const validateUpdateGenderRequest = (body) => {
+  const errors = [];
+  if (!isValidGender(body.gender))
+    errors.push(`gender is required and must be one of: ${GENDER_OPTIONS.join(", ")}`);
+  if (errors.length) throw new ValidationException("Validation failed", errors);
+};

@@ -71,4 +71,11 @@ export const UserRepository = {
       id,
     ]);
   },
+  async updateGender(id, gender) {
+  const { rows } = await pool.query(
+    "UPDATE users SET gender = $1 WHERE id = $2 RETURNING id, login, email, gender",
+    [gender, id],
+  );
+  return rows[0] ?? null;
+},
 };

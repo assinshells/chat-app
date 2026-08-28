@@ -5,6 +5,7 @@ import {
   toForgotPasswordDto,
   toVerifyOtpDto,
   toResetPasswordDto,
+  toUpdateGenderDto,
 } from "../dto/auth.dto.js";
 import {
   validateLoginRequest,
@@ -12,6 +13,7 @@ import {
   validateForgotPasswordRequest,
   validateVerifyOtpRequest,
   validateResetPasswordRequest,
+  validateUpdateGenderRequest,
 } from "../validators/auth.validator.js";
 import { CookieProvider } from "../providers/cookie.provider.js";
 import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
@@ -108,4 +110,17 @@ export const AuthController = {
       next(err);
     }
   },
+  updateGender: async (req, res, next) => {
+  try {
+    validateUpdateGenderRequest(req.body);
+    const dto = toUpdateGenderDto(req.body);
+    const result = await AuthService.updateGender({
+      userId: req.userId,
+      gender: dto.gender,
+    });
+    res.status(HTTP_STATUS.OK).json({ success: true, gender: result.gender });
+  } catch (err) {
+    next(err);
+  }
+},
 };

@@ -36,5 +36,11 @@ router.post(
   AuthController.refresh,
 );
 router.post("/logout", authGuard, csrfProtection, AuthController.logout);
+router.patch(
+  "/gender",
+  authGuard,
+  csrfProtection,
+  AuthController.updateGender,
+);
 
 export default router;

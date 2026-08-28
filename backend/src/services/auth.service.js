@@ -82,4 +82,9 @@ export const AuthService = {
     await TokenService.revokeRefreshToken(refreshToken);
     return { success: true };
   },
+  async updateGender({ userId, gender }) {
+  const updated = await UserRepository.updateGender(userId, gender);
+  if (!updated) throw new NotFoundException();
+  return { success: true, gender: updated.gender };
+},
 };

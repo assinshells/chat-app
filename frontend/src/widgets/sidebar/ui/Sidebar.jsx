@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { LogOut, PanelLeft, X } from "lucide-react";
+import { LogOut, PanelLeft, Settings, X } from "lucide-react";
+import { SettingsModal } from "@features/settings";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
@@ -15,6 +16,8 @@ const MAIN_TABS = [
   { id: "rooms", label: "Кімнати" },
   { id: "users", label: "Користувачі" },
 ];
+
+const SETTINGS_MODAL_ID = "settingsModal";
 
 /**
  * Боковая панель в духе Claude / ChatGPT.
@@ -213,18 +216,23 @@ export function Sidebar({
             </button>
 
             <div className="dropdown-menu app-sidebar-user-menu">
-              
-              <a  className="dropdown-item"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onLogout();
-                }}
-              >
-                <LogOut size={16} strokeWidth={2} />
-                <span>Выйти</span>
-              </a>
-            </div>
+  <a className="dropdown-item"
+    href="#"
+    data-bs-toggle="modal"
+    data-bs-target={`#${SETTINGS_MODAL_ID}`}
+    onClick={(e) => e.preventDefault()}
+  >
+    <Settings size={16} strokeWidth={2} />
+    <span>Налаштування</span>
+  </a>
+
+  <div className="dropdown-divider"></div>
+
+  <a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); onLogout(); }}>
+    <LogOut size={16} strokeWidth={2} />
+    <span>Выйти</span>
+  </a>
+</div><SettingsModal modalId={SETTINGS_MODAL_ID} />
           </div>
 
           {/* На десктопе — рядом с ником. В превью CSS переносит её
@@ -240,5 +248,6 @@ export function Sidebar({
         </div>
       </div>
     </aside>
+    
   );
 }
