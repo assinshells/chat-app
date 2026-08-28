@@ -437,6 +437,44 @@
   background: #22c55e;
 }
 
+/* Ник в списке онлайн-пользователей. Обычный текст для своего ника
+   (подсвечивается классом .nickname-own, см. app.css), кнопка — для
+   чужого: клик добавляет пользователя в форму отправки сообщения
+   (до 3 шт, см. ChatComposer/ChatLayout). */
+.app-sidebar-online-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-sidebar-online-name-btn {
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  background: transparent;
+
+  font: inherit;
+  color: inherit;
+
+  cursor: pointer;
+
+  border-radius: 4px;
+
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.app-sidebar-online-name-btn:hover {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.app-sidebar-online-name-btn.is-selected {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.14);
+}
+
+
 /* Пустое состояние: в выбранной гендерной группе никого нет онлайн */
 .app-sidebar-empty {
   padding: 0.65rem;

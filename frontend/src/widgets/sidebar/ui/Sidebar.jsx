@@ -56,6 +56,8 @@ export function Sidebar({
   roomCounts,
   roomUsers,
   onSelectRoom,
+  onNicknameClick,
+  selectedNicknames = [],
 }) {
   // Верхний уровень табов: список комнат / список пользователей.
   const [activeTab, setActiveTab] = useState("rooms");
@@ -190,12 +192,36 @@ export function Sidebar({
                   {usersByGroup[activeUserGroup].length === 0 ? (
                     <div className="app-sidebar-empty">Немає користувачів онлайн</div>
                   ) : (
-                    usersByGroup[activeUserGroup].map((user) => (
-                      <div key={user.id} className="app-sidebar-online-item">
-                        <span className="app-sidebar-online-dot" />
-                        <span>{user.login}</span>
-                      </div>
-                    ))
+                    usersByGroup[activeUserGroup].map((user) => {
+                      const isOwn = user.login === login;
+                      const isSelected = selectedNicknames.includes(user.login);
+
+                      return (
+                        <div key={user.id} className="app-sidebar-online-item">
+                          <span className="app-sidebar-online-dot" />
+
+                          {/* Свой ник — просто подсвечен красным, не кликабелен.
+                              Чужой — кликабелен, добавляет адресата в форму
+                              отправки сообщения (см. ChatComposer). */}
+                          {isOwn ? (
+                            <span className="app-sidebar-online-name nickname-own">
+                              {user.login}
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className={`app-sidebar-online-name app-sidebar-online-name-btn ${
+                                isSelected ? "is-selected" : ""
+                              }`}
+                              title="Add user to message form"
+                              onClick={() => onNicknameClick?.(user.login)}
+                            >
+                              {user.login}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>

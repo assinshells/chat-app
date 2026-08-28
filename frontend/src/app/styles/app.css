@@ -487,6 +487,93 @@ body {
 
 
 /* =========================================================
+   COMPOSER TARGETS (selected nicknames / times)
+   Чипы выбранных адресатов и меток времени, добавленных кликом
+   по нику/времени в списке сообщений (см. ChatConversation).
+   ========================================================= */
+
+.composer-targets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 0.35rem;
+
+  padding: 0 0.1rem 0.5rem;
+}
+
+.composer-chip {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.3rem;
+
+  padding: 0.2rem 0.35rem 0.2rem 0.55rem;
+
+  border-radius: 999px;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.composer-chip-time {
+  color: var(--bs-secondary-color);
+  background: var(--bs-secondary-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+.composer-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 16px;
+  height: 16px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  color: inherit;
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.composer-chip-remove:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.composer-chip-clear {
+  padding: 0.2rem 0.5rem;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: transparent;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.composer-chip-clear:hover {
+  color: var(--bs-danger);
+  background: rgba(var(--bs-danger-rgb), 0.08);
+}
+
+
+/* =========================================================
    TEXTAREA
    ========================================================= */
 
@@ -1340,7 +1427,66 @@ button:focus-visible,
  .message-author {
    font-weight: 600;
  }
- 
+
+
+ /* =========================================================
+    OWN NICKNAME — единый акцент для собственного ника пользователя
+    везде, где он показывается (список сообщений, список онлайн-
+    пользователей в сайдбаре). Кроме футера сайдбара — там ник в
+    выпадающем меню логаута/настроек и остаётся обычным.
+    ========================================================= */
+
+ .nickname-own {
+   color: var(--bs-danger) !important;
+ }
+
+
+ /* =========================================================
+    CLICKABLE TIME / NICKNAME
+    Клик добавляет ник/время в форму отправки (см. ChatComposer).
+    ========================================================= */
+
+ .message-time-btn,
+ .message-author-btn {
+   padding: 0;
+   margin: 0;
+
+   border: 0;
+   background: transparent;
+
+   font: inherit;
+   font-size: 0.8em;
+   font-variant-numeric: tabular-nums;
+   color: inherit;
+   opacity: 0.65;
+
+   cursor: pointer;
+
+   border-radius: 4px;
+
+   transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+ }
+
+ .message-author-btn {
+   font-size: 1em;
+   font-weight: 600;
+   opacity: 1;
+ }
+
+ .message-time-btn:hover,
+ .message-author-btn:hover {
+   opacity: 1;
+   color: var(--bs-primary);
+   background: rgba(var(--bs-primary-rgb), 0.08);
+ }
+
+ .message-time-btn.is-selected,
+ .message-author-btn.is-selected {
+   opacity: 1;
+   color: var(--bs-primary);
+   background: rgba(var(--bs-primary-rgb), 0.14);
+ }
+
  .message-text {
    white-space: pre-wrap;
    word-break: break-word;

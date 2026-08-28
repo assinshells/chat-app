@@ -3,7 +3,22 @@ import { useEffect, useRef } from "react";
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 
-export function ChatConversation({ messages = [], currentUser }) {
+/**
+ * ChatConversation — список сообщений комнаты.
+ *
+ * Ник автора (кроме своего собственного) и время сообщения кликабельны:
+ * клик передаётся наверх через onNicknameClick/onTimeClick, чтобы
+ * ChatComposer мог добавить их как "цели" отправки (до 3 ников и 3 меток
+ * времени, см. ChatLayout). Уже выбранные значения подсвечиваются.
+ */
+export function ChatConversation({
+  messages = [],
+  currentUser,
+  onNicknameClick,
+  onTimeClick,
+  selectedNicknames = [],
+  selectedTimes = [],
+}) {
   const endRef = useRef(null);
   const scrollRef = useRef(null);
 
@@ -27,6 +42,10 @@ export function ChatConversation({ messages = [], currentUser }) {
 
             {messages.map((message) => {
               const isOwn = message.author === currentUser;
+              const timeLabel = formatMessageTime(message.timestamp);
+
+              const isNicknameSelected = selectedNicknames.includes(message.author);
+              const isTimeSelected = selectedTimes.includes(timeLabel);
 
               return (
                 <div
@@ -35,12 +54,39 @@ export function ChatConversation({ messages = [], currentUser }) {
                 >
 
                   <div className="message-content">
-                    <span className="message-time">
-                      {formatMessageTime(message.timestamp)}
-                    </span>{" "}
-                    <span className="message-author">
-                      {message.author}
-                    </span>{" "}
+
+                    {/* Время — кликабельно всегда: добавляет метку времени
+                        в форму отправки (до 3 шт, см. ChatComposer). */}
+                    <button
+                      type="button"
+                      className={`message-time message-time-btn ${
+                        isTimeSelected ? "is-selected" : ""
+                      }`}
+                      title="Add time to message form"
+                      onClick={() => onTimeClick?.(timeLabel)}
+                    >
+                      {timeLabel}
+                    </button>{" "}
+
+                    {/* Ник — кликабелен, кроме собственного: добавляет
+                        адресата в форму отправки (до 3 шт). */}
+                    {isOwn ? (
+                      <span className="message-author nickname-own">
+                        {message.author}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className={`message-author message-author-btn ${
+                          isNicknameSelected ? "is-selected" : ""
+                        }`}
+                        title="Add user to message form"
+                        onClick={() => onNicknameClick?.(message.author)}
+                      >
+                        {message.author}
+                      </button>
+                    )}{" "}
+
                     <span className="message-text">
                       {message.text}
                     </span>
