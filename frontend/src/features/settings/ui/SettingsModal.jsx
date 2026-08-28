@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 
 import { GENDER_OPTIONS } from "@shared/constants/auth.constants.js";
@@ -36,7 +37,14 @@ export function SettingsModal({ modalId = "settingsModal" }) {
     applyTheme(next);
   };
 
-  return (
+  // Портал в document.body обязателен: Bootstrap-модалка использует
+  // position: fixed относительно вьюпорта, а не своего DOM-родителя.
+  // Если рендерить её как обычного React-child внутри .app-sidebar,
+  // она попадёт в поддерево с transform/overflow:hidden (см. _sidebar.css)
+  // — это создаёт новый containing block для fixed-элементов, и модалка
+  // либо обрежется по ширине свёрнутого сайдбара, либо будет смещена
+  // и отцентрована относительно него, а не относительно экрана.
+  return createPortal(
     <div
       className="modal fade"
       id={modalId}
@@ -140,6 +148,7 @@ export function SettingsModal({ modalId = "settingsModal" }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { LogOut, PanelLeft, Settings, X } from "lucide-react";
 import { SettingsModal } from "@features/settings";
+import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
@@ -18,6 +19,7 @@ const MAIN_TABS = [
 ];
 
 const SETTINGS_MODAL_ID = "settingsModal";
+const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 /**
  * Боковая панель в духе Claude / ChatGPT.
@@ -228,11 +230,18 @@ export function Sidebar({
 
   <div className="dropdown-divider"></div>
 
-  <a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); onLogout(); }}>
+  <a  className="dropdown-item"
+    href="#"
+    data-bs-toggle="modal"
+    data-bs-target={`#${LOGOUT_MODAL_ID}`}
+    onClick={(e) => e.preventDefault()}
+  >
     <LogOut size={16} strokeWidth={2} />
     <span>Выйти</span>
   </a>
-</div><SettingsModal modalId={SETTINGS_MODAL_ID} />
+</div>
+<SettingsModal modalId={SETTINGS_MODAL_ID} />
+<LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
           </div>
 
           {/* На десктопе — рядом с ником. В превью CSS переносит её
