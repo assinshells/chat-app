@@ -359,7 +359,7 @@ body {
   display: flex;
   flex-direction: column;
 
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 
@@ -783,7 +783,7 @@ body {
 
 
   .message-list {
-    gap: 1.25rem;
+    gap: 0.4rem;
   }
 
 
@@ -1496,12 +1496,12 @@ button:focus-visible,
  /* =========================================================
     SYSTEM MESSAGE — вхід / перехід / вихід користувача
     вид рядка: "20:10:05 Нікнейм увійшов у кімнату Назва"
-    Без бульбашки, по центру, приглушено — щоб не змагатися за увагу
-    зі звичайними повідомленнями.
+    Без бульбашки, по лівому краю (як звичайні повідомлення), лише
+    приглушено — щоб не змагатися за увагу зі звичайними повідомленнями.
     ========================================================= */
 
  .message-system {
-   justify-content: center;
+   justify-content: flex-start;
  }
 
  .message-system .message-content {
@@ -1510,7 +1510,7 @@ button:focus-visible,
    padding: 0.1rem 0;
 
    font-size: 0.82rem;
-   text-align: center;
+   text-align: left;
 
    color: var(--bs-secondary-color);
  }

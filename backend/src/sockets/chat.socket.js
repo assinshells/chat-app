@@ -40,20 +40,21 @@ function broadcastRoomsState(io) {
 
 /**
  * broadcastSystemEvent — рассылает системное сообщение (вход/переход/
- * выход) ВСЕМ подключённым сокетам через io.emit (а не io.to(room)),
- * т.е. независимо от того, в какой комнате сейчас находится получатель —
- * см. комментарий у SOCKET_EVENTS.SYSTEM_EVENT. На клиенте оно
- * подмешивается в ленту текущей открытой комнаты как строка вида
- * "час Нікнейм увійшов/увійшла в кімнату Назва" с кликабельными
- * ніком и назвою кімнати (см. ChatConversation.jsx).
+ * выход) участникам КОНКРЕТНОЙ Socket.IO room через io.to(scopeRoom) —
+ * не глобально. scopeRoom — это КОМУ виден эффект (кто должен увидеть
+ * строку в своей ленте), а payload.room — это НАЗВАНИЕ комнаты,
+ * упомянутое в тексте сообщения; для события 'switch' они РАЗНЫЕ:
+ * рассылается в СТАРУЮ комнату (scopeRoom), а текст называет НОВУЮ
+ * (payload.room), см. joinRoom ниже. Текст сообщения не зависит от пола
+ * пользователя (см. widgets/chat-conversation) — gender сюда сознательно
+ * не передаётся.
  */
-function broadcastSystemEvent(io, { event, login, gender, color, room }) {
-  io.emit(SOCKET_EVENTS.SYSTEM_EVENT, {
+function broadcastSystemEvent(io, scopeRoom, { event, login, color, room }) {
+  io.to(scopeRoom).emit(SOCKET_EVENTS.SYSTEM_EVENT, {
     id: `sys-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     type: "system",
     event,
     login,
-    gender,
     color,
     room,
     timestamp: Date.now(),
@@ -64,13 +65,23 @@ function broadcastSystemEvent(io, { event, login, gender, color, room }) {
  * joinRoom — переводит socket из текущей комнаты (если есть) в целевую:
  * обновляет и Socket.IO room (нужна для рассылки message:new только
  * участникам комнаты), и presence-реестр (нужен для подсчёта "кто
- * онлайн"), затем рассылает обновлённые данные всем, кого это касается,
- * и возвращает снапшот (история сообщений + участники) — это единый
- * ответ на room:join, второй отдельный запрос истории не нужен.
+ * онлайн"), затем возвращает снапшот (история сообщений + участники) —
+ * это единый ответ на room:join, второй отдельный запрос истории не нужен.
+ *
+ * Системные события (вхід/перехід) НЕ рассылаются отсюда напрямую —
+ * функция лишь СОБИРАЕТ их в systemEvents и возвращает вызывающему
+ * коду (см. SOCKET_EVENTS.ROOM_JOIN ниже), чтобы тот разослал их уже
+ * ПОСЛЕ отправки ack с историей. Это важно: если разослать их раньше
+ * ack, клиент получит live-событие "Добро пожаловать" раньше, чем ack
+ * со снапшотом истории, а обработчик ack безусловно делает
+ * setMessages(result.messages) — это стёрло бы уже отрисованное
+ * системное сообщение (гонка состояний, из-за которой оно "мигало" и
+ * пропадало).
  */
 async function joinRoom(io, socket, requestedRoom) {
   const targetRoom = isValidRoom(requestedRoom) ? requestedRoom : DEFAULT_ROOM;
   const previousRoom = socket.data.currentRoom;
+  const systemEvents = [];
 
   if (previousRoom !== targetRoom) {
     if (previousRoom) {
@@ -83,6 +94,20 @@ async function joinRoom(io, socket, requestedRoom) {
       // клиенту доставит broadcastRoomsState(io) ниже — тот всегда явно
       // включает count: 0 для опустевшей комнаты (см. presence.js).
       broadcastRoomUsers(io, previousRoom);
+
+      // "Переходит в комнату X" — видят ТОЛЬКО те, кто остался в СТАРОЙ
+      // комнате (scopeRoom = previousRoom); сам переходящий это уже не
+      // увидит (он вышел из previousRoom строкой выше) — и это верно,
+      // ему через мгновение придёт свой "Добро пожаловать" в новую.
+      systemEvents.push({
+        scopeRoom: previousRoom,
+        payload: {
+          event: "switch",
+          login: socket.data.login,
+          color: socket.data.color,
+          room: targetRoom,
+        },
+      });
     }
 
     socket.join(targetRoom);
@@ -97,26 +122,31 @@ async function joinRoom(io, socket, requestedRoom) {
     broadcastRoomUsers(io, targetRoom);
     broadcastRoomsState(io);
 
-    // previousRoom пуст только для первого room:join за жизнь ЭТОГО
-    // socket-соединения (в т.ч. после реконнекта — presence привязан к
-    // socket.id, см. комментарий в registerChatSocket) — считаем это
-    // "входом"; смену уже активной комнаты — "переходом".
-    broadcastSystemEvent(io, {
-      event: previousRoom ? "switch" : "join",
-      login: socket.data.login,
-      gender: socket.data.gender,
-      color: socket.data.color,
-      room: targetRoom,
+    // "Добро пожаловать в чат" — видят ВСЕ, кто сейчас в целевой
+    // комнате (включая самого вошедшего, он уже participant targetRoom
+    // после socket.join выше), независимо от того, первый это вход за
+    // сессию или переход из другой комнаты — сообщение одинаковое.
+    systemEvents.push({
+      scopeRoom: targetRoom,
+      payload: {
+        event: "join",
+        login: socket.data.login,
+        color: socket.data.color,
+        room: targetRoom,
+      },
     });
   }
 
   const messages = await MessageService.getHistory({ room: targetRoom });
 
   return {
-    room: targetRoom,
-    messages,
-    users: RoomPresence.listUsers(targetRoom),
-    count: RoomPresence.countUsers(targetRoom),
+    snapshot: {
+      room: targetRoom,
+      messages,
+      users: RoomPresence.listUsers(targetRoom),
+      count: RoomPresence.countUsers(targetRoom),
+    },
+    systemEvents,
   };
 }
 
@@ -129,9 +159,17 @@ export function registerChatSocket(io, socket) {
     const room = typeof payload === "string" ? payload : payload?.room;
 
     try {
-      const snapshot = await joinRoom(io, socket, room);
+      const { snapshot, systemEvents } = await joinRoom(io, socket, room);
       if (typeof ack === "function") {
         ack({ success: true, ...snapshot });
+      }
+
+      // См. комментарий в joinRoom: рассылаем ТОЛЬКО после ack, чтобы
+      // клиент успел применить историю раньше, чем получит живое
+      // "Добро пожаловать"/"переходит" — иначе оно было бы стёрто
+      // безусловным setMessages(result.messages) в обработчике ack.
+      for (const { scopeRoom, payload: eventPayload } of systemEvents) {
+        broadcastSystemEvent(io, scopeRoom, eventPayload);
       }
     } catch (err) {
       logger.warn(
@@ -194,10 +232,11 @@ export function registerChatSocket(io, socket) {
     broadcastRoomUsers(io, room);
     broadcastRoomsState(io);
 
-    broadcastSystemEvent(io, {
+    // "Покидает чат" — видят те, кто остался в комнате, где пользователь
+    // был перед дисконнектом (сам уходящий уже отключился и это не увидит).
+    broadcastSystemEvent(io, room, {
       event: "leave",
       login: socket.data.login,
-      gender: socket.data.gender,
       color: socket.data.color,
       room,
     });

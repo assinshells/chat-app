@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { getColorHex } from "@shared/constants/color.constants.js";
-import { getSystemEventText, hasRoomLink } from "@shared/lib/systemMessage.js";
+import { hasRoomLink } from "@shared/lib/systemMessage.js";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 /**
@@ -47,11 +47,18 @@ function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
 }
 
 /**
- * SystemMessageRow — строка вида "час Нікнейм увійшов у кімнату Назва":
- * системное уведомление о входе/переходе/выходе (event: 'join'|'switch'
- * |'leave', см. backend sockets/chat.socket.js). Ник и назва кімнати —
- * клікабельні (ник — добавляет как адресата в форму отправки, как и в
- * обычных сообщениях; кімната — переключает пользователя туда же).
+ * SystemMessageRow — системное уведомление о входе/переходе/выходе
+ * (event: 'join'|'switch'|'leave', см. backend sockets/chat.socket.js).
+ * Текст без родовых форм (не зависит от пола), у каждого события —
+ * свой порядок слов:
+ *
+ *  - join:   "{час} Добро пожаловать в чат, {Нік}!"
+ *  - switch: "{час} {Нік} переходит в комнату {Назва}"
+ *  - leave:  "{час} {Нік} покидает чат"
+ *
+ * Ник и назва кімнати (для switch) — клікабельні: ник — добавляет как
+ * адресата в форму отправки (как и в обычных сообщениях), кімната —
+ * переключает пользователя туда же.
  *
  * Цвет ника: свой собственный — красный (.nickname-own, тот же акцент,
  * что и везде в приложении), чужой — цвет, который тот пользователь
@@ -60,43 +67,53 @@ function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
 function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }) {
   const isOwn = message.login === currentUser;
   const timeLabel = formatMessageTime(message.timestamp);
-  const actionText = getSystemEventText(message.event, message.gender);
   const roomName = ROOMS_BY_ID[message.room]?.name ?? message.room;
+
+  const nicknameEl = isOwn ? (
+    <span className="nickname-own">{message.login}</span>
+  ) : (
+    <button
+      type="button"
+      className="system-message-nickname-btn"
+      title="Add user to message form"
+      style={
+        message.color && message.color !== "black"
+          ? { "--user-color": getColorHex(message.color) }
+          : undefined
+      }
+      onClick={() => onNicknameClick?.(message.login)}
+    >
+      {message.login}
+    </button>
+  );
+
+  const roomEl = hasRoomLink(message.event) ? (
+    <button
+      type="button"
+      className="system-message-room-btn"
+      title="Go to room"
+      onClick={() => onRoomClick?.(message.room)}
+    >
+      {roomName}
+    </button>
+  ) : null;
 
   return (
     <div className="message message-system">
       <div className="message-content">
         <span className="message-time">{timeLabel}</span>{" "}
-        {isOwn ? (
-          <span className="nickname-own">{message.login}</span>
-        ) : (
-          <button
-            type="button"
-            className="system-message-nickname-btn"
-            title="Add user to message form"
-            style={
-              message.color && message.color !== "black"
-                ? { "--user-color": getColorHex(message.color) }
-                : undefined
-            }
-            onClick={() => onNicknameClick?.(message.login)}
-          >
-            {message.login}
-          </button>
-        )}{" "}
-        <span className="system-message-text">{actionText}</span>
-        {hasRoomLink(message.event) && (
-          <>
-            {" "}
-            <button
-              type="button"
-              className="system-message-room-btn"
-              title="Go to room"
-              onClick={() => onRoomClick?.(message.room)}
-            >
-              {roomName}
-            </button>
-          </>
+        {message.event === "join" && (
+          <span className="system-message-text">
+            Добро пожаловать в чат, {nicknameEl}!
+          </span>
+        )}
+        {message.event === "switch" && (
+          <span className="system-message-text">
+            {nicknameEl} переходит в комнату {roomEl}
+          </span>
+        )}
+        {message.event === "leave" && (
+          <span className="system-message-text">{nicknameEl} покидает чат</span>
         )}
       </div>
     </div>
