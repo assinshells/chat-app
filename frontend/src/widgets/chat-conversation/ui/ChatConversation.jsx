@@ -4,6 +4,29 @@ import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 
 /**
+ * renderMessageText — рендерит текст сообщения, подсвечивая красным
+ * упоминания собственного ника (например "@login", добавленное кликом
+ * по чужому нику в ChatComposer), чтобы пользователь сразу замечал
+ * сообщения, адресованные лично ему — так же, как выделен его ник-автор
+ * в собственных сообщениях (см. .nickname-own в app.css).
+ */
+function renderMessageText(text, currentUser) {
+  if (!currentUser) return text;
+
+  const ownMention = `@${currentUser}`;
+
+  return text.split(/(\s+)/).map((part, index) =>
+    part === ownMention ? (
+      <span key={index} className="nickname-own">
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+}
+
+/**
  * ChatConversation — список сообщений комнаты.
  *
  * Ник автора (кроме своего собственного) и время сообщения кликабельны:
@@ -88,7 +111,7 @@ export function ChatConversation({
                     )}{" "}
 
                     <span className="message-text">
-                      {message.text}
+                      {renderMessageText(message.text, currentUser)}
                     </span>
                   </div>
 
