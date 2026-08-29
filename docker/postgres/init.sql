@@ -3,7 +3,10 @@ CREATE TABLE IF NOT EXISTS users (
     login VARCHAR(64) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     email VARCHAR(255) UNIQUE,
-    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female', 'unknown')),
+    -- 'unknown' сознательно не входит в набор значений: гендер нужен для
+    -- родових форм системных повідомлень (увійшов/увійшла тощо), а без
+    -- конкретного значення таке повідомлення сформувати не можна.
+    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female')),
     -- Цвет сообщений/ника пользователя в сайдбаре, выбирается в настройках.
     -- 'black' — значение по умолчанию, ставится всем новым пользователям.
     color VARCHAR(16) NOT NULL DEFAULT 'black'
@@ -23,6 +26,26 @@ BEGIN
         ALTER TABLE users ADD CONSTRAINT users_color_check
             CHECK (color IN ('black', 'blue', 'green', 'purple', 'orange'));
     END IF;
+END $$;
+
+-- Убираем значение 'unknown' из gender для уже существующих баз (init.sql
+-- выполняется только на пустой базе, поэтому старые окружения нужно
+-- домигрировать явно). Так как выбрать "правильный" пол за пользователя
+-- нельзя, а поле обязательное и без дефолта — оставшиеся строки со
+-- значением 'unknown' переводим в 'male' как нейтральный технический
+-- выбор (просто чтобы CHECK не упал); если для вашей базы это не
+-- подходит — поправьте построчно перед следующим деплоем.
+UPDATE users SET gender = 'male' WHERE gender = 'unknown';
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_gender_check'
+    ) THEN
+        ALTER TABLE users DROP CONSTRAINT users_gender_check;
+    END IF;
+    ALTER TABLE users ADD CONSTRAINT users_gender_check
+        CHECK (gender IN ('male', 'female'));
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);

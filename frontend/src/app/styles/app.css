@@ -1491,8 +1491,87 @@ button:focus-visible,
    white-space: pre-wrap;
    word-break: break-word;
  }
- 
- 
+
+
+ /* =========================================================
+    SYSTEM MESSAGE — вхід / перехід / вихід користувача
+    вид рядка: "20:10:05 Нікнейм увійшов у кімнату Назва"
+    Без бульбашки, по центру, приглушено — щоб не змагатися за увагу
+    зі звичайними повідомленнями.
+    ========================================================= */
+
+ .message-system {
+   justify-content: center;
+ }
+
+ .message-system .message-content {
+   max-width: 100%;
+
+   padding: 0.1rem 0;
+
+   font-size: 0.82rem;
+   text-align: center;
+
+   color: var(--bs-secondary-color);
+ }
+
+ .system-message-text {
+   opacity: 0.85;
+ }
+
+ .system-message-nickname-btn {
+   padding: 0 2px;
+   margin: 0;
+
+   border: 0;
+   background: transparent;
+
+   font: inherit;
+   font-weight: 600;
+   /* --user-color задаётся инлайн (см. ChatConversation.jsx) — цвет,
+      выбранный этим пользователем в настройках; по умолчанию (чёрный,
+      не задан) наследует обычный приглушённый цвет системной строки. */
+   color: var(--user-color, inherit);
+
+   cursor: pointer;
+
+   border-radius: 4px;
+
+   transition: color 0.15s ease, background-color 0.15s ease;
+ }
+
+ .system-message-nickname-btn:hover {
+   color: var(--bs-primary);
+   background: rgba(var(--bs-primary-rgb), 0.08);
+ }
+
+ .system-message-room-btn {
+   padding: 0 2px;
+   margin: 0;
+
+   border: 0;
+   background: transparent;
+
+   font: inherit;
+   font-weight: 600;
+   color: var(--bs-primary);
+   text-decoration: underline;
+   text-decoration-style: dotted;
+   text-underline-offset: 2px;
+
+   cursor: pointer;
+
+   border-radius: 4px;
+
+   transition: background-color 0.15s ease, text-decoration-style 0.15s ease;
+ }
+
+ .system-message-room-btn:hover {
+   background: rgba(var(--bs-primary-rgb), 0.08);
+   text-decoration-style: solid;
+ }
+
+
  /* =========================================================
     EMPTY CONVERSATION STATE
     ========================================================= */

@@ -11,7 +11,6 @@ import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 const USER_GROUPS = [
   { id: "male", label: "Чоловіки" },
   { id: "female", label: "Жінки" },
-  { id: "unknown", label: "Невідомі" },
 ];
 
 const MAIN_TABS = [
@@ -70,12 +69,13 @@ export function Sidebar({
 
   // Группируем участников активной комнаты по гендеру один раз за рендер,
   // а не на каждый чих — список участников комнаты может быть длинным.
+  // gender гарантированно 'male' | 'female' (см. GENDER_VALUES на бэкенде,
+  // значение 'unknown' убрано), третьей группы больше не нужно.
   const usersByGroup = useMemo(() => {
-    const grouped = { male: [], female: [], unknown: [] };
+    const grouped = { male: [], female: [] };
 
     for (const user of roomUsers) {
-      const key = grouped[user.gender] ? user.gender : "unknown";
-      grouped[key].push(user);
+      if (grouped[user.gender]) grouped[user.gender].push(user);
     }
 
     return grouped;

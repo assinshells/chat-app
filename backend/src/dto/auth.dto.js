@@ -15,7 +15,7 @@
  * @property {string} login
  * @property {string} password
  * @property {string|undefined} email
- * @property {"male"|"female"|"unknown"} gender
+ * @property {"male"|"female"} gender
  */
 
 /**

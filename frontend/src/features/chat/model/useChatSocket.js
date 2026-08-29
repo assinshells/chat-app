@@ -7,6 +7,7 @@ const MESSAGE_SEND = "message:send";
 const ROOM_JOIN = "room:join";
 const ROOM_USERS = "room:users";
 const ROOMS_STATE = "rooms:state";
+const SYSTEM_EVENT = "system:event";
 
 /**
  * useChatSocket — держит живое Socket.IO-соединение и текущую активную
@@ -21,6 +22,11 @@ const ROOMS_STATE = "rooms:state";
  * в которых пользователь сейчас не находится.
  * roomUsers — участники ТОЛЬКО активной комнаты (с гендером), нужны для
  * вкладки "Користувачі" в сайдбаре.
+ *
+ * Системные сообщения (вхід/перехід/вихід, event: 'join'|'switch'|'leave')
+ * приходят отдельным глобальным событием (system:event, см. backend) и
+ * подмешиваются в тот же массив messages, что и обычные сообщения чата —
+ * ChatConversation различает их по полю message.type === 'system'.
  */
 export function useChatSocket({ enabled, initialRoom }) {
   const startRoom = initialRoom || DEFAULT_ROOM;
@@ -79,6 +85,20 @@ export function useChatSocket({ enabled, initialRoom }) {
       });
     };
 
+    // Системные сообщения (вхід/перехід/вихід) приходят ГЛОБАЛЬНО, всем
+    // подключённым сокетам, независимо от активной комнаты (см. backend
+    // sockets/chat.socket.js: io.emit, а не io.to(room).emit) — поэтому,
+    // в отличие от handleMessageNew, здесь нет и не нужно проверки "моя
+    // ли это комната": подмешиваем в ленту текущей открытой комнаты как
+    // живую строку активности, чтобы название чужой комнаты в ней можно
+    // было кликнуть и перейти туда даже не находясь в ней сейчас.
+    const handleSystemEvent = (message) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+    };
+
     const handleRoomUsers = (payload) => {
       setRoomCounts((prev) => ({ ...prev, [payload.room]: payload.count }));
 
@@ -94,6 +114,7 @@ export function useChatSocket({ enabled, initialRoom }) {
     chatSocket.on("connect", handleConnect);
     chatSocket.on("disconnect", handleDisconnect);
     chatSocket.on(MESSAGE_NEW, handleMessageNew);
+    chatSocket.on(SYSTEM_EVENT, handleSystemEvent);
     chatSocket.on(ROOM_USERS, handleRoomUsers);
     chatSocket.on(ROOMS_STATE, handleRoomsState);
 
@@ -104,6 +125,7 @@ export function useChatSocket({ enabled, initialRoom }) {
       chatSocket.off("connect", handleConnect);
       chatSocket.off("disconnect", handleDisconnect);
       chatSocket.off(MESSAGE_NEW, handleMessageNew);
+      chatSocket.off(SYSTEM_EVENT, handleSystemEvent);
       chatSocket.off(ROOM_USERS, handleRoomUsers);
       chatSocket.off(ROOMS_STATE, handleRoomsState);
       chatSocket.disconnect();

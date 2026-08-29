@@ -1,7 +1,7 @@
 import { apiClient } from "@shared/api/axios.js";
 
 /**
- * @param {{ login: string, password: string, email?: string, gender: "male"|"female"|"unknown" }} dto
+ * @param {{ login: string, password: string, email?: string, gender: "male"|"female" }} dto
  * @returns {Promise<{ success: boolean }>}
  */
 export const registerRequest = (dto) =>

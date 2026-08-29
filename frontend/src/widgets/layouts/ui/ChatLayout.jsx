@@ -132,6 +132,7 @@ export function ChatLayout({ login, initialRoom, onLogout, selectedUser }) {
             currentUser={login}
             onNicknameClick={handleNicknameClick}
             onTimeClick={handleTimeClick}
+            onRoomClick={handleSelectRoom}
             selectedNicknames={targetNicknames}
             selectedTimes={targetTimes}
             roomUsers={roomUsers}

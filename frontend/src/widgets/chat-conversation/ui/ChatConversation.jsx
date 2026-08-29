@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { getColorHex } from "@shared/constants/color.constants.js";
+import { getSystemEventText, hasRoomLink } from "@shared/lib/systemMessage.js";
+import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 /**
  * renderMessageText — рендерит текст сообщения, подсвечивая упоминания
@@ -45,6 +47,63 @@ function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
 }
 
 /**
+ * SystemMessageRow — строка вида "час Нікнейм увійшов у кімнату Назва":
+ * системное уведомление о входе/переходе/выходе (event: 'join'|'switch'
+ * |'leave', см. backend sockets/chat.socket.js). Ник и назва кімнати —
+ * клікабельні (ник — добавляет как адресата в форму отправки, как и в
+ * обычных сообщениях; кімната — переключает пользователя туда же).
+ *
+ * Цвет ника: свой собственный — красный (.nickname-own, тот же акцент,
+ * что и везде в приложении), чужой — цвет, который тот пользователь
+ * выбрал в настройках (см. features/settings).
+ */
+function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }) {
+  const isOwn = message.login === currentUser;
+  const timeLabel = formatMessageTime(message.timestamp);
+  const actionText = getSystemEventText(message.event, message.gender);
+  const roomName = ROOMS_BY_ID[message.room]?.name ?? message.room;
+
+  return (
+    <div className="message message-system">
+      <div className="message-content">
+        <span className="message-time">{timeLabel}</span>{" "}
+        {isOwn ? (
+          <span className="nickname-own">{message.login}</span>
+        ) : (
+          <button
+            type="button"
+            className="system-message-nickname-btn"
+            title="Add user to message form"
+            style={
+              message.color && message.color !== "black"
+                ? { "--user-color": getColorHex(message.color) }
+                : undefined
+            }
+            onClick={() => onNicknameClick?.(message.login)}
+          >
+            {message.login}
+          </button>
+        )}{" "}
+        <span className="system-message-text">{actionText}</span>
+        {hasRoomLink(message.event) && (
+          <>
+            {" "}
+            <button
+              type="button"
+              className="system-message-room-btn"
+              title="Go to room"
+              onClick={() => onRoomClick?.(message.room)}
+            >
+              {roomName}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * ChatConversation — список сообщений комнаты.
  *
  * Ник автора (кроме своего собственного) и время сообщения кликабельны:
@@ -57,6 +116,7 @@ export function ChatConversation({
   currentUser,
   onNicknameClick,
   onTimeClick,
+  onRoomClick,
   selectedNicknames = [],
   selectedTimes = [],
   roomUsers = [],
@@ -88,6 +148,18 @@ export function ChatConversation({
           <div className="message-list">
 
             {messages.map((message) => {
+              if (message.type === "system") {
+                return (
+                  <SystemMessageRow
+                    key={message.id}
+                    message={message}
+                    currentUser={currentUser}
+                    onNicknameClick={onNicknameClick}
+                    onRoomClick={onRoomClick}
+                  />
+                );
+              }
+
               const isOwn = message.author === currentUser;
               const timeLabel = formatMessageTime(message.timestamp);
 

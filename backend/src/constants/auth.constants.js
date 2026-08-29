@@ -26,10 +26,12 @@ export const COOKIE_NAMES = Object.freeze({
 
 // Gender is a required registration field with no default value —
 // the client must always send one of these explicit values.
+// 'unknown' сознательно убран: гендер используется для родовых форм
+// системных сообщений (увійшов/увійшла тощо, см. sockets/chat.socket.js),
+// а без конкретного значения такое сообщение сформировать нельзя.
 export const GENDER_VALUES = Object.freeze({
   MALE: "male",
   FEMALE: "female",
-  UNKNOWN: "unknown",
 });
 
 export const GENDER_OPTIONS = Object.freeze(Object.values(GENDER_VALUES));

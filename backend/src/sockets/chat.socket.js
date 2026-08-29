@@ -39,6 +39,28 @@ function broadcastRoomsState(io) {
 }
 
 /**
+ * broadcastSystemEvent — рассылает системное сообщение (вход/переход/
+ * выход) ВСЕМ подключённым сокетам через io.emit (а не io.to(room)),
+ * т.е. независимо от того, в какой комнате сейчас находится получатель —
+ * см. комментарий у SOCKET_EVENTS.SYSTEM_EVENT. На клиенте оно
+ * подмешивается в ленту текущей открытой комнаты как строка вида
+ * "час Нікнейм увійшов/увійшла в кімнату Назва" с кликабельными
+ * ніком и назвою кімнати (см. ChatConversation.jsx).
+ */
+function broadcastSystemEvent(io, { event, login, gender, color, room }) {
+  io.emit(SOCKET_EVENTS.SYSTEM_EVENT, {
+    id: `sys-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    type: "system",
+    event,
+    login,
+    gender,
+    color,
+    room,
+    timestamp: Date.now(),
+  });
+}
+
+/**
  * joinRoom — переводит socket из текущей комнаты (если есть) в целевую:
  * обновляет и Socket.IO room (нужна для рассылки message:new только
  * участникам комнаты), и presence-реестр (нужен для подсчёта "кто
@@ -74,6 +96,18 @@ async function joinRoom(io, socket, requestedRoom) {
 
     broadcastRoomUsers(io, targetRoom);
     broadcastRoomsState(io);
+
+    // previousRoom пуст только для первого room:join за жизнь ЭТОГО
+    // socket-соединения (в т.ч. после реконнекта — presence привязан к
+    // socket.id, см. комментарий в registerChatSocket) — считаем это
+    // "входом"; смену уже активной комнаты — "переходом".
+    broadcastSystemEvent(io, {
+      event: previousRoom ? "switch" : "join",
+      login: socket.data.login,
+      gender: socket.data.gender,
+      color: socket.data.color,
+      room: targetRoom,
+    });
   }
 
   const messages = await MessageService.getHistory({ room: targetRoom });
@@ -159,5 +193,13 @@ export function registerChatSocket(io, socket) {
     RoomPresence.leave(room, socket.id);
     broadcastRoomUsers(io, room);
     broadcastRoomsState(io);
+
+    broadcastSystemEvent(io, {
+      event: "leave",
+      login: socket.data.login,
+      gender: socket.data.gender,
+      color: socket.data.color,
+      room,
+    });
   });
 }
