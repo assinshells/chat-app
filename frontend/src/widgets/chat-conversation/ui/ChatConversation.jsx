@@ -2,28 +2,46 @@ import { useEffect, useRef } from "react";
 
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
+import { getColorHex } from "@shared/constants/color.constants.js";
 
 /**
- * renderMessageText — рендерит текст сообщения, подсвечивая красным
- * упоминания собственного ника (например "@login", добавленное кликом
- * по чужому нику в ChatComposer), чтобы пользователь сразу замечал
- * сообщения, адресованные лично ему — так же, как выделен его ник-автор
- * в собственных сообщениях (см. .nickname-own в app.css).
+ * renderMessageText — рендерит текст сообщения, подсвечивая упоминания
+ * ников (например "@login", добавленное кликом по нику в ChatComposer):
+ *
+ *  - упоминание САМОГО СЕБЯ — всегда красным (.nickname-own), чтобы
+ *    пользователь сразу замечал сообщения, адресованные лично ему —
+ *    так же, как выделен его ник-автор в собственных сообщениях;
+ *  - упоминание ЛЮБОГО ДРУГОГО известного пользователя (получателя
+ *    сообщения) — цветом самого сообщения (см. messageColor/getColorHex),
+ *    т.е. цветом, который выбрал в настройках автор сообщения.
+ *
+ * knownLogins — Set логинов участников текущей комнаты (см. roomUsers в
+ * ChatLayout), нужен, чтобы не подсвечивать случайное "@что-то" в
+ * тексте, не являющееся реальным ником.
  */
-function renderMessageText(text, currentUser) {
-  if (!currentUser) return text;
+function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
+  const ownMention = currentUser ? `@${currentUser}` : null;
 
-  const ownMention = `@${currentUser}`;
+  return text.split(/(\s+)/).map((part, index) => {
+    if (ownMention && part === ownMention) {
+      return (
+        <span key={index} className="nickname-own">
+          {part}
+        </span>
+      );
+    }
 
-  return text.split(/(\s+)/).map((part, index) =>
-    part === ownMention ? (
-      <span key={index} className="nickname-own">
-        {part}
-      </span>
-    ) : (
-      part
-    )
-  );
+    const mentionedLogin = part.startsWith("@") ? part.slice(1) : null;
+    if (mentionedLogin && knownLogins?.has(mentionedLogin)) {
+      return (
+        <span key={index} style={{ color: messageColorHex }}>
+          {part}
+        </span>
+      );
+    }
+
+    return part;
+  });
 }
 
 /**
@@ -41,11 +59,17 @@ export function ChatConversation({
   onTimeClick,
   selectedNicknames = [],
   selectedTimes = [],
+  roomUsers = [],
 }) {
   const endRef = useRef(null);
   const scrollRef = useRef(null);
 
   useAutoHideScrollbar(scrollRef);
+
+  // Множество логинов участников комнаты — используется в renderMessageText,
+  // чтобы подсветить цветом сообщения только реальные упоминания ников,
+  // а не любой текст, случайно начинающийся с "@".
+  const knownLogins = new Set(roomUsers.map((user) => user.login));
 
   // Автопрокрутка к последнему сообщению при добавлении нового.
   useEffect(() => {
@@ -69,6 +93,19 @@ export function ChatConversation({
 
               const isNicknameSelected = selectedNicknames.includes(message.author);
               const isTimeSelected = selectedTimes.includes(timeLabel);
+
+              // Цвет текста сообщения — тот, что автор выбрал в настройках.
+              // 'black' (значение по умолчанию) — НЕ форсируется явным
+              // hex-кодом: в тёмной теме чистый чёрный текст был бы
+              // нечитаемым на тёмном фоне, поэтому для дефолтного цвета
+              // просто ничего не переопределяем и остаётся обычный
+              // адаптивный цвет темы (var(--bs-body-color)). Ник автора
+              // при этом цвет вообще не меняет — остаётся обычным, кроме
+              // своего собственного (он всегда красный, .nickname-own).
+              const messageColorHex =
+                message.color && message.color !== "black"
+                  ? getColorHex(message.color)
+                  : undefined;
 
               return (
                 <div
@@ -110,8 +147,13 @@ export function ChatConversation({
                       </button>
                     )}{" "}
 
-                    <span className="message-text">
-                      {renderMessageText(message.text, currentUser)}
+                    <span className="message-text" style={{ color: messageColorHex }}>
+                      {renderMessageText(
+                        message.text,
+                        currentUser,
+                        knownLogins,
+                        messageColorHex,
+                      )}
                     </span>
                   </div>
 

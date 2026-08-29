@@ -1,3 +1,5 @@
+import { DEFAULT_COLOR } from "../constants/auth.constants.js";
+
 /**
  * @typedef {Object} MessageDto
  * @property {string} id
@@ -5,6 +7,8 @@
  * @property {string} text
  * @property {number} timestamp - unix ms, совместимо с formatMessageTime на фронтенде
  * @property {string} room
+ * @property {string} color - цвет сообщения/ника автора на момент отправки
+ *   ('black' | 'blue' | 'green' | 'purple' | 'orange'), см. COLOR_OPTIONS
  */
 
 export const toMessageDto = (row) => ({
@@ -13,4 +17,5 @@ export const toMessageDto = (row) => ({
   text: row.text,
   timestamp: new Date(row.created_at).getTime(),
   room: row.room,
+  color: row.author_color ?? row.color ?? DEFAULT_COLOR,
 });

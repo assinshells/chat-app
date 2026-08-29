@@ -82,3 +82,11 @@ export const toResetPasswordDto = (body) => ({
 export const toUpdateGenderDto = (body) => ({
   gender: body.gender,
 });
+
+/**
+ * @typedef {Object} UpdateColorDto
+ * @property {"black"|"blue"|"green"|"purple"|"orange"} color
+ */
+export const toUpdateColorDto = (body) => ({
+  color: body.color,
+});

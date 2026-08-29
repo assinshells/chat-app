@@ -24,6 +24,7 @@ export const socketAuthGuard = async (socket, next) => {
     socket.data.userId = user.id;
     socket.data.login = user.login;
     socket.data.gender = user.gender;
+    socket.data.color = user.color;
     next();
   } catch {
     next(new Error("ACCESS_TOKEN_INVALID"));

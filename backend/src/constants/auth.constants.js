@@ -34,6 +34,19 @@ export const GENDER_VALUES = Object.freeze({
 
 export const GENDER_OPTIONS = Object.freeze(Object.values(GENDER_VALUES));
 
+// Цвет сообщений/ника пользователя, выбирается в настройках профиля.
+// 'black' — значение по умолчанию (совпадает с DEFAULT в БД).
+export const COLOR_VALUES = Object.freeze({
+  BLACK: "black",
+  BLUE: "blue",
+  GREEN: "green",
+  PURPLE: "purple",
+  ORANGE: "orange",
+});
+
+export const COLOR_OPTIONS = Object.freeze(Object.values(COLOR_VALUES));
+export const DEFAULT_COLOR = COLOR_VALUES.BLACK;
+
 export const REDIS_KEYS = Object.freeze({
   refreshToken: (jti) => `refresh_token:${jti}`,
   otp: (uid) => `otp:${uid}`,

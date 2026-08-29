@@ -455,7 +455,13 @@
   background: transparent;
 
   font: inherit;
-  color: inherit;
+  /* --user-color задаётся инлайн из Sidebar.jsx — цвет, который владелец
+     ника выбрал в настройках (по умолчанию чёрный/inherit). Через
+     custom property, а не напрямую через color, чтобы :hover и
+     .is-selected ниже (акцент var(--bs-primary)) продолжали
+     перебивать его за счёт обычной специфичности CSS-классов, а не
+     проигрывали инлайн-стилю. */
+  color: var(--user-color, inherit);
 
   cursor: pointer;
 

@@ -3,7 +3,7 @@ import { pool } from "../config/database.js";
 export const UserRepository = {
   async findByLogin(login) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender FROM users WHERE login = $1",
+      "SELECT id, login, email, password_hash, gender, color FROM users WHERE login = $1",
       [login],
     );
     return rows[0] ?? null;
@@ -11,7 +11,7 @@ export const UserRepository = {
 
   async findByEmail(email) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender FROM users WHERE email = $1",
+      "SELECT id, login, email, password_hash, gender, color FROM users WHERE email = $1",
       [email],
     );
     return rows[0] ?? null;
@@ -19,7 +19,7 @@ export const UserRepository = {
 
   async findById(id) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender FROM users WHERE id = $1",
+      "SELECT id, login, email, password_hash, gender, color FROM users WHERE id = $1",
       [id],
     );
     return rows[0] ?? null;
@@ -78,4 +78,11 @@ export const UserRepository = {
   );
   return rows[0] ?? null;
 },
+  async updateColor(id, color) {
+    const { rows } = await pool.query(
+      "UPDATE users SET color = $1 WHERE id = $2 RETURNING id, login, email, color",
+      [color, id],
+    );
+    return rows[0] ?? null;
+  },
 };

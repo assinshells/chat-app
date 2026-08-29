@@ -2,7 +2,8 @@ import { pool } from "../config/database.js";
 import { DEFAULT_ROOM } from "../constants/chat.constants.js";
 
 const SELECT_WITH_AUTHOR = `
-  SELECT m.id, m.text, m.created_at, m.author_id, m.room, u.login AS author_login
+  SELECT m.id, m.text, m.created_at, m.author_id, m.room,
+         u.login AS author_login, u.color AS author_color
   FROM messages m
   JOIN users u ON u.id = m.author_id
 `;

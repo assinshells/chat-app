@@ -25,7 +25,7 @@ export const MessageService = {
    * room тихо заменяется на DEFAULT_ROOM — комнаты фиксированы списком
    * на бэкенде, клиент не может завести произвольную.
    */
-  async sendMessage({ authorId, authorLogin, text, room = DEFAULT_ROOM }) {
+  async sendMessage({ authorId, authorLogin, authorColor, text, room = DEFAULT_ROOM }) {
     const normalized = normalizeText(text);
 
     if (!normalized) {
@@ -43,7 +43,7 @@ export const MessageService = {
       room: safeRoom,
     });
 
-    return toMessageDto({ ...created, author: authorLogin });
+    return toMessageDto({ ...created, author: authorLogin, color: authorColor });
   },
 
   async getHistory({ room = DEFAULT_ROOM, limit = CHAT_LIMITS.HISTORY_DEFAULT_LIMIT } = {}) {

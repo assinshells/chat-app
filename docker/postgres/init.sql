@@ -4,8 +4,26 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL,
     email VARCHAR(255) UNIQUE,
     gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female', 'unknown')),
+    -- Цвет сообщений/ника пользователя в сайдбаре, выбирается в настройках.
+    -- 'black' — значение по умолчанию, ставится всем новым пользователям.
+    color VARCHAR(16) NOT NULL DEFAULT 'black'
+        CHECK (color IN ('black', 'blue', 'green', 'purple', 'orange')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Для баз, созданных до появления поля color (init.sql выполняется только
+-- на пустой базе через docker-entrypoint-initdb.d) — добить существующую
+-- таблицу колонкой без падения, если она уже есть.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS color VARCHAR(16) NOT NULL DEFAULT 'black';
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_color_check'
+    ) THEN
+        ALTER TABLE users ADD CONSTRAINT users_color_check
+            CHECK (color IN ('black', 'blue', 'green', 'purple', 'orange'));
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);

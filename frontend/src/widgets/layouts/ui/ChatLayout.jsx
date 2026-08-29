@@ -134,6 +134,7 @@ export function ChatLayout({ login, initialRoom, onLogout, selectedUser }) {
             onTimeClick={handleTimeClick}
             selectedNicknames={targetNicknames}
             selectedTimes={targetTimes}
+            roomUsers={roomUsers}
           />
           <ChatComposer
             selectedUser={selectedUser}

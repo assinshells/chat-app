@@ -1589,3 +1589,80 @@ button:focus-visible,
   border-color: var(--bs-primary);
   color: var(--bs-primary);
 }
+
+
+/* =========================================================
+   SETTINGS MODAL: вибір кольору повідомлень/ніка
+   Радіокнопка прихована — клікабельне коло-свотч навколо неї
+   саме і є "радіокнопкою" (обводка кольором з'являється при
+   виборі), як просили: "радіокнопка, вокруг которой будет цвет".
+   ========================================================= */
+
+.settings-color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.settings-color-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+
+  cursor: pointer;
+}
+
+.settings-color-input {
+  /* Візуально прихована, але лишається доступною (фокус/клавіатура) —
+     клік по колу-свотчу або підпису теж її перемикає, бо вони всередині
+     того самого <label>. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.settings-color-swatch {
+  display: block;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+  background: var(--settings-swatch-color);
+
+  border: 2px solid var(--bs-border-color);
+  box-shadow: 0 0 0 2px transparent;
+
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.settings-color-option:hover .settings-color-swatch {
+  transform: scale(1.06);
+}
+
+.settings-color-option.is-active .settings-color-swatch {
+  border-color: var(--settings-swatch-color);
+  box-shadow: 0 0 0 2px var(--bs-body-bg), 0 0 0 4px var(--settings-swatch-color);
+}
+
+.settings-color-input:focus-visible ~ .settings-color-swatch {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+.settings-color-label {
+  font-size: 0.78rem;
+  color: var(--bs-secondary-color);
+}
+
+.settings-color-option.is-active .settings-color-label {
+  color: var(--bs-body-color);
+  font-weight: 600;
+}

@@ -68,6 +68,7 @@ async function joinRoom(io, socket, requestedRoom) {
       id: socket.data.userId,
       login: socket.data.login,
       gender: socket.data.gender,
+      color: socket.data.color,
     });
     socket.data.currentRoom = targetRoom;
 
@@ -128,6 +129,7 @@ export function registerChatSocket(io, socket) {
       const message = await MessageService.sendMessage({
         authorId: socket.data.userId,
         authorLogin: socket.data.login,
+        authorColor: socket.data.color,
         text,
         room,
       });

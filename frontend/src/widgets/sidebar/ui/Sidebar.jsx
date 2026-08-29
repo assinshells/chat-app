@@ -4,6 +4,7 @@ import { SettingsModal } from "@features/settings";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
+import { getColorHex } from "@shared/constants/color.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 
@@ -200,9 +201,12 @@ export function Sidebar({
                         <div key={user.id} className="app-sidebar-online-item">
                           <span className="app-sidebar-online-dot" />
 
-                          {/* Свой ник — просто подсвечен красным, не кликабелен.
+                          {/* Свой ник — просто подсвечен красным, не кликабелен,
+                              цвет из настроек на него не влияет (остаётся как есть).
                               Чужой — кликабелен, добавляет адресата в форму
-                              отправки сообщения (см. ChatComposer). */}
+                              отправки сообщения (см. ChatComposer), и красится
+                              в цвет, который этот пользователь выбрал в
+                              настройках (по умолчанию — чёрный). */}
                           {isOwn ? (
                             <span className="app-sidebar-online-name nickname-own">
                               {user.login}
@@ -214,6 +218,11 @@ export function Sidebar({
                                 isSelected ? "is-selected" : ""
                               }`}
                               title="Add user to message form"
+                              style={
+                                user.color && user.color !== "black"
+                                  ? { "--user-color": getColorHex(user.color) }
+                                  : undefined
+                              }
                               onClick={() => onNicknameClick?.(user.login)}
                             >
                               {user.login}

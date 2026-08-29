@@ -42,5 +42,11 @@ router.patch(
   csrfProtection,
   AuthController.updateGender,
 );
+router.patch(
+  "/color",
+  authGuard,
+  csrfProtection,
+  AuthController.updateColor,
+);
 
 export default router;

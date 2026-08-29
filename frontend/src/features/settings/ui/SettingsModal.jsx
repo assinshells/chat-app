@@ -3,11 +3,13 @@ import { createPortal } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 
 import { GENDER_OPTIONS } from "@shared/constants/auth.constants.js";
+import { COLOR_OPTIONS } from "@shared/constants/color.constants.js";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
 import { useSettingsStore } from "@features/settings/model/useSettingsStore.js";
 
 const TABS = [
   { id: "profile", label: "Профіль" },
+  { id: "color", label: "Колір" },
   { id: "theme", label: "Тема" },
 ];
 
@@ -16,20 +18,29 @@ export function SettingsModal({ modalId = "settingsModal" }) {
 
   const {
     gender: storedGender,
+    color: storedColor,
     loading,
     error,
     success,
     updateGender,
+    updateColor,
     clearStatus,
   } = useSettingsStore();
 
   const [gender, setGender] = useState(() => storedGender);
+  const [color, setColor] = useState(() => storedColor);
   const [theme, setThemeState] = useState(() => getStoredTheme());
 
   const handleGenderSubmit = (e) => {
     e.preventDefault();
     if (!gender || loading) return;
     updateGender(gender);
+  };
+
+  const handleColorSubmit = (e) => {
+    e.preventDefault();
+    if (!color || loading) return;
+    updateColor(color);
   };
 
   const handleThemeSelect = (next) => {
@@ -118,6 +129,51 @@ export function SettingsModal({ modalId = "settingsModal" }) {
                   type="submit"
                   className="btn btn-primary rounded-4 fw-bold"
                   disabled={loading || !gender}
+                >
+                  {loading ? "Зберігаємо..." : "Зберегти"}
+                </button>
+              </form>
+            )}
+
+            {activeTab === "color" && (
+              <form onSubmit={handleColorSubmit}>
+                <label className="mb-2 text-muted small d-block">
+                  Колір ваших повідомлень і ніка у списку користувачів
+                  (власний нік у списку та в чаті колір не змінює)
+                </label>
+
+                <div className="settings-color-options">
+                  {COLOR_OPTIONS.map((option) => (
+                    <label
+                      key={option.value}
+                      className={`settings-color-option ${
+                        color === option.value ? "is-active" : ""
+                      }`}
+                      style={{ "--settings-swatch-color": option.hex }}
+                    >
+                      <input
+                        className="settings-color-input"
+                        type="radio"
+                        name="settings-color"
+                        value={option.value}
+                        checked={color === option.value}
+                        onChange={(e) => setColor(e.target.value)}
+                      />
+                      <span className="settings-color-swatch" aria-hidden="true" />
+                      <span className="settings-color-label">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {error && <p className="text-danger small mb-3 mt-3">{error}</p>}
+                {success && (
+                  <p className="text-success small mb-3 mt-3">Збережено</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary rounded-4 fw-bold mt-3"
+                  disabled={loading || !color}
                 >
                   {loading ? "Зберігаємо..." : "Зберегти"}
                 </button>
