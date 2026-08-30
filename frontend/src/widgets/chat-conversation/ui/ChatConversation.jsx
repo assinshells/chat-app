@@ -226,6 +226,7 @@ export function ChatConversation({
                       </span>
                     ) : (
                       <>
+                        <DmTriggerButton login={message.author} color={message.color} />
                         <button
                           type="button"
                           className={`message-author message-author-btn ${
@@ -236,7 +237,6 @@ export function ChatConversation({
                         >
                           {message.author}
                         </button>
-                        <DmTriggerButton login={message.author} color={message.color} />
                       </>
                     )}{" "}
 

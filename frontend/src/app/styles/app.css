@@ -1755,12 +1755,13 @@ button:focus-visible,
 
 .dm-trigger-dropdown {
   display: inline-flex;
+  vertical-align: middle;
   flex: 0 0 auto;
 }
 
 .dm-trigger-btn {
-  width: 22px;
-  height: 22px;
+  width: 1.4em;
+  height: 1.4em;
 
   padding: 0;
 
@@ -1773,6 +1774,7 @@ button:focus-visible,
 
   background: transparent;
   color: var(--bs-secondary-color);
+  font-size: inherit;
 
   cursor: pointer;
 

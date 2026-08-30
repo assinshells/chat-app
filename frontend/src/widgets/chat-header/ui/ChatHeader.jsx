@@ -1,4 +1,4 @@
-import { Ellipsis, Mail, PanelLeft } from "lucide-react";
+import { Mail, PanelLeft } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
@@ -74,110 +74,6 @@ export function ChatHeader({
           >
             <Mail size={18} />
           </button>
-
-          <button
-            type="button"
-            className="chat-header-btn d-none d-lg-flex"
-            title="Audio call"
-            data-bs-toggle="modal"
-            data-bs-target="#audiocallModal"
-          >
-            <i className="ri-phone-line"></i>
-          </button>
-
-          <button
-            type="button"
-            className="chat-header-btn d-none d-lg-flex"
-            title="Video call"
-            data-bs-toggle="modal"
-            data-bs-target="#videocallModal"
-          >
-            <i className="ri-vidicon-line"></i>
-          </button>
-
-          <button
-            type="button"
-            className="chat-header-btn d-none d-lg-flex"
-            title="Profile"
-          >
-            <i className="ri-user-2-line"></i>
-          </button>
-
-
-          {/* More */}
-          <div className="dropdown">
-
-            <button
-              type="button"
-              className="chat-header-btn"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <Ellipsis size={18} />
-            </button>
-
-            <div className="dropdown-menu dropdown-menu-end chat-dropdown">
-
-              
-              <a  className="dropdown-item d-lg-none"
-                href="#"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span>View profile</span>
-                <i className="ri-user-2-line"></i>
-              </a>
-
-              
-              <a  className="dropdown-item d-lg-none"
-                href="#"
-                data-bs-toggle="modal"
-                data-bs-target="#audiocallModal"
-              >
-                <span>Audio call</span>
-                <i className="ri-phone-line"></i>
-              </a>
-
-              
-              <a  className="dropdown-item d-lg-none"
-                href="#"
-                data-bs-toggle="modal"
-                data-bs-target="#videocallModal"
-              >
-                <span>Video call</span>
-                <i className="ri-vidicon-line"></i>
-              </a>
-
-              <div className="dropdown-divider d-lg-none"></div>
-
-              
-              <a  className="dropdown-item"
-                href="#"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span>Archive</span>
-                <i className="ri-archive-line"></i>
-              </a>
-
-              
-              <a  className="dropdown-item"
-                href="#"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span>Mute</span>
-                <i className="ri-volume-mute-line"></i>
-              </a>
-
-              
-              <a  className="dropdown-item"
-                href="#"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span>Delete</span>
-                <i className="ri-delete-bin-line"></i>
-              </a>
-
-            </div>
-          </div>
 
         </div>
       </div>

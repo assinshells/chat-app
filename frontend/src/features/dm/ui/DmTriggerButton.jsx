@@ -24,7 +24,7 @@ export function DmTriggerButton({ login, color, modalId = "dmModal" }) {
         title="Дії"
         onClick={(e) => e.stopPropagation()}
       >
-        <MoreVertical size={16} />
+        <MoreVertical size="1em" />
       </button>
 
       <div className="dropdown-menu dm-trigger-menu">
