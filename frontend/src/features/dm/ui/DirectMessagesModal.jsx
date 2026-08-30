@@ -11,24 +11,31 @@ import { useDmStore } from "@features/dm/model/useDmStore.js";
  * DirectMessagesModal — единая модалка личных сообщений на всё
  * приложение (рендерится один раз в ChatLayout, как SettingsModal/
  * LogoutConfirmModal в Sidebar — см. их комментарий про createPortal).
+ * Доставка реальная — через персональный сокет-канал пользователя (см.
+ * backend sockets/dm.socket.js) и таблицу private_messages, а не
+ * локальный стейт-стаб.
  *
  * Два входа в неё (см. Sidebar.jsx, ChatConversation.jsx, ChatHeader.jsx):
  *  - "Написати особисте повідомлення" у конкретного ніка — открывает
  *    сразу на диалоге с этим человеком (useDmStore.openConversation);
  *  - иконка в шапке — открывает "инбокс" как есть, без выбора конкретного
- *    адресата (useDmStore.openInbox).
+ *    адресата, всегда с актуальным списком диалогов (useDmStore.openInbox).
  *
- * Раскладка ровно как просили: слева вертикальные вкладки диалогов со
- * своим скроллбаром (app-scrollbar, как и везде в приложении), справа —
- * само окно переписки с выбранным собеседником.
+ * Раскладка: слева вертикальные вкладки диалогов со своим скроллбаром
+ * (app-scrollbar, как и везде в приложении), справа — само окно
+ * переписки с выбранным собеседником.
  */
 export function DirectMessagesModal({ modalId = "dmModal" }) {
   const {
+    currentUser,
     conversations,
     order,
     activeLogin,
+    listLoading,
+    sendError,
     selectConversation,
-    sendLocalMessage,
+    sendMessage,
+    clearSendError,
   } = useDmStore();
 
   const [draft, setDraft] = useState("");
@@ -40,13 +47,16 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
   const active = activeLogin ? conversations[activeLogin] : null;
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     const text = draft.trim();
     if (!text || !activeLogin) return;
 
-    sendLocalMessage(activeLogin, text);
     setDraft("");
+    await sendMessage(activeLogin, text);
+    // При ошибке (см. sendError в сторе) текст пользователю возвращать
+    // не будем — проще оставить как есть и дать перепечатать: черновик
+    // мог успеть устареть (например, ошибка "recipient not found").
   };
 
   // Портал в document.body — см. подробное объяснение в SettingsModal.jsx
@@ -79,12 +89,14 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
             <div ref={tabsRef} className="dm-modal-tabs app-scrollbar">
               {order.length === 0 ? (
                 <div className="dm-modal-empty-tabs">
-                  Немає розпочатих діалогів
+                  {listLoading ? "Завантаження…" : "Немає розпочатих діалогів"}
                 </div>
               ) : (
                 order.map((login) => {
                   const convo = conversations[login];
-                  const last = convo.messages[convo.messages.length - 1];
+                  const preview =
+                    convo.lastMessage?.text ??
+                    convo.messages[convo.messages.length - 1]?.text;
 
                   return (
                     <button
@@ -106,7 +118,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                         {login}
                       </span>
                       <span className="dm-modal-tab-preview">
-                        {last ? last.text : "Немає повідомлень"}
+                        {preview ?? "Немає повідомлень"}
                       </span>
                     </button>
                   );
@@ -143,13 +155,20 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                     Виберіть діалог зліва або натисніть «Написати особисте
                     повідомлення» біля ніка користувача в сайдбарі чи в чаті
                   </div>
+                ) : active.loading ? (
+                  <div className="dm-modal-empty-messages">Завантаження…</div>
                 ) : active.messages.length === 0 ? (
                   <div className="dm-modal-empty-messages">
                     Повідомлень ще немає. Напишіть перше!
                   </div>
                 ) : (
                   active.messages.map((message) => (
-                    <div key={message.id} className="dm-modal-message is-own">
+                    <div
+                      key={message.id}
+                      className={`dm-modal-message ${
+                        message.sender === currentUser ? "is-own" : "is-other"
+                      }`}
+                    >
                       <span className="dm-modal-message-time">
                         {formatMessageTime(message.timestamp)}
                       </span>
@@ -163,13 +182,20 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
               {active && (
                 <>
+                  {sendError && (
+                    <p className="dm-modal-error">{sendError}</p>
+                  )}
+
                   <form className="dm-modal-composer" onSubmit={handleSend}>
                     <input
                       type="text"
                       className="dm-modal-input"
                       placeholder={`Повідомлення ${active.login}...`}
                       value={draft}
-                      onChange={(e) => setDraft(e.target.value)}
+                      onChange={(e) => {
+                        setDraft(e.target.value);
+                        if (sendError) clearSendError();
+                      }}
                     />
                     <button
                       type="submit"
@@ -180,14 +206,6 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                       <Send size={16} />
                     </button>
                   </form>
-
-                  {/* Честное предупреждение: реальной доставки собеседнику
-                      пока нет — см. комментарий в useDmStore.js. Как только
-                      появится бэкенд под личку, эта строка убирается. */}
-                  <p className="dm-modal-hint">
-                    Демо-режим: повідомлення поки що не надсилаються
-                    співрозмовнику, видно лише вам.
-                  </p>
                 </>
               )}
             </div>

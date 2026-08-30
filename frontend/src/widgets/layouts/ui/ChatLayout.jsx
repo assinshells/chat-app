@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
-import { DirectMessagesModal } from "@features/dm";
+import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 // Сколько ников/меток времени можно одновременно прикрепить к сообщению
@@ -13,6 +13,12 @@ import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 const MAX_TARGETS = 3;
 
 export function ChatLayout({ login, initialRoom, onLogout }) {
+  // useDmStore нужен свой логин, чтобы по входящему dm:new {sender,
+  // recipient} понимать, кто тут "собеседник" (см. _handleIncoming).
+  useEffect(() => {
+    useDmStore.getState().setCurrentUser(login);
+  }, [login]);
+
   const {
     activeRoom,
     switchRoom,

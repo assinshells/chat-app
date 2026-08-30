@@ -51,9 +51,9 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
--- Общий чат (один room "general") — соответствует текущему фронтенду,
--- где нет ни диалогов, ни списка контактов. text не содержит переносов
--- строк — это гарантируется на уровне backend (message.service.js).
+-- Общий чат (комнаты из ROOMS, см. backend/src/constants/chat.constants.js).
+-- text не содержит переносов строк — это гарантируется на уровне backend
+-- (message.service.js).
 CREATE TABLE IF NOT EXISTS messages (
     id BIGSERIAL PRIMARY KEY,
     author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -63,3 +63,24 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_messages_room_created_at ON messages(room, created_at);
+
+-- Личные сообщения (DM) — отдельная таблица, а не messages с room=NULL:
+-- у личики нет ни гендерных групп участников, ни системных подій
+-- вхід/вихід, ни общего "списка комнат", это принципиально другая
+-- сущность (переписка ровно двух конкретных людей), см.
+-- backend/src/repositories/privateMessage.repository.js.
+CREATE TABLE IF NOT EXISTS private_messages (
+    id BIGSERIAL PRIMARY KEY,
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    text VARCHAR(2000) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT private_messages_no_self_dm CHECK (sender_id <> recipient_id)
+);
+
+-- Один индекс покрывает оба типичных запроса: "переписка между A и Б"
+-- (WHERE LEAST/GREATEST(...) = конкретная пара, ORDER BY created_at) и
+-- "список диалогов пользователя" (см. PrivateMessageRepository) — вместо
+-- отдельных индексов на sender_id/recipient_id по отдельности.
+CREATE INDEX IF NOT EXISTS idx_private_messages_pair
+    ON private_messages (LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id), created_at);

@@ -1930,7 +1930,18 @@ button:focus-visible,
   align-items: baseline;
   gap: 0.5rem;
 
+  max-width: 80%;
+
   font-size: 0.88rem;
+}
+
+.dm-modal-message.is-own {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.dm-modal-message.is-other {
+  align-self: flex-start;
 }
 
 .dm-modal-message-time {
@@ -2004,6 +2015,14 @@ button:focus-visible,
   font-size: 0.74rem;
   text-align: center;
   color: var(--bs-secondary-color);
+}
+
+.dm-modal-error {
+  margin: 0;
+  padding: 0.4rem 1rem 0;
+
+  font-size: 0.78rem;
+  color: var(--bs-danger);
 }
 
 

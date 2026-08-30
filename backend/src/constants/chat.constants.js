@@ -9,6 +9,32 @@ export const CHAT_LIMITS = Object.freeze({
   HISTORY_MAX_LIMIT: 200,
 });
 
+// Личные сообщения (DM) — отдельные ошибки/лимиты от публичного чата,
+// хотя сейчас совпадают по значениям: это разные сущности (см.
+// private_messages в init.sql), и лимиты вполне могут разойтись в
+// будущем (например, более строгий рейт-лимит для личики).
+export const DM_ERRORS = Object.freeze({
+  MESSAGE_EMPTY: "Message text is empty",
+  MESSAGE_TOO_LONG: "Message text is too long",
+  RECIPIENT_NOT_FOUND: "Recipient not found",
+  CANNOT_MESSAGE_SELF: "Cannot send a private message to yourself",
+});
+
+export const DM_LIMITS = Object.freeze({
+  MAX_MESSAGE_LENGTH: 2000,
+  HISTORY_DEFAULT_LIMIT: 50,
+  HISTORY_MAX_LIMIT: 200,
+});
+
+/**
+ * dmChannel — имя персонального Socket.IO room пользователя, куда он
+ * автоматически вступает при коннекте (см. sockets/dm.socket.js) и не
+ * покидает его независимо от того, в какой публичной комнате чата
+ * находится сейчас — это отдельный, постоянно открытый канал доставки
+ * личных сообщений, не связанный с ROOM_JOIN/currentRoom.
+ */
+export const dmChannel = (userId) => `dm:${userId}`;
+
 // Список комнат чата. id хранится в messages.room и используется как имя
 // Socket.IO room + ключ в presence-реестре (см. sockets/presence.js) —
 // поэтому id уже существующих комнат менять нельзя, это ключ в БД.
@@ -75,4 +101,12 @@ export const SOCKET_EVENTS = Object.freeze({
   // те, кто сейчас в комнате, куда вошли; "переходит в комнату X" —
   // только те, кто остался в СТАРОЙ комнате (откуда пользователь ушёл).
   SYSTEM_EVENT: "system:event",
+
+  // Особисті повідомлення (DM) — окремий канал доставки, не пов'язаний
+  // з ROOM_JOIN/currentRoom, див. dmChannel вище і sockets/dm.socket.js.
+  DM_OPEN: "dm:open",
+  DM_LIST: "dm:list",
+  DM_SEND: "dm:send",
+  DM_NEW: "dm:new",
+  DM_ERROR: "dm:error",
 });
