@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Smile, Paperclip, Ellipsis, UserPlus, UserX, Ban, Send, X } from "lucide-react";
+import { Smile, Paperclip, Send, X } from "lucide-react";
 import { normalizeMessageText } from "@shared/lib/message.js";
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -15,7 +15,6 @@ const MAX_MESSAGE_LENGTH = 2000;
  * отправляются — только вместе с непустым текстом.
  */
 export function ChatComposer({
-  selectedUser,
   onSend,
   targetNicknames = [],
   targetTimes = [],
@@ -25,7 +24,6 @@ export function ChatComposer({
   onRestoreTargets,
 }) {
   const [message, setMessage] = useState("");
-  const [showActions, setShowActions] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const [sendError, setSendError] = useState(null);
   const [sending, setSending] = useState(false);
@@ -179,8 +177,6 @@ export function ChatComposer({
           placeholder={
             targetNicknames.length
               ? `Message ${targetNicknames.map((n) => `@${n}`).join(", ")}...`
-              : selectedUser
-              ? `Message ${selectedUser.name}...`
               : "Message..."
           }
         />
@@ -255,95 +251,6 @@ export function ChatComposer({
 
             </div>
 
-
-            {/* User actions */}
-
-            {selectedUser && (
-              <div className="composer-dropdown">
-
-                <button
-                  type="button"
-                  className="composer-tool-btn"
-                  title="User actions"
-                  onClick={() =>
-                    setShowActions((prev) => !prev)
-                  }
-                >
-                  <Ellipsis size={18} />
-                </button>
-
-
-                {showActions && (
-                  <div className="user-actions-menu">
-
-                    <div className="user-actions-header">
-                      <span>
-                        {selectedUser.name}
-                      </span>
-                    </div>
-
-
-                    <button
-                      type="button"
-                      className="user-action-item"
-                      onClick={() => {
-                        console.log(
-                          "Add friend",
-                          selectedUser
-                        );
-                        setShowActions(false);
-                      }}
-                    >
-                      <UserPlus size={16} />
-
-                      <span>
-                        Add to friends
-                      </span>
-                    </button>
-
-
-                    <button
-                      type="button"
-                      className="user-action-item"
-                      onClick={() => {
-                        console.log(
-                          "Ignore",
-                          selectedUser
-                        );
-                        setShowActions(false);
-                      }}
-                    >
-                      <UserX size={16} />
-
-                      <span>
-                        Ignore
-                      </span>
-                    </button>
-
-
-                    <button
-                      type="button"
-                      className="user-action-item danger"
-                      onClick={() => {
-                        console.log(
-                          "Block",
-                          selectedUser
-                        );
-                        setShowActions(false);
-                      }}
-                    >
-                      <Ban size={16} />
-
-                      <span>
-                        Block user
-                      </span>
-                    </button>
-
-                  </div>
-                )}
-
-              </div>
-            )}
 
           </div>
 

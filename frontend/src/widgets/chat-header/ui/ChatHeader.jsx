@@ -1,6 +1,7 @@
-import { Ellipsis, PanelLeft } from "lucide-react";
+import { Ellipsis, Mail, PanelLeft } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
+import { useDmStore } from "@features/dm";
 
 export function ChatHeader({
   title,
@@ -9,7 +10,9 @@ export function ChatHeader({
   onOpenSidebar,
   onHoverSidebarIcon,
   onOpenMobileSidebar,
+  dmModalId = "dmModal",
 }) {
+  const openInbox = useDmStore((state) => state.openInbox);
   return (
     <header className="chat-header">
       <div className="chat-header-inner">
@@ -60,6 +63,17 @@ export function ChatHeader({
 
         {/* Actions */}
         <div className="chat-header-actions">
+
+          <button
+            type="button"
+            className="chat-header-btn"
+            title="Особисті повідомлення"
+            data-bs-toggle="modal"
+            data-bs-target={`#${dmModalId}`}
+            onClick={openInbox}
+          >
+            <Mail size={18} />
+          </button>
 
           <button
             type="button"

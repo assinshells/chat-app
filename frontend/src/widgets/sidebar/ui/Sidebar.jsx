@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { LogOut, PanelLeft, Settings, X } from "lucide-react";
 import { SettingsModal } from "@features/settings";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
+import { DmTriggerButton } from "@features/dm";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getColorHex } from "@shared/constants/color.constants.js";
@@ -199,8 +200,6 @@ export function Sidebar({
 
                       return (
                         <div key={user.id} className="app-sidebar-online-item">
-                          <span className="app-sidebar-online-dot" />
-
                           {/* Свой ник — просто подсвечен красным, не кликабелен,
                               цвет из настроек на него не влияет (остаётся как есть).
                               Чужой — кликабелен, добавляет адресата в форму
@@ -212,21 +211,24 @@ export function Sidebar({
                               {user.login}
                             </span>
                           ) : (
-                            <button
-                              type="button"
-                              className={`app-sidebar-online-name app-sidebar-online-name-btn ${
-                                isSelected ? "is-selected" : ""
-                              }`}
-                              title="Add user to message form"
-                              style={
-                                user.color && user.color !== "black"
-                                  ? { "--user-color": getColorHex(user.color) }
-                                  : undefined
-                              }
-                              onClick={() => onNicknameClick?.(user.login)}
-                            >
-                              {user.login}
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                className={`app-sidebar-online-name app-sidebar-online-name-btn ${
+                                  isSelected ? "is-selected" : ""
+                                }`}
+                                title="Add user to message form"
+                                style={
+                                  user.color && user.color !== "black"
+                                    ? { "--user-color": getColorHex(user.color) }
+                                    : undefined
+                                }
+                                onClick={() => onNicknameClick?.(user.login)}
+                              >
+                                {user.login}
+                              </button>
+                              <DmTriggerButton login={user.login} color={user.color} />
+                            </>
                           )}
                         </div>
                       );

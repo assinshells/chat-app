@@ -5,6 +5,7 @@ import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { getColorHex } from "@shared/constants/color.constants.js";
 import { hasRoomLink } from "@shared/lib/systemMessage.js";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
+import { DmTriggerButton } from "@features/dm";
 
 /**
  * renderMessageText — рендерит текст сообщения, подсвечивая упоминания
@@ -224,16 +225,19 @@ export function ChatConversation({
                         {message.author}
                       </span>
                     ) : (
-                      <button
-                        type="button"
-                        className={`message-author message-author-btn ${
-                          isNicknameSelected ? "is-selected" : ""
-                        }`}
-                        title="Add user to message form"
-                        onClick={() => onNicknameClick?.(message.author)}
-                      >
-                        {message.author}
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          className={`message-author message-author-btn ${
+                            isNicknameSelected ? "is-selected" : ""
+                          }`}
+                          title="Add user to message form"
+                          onClick={() => onNicknameClick?.(message.author)}
+                        >
+                          {message.author}
+                        </button>
+                        <DmTriggerButton login={message.author} color={message.color} />
+                      </>
                     )}{" "}
 
                     <span className="message-text" style={{ color: messageColorHex }}>

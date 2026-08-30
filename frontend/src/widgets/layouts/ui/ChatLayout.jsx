@@ -5,13 +5,14 @@ import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
+import { DirectMessagesModal } from "@features/dm";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 // Сколько ников/меток времени можно одновременно прикрепить к сообщению
 // через клик по нику/времени в ChatConversation.
 const MAX_TARGETS = 3;
 
-export function ChatLayout({ login, initialRoom, onLogout, selectedUser }) {
+export function ChatLayout({ login, initialRoom, onLogout }) {
   const {
     activeRoom,
     switchRoom,
@@ -138,7 +139,6 @@ export function ChatLayout({ login, initialRoom, onLogout, selectedUser }) {
             roomUsers={roomUsers}
           />
           <ChatComposer
-            selectedUser={selectedUser}
             onSend={sendMessage}
             targetNicknames={targetNicknames}
             targetTimes={targetTimes}
@@ -149,6 +149,8 @@ export function ChatLayout({ login, initialRoom, onLogout, selectedUser }) {
           />
         </div>
       </div>
+
+      <DirectMessagesModal />
     </div>
   );
 }

@@ -410,12 +410,13 @@
   color: var(--bs-secondary-color);
 }
 
-/* Онлайн: имя + индикатор-точка */
+/* Онлайн: имя + кнопка действий (три точки) */
 .app-sidebar-online-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 
-  gap: 0.55rem;
+  gap: 0.4rem;
 
   padding: 0.45rem 0.65rem;
 
@@ -426,22 +427,16 @@
   color: var(--bs-body-color);
 }
 
-.app-sidebar-online-dot {
-  width: 8px;
-  height: 8px;
-
-  flex: 0 0 8px;
-
-  border-radius: 50%;
-
-  background: #22c55e;
-}
-
 /* Ник в списке онлайн-пользователей. Обычный текст для своего ника
    (подсвечивается классом .nickname-own, см. app.css), кнопка — для
    чужого: клик добавляет пользователя в форму отправки сообщения
-   (до 3 шт, см. ChatComposer/ChatLayout). */
+   (до 3 шт, см. ChatComposer/ChatLayout). flex: 1 1 auto + min-width: 0,
+   чтобы длинный ник корректно обрезался многоточием, а не выталкивал
+   соседнюю кнопку "три точки" (DmTriggerButton) за пределы строки. */
 .app-sidebar-online-name {
+  flex: 1 1 auto;
+  min-width: 0;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

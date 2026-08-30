@@ -1,0 +1,200 @@
+import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Send } from "lucide-react";
+
+import { getColorHex } from "@shared/constants/color.constants.js";
+import { formatMessageTime } from "@shared/lib/message.js";
+import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
+import { useDmStore } from "@features/dm/model/useDmStore.js";
+
+/**
+ * DirectMessagesModal — единая модалка личных сообщений на всё
+ * приложение (рендерится один раз в ChatLayout, как SettingsModal/
+ * LogoutConfirmModal в Sidebar — см. их комментарий про createPortal).
+ *
+ * Два входа в неё (см. Sidebar.jsx, ChatConversation.jsx, ChatHeader.jsx):
+ *  - "Написати особисте повідомлення" у конкретного ніка — открывает
+ *    сразу на диалоге с этим человеком (useDmStore.openConversation);
+ *  - иконка в шапке — открывает "инбокс" как есть, без выбора конкретного
+ *    адресата (useDmStore.openInbox).
+ *
+ * Раскладка ровно как просили: слева вертикальные вкладки диалогов со
+ * своим скроллбаром (app-scrollbar, как и везде в приложении), справа —
+ * само окно переписки с выбранным собеседником.
+ */
+export function DirectMessagesModal({ modalId = "dmModal" }) {
+  const {
+    conversations,
+    order,
+    activeLogin,
+    selectConversation,
+    sendLocalMessage,
+  } = useDmStore();
+
+  const [draft, setDraft] = useState("");
+
+  const tabsRef = useRef(null);
+  const messagesRef = useRef(null);
+  useAutoHideScrollbar(tabsRef);
+  useAutoHideScrollbar(messagesRef);
+
+  const active = activeLogin ? conversations[activeLogin] : null;
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text || !activeLogin) return;
+
+    sendLocalMessage(activeLogin, text);
+    setDraft("");
+  };
+
+  // Портал в document.body — см. подробное объяснение в SettingsModal.jsx
+  // (тот же самый паттерн: Bootstrap-модалка не должна попадать в
+  // поддерево сайдбара с overflow/transform).
+  return createPortal(
+    <div
+      className="modal fade"
+      id={modalId}
+      tabIndex="-1"
+      aria-labelledby={`${modalId}Label`}
+      aria-hidden="true"
+    >
+      <div className="modal-dialog modal-dialog-centered modal-lg">
+        <div className="modal-content dm-modal">
+          <div className="modal-header">
+            <h5 className="modal-title" id={`${modalId}Label`}>
+              Особисті повідомлення
+            </h5>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Закрити"
+            />
+          </div>
+
+          <div className="dm-modal-body">
+            {/* Вертикальні вкладки діалогів + скролбар */}
+            <div ref={tabsRef} className="dm-modal-tabs app-scrollbar">
+              {order.length === 0 ? (
+                <div className="dm-modal-empty-tabs">
+                  Немає розпочатих діалогів
+                </div>
+              ) : (
+                order.map((login) => {
+                  const convo = conversations[login];
+                  const last = convo.messages[convo.messages.length - 1];
+
+                  return (
+                    <button
+                      key={login}
+                      type="button"
+                      className={`dm-modal-tab ${
+                        login === activeLogin ? "is-active" : ""
+                      }`}
+                      onClick={() => selectConversation(login)}
+                    >
+                      <span
+                        className="dm-modal-tab-name"
+                        style={
+                          convo.color && convo.color !== "black"
+                            ? { color: getColorHex(convo.color) }
+                            : undefined
+                        }
+                      >
+                        {login}
+                      </span>
+                      <span className="dm-modal-tab-preview">
+                        {last ? last.text : "Немає повідомлень"}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Само вікно повідомлень обраного діалогу. Контейнер
+                .dm-modal-messages рендерится ВСЕГДА (а не только когда
+                есть активный диалог) — так ref для useAutoHideScrollbar
+                привязывается сразу при первом монтировании модалки, а не
+                теряется при переключении между "нет диалога"/"диалог
+                открыт" (эффект в хуке не переподписывается на смену
+                .current, только на смену самого объекта ref). */}
+            <div className="dm-modal-conversation">
+              {active && (
+                <div className="dm-modal-conversation-header">
+                  <span
+                    className="dm-modal-conversation-name"
+                    style={
+                      active.color && active.color !== "black"
+                        ? { color: getColorHex(active.color) }
+                        : undefined
+                    }
+                  >
+                    {active.login}
+                  </span>
+                </div>
+              )}
+
+              <div ref={messagesRef} className="dm-modal-messages app-scrollbar">
+                {!active ? (
+                  <div className="dm-modal-placeholder">
+                    Виберіть діалог зліва або натисніть «Написати особисте
+                    повідомлення» біля ніка користувача в сайдбарі чи в чаті
+                  </div>
+                ) : active.messages.length === 0 ? (
+                  <div className="dm-modal-empty-messages">
+                    Повідомлень ще немає. Напишіть перше!
+                  </div>
+                ) : (
+                  active.messages.map((message) => (
+                    <div key={message.id} className="dm-modal-message is-own">
+                      <span className="dm-modal-message-time">
+                        {formatMessageTime(message.timestamp)}
+                      </span>
+                      <span className="dm-modal-message-text">
+                        {message.text}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {active && (
+                <>
+                  <form className="dm-modal-composer" onSubmit={handleSend}>
+                    <input
+                      type="text"
+                      className="dm-modal-input"
+                      placeholder={`Повідомлення ${active.login}...`}
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      className="dm-modal-send-btn"
+                      disabled={!draft.trim()}
+                      title="Надіслати"
+                    >
+                      <Send size={16} />
+                    </button>
+                  </form>
+
+                  {/* Честное предупреждение: реальной доставки собеседнику
+                      пока нет — см. комментарий в useDmStore.js. Как только
+                      появится бэкенд под личку, эта строка убирается. */}
+                  <p className="dm-modal-hint">
+                    Демо-режим: повідомлення поки що не надсилаються
+                    співрозмовнику, видно лише вам.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
