@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Send } from "lucide-react";
 
@@ -36,14 +36,42 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
     selectConversation,
     sendMessage,
     clearSendError,
+    setModalOpen,
+    markAsRead,
   } = useDmStore();
 
   const [draft, setDraft] = useState("");
 
+  const modalRef = useRef(null);
   const tabsRef = useRef(null);
   const messagesRef = useRef(null);
   useAutoHideScrollbar(tabsRef);
   useAutoHideScrollbar(messagesRef);
+
+  // Модалка рендерится всегда (портал в document.body), видимость на
+  // экране переключает сам Bootstrap через CSS/JS — React об этом
+  // иначе не узнал бы. Нужно для счётчика непрочитанных: пока модалка
+  // реально не видна, новые dm:new засчитываются как непрочитанные
+  // (см. modalOpen в useDmStore), а как только показалась — активная
+  // вкладка сразу помечается прочитанной.
+  useEffect(() => {
+    const el = modalRef.current;
+    if (!el) return undefined;
+
+    const handleShown = () => {
+      setModalOpen(true);
+      const login = useDmStore.getState().activeLogin;
+      if (login) markAsRead(login);
+    };
+    const handleHidden = () => setModalOpen(false);
+
+    el.addEventListener("shown.bs.modal", handleShown);
+    el.addEventListener("hidden.bs.modal", handleHidden);
+    return () => {
+      el.removeEventListener("shown.bs.modal", handleShown);
+      el.removeEventListener("hidden.bs.modal", handleHidden);
+    };
+  }, [setModalOpen, markAsRead]);
 
   const active = activeLogin ? conversations[activeLogin] : null;
 
@@ -64,6 +92,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
   // поддерево сайдбара с overflow/transform).
   return createPortal(
     <div
+      ref={modalRef}
       className="modal fade"
       id={modalId}
       tabIndex="-1"
@@ -107,15 +136,22 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                       }`}
                       onClick={() => selectConversation(login)}
                     >
-                      <span
-                        className="dm-modal-tab-name"
-                        style={
-                          convo.color && convo.color !== "black"
-                            ? { color: getColorHex(convo.color) }
-                            : undefined
-                        }
-                      >
-                        {login}
+                      <span className="dm-modal-tab-row">
+                        <span
+                          className="dm-modal-tab-name"
+                          style={
+                            convo.color && convo.color !== "black"
+                              ? { color: getColorHex(convo.color) }
+                              : undefined
+                          }
+                        >
+                          {login}
+                        </span>
+                        {convo.unreadCount > 0 && (
+                          <span className="dm-modal-tab-badge">
+                            {convo.unreadCount > 99 ? "99+" : convo.unreadCount}
+                          </span>
+                        )}
                       </span>
                       <span className="dm-modal-tab-preview">
                         {preview ?? "Немає повідомлень"}

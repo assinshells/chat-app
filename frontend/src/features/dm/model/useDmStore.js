@@ -25,8 +25,8 @@ function emitWithAck(event, payload) {
 }
 
 /**
- * useDmStore — состояние модалки личных сообщений, теперь с реальной
- * доставкой через персональный сокет-канал пользователя (см. backend
+ * useDmStore — состояние модалки личных сообщений, с реальной доставкой
+ * через персональный сокет-канал пользователя (см. backend
  * sockets/dm.socket.js): dm:open — история с конкретным собеседником,
  * dm:list — сводка по всем диалогам, dm:send — отправка. Входящие
  * сообщения (dm:new) слушаются один раз на уровне модуля (см. низ
@@ -34,7 +34,10 @@ function emitWithAck(event, payload) {
  * комната чата сейчас открыта и открыта ли вообще модалка.
  *
  * conversations — map login -> { login, color, messages, lastMessage,
- *   loading, loaded }. order — логины, последний активный диалог первым.
+ *   loading, loaded, unreadCount }. order — логины, последний активный
+ *   диалог первым. modalOpen — реально ли сейчас видна DirectMessagesModal
+ *   на экране (см. shown.bs.modal/hidden.bs.modal в самом компоненте) —
+ *   нужно, чтобы не считать непрочитанным то, что человек видит вживую.
  */
 export const useDmStore = create((set, get) => ({
   currentUser: null,
@@ -44,6 +47,7 @@ export const useDmStore = create((set, get) => ({
   listLoading: false,
   listLoaded: false,
   sendError: null,
+  modalOpen: false,
 
   /**
    * setCurrentUser — вызывается один раз из ChatLayout (см. проп login):
@@ -51,6 +55,32 @@ export const useDmStore = create((set, get) => ({
    * понять, КТО тут "собеседник", а не "я".
    */
   setCurrentUser: (login) => set({ currentUser: login }),
+
+  /**
+   * setModalOpen — вызывается из DirectMessagesModal по нативным событиям
+   * Bootstrap shown.bs.modal/hidden.bs.modal (см. компонент) — модалка
+   * рендерится всегда (портал в document.body), видимость переключает
+   * сам Bootstrap через CSS, React об этом иначе не узнал бы.
+   */
+  setModalOpen: (open) => set({ modalOpen: open }),
+
+  /**
+   * markAsRead — обнуляет счётчик непрочитанных конкретного диалога.
+   * Вызывается при его реальном открытии (openConversation/
+   * selectConversation) и при показе модалки, если диалог уже был активен.
+   */
+  markAsRead: (login) => {
+    const { conversations } = get();
+    const convo = conversations[login];
+    if (!convo || !convo.unreadCount) return;
+
+    set({
+      conversations: {
+        ...conversations,
+        [login]: { ...convo, unreadCount: 0 },
+      },
+    });
+  },
 
   /**
    * openConversation — открывает вкладку с конкретным собеседником и,
@@ -68,12 +98,13 @@ export const useDmStore = create((set, get) => ({
         ...conversations,
         [login]: existing
           ? { ...existing, loading: !existing.loaded }
-          : { login, color, messages: [], loading: true, loaded: false },
+          : { login, color, messages: [], loading: true, loaded: false, unreadCount: 0 },
       },
       order: order.includes(login) ? order : [login, ...order],
       activeLogin: login,
       sendError: null,
     });
+    get().markAsRead(login);
 
     if (existing?.loaded) return;
 
@@ -102,6 +133,7 @@ export const useDmStore = create((set, get) => ({
             lastMessage: current?.lastMessage,
             loading: false,
             loaded: true,
+            unreadCount: 0,
           },
         },
       };
@@ -134,6 +166,7 @@ export const useDmStore = create((set, get) => ({
           lastMessage: summary.lastMessage,
           loading: existing?.loading ?? false,
           loaded: existing?.loaded ?? false,
+          unreadCount: existing?.unreadCount ?? 0,
         };
       }
 
@@ -153,6 +186,14 @@ export const useDmStore = create((set, get) => ({
         activeLogin: state.activeLogin ?? order[0] ?? null,
       };
     });
+
+    // Если после обновления списка есть активная вкладка (только что
+    // выбранная по умолчанию или уже была) — считаем её прочитанной,
+    // модалка вот-вот покажется на экране (см. handleShown в компоненте,
+    // который дублирует то же самое на случай, если activeLogin
+    // поменяется уже ПОСЛЕ показа модалки).
+    const { activeLogin } = get();
+    if (activeLogin) get().markAsRead(activeLogin);
   },
 
   /**
@@ -162,6 +203,8 @@ export const useDmStore = create((set, get) => ({
    */
   selectConversation: (login) => {
     set({ activeLogin: login, sendError: null });
+    get().markAsRead(login);
+
     const convo = get().conversations[login];
     if (convo && !convo.loaded && !convo.loading) {
       get().openConversation(login, convo.color);
@@ -190,7 +233,7 @@ export const useDmStore = create((set, get) => ({
   // Вызывается из module-level подписки на dm:new ниже — не экспортируется
   // отдельно, наружу используется только сам факт подписки.
   _handleIncoming: (message) => {
-    const { currentUser, conversations, order } = get();
+    const { currentUser, conversations, order, modalOpen, activeLogin } = get();
     if (!currentUser) return;
 
     const isOwn = message.sender === currentUser;
@@ -200,6 +243,13 @@ export const useDmStore = create((set, get) => ({
     // Дедуп на случай повторной доставки (переподключение и т.п.) — тот
     // же принцип, что и в useChatSocket.js для message:new/system:event.
     if (existing?.messages.some((m) => m.id === message.id)) return;
+
+    // Не считаем непрочитанным: своё же сообщение (эхо) и сообщение в
+    // диалог, который человек прямо сейчас видит на экране (модалка
+    // открыта и активна именно эта вкладка).
+    const isBeingViewed = modalOpen && activeLogin === otherLogin;
+    const unreadCount =
+      isOwn || isBeingViewed ? existing?.unreadCount ?? 0 : (existing?.unreadCount ?? 0) + 1;
 
     set({
       conversations: {
@@ -215,6 +265,7 @@ export const useDmStore = create((set, get) => ({
           lastMessage: { text: message.text, timestamp: message.timestamp, own: isOwn },
           loading: existing?.loading ?? false,
           loaded: existing?.loaded ?? false,
+          unreadCount,
         },
       },
       order: [otherLogin, ...order.filter((l) => l !== otherLogin)],

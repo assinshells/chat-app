@@ -1792,6 +1792,35 @@ button:focus-visible,
 }
 
 
+/* Бейдж непрочитанных на иконке DM в шапке */
+.dm-header-btn {
+  position: relative;
+}
+
+.dm-header-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: var(--bs-danger);
+  color: var(--bs-white);
+
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+
 /* =========================================================
    DIRECT MESSAGES MODAL — "Особисті повідомлення"
    Зліва вертикальні вкладки діалогів зі своїм скролбаром, справа —
@@ -1855,10 +1884,47 @@ button:focus-visible,
   background: rgba(var(--bs-primary-rgb), 0.12);
 }
 
+.dm-modal-tab-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+
+  width: 100%;
+}
+
 .dm-modal-tab-name {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   font-weight: 600;
   font-size: 0.86rem;
   color: var(--bs-body-color);
+}
+
+.dm-modal-tab-badge {
+  flex: 0 0 auto;
+
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: var(--bs-danger);
+  color: var(--bs-white);
+
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .dm-modal-tab-preview {

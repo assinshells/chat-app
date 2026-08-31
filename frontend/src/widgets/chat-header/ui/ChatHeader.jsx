@@ -13,6 +13,12 @@ export function ChatHeader({
   dmModalId = "dmModal",
 }) {
   const openInbox = useDmStore((state) => state.openInbox);
+  const unreadTotal = useDmStore((state) =>
+    Object.values(state.conversations).reduce(
+      (sum, convo) => sum + (convo.unreadCount || 0),
+      0,
+    ),
+  );
   return (
     <header className="chat-header">
       <div className="chat-header-inner">
@@ -66,13 +72,18 @@ export function ChatHeader({
 
           <button
             type="button"
-            className="chat-header-btn"
+            className="chat-header-btn dm-header-btn"
             title="Особисті повідомлення"
             data-bs-toggle="modal"
             data-bs-target={`#${dmModalId}`}
             onClick={openInbox}
           >
             <Mail size={18} />
+            {unreadTotal > 0 && (
+              <span className="dm-header-badge">
+                {unreadTotal > 99 ? "99+" : unreadTotal}
+              </span>
+            )}
           </button>
 
         </div>
