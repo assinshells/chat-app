@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { chatSocket } from "@shared/api/socket.js";
 import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
+import { registerSend } from "@features/chat/model/messageRateLimiter.js";
+import { useMessageCooldown } from "@features/chat/model/useMessageCooldown.js";
 
 const MESSAGE_NEW = "message:new";
 const MESSAGE_SEND = "message:send";
@@ -164,10 +166,27 @@ export function useChatSocket({ enabled, initialRoom }) {
     });
   }, []);
 
+  const { remainingMs: cooldownMs, startCooldown } = useMessageCooldown();
+
   const sendMessage = useCallback((text) => {
     return new Promise((resolve, reject) => {
       if (!chatSocket.connected) {
         reject(new Error("No connection to server"));
+        return;
+      }
+
+      // Локальный rate-limit ДО похода на сервер (зеркалит серверный
+      // лимит, см. messageRateLimiter.js): если пользователь уже
+      // выбрал окно, сервер всё равно отклонит запрос — нет смысла
+      // тратить round-trip, и пользователь мгновенно видит причину и
+      // обратный отсчёт, а не молчаливое "сообщение не ушло".
+      const localRetryAfterMs = registerSend();
+      if (localRetryAfterMs) {
+        startCooldown(localRetryAfterMs);
+        const err = new Error("Too many messages");
+        err.code = "RATE_LIMITED";
+        err.details = { retryAfterMs: localRetryAfterMs };
+        reject(err);
         return;
       }
 
@@ -177,13 +196,26 @@ export function useChatSocket({ enabled, initialRoom }) {
         (result) => {
           if (result?.success) {
             resolve();
-          } else {
-            reject(new Error(result?.message || "Failed to send message"));
+            return;
           }
+
+          // RATE_LIMITED/MUTED от сервера — источник истины по факту
+          // (локальный лимитер мог разойтись: несколько вкладок,
+          // реконнект после сна ноутбука, реальный мут автомодератора,
+          // о котором локальный счётчик вообще не знает). Кулдаун
+          // синхронизируется с реальным retryAfterMs от сервера.
+          if (result?.details?.retryAfterMs) {
+            startCooldown(result.details.retryAfterMs);
+          }
+
+          const err = new Error(result?.message || "Failed to send message");
+          err.code = result?.code;
+          err.details = result?.details;
+          reject(err);
         },
       );
     });
-  }, []);
+  }, [startCooldown]);
 
   return {
     activeRoom,
@@ -194,5 +226,6 @@ export function useChatSocket({ enabled, initialRoom }) {
     roomCounts,
     roomUsers,
     sendMessage,
+    cooldownMs,
   };
 }

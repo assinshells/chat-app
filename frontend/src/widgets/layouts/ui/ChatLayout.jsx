@@ -27,6 +27,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     roomCounts,
     roomUsers,
     sendMessage,
+    cooldownMs,
   } = useChatSocket({
     enabled: Boolean(login),
     initialRoom,
@@ -146,6 +147,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
           />
           <ChatComposer
             onSend={sendMessage}
+            cooldownMs={cooldownMs}
             targetNicknames={targetNicknames}
             targetTimes={targetTimes}
             onRemoveNickname={handleRemoveNickname}

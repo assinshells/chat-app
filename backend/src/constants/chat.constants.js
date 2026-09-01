@@ -1,6 +1,18 @@
 export const CHAT_ERRORS = Object.freeze({
   MESSAGE_EMPTY: "Message text is empty",
   MESSAGE_TOO_LONG: "Message text is too long",
+
+  // Автомодератор (см. moderation/moderation.service.js). Тексты здесь
+  // используются как fallback для логов/непредвиденных клиентов —
+  // основной пользовательский текст подбирается на фронте по коду
+  // ошибки (см. shared/lib/moderationMessages.js), не по этой строке.
+  PROFANITY: "Message contains prohibited language",
+  CAPS_LOCK: "Please don't use excessive capital letters",
+  SPAM: Object.freeze({
+    duplicate: "Please don't repeat the same message",
+    links: "Message looks like link spam",
+  }),
+  MUTED: "You are temporarily muted for repeated violations",
 });
 
 export const CHAT_LIMITS = Object.freeze({

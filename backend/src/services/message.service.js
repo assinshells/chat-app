@@ -2,6 +2,7 @@ import { MessageRepository } from "../repositories/message.repository.js";
 import { UserRepository } from "../repositories/user.repository.js";
 import { toMessageDto } from "../dto/message.dto.js";
 import { MessageValidationException } from "../exceptions/chat.exceptions.js";
+import { ModerationService } from "../moderation/moderation.service.js";
 import {
   CHAT_ERRORS,
   CHAT_LIMITS,
@@ -26,6 +27,11 @@ export const MessageService = {
    * на бэкенде, клиент не может завести произвольную.
    */
   async sendMessage({ authorId, authorLogin, authorColor, text, room = DEFAULT_ROOM }) {
+    // Мут проверяется раньше нормализации текста: замученному
+    // пользователю не нужно объяснение про пустое/длинное сообщение —
+    // ему нужен только код MUTED с оставшимся временем.
+    ModerationService.assertNotMuted(authorId);
+
     const normalized = normalizeText(text);
 
     if (!normalized) {
@@ -34,6 +40,13 @@ export const MessageService = {
     if (normalized.length > CHAT_LIMITS.MAX_MESSAGE_LENGTH) {
       throw new MessageValidationException(CHAT_ERRORS.MESSAGE_TOO_LONG);
     }
+
+    // Автомодератор: мат / КАПС / спам-повтор / спам-ссылки (см.
+    // moderation/moderation.service.js). Бросает исключение с кодом
+    // конкретной причины — сообщение до сохранения/рассылки не
+    // доходит. Накопление нарушений может здесь же включить временный
+    // мут для следующих сообщений этого пользователя.
+    ModerationService.check({ userId: authorId, text: normalized });
 
     const safeRoom = isValidRoom(room) ? room : DEFAULT_ROOM;
 

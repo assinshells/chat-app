@@ -10,7 +10,16 @@ import logger from "../config/logger.js";
 const RATE_LIMIT_WINDOW_MS = 10_000;
 const RATE_LIMIT_MAX_MESSAGES = 20;
 
-function isRateLimited(socket) {
+/**
+ * checkRateLimit — возвращает { limited: false } либо { limited: true,
+ * retryAfterMs }. retryAfterMs — сколько ждать до момента, когда самое
+ * старое сообщение в окне "устареет" и освободит слот (окно
+ * скользящее, а не фиксированное, поэтому это не просто "секунда до
+ * конца окна", а точное время до следующего разрешённого слота).
+ * Раньше функция возвращала просто boolean — фронтенду нечем было бы
+ * показать обратный отсчёт до конца лимита без этого числа.
+ */
+function checkRateLimit(socket) {
   const now = Date.now();
   const timestamps = (socket.data.messageTimestamps ?? []).filter(
     (t) => now - t < RATE_LIMIT_WINDOW_MS,
@@ -18,12 +27,13 @@ function isRateLimited(socket) {
 
   if (timestamps.length >= RATE_LIMIT_MAX_MESSAGES) {
     socket.data.messageTimestamps = timestamps;
-    return true;
+    const oldest = timestamps[0];
+    return { limited: true, retryAfterMs: RATE_LIMIT_WINDOW_MS - (now - oldest) };
   }
 
   timestamps.push(now);
   socket.data.messageTimestamps = timestamps;
-  return false;
+  return { limited: false };
 }
 
 function broadcastRoomUsers(io, room) {
@@ -190,8 +200,14 @@ export function registerChatSocket(io, socket) {
       }
     };
 
-    if (isRateLimited(socket)) {
-      return respond({ success: false, code: "RATE_LIMITED", message: "Too many messages" });
+    const rateLimit = checkRateLimit(socket);
+    if (rateLimit.limited) {
+      return respond({
+        success: false,
+        code: "RATE_LIMITED",
+        message: "Too many messages",
+        details: { retryAfterMs: rateLimit.retryAfterMs },
+      });
     }
 
     const room = socket.data.currentRoom || DEFAULT_ROOM;
@@ -220,6 +236,10 @@ export function registerChatSocket(io, socket) {
         success: false,
         code: err.code ?? "MESSAGE_REJECTED",
         message: err.message,
+        // retryAfterMs присутствует только для MutedException (см.
+        // exceptions/chat.exceptions.js) — фронтенду нужен именно он,
+        // чтобы показать живой обратный отсчёт до конца мута.
+        ...(err.details ? { details: err.details } : {}),
       });
     }
   });
