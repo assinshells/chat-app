@@ -38,6 +38,20 @@ function emitWithAck(event, payload) {
  *   диалог первым. modalOpen — реально ли сейчас видна DirectMessagesModal
  *   на экране (см. shown.bs.modal/hidden.bs.modal в самом компоненте) —
  *   нужно, чтобы не считать непрочитанным то, что человек видит вживую.
+ *
+ * mobileView — 'list' | 'conversation', имеет значение ТОЛЬКО на узких
+ * экранах (см. CSS-медиазапрос в app.css: на десктопе список диалогов
+ * и переписка показываются одновременно бок о бок, этот флаг там ни на
+ * что не влияет). На мобильном же экран один, и точка входа определяет,
+ * что показать сразу:
+ *  - открытие из шапки (openInbox) — список диалогов ('list');
+ *  - "Написати особисте повідомлення" у конкретного ніка
+ *    (openConversation) — сразу переписка с этим человеком
+ *    ('conversation'), без необходимости искать его в списке;
+ *  - выбор диалога из списка руками (selectConversation) — тоже
+ *    переключает на переписку;
+ *  - кнопка "Назад" в шапке переписки (см. DirectMessagesModal.jsx) —
+ *    единственный способ вернуться к 'list', не закрывая модалку.
  */
 export const useDmStore = create((set, get) => ({
   currentUser: null,
@@ -48,6 +62,7 @@ export const useDmStore = create((set, get) => ({
   listLoaded: false,
   sendError: null,
   modalOpen: false,
+  mobileView: "list",
 
   /**
    * setCurrentUser — вызывается один раз из ChatLayout (см. проп login):
@@ -83,6 +98,14 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
+   * showConversationList — возвращает мобильный вид модалки к списку
+   * диалогов (кнопка "Назад" в шапке переписки, см.
+   * DirectMessagesModal.jsx). На десктопе ни на что не влияет — там оба
+   * панели видны одновременно независимо от mobileView.
+   */
+  showConversationList: () => set({ mobileView: "list" }),
+
+  /**
    * openConversation — открывает вкладку с конкретным собеседником и,
    * если история ещё не подгружалась в этой сессии, запрашивает её
    * через dm:open. color — цвет собеседника (передаётся с места клика,
@@ -103,6 +126,9 @@ export const useDmStore = create((set, get) => ({
       order: order.includes(login) ? order : [login, ...order],
       activeLogin: login,
       sendError: null,
+      // Явный запрос переписки с конкретным человеком (клик у ніка) —
+      // на мобильном сразу показываем её, а не список диалогов.
+      mobileView: "conversation",
     });
     get().markAsRead(login);
 
@@ -145,9 +171,15 @@ export const useDmStore = create((set, get) => ({
    * конкретного адресата): всегда перезапрашивает свежий список
    * диалогов через dm:list, чтобы вкладки не были устаревшими, если
    * пришли новые диалоги, начатые с других устройств/вкладок.
+   *
+   * mobileView сбрасывается на 'list' безусловно: это вход "хочу
+   * посмотреть все диалоги", даже если до этого на мобильном была
+   * открыта конкретная переписка (через openConversation) — открытие
+   * из шапки должно показать список, а не продолжить с того места,
+   * где остановились (см. требование в задаче).
    */
   openInbox: async () => {
-    set({ listLoading: true });
+    set({ listLoading: true, mobileView: "list" });
     const result = await emitWithAck(DM_LIST, {});
 
     set((state) => {
@@ -199,10 +231,11 @@ export const useDmStore = create((set, get) => ({
   /**
    * selectConversation — переключение вкладки внутри уже открытой
    * модалки (не открывает саму модалку). Догружает историю, если эта
-   * вкладка ещё не была открыта в текущей сессии.
+   * вкладка ещё не была открыта в текущей сессии. На мобильном это и
+   * есть выбор диалога из списка — сразу переключаем вид на переписку.
    */
   selectConversation: (login) => {
-    set({ activeLogin: login, sendError: null });
+    set({ activeLogin: login, sendError: null, mobileView: "conversation" });
     get().markAsRead(login);
 
     const convo = get().conversations[login];

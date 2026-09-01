@@ -1961,8 +1961,41 @@ button:focus-visible,
 }
 
 .dm-modal-conversation-header {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Кнопка "Назад до списку діалогів" — на десктопе не нужна (обе панелі
+   й так видно одночасно), показывается только в мобильном медиа-запросе
+   нижче. display:none тут — базовое (десктопное) состояние. */
+.dm-modal-back-btn {
+  display: none;
+  flex: 0 0 auto;
+
+  width: 30px;
+  height: 30px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--bs-body-color);
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.dm-modal-back-btn:hover {
+  background: rgba(var(--bs-primary-rgb), 0.08);
 }
 
 .dm-modal-conversation-name {
@@ -2092,12 +2125,33 @@ button:focus-visible,
 }
 
 
+/* На узких экранах модалка ЛС показывает ОДНУ панель за раз — список
+   диалогов или переписку (см. useDmStore.mobileView), а не обе колонки
+   одновременно (там банально нет места на 150px+переписка). Какая
+   панель видна, решает mobileView-класс на .dm-modal-body, выставленный
+   компонентом (dm-modal-mobile-list / dm-modal-mobile-conversation);
+   без него (на десктопе, где этот блок вообще не действует) обе
+   панели, как и раньше, видны всегда. */
 @media (max-width: 576px) {
   .dm-modal {
     height: 100vh;
   }
 
-  .dm-modal-tabs {
-    flex-basis: 150px;
+  .dm-modal-tabs,
+  .dm-modal-conversation {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .dm-modal-mobile-list .dm-modal-conversation {
+    display: none;
+  }
+
+  .dm-modal-mobile-conversation .dm-modal-tabs {
+    display: none;
+  }
+
+  .dm-modal-back-btn {
+    display: flex;
   }
 }

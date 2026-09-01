@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 
 import { getColorHex } from "@shared/constants/color.constants.js";
 import { formatMessageTime } from "@shared/lib/message.js";
@@ -24,6 +24,14 @@ import { useDmStore } from "@features/dm/model/useDmStore.js";
  * Раскладка: слева вертикальные вкладки диалогов со своим скроллбаром
  * (app-scrollbar, как и везде в приложении), справа — само окно
  * переписки с выбранным собеседником.
+ *
+ * На мобильном (см. @media в app.css) панели показываются по одной —
+ * какая именно, решает useDmStore.mobileView, а не эта точка входа
+ * сама по себе: openInbox (шапка) выставляет 'list', openConversation
+ * (клик у ніка) — сразу 'conversation'. Кнопка "Назад" в шапке
+ * переписки (видна только на мобильном, см. .dm-modal-back-btn)
+ * возвращает к списку, не закрывая модалку. На десктопе mobileView ни
+ * на что не влияет — обе панели видны всегда.
  */
 export function DirectMessagesModal({ modalId = "dmModal" }) {
   const {
@@ -33,7 +41,9 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
     activeLogin,
     listLoading,
     sendError,
+    mobileView,
     selectConversation,
+    showConversationList,
     sendMessage,
     clearSendError,
     setModalOpen,
@@ -45,6 +55,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
   const modalRef = useRef(null);
   const tabsRef = useRef(null);
   const messagesRef = useRef(null);
+  const endRef = useRef(null);
   useAutoHideScrollbar(tabsRef);
   useAutoHideScrollbar(messagesRef);
 
@@ -62,6 +73,10 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
       setModalOpen(true);
       const login = useDmStore.getState().activeLogin;
       if (login) markAsRead(login);
+      // Пока модалка была скрыта (display:none у Bootstrap-модалки),
+      // scrollIntoView из эффекта ниже мог не сработать — довернём
+      // прокрутку теперь, когда контент реально виден и имеет layout.
+      endRef.current?.scrollIntoView({ block: "end" });
     };
     const handleHidden = () => setModalOpen(false);
 
@@ -74,6 +89,14 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
   }, [setModalOpen, markAsRead]);
 
   const active = activeLogin ? conversations[activeLogin] : null;
+
+  // Автопрокрутка к последнему сообщению — при переключении диалога и
+  // при появлении новых сообщений (пришла история с сервера, отправили
+  // своё, получили входящее). Тот же паттерн, что и в ChatConversation
+  // (endRef — пустой якорь в конце списка, scrollIntoView без анимации).
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [activeLogin, active?.messages?.length]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -113,7 +136,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
             />
           </div>
 
-          <div className="dm-modal-body">
+          <div className={`dm-modal-body dm-modal-mobile-${mobileView}`}>
             {/* Вертикальні вкладки діалогів + скролбар */}
             <div ref={tabsRef} className="dm-modal-tabs app-scrollbar">
               {order.length === 0 ? (
@@ -172,6 +195,16 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
             <div className="dm-modal-conversation">
               {active && (
                 <div className="dm-modal-conversation-header">
+                  {/* Видна только на мобильном (см. app.css) — на
+                      десктопе список диалогов и так всегда рядом. */}
+                  <button
+                    type="button"
+                    className="dm-modal-back-btn"
+                    title="До списку діалогів"
+                    onClick={showConversationList}
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
                   <span
                     className="dm-modal-conversation-name"
                     style={
@@ -214,6 +247,10 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                     </div>
                   ))
                 )}
+                {/* Якорь для автопрокрутки (см. эффект выше) — пустой,
+                    рендерится всегда, в т.ч. при пустом/загружающемся
+                    диалоге, чтобы ref не терялся при смене состояния. */}
+                <div ref={endRef} />
               </div>
 
               {active && (
