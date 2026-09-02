@@ -3,14 +3,14 @@ import { UserRepository } from "../repositories/user.repository.js";
 
 /**
  * socketAuthGuard — Socket.IO middleware (io.use).
- * Ожидает access-токен в socket.handshake.auth.token (тот же токен,
- * что кладётся в Authorization: Bearer для REST) — cookie для сокетов
- * не подходит, т.к. handshake делается напрямую WebSocket-клиентом,
- * а не через axios-интерсептор.
- * В отличие от authGuard, дополнительно резолвит login и gender одним
- * запросом к БД при коннекте — login нужен на каждое сообщение, а gender
- * на список "кто онлайн" по комнатам; дешевле получить их один раз
- * и закэшировать в socket.data, чем ходить в БД на каждое событие.
+ * Очікує access-токен у socket.handshake.auth.token (той самий токен,
+ * що кладеться в Authorization: Bearer для REST) — cookie для сокетів
+ * не підходить, оскільки handshake робиться напряму WebSocket-клієнтом,
+ * а не через axios-інтерсептор.
+ * На відміну від authGuard, додатково резолвить login і gender одним
+ * запитом до БД при конекті — login потрібен на кожне повідомлення, а gender
+ * на список "хто онлайн" по кімнатах; дешевше отримати їх один раз
+ * і закешувати в socket.data, ніж ходити в БД на кожну подію.
  */
 export const socketAuthGuard = async (socket, next) => {
   try {

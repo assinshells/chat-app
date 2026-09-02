@@ -13,9 +13,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ../postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      # См. комментарий в docker/dev/compose.yml — на init postgres
-      # перезапускает себя, и одиночная проверка может поймать ложный
-      # "healthy" ещё до реального рестарта. Требуем два ответа подряд.
+      # Див. коментар у docker/dev/compose.yml — при init postgres
+      # перезапускає себе, і одиночна перевірка може впіймати хибний
+      # "healthy" ще до реального рестарту. Вимагаємо дві відповіді поспіль.
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgre} -d ${POSTGRES_DB:-postgre} -q && sleep 1 && pg_isready -U ${POSTGRES_USER:-postgre} -d ${POSTGRES_DB:-postgre} -q"]
       interval: 10s
       timeout: 5s
@@ -23,7 +23,7 @@ services:
       retries: 10
     networks:
       - chat-network
-    # Not exposed on the host in production; only reachable by other services
+    # Не відкритий на хості в продакшні; доступний лише іншим сервісам
 
   redis:
     image: redis:7-alpine
@@ -66,7 +66,7 @@ services:
       retries: 5
     networks:
       - chat-network
-    # Not exposed on the host in production; nginx reverse-proxies to it
+    # Не відкритий на хості в продакшні; nginx проксує до нього
 
   frontend:
     build:

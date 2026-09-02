@@ -10,14 +10,14 @@ export const Storage = {
     try {
       localStorage.setItem(key, value);
     } catch {
-      // localStorage unavailable (private mode, quota exceeded)
+      // localStorage недоступний (приватний режим, вичерпано квоту)
     }
   },
   remove(key) {
     try {
       localStorage.removeItem(key);
     } catch {
-      // localStorage unavailable
+      // localStorage недоступний
     }
   },
 };

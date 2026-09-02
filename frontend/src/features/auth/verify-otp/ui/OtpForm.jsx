@@ -8,7 +8,7 @@ export function OtpForm({ email, onSuccess, onBack }) {
   const { loading, error, verify, clearError } = useVerifyOtpStore();
 
   const handleChange = (index, value) => {
-    // Только цифры
+    // Лише цифри
     const digit = value.replace(/\D/g, "").slice(-1);
 
     if (!digit) {
@@ -24,27 +24,27 @@ export function OtpForm({ email, onSuccess, onBack }) {
     setOtp(newOtp);
     clearError();
 
-    // Перейти к следующей ячейке
+    // Перейти до наступної комірки
     if (index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    // Backspace — удалить текущую цифру
-    // Если ячейка пустая — перейти назад
+    // Backspace — видалити поточну цифру
+    // Якщо комірка порожня — перейти назад
     if (e.key === "Backspace") {
       if (!otp[index] && index > 0) {
         inputRefs.current[index - 1]?.focus();
       }
     }
 
-    // Стрелка влево
+    // Стрілка вліво
     if (e.key === "ArrowLeft" && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
 
-    // Стрелка вправо
+    // Стрілка вправо
     if (e.key === "ArrowRight" && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -69,7 +69,7 @@ export function OtpForm({ email, onSuccess, onBack }) {
     setOtp(newOtp);
     clearError();
 
-    // Фокус на последнюю заполненную ячейку
+    // Фокус на останню заповнену комірку
     const focusIndex = Math.min(pastedCode.length, 5);
     inputRefs.current[focusIndex]?.focus();
   };

@@ -3,7 +3,7 @@ import { REDIS_KEYS } from "../constants/auth.constants.js";
 import { authConfig } from "../config/auth.config.js";
 
 /**
- * OtpRepository — работа с OTP и verified-токенами в Redis.
+ * OtpRepository — робота з OTP і verified-токенами в Redis.
  */
 export const OtpRepository = {
   async saveOtp(userId, otp) {
@@ -21,9 +21,9 @@ export const OtpRepository = {
   },
 
   /**
-   * Инкрементирует счётчик неверных попыток ввода OTP для userId.
-   * TTL счётчика выставляется равным OTP TTL при первом инкременте,
-   * чтобы счётчик не пережил сам код и не блокировал следующий запрос OTP.
+   * Інкрементує лічильник невірних спроб введення OTP для userId.
+   * TTL лічильника виставляється рівним OTP TTL при першому інкременті,
+   * щоб лічильник не пережив сам код і не блокував наступний запит OTP.
    */
   async incrementAttempts(userId) {
     const key = REDIS_KEYS.otpAttempts(userId);

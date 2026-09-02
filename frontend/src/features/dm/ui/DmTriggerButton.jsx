@@ -3,13 +3,13 @@ import { MoreVertical } from "lucide-react";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 
 /**
- * DmTriggerButton — кнопка "три вертикальные точки" рядом с чужим ником
- * (используется и в Sidebar.jsx — список "Користувачі", и в
- * ChatConversation.jsx — автор сообщения). Один пункт меню: открыть
- * DirectMessagesModal сразу на диалоге с этим человеком.
+ * DmTriggerButton — кнопка "три вертикальні крапки" поруч з чужим ніком
+ * (використовується і в Sidebar.jsx — список "Користувачі", і в
+ * ChatConversation.jsx — автор повідомлення). Один пункт меню: відкрити
+ * DirectMessagesModal одразу на діалозі з цією людиною.
  *
- * login/color — тот, с кем начинаем диалог (цвет — чтобы модалка сразу
- * могла покрасить его имя, не делая отдельного запроса).
+ * login/color — той, з ким починаємо діалог (колір — щоб модалка одразу
+ * могла зафарбувати його ім'я, не роблячи окремого запиту).
  */
 export function DmTriggerButton({ login, color, modalId = "dmModal" }) {
   const openConversation = useDmStore((state) => state.openConversation);

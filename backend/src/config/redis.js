@@ -6,35 +6,35 @@ const redisClient = createClient({
   socket: {
     reconnectStrategy: (retries) => {
       if (retries >= 10) {
-        logger.error('Redis max reconnection attempts reached. Giving up.');
-        return new Error('Redis max reconnection attempts reached');
+        logger.error('Досягнуто максимум спроб перепідключення Redis. Припиняємо.');
+        return new Error('Досягнуто максимум спроб перепідключення Redis');
       }
       const delay = Math.min(retries * 100, 3000);
-      logger.warn(`Redis reconnecting in ${delay}ms (attempt ${retries + 1})`);
+      logger.warn(`Перепідключення до Redis через ${delay}мс (спроба ${retries + 1})`);
       return delay;
     },
   },
 });
 
 redisClient.on('error', (err) => {
-  logger.error(`Redis client error: ${err.message}`);
+  logger.error(`Помилка клієнта Redis: ${err.message}`);
 });
 
 redisClient.on('reconnecting', () => {
-  logger.warn('Redis client reconnecting...');
+  logger.warn('Перепідключення клієнта Redis...');
 });
 
 redisClient.on('ready', () => {
-  logger.info('Redis client ready');
+  logger.info('Клієнт Redis готовий');
 });
 
 const connectRedis = async () => {
   try {
     await redisClient.connect();
     await redisClient.ping();
-    logger.info('Redis connected successfully');
+    logger.info('Redis успішно підключено');
   } catch (err) {
-    logger.error(`Redis connection failed: ${err.message}`);
+    logger.error(`Не вдалося підключитися до Redis: ${err.message}`);
     throw err;
   }
 };
@@ -42,9 +42,9 @@ const connectRedis = async () => {
 const disconnectRedis = async () => {
   try {
     await redisClient.quit();
-    logger.info('Redis connection closed');
+    logger.info("З'єднання з Redis закрито");
   } catch (err) {
-    logger.error(`Redis disconnect error: ${err.message}`);
+    logger.error(`Помилка відключення Redis: ${err.message}`);
   }
 };
 

@@ -12,61 +12,61 @@ const isValidColor = (val) =>
 
 export const validateLoginRequest = (body) => {
   const errors = [];
-  if (!isNonEmptyString(body.login)) errors.push("login is required");
+  if (!isNonEmptyString(body.login)) errors.push("логін обов'язковий");
   if (!isValidPassword(body.password))
-    errors.push("password must be at least 6 characters");
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push("пароль має містити щонайменше 6 символів");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
 export const validateRegisterRequest = (body) => {
   const errors = [];
-  if (!isNonEmptyString(body.login)) errors.push("login is required");
+  if (!isNonEmptyString(body.login)) errors.push("логін обов'язковий");
   if (!isValidPassword(body.password))
-    errors.push("password must be at least 6 characters");
-  if (body.email && !isValidEmail(body.email)) errors.push("email is invalid");
+    errors.push("пароль має містити щонайменше 6 символів");
+  if (body.email && !isValidEmail(body.email)) errors.push("email недійсний");
   if (!isValidGender(body.gender))
-    errors.push(`gender is required and must be one of: ${GENDER_OPTIONS.join(", ")}`);
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push(`стать обов'язкова і має бути однією з: ${GENDER_OPTIONS.join(", ")}`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
 export const validateForgotPasswordRequest = (body) => {
   const errors = [];
   if (!body.email || !isValidEmail(body.email))
-    errors.push("valid email is required");
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push("потрібна дійсна email-адреса");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
 export const validateVerifyOtpRequest = (body) => {
   const errors = [];
   if (!body.email || !isValidEmail(body.email))
-    errors.push("valid email is required");
-  if (!isNonEmptyString(body.otpCode)) errors.push("otpCode is required");
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push("потрібна дійсна email-адреса");
+  if (!isNonEmptyString(body.otpCode)) errors.push("otpCode обов'язковий");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
 export const validateResetPasswordRequest = (body) => {
   const errors = [];
   if (!isNonEmptyString(body.verifiedToken))
-    errors.push("verifiedToken is required");
+    errors.push("verifiedToken обов'язковий");
   if (!isValidPassword(body.password))
-    errors.push("password must be at least 6 characters");
+    errors.push("пароль має містити щонайменше 6 символів");
   if (!isNonEmptyString(body.confirmPassword))
-    errors.push("confirmPassword is required");
+    errors.push("підтвердження пароля обов'язкове");
   if (body.password !== body.confirmPassword)
-    errors.push("Passwords do not match");
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push("Паролі не збігаються");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
 export const validateUpdateGenderRequest = (body) => {
   const errors = [];
   if (!isValidGender(body.gender))
-    errors.push(`gender is required and must be one of: ${GENDER_OPTIONS.join(", ")}`);
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push(`стать обов'язкова і має бути однією з: ${GENDER_OPTIONS.join(", ")}`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
 export const validateUpdateColorRequest = (body) => {
   const errors = [];
   if (!isValidColor(body.color))
-    errors.push(`color is required and must be one of: ${COLOR_OPTIONS.join(", ")}`);
-  if (errors.length) throw new ValidationException("Validation failed", errors);
+    errors.push(`колір обов'язковий і має бути одним із: ${COLOR_OPTIONS.join(", ")}`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };

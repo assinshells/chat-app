@@ -4,11 +4,11 @@ import { moderationConfig } from "../config/moderation.config.js";
 const URL_PATTERN = /\bhttps?:\/\/\S+|\bwww\.\S+/gi;
 
 /**
- * countLinks — грубая оценка "это сообщение — по сути одни ссылки?":
- * считает совпадения URL_PATTERN и сравнивает суммарную длину ссылок с
- * длиной всего текста. Одно-два сообщения со ссылкой в диалоге — это
- * нормально, а вот "смотри тут http://... http://... http://..." —
- * типичный рекламный спам.
+ * countLinks — груба оцінка "це повідомлення — по суті самі
+ * посилання?": рахує збіги URL_PATTERN і порівнює сумарну довжину
+ * посилань з довжиною всього тексту. Одне-два повідомлення з
+ * посиланням у діалозі — це нормально, а от "дивись тут http://...
+ * http://... http://..." — типовий рекламний спам.
  */
 function isLinkFlood(text) {
   const matches = String(text ?? "").match(URL_PATTERN) ?? [];
@@ -19,15 +19,15 @@ function isLinkFlood(text) {
 }
 
 /**
- * isDuplicateFlood — true, если ПОСЛЕДНИЕ duplicateMaxRepeats-1
- * сообщений этого пользователя (в пределах duplicateWindowMs) после
- * нормализации совпадают с текущим — то есть текущее было бы
- * duplicateMaxRepeats-м повтором подряд без единого другого сообщения
- * между ними.
+ * isDuplicateFlood — true, якщо ОСТАННІ duplicateMaxRepeats-1
+ * повідомлень цього користувача (в межах duplicateWindowMs) після
+ * нормалізації збігаються з поточним — тобто поточне було б
+ * duplicateMaxRepeats-м повтором поспіль без жодного іншого
+ * повідомлення між ними.
  *
- * state.recent — массив { text, ts }, который ведёт и пополняет
- * ModerationService (см. moderation.service.js); эта функция сама
- * ничего не мутирует, только читает.
+ * state.recent — масив { text, ts }, який веде і поповнює
+ * ModerationService (див. moderation.service.js); ця функція сама
+ * нічого не мутує, лише читає.
  */
 function isDuplicateFlood(state, text, now) {
   const normalized = normalizeForModeration(text);
@@ -45,10 +45,10 @@ function isDuplicateFlood(state, text, now) {
 
 export const spamFilter = {
   /**
-   * check — возвращает { isSpam, reason } вместо простого boolean:
-   * reason ("duplicate" | "links") уходит в код ошибки, который видит
-   * клиент (SPAM_DUPLICATE / SPAM_LINKS в chat.constants.js), чтобы
-   * подсказка пользователю была осмысленной, а не общим "это спам".
+   * check — повертає { isSpam, reason } замість простого boolean:
+   * reason ("duplicate" | "links") йде в код помилки, який бачить
+   * клієнт (SPAM_DUPLICATE / SPAM_LINKS у chat.constants.js), щоб
+   * підказка користувачу була осмисленою, а не загальним "це спам".
    */
   check(state, text, now) {
     if (isLinkFlood(text)) {

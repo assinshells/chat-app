@@ -10,17 +10,17 @@ export const OtpService = {
   async generateOtp(userId) {
     const otp = OtpProvider.generate();
     await OtpRepository.saveOtp(userId, otp);
-    // Новый код — новый лимит попыток, иначе можно было бы "сжечь"
-    // попытки чужим forgot-password и заблокировать пользователю OTP.
+    // Новий код — новий ліміт спроб, інакше можна було б "спалити"
+    // спроби чужим forgot-password і заблокувати користувачу OTP.
     await OtpRepository.deleteAttempts(userId);
     return otp;
   },
 
   /**
-   * Проверяет OTP и ограничивает число попыток подбора (brute-force).
-   * express-rate-limit на роуте ограничивает запросы по IP, но не мешает
-   * перебору 6-значного кода с разных IP в пределах TTL — поэтому лимит
-   * попыток должен считаться отдельно, per-user, в Redis.
+   * Перевіряє OTP і обмежує кількість спроб підбору (brute-force).
+   * express-rate-limit на маршруті обмежує запити за IP, але не заважає
+   * перебору 6-значного коду з різних IP у межах TTL — тому ліміт
+   * спроб має рахуватися окремо, per-user, у Redis.
    */
   async validateOtp(userId, otpCode) {
     const attempts = await OtpRepository.incrementAttempts(userId);

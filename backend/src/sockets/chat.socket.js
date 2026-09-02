@@ -3,21 +3,21 @@ import { DEFAULT_ROOM, SOCKET_EVENTS, isValidRoom } from "../constants/chat.cons
 import { RoomPresence } from "./presence.js";
 import logger from "../config/logger.js";
 
-// Простая защита от флуда в оперативной памяти: не более N сообщений
-// за скользящее окно на сокет-соединение. Для одного backend-инстанса
-// этого достаточно; при горизонтальном масштабировании стоит перенести
-// в Redis (по аналогии с OTP-лимитами), но пока это не требуется.
+// Проста in-memory-защита від флуду: не більше N повідомлень за
+// ковзне вікно на сокет-з'єднання. Для одного backend-інстансу цього
+// достатньо; при горизонтальному масштабуванні варто перенести в
+// Redis (за аналогією з лімітами OTP), але поки що це не потрібно.
 const RATE_LIMIT_WINDOW_MS = 10_000;
 const RATE_LIMIT_MAX_MESSAGES = 20;
 
 /**
- * checkRateLimit — возвращает { limited: false } либо { limited: true,
- * retryAfterMs }. retryAfterMs — сколько ждать до момента, когда самое
- * старое сообщение в окне "устареет" и освободит слот (окно
- * скользящее, а не фиксированное, поэтому это не просто "секунда до
- * конца окна", а точное время до следующего разрешённого слота).
- * Раньше функция возвращала просто boolean — фронтенду нечем было бы
- * показать обратный отсчёт до конца лимита без этого числа.
+ * checkRateLimit — повертає { limited: false } або { limited: true,
+ * retryAfterMs }. retryAfterMs — скільки чекати до моменту, коли
+ * найстаріше повідомлення у вікні "застаріє" і звільнить слот (вікно
+ * ковзне, а не фіксоване, тому це не просто "секунда до кінця вікна",
+ * а точний час до наступного дозволеного слота). Раніше функція
+ * повертала просто boolean — фронтенду не було б чим показати зворотний
+ * відлік до кінця ліміту без цього числа.
  */
 function checkRateLimit(socket) {
   const now = Date.now();
@@ -49,15 +49,14 @@ function broadcastRoomsState(io) {
 }
 
 /**
- * broadcastSystemEvent — рассылает системное сообщение (вход/переход/
- * выход) участникам КОНКРЕТНОЙ Socket.IO room через io.to(scopeRoom) —
- * не глобально. scopeRoom — это КОМУ виден эффект (кто должен увидеть
- * строку в своей ленте), а payload.room — это НАЗВАНИЕ комнаты,
- * упомянутое в тексте сообщения; для события 'switch' они РАЗНЫЕ:
- * рассылается в СТАРУЮ комнату (scopeRoom), а текст называет НОВУЮ
- * (payload.room), см. joinRoom ниже. Текст сообщения не зависит от пола
- * пользователя (см. widgets/chat-conversation) — gender сюда сознательно
- * не передаётся.
+ * broadcastSystemEvent — розсилає системне повідомлення (вхід/перехід/
+ * вихід) учасникам КОНКРЕТНОЇ Socket.IO room через io.to(scopeRoom) —
+ * не глобально. scopeRoom — це КОМУ видно ефект (хто повинен побачити
+ * рядок у своїй стрічці), а payload.room — це НАЗВА кімнати, згадана в
+ * тексті повідомлення; для події 'switch' вони РІЗНІ: розсилається в
+ * СТАРУ кімнату (scopeRoom), а текст називає НОВУ (payload.room), див.
+ * joinRoom нижче. Текст повідомлення не залежить від статі користувача
+ * (див. widgets/chat-conversation) — gender сюди свідомо не передається.
  */
 function broadcastSystemEvent(io, scopeRoom, { event, login, color, room }) {
   io.to(scopeRoom).emit(SOCKET_EVENTS.SYSTEM_EVENT, {
@@ -72,21 +71,21 @@ function broadcastSystemEvent(io, scopeRoom, { event, login, color, room }) {
 }
 
 /**
- * joinRoom — переводит socket из текущей комнаты (если есть) в целевую:
- * обновляет и Socket.IO room (нужна для рассылки message:new только
- * участникам комнаты), и presence-реестр (нужен для подсчёта "кто
- * онлайн"), затем возвращает снапшот (история сообщений + участники) —
- * это единый ответ на room:join, второй отдельный запрос истории не нужен.
+ * joinRoom — переводить socket з поточної кімнати (якщо є) у цільову:
+ * оновлює і Socket.IO room (потрібна для розсилки message:new лише
+ * учасникам кімнати), і presence-реєстр (потрібен для підрахунку "хто
+ * онлайн"), потім повертає знімок (історія повідомлень + учасники) —
+ * це єдина відповідь на room:join, другий окремий запит історії не потрібен.
  *
- * Системные события (вхід/перехід) НЕ рассылаются отсюда напрямую —
- * функция лишь СОБИРАЕТ их в systemEvents и возвращает вызывающему
- * коду (см. SOCKET_EVENTS.ROOM_JOIN ниже), чтобы тот разослал их уже
- * ПОСЛЕ отправки ack с историей. Это важно: если разослать их раньше
- * ack, клиент получит live-событие "Добро пожаловать" раньше, чем ack
- * со снапшотом истории, а обработчик ack безусловно делает
- * setMessages(result.messages) — это стёрло бы уже отрисованное
- * системное сообщение (гонка состояний, из-за которой оно "мигало" и
- * пропадало).
+ * Системні події (вхід/перехід) НЕ розсилаються звідси напряму —
+ * функція лише ЗБИРАЄ їх у systemEvents і повертає викликаючому
+ * коду (див. SOCKET_EVENTS.ROOM_JOIN нижче), щоб той розіслав їх уже
+ * ПІСЛЯ відправлення ack з історією. Це важливо: якщо розіслати їх
+ * раніше за ack, клієнт отримає live-подію "Ласкаво просимо" раніше,
+ * ніж ack зі знімком історії, а обробник ack безумовно робить
+ * setMessages(result.messages) — це стерло б уже відмальоване
+ * системне повідомлення (гонка станів, через яку воно "блимало" і
+ * зникало).
  */
 async function joinRoom(io, socket, requestedRoom) {
   const targetRoom = isValidRoom(requestedRoom) ? requestedRoom : DEFAULT_ROOM;
@@ -97,18 +96,18 @@ async function joinRoom(io, socket, requestedRoom) {
     if (previousRoom) {
       socket.leave(previousRoom);
       RoomPresence.leave(previousRoom, socket.id);
-      // Сам уходящий socket уже не состоит в Socket.IO room previousRoom
-      // (socket.leave выше), поэтому этот emit до него не долетит — если
-      // он был последним в комнате, получателей у события вообще 0, и
-      // это нормально: актуальный (в т.ч. нулевой) счётчик уходящему
-      // клиенту доставит broadcastRoomsState(io) ниже — тот всегда явно
-      // включает count: 0 для опустевшей комнаты (см. presence.js).
+      // Сам сокет, що йде, уже не перебуває в Socket.IO room previousRoom
+      // (socket.leave вище), тому цей emit до нього не долетить — якщо
+      // він був останнім у кімнаті, отримувачів у події взагалі 0, і
+      // це нормально: актуальний (у т.ч. нульовий) лічильник тому, хто
+      // йде, доставить broadcastRoomsState(io) нижче — той завжди явно
+      // включає count: 0 для спорожнілої кімнати (див. presence.js).
       broadcastRoomUsers(io, previousRoom);
 
-      // "Переходит в комнату X" — видят ТОЛЬКО те, кто остался в СТАРОЙ
-      // комнате (scopeRoom = previousRoom); сам переходящий это уже не
-      // увидит (он вышел из previousRoom строкой выше) — и это верно,
-      // ему через мгновение придёт свой "Добро пожаловать" в новую.
+      // "Переходить у кімнату X" — бачать ЛИШЕ ті, хто залишився в
+      // СТАРІЙ кімнаті (scopeRoom = previousRoom); сам той, хто переходить,
+      // цього вже не побачить (він вийшов з previousRoom рядком вище) —
+      // і це правильно, йому за мить прийде своє "Ласкаво просимо" в нову.
       systemEvents.push({
         scopeRoom: previousRoom,
         payload: {
@@ -132,10 +131,10 @@ async function joinRoom(io, socket, requestedRoom) {
     broadcastRoomUsers(io, targetRoom);
     broadcastRoomsState(io);
 
-    // "Добро пожаловать в чат" — видят ВСЕ, кто сейчас в целевой
-    // комнате (включая самого вошедшего, он уже participant targetRoom
-    // после socket.join выше), независимо от того, первый это вход за
-    // сессию или переход из другой комнаты — сообщение одинаковое.
+    // "Ласкаво просимо до чату" — бачать УСІ, хто зараз у цільовій
+    // кімнаті (включно з самим тим, хто увійшов, він вже participant
+    // targetRoom після socket.join вище), незалежно від того, перший
+    // це вхід за сесію чи перехід з іншої кімнати — повідомлення однакове.
     systemEvents.push({
       scopeRoom: targetRoom,
       payload: {
@@ -161,10 +160,10 @@ async function joinRoom(io, socket, requestedRoom) {
 }
 
 export function registerChatSocket(io, socket) {
-  // Комната по умолчанию НЕ назначается автоматически — клиент явно
-  // запрашивает room:join сразу после connect (см. useChatSocket на
-  // фронтенде). Так presence-реестр всегда отражает реальное намерение
-  // клиента, а не серверное предположение о том, в какой комнате он "должен" быть.
+  // Кімната за замовчуванням НЕ призначається автоматично — клієнт явно
+  // запитує room:join одразу після connect (див. useChatSocket на
+  // фронтенді). Так presence-реєстр завжди відображає реальний намір
+  // клієнта, а не серверне припущення про те, в якій кімнаті він "повинен" бути.
   socket.on(SOCKET_EVENTS.ROOM_JOIN, async (payload, ack) => {
     const room = typeof payload === "string" ? payload : payload?.room;
 
@@ -174,19 +173,19 @@ export function registerChatSocket(io, socket) {
         ack({ success: true, ...snapshot });
       }
 
-      // См. комментарий в joinRoom: рассылаем ТОЛЬКО после ack, чтобы
-      // клиент успел применить историю раньше, чем получит живое
-      // "Добро пожаловать"/"переходит" — иначе оно было бы стёрто
-      // безусловным setMessages(result.messages) в обработчике ack.
+      // Див. коментар у joinRoom: розсилаємо ЛИШЕ після ack, щоб
+      // клієнт встиг застосувати історію раніше, ніж отримає живе
+      // "Ласкаво просимо"/"переходить" — інакше воно було б стерто
+      // безумовним setMessages(result.messages) в обробнику ack.
       for (const { scopeRoom, payload: eventPayload } of systemEvents) {
         broadcastSystemEvent(io, scopeRoom, eventPayload);
       }
     } catch (err) {
       logger.warn(
-        `room:join failed for user ${socket.data.userId}: ${err.message}`,
+        `room:join не вдався для користувача ${socket.data.userId}: ${err.message}`,
       );
       if (typeof ack === "function") {
-        ack({ success: false, message: "Failed to join room" });
+        ack({ success: false, message: "Не вдалося приєднатися до кімнати" });
       }
     }
   });
@@ -205,7 +204,7 @@ export function registerChatSocket(io, socket) {
       return respond({
         success: false,
         code: "RATE_LIMITED",
-        message: "Too many messages",
+        message: "Забагато повідомлень",
         details: { retryAfterMs: rateLimit.retryAfterMs },
       });
     }
@@ -222,23 +221,23 @@ export function registerChatSocket(io, socket) {
         room,
       });
 
-      // Рассылаем в room, включая самого отправителя — единый источник
-      // истины (серверный id/timestamp), без отдельного оптимистичного
-      // рендера на клиенте, который потом пришлось бы сверять/дедуплицировать.
+      // Розсилаємо в room, включно з самим відправником — єдине джерело
+      // істини (серверний id/timestamp), без окремого оптимістичного
+      // рендеру на клієнті, який потім довелося б звіряти/дедуплікувати.
       io.to(room).emit(SOCKET_EVENTS.MESSAGE_NEW, message);
 
       respond({ success: true });
     } catch (err) {
       logger.warn(
-        `message:send rejected for user ${socket.data.userId}: ${err.message}`,
+        `message:send відхилено для користувача ${socket.data.userId}: ${err.message}`,
       );
       respond({
         success: false,
         code: err.code ?? "MESSAGE_REJECTED",
         message: err.message,
-        // retryAfterMs присутствует только для MutedException (см.
-        // exceptions/chat.exceptions.js) — фронтенду нужен именно он,
-        // чтобы показать живой обратный отсчёт до конца мута.
+        // retryAfterMs присутній лише для MutedException (див.
+        // exceptions/chat.exceptions.js) — фронтенду потрібен саме він,
+        // щоб показати живий зворотний відлік до кінця мута.
         ...(err.details ? { details: err.details } : {}),
       });
     }
@@ -252,8 +251,8 @@ export function registerChatSocket(io, socket) {
     broadcastRoomUsers(io, room);
     broadcastRoomsState(io);
 
-    // "Покидает чат" — видят те, кто остался в комнате, где пользователь
-    // был перед дисконнектом (сам уходящий уже отключился и это не увидит).
+    // "Покидає чат" — бачать ті, хто залишився в кімнаті, де користувач
+    // був перед дисконнектом (сам той, хто пішов, вже відключився і цього не побачить).
     broadcastSystemEvent(io, room, {
       event: "leave",
       login: socket.data.login,

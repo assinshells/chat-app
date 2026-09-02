@@ -22,10 +22,10 @@ const io = createSocketServer(httpServer);
 initSockets(io);
 
 const shutdown = async (signal) => {
-  logger.info(`${signal} received. Starting graceful shutdown...`);
+  logger.info(`Отримано ${signal}. Починаємо штатне завершення роботи...`);
 
   const forceExitTimer = setTimeout(() => {
-    logger.error("Graceful shutdown timed out. Forcing exit.");
+    logger.error("Час на штатне завершення вичерпано. Примусовий вихід.");
     process.exit(1);
   }, 15000);
 
@@ -33,22 +33,22 @@ const shutdown = async (signal) => {
 
   try {
     await new Promise((resolve) => io.close(resolve));
-    logger.info("Socket.IO server closed");
+    logger.info("Сервер Socket.IO зупинено");
 
     await new Promise((resolve) => httpServer.close(resolve));
-    logger.info("HTTP server closed");
+    logger.info("HTTP-сервер зупинено");
 
     await pool.end();
-    logger.info("PostgreSQL pool closed");
+    logger.info("Пул PostgreSQL закрито");
 
     await disconnectRedis();
-    logger.info("Redis connection closed");
+    logger.info("З'єднання з Redis закрито");
 
-    logger.info("Graceful shutdown complete");
+    logger.info("Штатне завершення роботи завершено");
     clearTimeout(forceExitTimer);
     process.exit(0);
   } catch (err) {
-    logger.error(`Error during shutdown: ${err.message}`);
+    logger.error(`Помилка під час завершення роботи: ${err.message}`);
     process.exit(1);
   }
 };
@@ -57,12 +57,12 @@ process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 process.on("unhandledRejection", (reason) => {
-  logger.error(`Unhandled rejection: ${String(reason)}`);
+  logger.error(`Необроблене відхилення: ${String(reason)}`);
   shutdown("unhandledRejection");
 });
 
 process.on("uncaughtException", (err) => {
-  logger.error(`Uncaught exception: ${err.message}`, { stack: err.stack });
+  logger.error(`Необроблений виняток: ${err.message}`, { stack: err.stack });
   shutdown("uncaughtException");
 });
 
@@ -71,10 +71,10 @@ const start = async () => {
     await connectDatabase();
     await connectRedis();
     httpServer.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT} [${process.env.NODE_ENV}]`);
+      logger.info(`Сервер запущено на порту ${PORT} [${process.env.NODE_ENV}]`);
     });
   } catch (err) {
-    logger.error(`Failed to start server: ${err.message}`);
+    logger.error(`Не вдалося запустити сервер: ${err.message}`);
     process.exit(1);
   }
 };

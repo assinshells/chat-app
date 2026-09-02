@@ -24,10 +24,10 @@ router.post(
   RateLimitProvider.resetPassword,
   AuthController.resetPassword,
 );
-// refreshToken больше не приходит в теле запроса — он читается из
-// httpOnly cookie (refreshCookieGuard), а csrfProtection проверяет
-// double-submit CSRF-токен, чтобы cookie нельзя было "заставить"
-// отправиться со стороннего сайта.
+// refreshToken більше не приходить у тілі запиту — він читається з
+// httpOnly cookie (refreshCookieGuard), а csrfProtection перевіряє
+// double-submit CSRF-токен, щоб cookie не можна було "змусити"
+// відправитися зі стороннього сайту.
 router.post(
   "/refresh",
   RateLimitProvider.refresh,

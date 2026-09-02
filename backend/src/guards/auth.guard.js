@@ -3,9 +3,9 @@ import { AccessTokenInvalidException } from "../exceptions/auth.exceptions.js";
 
 /**
  * authGuard — Express middleware.
- * Ожидает заголовок `Authorization: Bearer <accessToken>`, проверяет
- * подпись/срок действия JWT (без обращения к БД/Redis — access-токен
- * полностью stateless) и пробрасывает userId в req.
+ * Очікує заголовок `Authorization: Bearer <accessToken>`, перевіряє
+ * підпис/термін дії JWT (без звернення до БД/Redis — access-токен
+ * повністю stateless) і передає userId у req.
  */
 export const authGuard = (req, _res, next) => {
   const header = req.headers.authorization;

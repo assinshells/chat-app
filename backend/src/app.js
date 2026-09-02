@@ -12,7 +12,7 @@ import { globalExceptionHandler } from "./middlewares/globalException.middleware
 const CLIENT_URL = process.env.CLIENT_URL;
 
 if (!CLIENT_URL) {
-  logger.warn("CLIENT_URL is not set — CORS will block all browser requests");
+  logger.warn("CLIENT_URL не задано — CORS блокуватиме всі запити з браузера");
 }
 
 const app = express();

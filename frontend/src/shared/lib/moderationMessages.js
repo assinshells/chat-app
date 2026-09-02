@@ -1,10 +1,10 @@
 /**
- * Коды приходят от backend/src/sockets/chat.socket.js в ack
- * { success:false, code, message, details? } — см. exceptions/chat.exceptions.js
- * и moderation/moderation.service.js. Текст подсказок здесь, а не на
- * бэкенде: сервер отдаёт технический code + details (числа), а
- * человеческую формулировку на языке интерфейса подбирает клиент —
- * так бэкенд не привязан к конкретному языку UI.
+ * Коди приходять від backend/src/sockets/chat.socket.js в ack
+ * { success:false, code, message, details? } — див. exceptions/chat.exceptions.js
+ * і moderation/moderation.service.js. Текст підказок тут, а не на
+ * бекенді: сервер віддає технічний code + details (числа), а
+ * людське формулювання мовою інтерфейсу підбирає клієнт —
+ * так бекенд не прив'язаний до конкретної мови UI.
  */
 const SECOND = 1000;
 
@@ -13,11 +13,11 @@ function formatSeconds(ms) {
 }
 
 /**
- * describeSendError — текст для chat-input-hint под полем ввода.
- * retryAfterMs (если есть) уже "живой" остаток на момент вызова —
- * ChatComposer пересчитывает и вызывает эту функцию заново на каждый
- * тик кулдауна (см. useMessageCooldown), поэтому секунды в подсказке
- * обновляются сами.
+ * describeSendError — текст для chat-input-hint під полем вводу.
+ * retryAfterMs (якщо є) вже "живий" залишок на момент виклику —
+ * ChatComposer перераховує і викликає цю функцію заново на кожен
+ * тік кулдауна (див. useMessageCooldown), тому секунди в підказці
+ * оновлюються самі.
  */
 export function describeSendError(code, retryAfterMs) {
   switch (code) {
@@ -41,10 +41,10 @@ export function describeSendError(code, retryAfterMs) {
 }
 
 /**
- * describeCooldownHint — короткий текст ДЛЯ поля ввода ПОКА идёт
- * локальный/серверный кулдаун (до попытки отправки, проактивно) —
- * используется вместо describeSendError, у которой нет заранее
- * известного code (ошибки ещё не было, только отсчёт).
+ * describeCooldownHint — короткий текст ДЛЯ поля вводу ПОКИ триває
+ * локальний/серверний кулдаун (до спроби відправлення, проактивно) —
+ * використовується замість describeSendError, у якої немає заздалегідь
+ * відомого code (помилки ще не було, лише відлік).
  */
 export function describeCooldownHint(remainingMs) {
   if (remainingMs <= 0) return null;

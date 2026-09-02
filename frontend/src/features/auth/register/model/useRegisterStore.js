@@ -7,7 +7,7 @@ export const useRegisterStore = create((set) => ({
 
   register: async ({ login, password, email, gender }, onSuccess) => {
     if (!gender) {
-      set({ error: "Пожалуйста, выберите пол" });
+      set({ error: "Будь ласка, оберіть стать" });
       return;
     }
     set({ loading: true, error: null });

@@ -12,7 +12,7 @@ const pool = new Pool({
 });
 
 pool.on("error", (err) => {
-  logger.error(`PostgreSQL pool error: ${err.message}`);
+  logger.error(`Помилка пулу PostgreSQL: ${err.message}`);
 });
 
 const connectDatabase = async () => {
@@ -20,12 +20,12 @@ const connectDatabase = async () => {
   try {
     client = await pool.connect();
     await client.query("SELECT 1");
-    logger.info("PostgreSQL connected successfully");
+    logger.info("PostgreSQL успішно підключено");
   } catch (err) {
     const detail = err?.message || err?.code || JSON.stringify(err);
-    logger.error(`PostgreSQL connection failed: ${detail}`);
+    logger.error(`Не вдалося підключитися до PostgreSQL: ${detail}`);
     logger.debug(
-      `PostgreSQL error object: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
+      `Об'єкт помилки PostgreSQL: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
     );
     throw err;
   } finally {

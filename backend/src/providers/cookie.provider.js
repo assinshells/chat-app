@@ -3,19 +3,19 @@ import { authConfig } from "../config/auth.config.js";
 import { env } from "../config/env.js";
 
 /**
- * CookieProvider — единственная точка установки/очистки auth-cookies.
+ * CookieProvider — єдина точка встановлення/очищення auth-cookies.
  *
- * refreshToken: httpOnly, недоступен из JS — защищает от кражи через XSS.
- * Ограничен path: "/api/auth" — нужен только auth-роутам.
+ * refreshToken: httpOnly, недоступний з JS — захищає від крадіжки через XSS.
+ * Обмежений path: "/api/auth" — потрібен лише auth-маршрутам.
  *
- * csrfToken: НЕ httpOnly (сознательно) — double-submit-cookie паттерн
- * требует, чтобы клиент мог прочитать его и продублировать в заголовке
- * X-CSRF-Token; сравнение cookie === header в middlewares/csrf.middleware.js
- * подтверждает, что запрос пришёл не с чужого сайта (сторонний сайт не
- * может прочитать чужие cookies, а значит не сможет подставить верный
- * заголовок). Ограничен path: "/" — иначе document.cookie на фронтенде
- * (который рендерится на "/", "/login" и т.д., а не на "/api/auth") не
- * видит cookie вовсе.
+ * csrfToken: НЕ httpOnly (свідомо) — патерн double-submit-cookie
+ * вимагає, щоб клієнт міг прочитати його і продублювати в заголовку
+ * X-CSRF-Token; порівняння cookie === header у middlewares/csrf.middleware.js
+ * підтверджує, що запит прийшов не з чужого сайту (сторонній сайт не
+ * може прочитати чужі cookies, а отже не зможе підставити правильний
+ * заголовок). Обмежений path: "/" — інакше document.cookie на фронтенді
+ * (який рендериться на "/", "/login" тощо, а не на "/api/auth") взагалі
+ * не бачить cookie.
  */
 const baseCookieOptions = {
   secure: env.isProduction,
@@ -30,12 +30,12 @@ export const CookieProvider = {
       path: "/api/auth",
       httpOnly: true,
     });
-    // path: "/" — сознательно шире, чем у refreshToken. csrfToken не
-    // httpOnly и должен читаться из document.cookie на любой странице
-    // SPA (frontend рендерится на "/", "/login" и т.д., а не на
-    // "/api/auth"), иначе getCsrfToken() на фронте всегда возвращает
-    // null и любой запрос на /refresh или /logout падает с 403
-    // (csrf.middleware видит cookie, но не видит совпадающий заголовок).
+    // path: "/" — свідомо ширший, ніж у refreshToken. csrfToken не
+    // httpOnly і має читатися з document.cookie на будь-якій сторінці
+    // SPA (frontend рендериться на "/", "/login" тощо, а не на
+    // "/api/auth"), інакше getCsrfToken() на фронті завжди повертає
+    // null і будь-який запит на /refresh чи /logout падає з 403
+    // (csrf.middleware бачить cookie, але не бачить відповідний заголовок).
     res.cookie(COOKIE_NAMES.csrfToken, csrfToken, {
       ...baseCookieOptions,
       path: "/",

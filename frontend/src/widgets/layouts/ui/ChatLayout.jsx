@@ -8,13 +8,13 @@ import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
-// Сколько ников/меток времени можно одновременно прикрепить к сообщению
-// через клик по нику/времени в ChatConversation.
+// Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
+// через клік по ніку/часу в ChatConversation.
 const MAX_TARGETS = 3;
 
 export function ChatLayout({ login, initialRoom, onLogout }) {
-  // useDmStore нужен свой логин, чтобы по входящему dm:new {sender,
-  // recipient} понимать, кто тут "собеседник" (см. _handleIncoming).
+  // useDmStore потрібен свій логін, щоб за вхідним dm:new {sender,
+  // recipient} розуміти, хто тут "співрозмовник" (див. _handleIncoming).
   useEffect(() => {
     useDmStore.getState().setCurrentUser(login);
   }, [login]);
@@ -33,17 +33,17 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     initialRoom,
   });
 
-  // pinned — сайдбар закреплён и виден на десктопе (по умолчанию — да).
+  // pinned — сайдбар закріплений і видимий на десктопі (за замовчуванням — так).
   const [pinned, setPinned] = useState(true);
-  // hovering — временный показ свёрнутого сайдбара при наведении на иконку в шапке.
+  // hovering — тимчасовий показ згорнутого сайдбара при наведенні на іконку в шапці.
   const [hovering, setHovering] = useState(false);
-  // mobileOpen — выезжающий drawer на мобильных устройствах (по умолчанию свёрнут).
+  // mobileOpen — висувний drawer на мобільних пристроях (за замовчуванням згорнутий).
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // targetNicknames / targetTimes — "цели" сообщения, собранные кликами
-  // по нику/времени в ChatConversation, до MAX_TARGETS каждого. Живут
-  // здесь, а не в ChatComposer, потому что заполняются из соседнего
-  // компонента (ChatConversation) — общее состояние двух "детей".
+  // targetNicknames / targetTimes — "цілі" повідомлення, зібрані кліками
+  // по ніку/часу в ChatConversation, до MAX_TARGETS кожного. Живуть
+  // тут, а не в ChatComposer, тому що заповнюються з сусіднього
+  // компонента (ChatConversation) — спільний стан двох "дітей".
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
 
@@ -54,11 +54,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   const handleSelectRoom = (roomId) => {
     switchRoom(roomId);
-    // На мобильном выбор комнаты в drawer'е должен сразу его закрывать —
-    // иначе список комнат перекрывает открывшийся чат.
+    // На мобільному вибір кімнати в drawer'і повинен одразу його закривати —
+    // інакше список кімнат перекриває чат, що відкрився.
     setMobileOpen(false);
-    // Ники/время выбирались из сообщений текущей комнаты — при переходе
-    // в другую комнату они теряют смысл.
+    // Ніки/час обиралися з повідомлень поточної кімнати — при переході
+    // в іншу кімнату вони втрачають сенс.
     setTargetNicknames([]);
     setTargetTimes([]);
   };
@@ -90,8 +90,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     setTargetTimes([]);
   };
 
-  // Восстанавливает цели, если отправка сообщения не удалась (ChatComposer
-  // уже успел оптимистично очистить их перед отправкой).
+  // Відновлює цілі, якщо відправлення повідомлення не вдалося (ChatComposer
+  // вже встиг оптимістично очистити їх перед відправленням).
   const handleRestoreTargets = ({ nicknames, times }) => {
     setTargetNicknames(nicknames);
     setTargetTimes(times);

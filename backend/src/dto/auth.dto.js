@@ -1,7 +1,7 @@
 /**
  * DTO — Data Transfer Objects.
- * Используются для явного описания входящих и исходящих данных.
- * Все поля типизированы через JSDoc.
+ * Використовуються для явного опису вхідних і вихідних даних.
+ * Усі поля типізовані через JSDoc.
  */
 
 /**
@@ -43,8 +43,8 @@
  * @property {string|undefined} csrfToken
  * @property {string|undefined} verifiedToken
  *
- * Note: refreshToken is intentionally NOT part of the response body —
- * it's set as an httpOnly cookie by CookieProvider and never exposed to JS.
+ * Примітка: refreshToken навмисно НЕ входить у тіло відповіді —
+ * він встановлюється як httpOnly cookie через CookieProvider і ніколи не потрапляє в JS.
  */
 
 /**

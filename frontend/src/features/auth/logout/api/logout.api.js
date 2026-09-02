@@ -1,9 +1,9 @@
 import { apiClient } from "@shared/api/axios.js";
 
 /**
- * refreshToken больше не передаётся явно — backend читает его из
- * httpOnly cookie, которую браузер приложит сам (apiClient настроен
- * с withCredentials: true).
+ * refreshToken більше не передається явно — backend читає його з
+ * httpOnly cookie, яку браузер додасть сам (apiClient налаштований
+ * з withCredentials: true).
  * @returns {Promise<{ success: boolean }>}
  */
 export const logoutRequest = () =>

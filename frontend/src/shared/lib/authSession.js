@@ -1,13 +1,13 @@
 /**
- * AuthSession — держит accessToken только в памяти вкладки (модульная
- * переменная), НЕ в localStorage/sessionStorage.
+ * AuthSession — тримає accessToken лише в пам'яті вкладки (модульна
+ * змінна), НЕ в localStorage/sessionStorage.
  *
- * Раньше здесь же хранился refreshToken — теперь он живёт исключительно
- * в httpOnly cookie на backend и никогда не попадает в JS (защита от
- * кражи токенов через XSS). Следствие: accessToken теряется при полной
- * перезагрузке страницы, поэтому App.jsx при монтировании делает
- * "тихий" запрос на /api/auth/refresh — браузер сам приложит httpOnly
- * cookie, и сессия восстановится без участия localStorage.
+ * Раніше тут же зберігався refreshToken — тепер він живе виключно
+ * в httpOnly cookie на backend і ніколи не потрапляє в JS (захист від
+ * крадіжки токенів через XSS). Наслідок: accessToken втрачається при
+ * повному перезавантаженні сторінки, тому App.jsx при монтуванні робить
+ * "тихий" запит на /api/auth/refresh — браузер сам додасть httpOnly
+ * cookie, і сесія відновиться без участі localStorage.
  */
 let accessToken = null;
 

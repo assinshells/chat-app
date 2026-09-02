@@ -23,24 +23,24 @@ const SETTINGS_MODAL_ID = "settingsModal";
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 /**
- * Боковая панель в духе Claude / ChatGPT.
+ * Бічна панель у дусі Claude / ChatGPT.
  *
  * Десктоп:
- *  - по умолчанию закреплена (pinned) и видна, толкает контент вправо;
- *  - кнопка сворачивания скрывает панель (pinned = false);
- *  - когда панель свёрнута, в шапке появляется иконка — при наведении
- *    на неё панель временно показывается поверх контента (previewOpen),
- *    а при клике — закрепляется обратно (pinned = true).
+ *  - за замовчуванням закріплена (pinned) і видима, штовхає контент праворуч;
+ *  - кнопка згортання приховує панель (pinned = false);
+ *  - коли панель згорнута, у шапці з'являється іконка — при наведенні
+ *    на неї панель тимчасово показується поверх контенту (previewOpen),
+ *    а при кліку — закріплюється назад (pinned = true).
  *
- * Мобильные устройства:
- *  - панель по умолчанию свёрнута;
- *  - открывается выезжающим слева поверх контента drawer'ом (mobileOpen)
- *    по нажатию на иконку в шапке, закрывается по нажатию на подложку
- *    или на крестик внутри самой панели.
+ * Мобільні пристрої:
+ *  - панель за замовчуванням згорнута;
+ *  - відкривається висувним зліва поверх контенту drawer'ом (mobileOpen)
+ *    за натисканням на іконку в шапці, закривається за натисканням на
+ *    підкладку або на хрестик всередині самої панелі.
  *
- * Комнаты и онлайн-пользователи — живые данные с бэкенда (Socket.IO),
- * см. features/chat/model/useChatSocket.js: activeRoom/roomCounts/roomUsers
- * приходят через ChatLayout, здесь только рендер и переключение.
+ * Кімнати і онлайн-користувачі — живі дані з бекенда (Socket.IO),
+ * див. features/chat/model/useChatSocket.js: activeRoom/roomCounts/roomUsers
+ * приходять через ChatLayout, тут лише рендер і перемикання.
  */
 export function Sidebar({
   pinned,
@@ -60,18 +60,18 @@ export function Sidebar({
   onNicknameClick,
   selectedNicknames = [],
 }) {
-  // Верхний уровень табов: список комнат / список пользователей.
+  // Верхній рівень табів: список кімнат / список користувачів.
   const [activeTab, setActiveTab] = useState("rooms");
-  // Внутри «Користувачі» — ещё один уровень табов-фильтров по полу.
+  // Всередині «Користувачі» — ще один рівень табів-фільтрів за статтю.
   const [activeUserGroup, setActiveUserGroup] = useState("male");
 
   const tabsBodyRef = useRef(null);
   useAutoHideScrollbar(tabsBodyRef);
 
-  // Группируем участников активной комнаты по гендеру один раз за рендер,
-  // а не на каждый чих — список участников комнаты может быть длинным.
-  // gender гарантированно 'male' | 'female' (см. GENDER_VALUES на бэкенде,
-  // значение 'unknown' убрано), третьей группы больше не нужно.
+  // Групуємо учасників активної кімнати за статтю один раз за рендер,
+  // а не на кожен чих — список учасників кімнати може бути довгим.
+  // gender гарантовано 'male' | 'female' (див. GENDER_VALUES на бекенді,
+  // значення 'unknown' прибрано), третя група більше не потрібна.
   const usersByGroup = useMemo(() => {
     const grouped = { male: [], female: [] };
 
@@ -82,13 +82,13 @@ export function Sidebar({
     return grouped;
   }, [roomUsers]);
 
-  // На десктопе состояние сайдбара строго одно из трёх и определяет CSS-класс:
-  //  - is-pinned  — закреплён, в потоке (толкает контент), без анимации через
-  //                 промежуточное состояние — переключается мгновенно по клику;
-  //  - is-preview — временный показ по наведению, всегда position: fixed
-  //                 (вне потока), поэтому НИКОГДА не толкает и не дёргает
-  //                 контент чата, даже во время transition ширины;
-  //  - (нет класса) — свёрнут, тоже position: fixed, просто width: 0.
+  // На десктопі стан сайдбара строго один із трьох і визначає CSS-клас:
+  //  - is-pinned  — закріплений, у потоці (штовхає контент), без анімації
+  //                 через проміжний стан — перемикається миттєво по кліку;
+  //  - is-preview — тимчасовий показ при наведенні, завжди position: fixed
+  //                 (поза потоком), тому НІКОЛИ не штовхає і не смикає
+  //                 контент чату, навіть під час transition ширини;
+  //  - (немає класу) — згорнутий, теж position: fixed, просто width: 0.
   const desktopStateClass = pinned
     ? "is-pinned"
     : previewOpen
@@ -115,8 +115,8 @@ export function Sidebar({
     >
       <div className="app-sidebar-inner app-scrollbar">
 
-        {/* Верх панели: название сайта (десктоп и мобильный, без логотипа) /
-            кнопка закрытия drawer'а (только мобильный). */}
+        {/* Верх панелі: назва сайту (десктоп і мобільний, без логотипа) /
+            кнопка закриття drawer'а (лише мобільний). */}
         <div className="app-sidebar-top">
           <span className="app-sidebar-site-name">
             {APP_NAME}
@@ -125,15 +125,15 @@ export function Sidebar({
           <button
             type="button"
             className="app-sidebar-btn d-lg-none"
-            title="Закрыть меню"
+            title="Закрити меню"
             onClick={onCloseMobile}
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Табы: «Кімнати» / «Користувачі». Занимают всё место от верха
-            панели (или от мобильного хедера) до футера. */}
+        {/* Таби: «Кімнати» / «Користувачі». Займають усе місце від верху
+            панелі (або від мобільного хедера) до футера. */}
         <div className="app-sidebar-tabs">
 
           <div className="app-sidebar-tabs-nav">
@@ -200,12 +200,12 @@ export function Sidebar({
 
                       return (
                         <div key={user.id} className="app-sidebar-online-item">
-                          {/* Свой ник — просто подсвечен красным, не кликабелен,
-                              цвет из настроек на него не влияет (остаётся как есть).
-                              Чужой — кликабелен, добавляет адресата в форму
-                              отправки сообщения (см. ChatComposer), и красится
-                              в цвет, который этот пользователь выбрал в
-                              настройках (по умолчанию — чёрный). */}
+                          {/* Свій нік — просто підсвічений червоним, не клікабельний,
+                              колір з налаштувань на нього не впливає (залишається як є).
+                              Чужий — клікабельний, додає адресата у форму
+                              відправлення повідомлення (див. ChatComposer), і фарбується
+                              в колір, який цей користувач обрав у
+                              налаштуваннях (за замовчуванням — чорний). */}
                           {isOwn ? (
                             <span className="app-sidebar-online-name nickname-own">
                               {user.login}
@@ -218,7 +218,7 @@ export function Sidebar({
                                 className={`app-sidebar-online-name app-sidebar-online-name-btn ${
                                   isSelected ? "is-selected" : ""
                                 }`}
-                                title="Add user to message form"
+                                title="Додати користувача у форму повідомлення"
                                 style={
                                   user.color && user.color !== "black"
                                     ? { "--user-color": getColorHex(user.color) }
@@ -240,9 +240,9 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* Профиль пользователя внизу панели: ник (с дропдауном логаута)
-            и кнопка сворачивания — две независимые кнопки со своим
-            ховером у каждой, одной высоты. */}
+        {/* Профіль користувача внизу панелі: нік (з дропдауном логауту)
+            і кнопка згортання — дві незалежні кнопки зі своїм
+            ховером у кожної, однієї висоти. */}
         <div className="app-sidebar-footer">
           <div className="dropdown dropup app-sidebar-user-dropdown">
             <button
@@ -251,7 +251,7 @@ export function Sidebar({
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              <span className="app-sidebar-user-name">{login || "Гость"}</span>
+              <span className="app-sidebar-user-name">{login || "Гість"}</span>
             </button>
 
             <div className="dropdown-menu app-sidebar-user-menu">
@@ -274,19 +274,19 @@ export function Sidebar({
     onClick={(e) => e.preventDefault()}
   >
     <LogOut size={16} strokeWidth={2} />
-    <span>Выйти</span>
+    <span>Вийти</span>
   </a>
 </div>
 <SettingsModal modalId={SETTINGS_MODAL_ID} />
 <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
           </div>
 
-          {/* На десктопе — рядом с ником. В превью CSS переносит её
-              в левый верхний угол, вровень с кнопкой в шапке. */}
+          {/* На десктопі — поруч з ніком. У прев'ю CSS переносить її
+              у лівий верхній кут, врівень з кнопкою в шапці. */}
           <button
             type="button"
             className="app-sidebar-btn app-sidebar-collapse-btn d-none d-lg-flex"
-            title={pinned ? "Свернуть боковую панель" : "Закрепить боковую панель"}
+            title={pinned ? "Згорнути бічну панель" : "Закріпити бічну панель"}
             onClick={pinned ? onCollapse : onPin}
           >
             <PanelLeft size={16} />

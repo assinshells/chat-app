@@ -4,10 +4,10 @@ import { RefreshTokenInvalidException } from "../exceptions/auth.exceptions.js";
 
 export const TokenService = {
   /**
-   * Выпускает новую пару access/refresh токенов + CSRF-токен и
-   * регистрирует refresh-токен в whitelist (Redis), чтобы его можно
-   * было отозвать. CSRF-токен выпускается вместе с парой и ротируется
-   * synchronно с refresh-токеном (см. cookie.provider.js).
+   * Видає нову пару access/refresh токенів + CSRF-токен і
+   * реєструє refresh-токен у whitelist (Redis), щоб його можна
+   * було відкликати. CSRF-токен видається разом із парою і ротується
+   * синхронно з refresh-токеном (див. cookie.provider.js).
    */
   async issueTokenPair(userId) {
     const accessToken = TokenProvider.signAccessToken(userId);
@@ -18,11 +18,11 @@ export const TokenService = {
   },
 
   /**
-   * Ротация refresh-токена: проверяет подпись/срок действия JWT,
-   * убеждается, что jti ещё не отозван, аннулирует старый токен и
-   * выпускает новую пару. Однократное использование refresh-токена
-   * снижает ущерб от его утечки (replay после первого использования
-   * будет отклонён).
+   * Ротація refresh-токена: перевіряє підпис/термін дії JWT,
+   * переконується, що jti ще не відкликано, анулює старий токен і
+   * видає нову пару. Одноразове використання refresh-токена
+   * знижує шкоду від його витоку (replay після першого використання
+   * буде відхилено).
    */
   async rotateRefreshToken(refreshToken) {
     let payload;
@@ -42,8 +42,8 @@ export const TokenService = {
   },
 
   /**
-   * Отзывает refresh-токен (logout). Тихо завершается, если токен
-   * уже невалиден/просрочен/отсутствует — logout должен быть идемпотентным.
+   * Відкликає refresh-токен (logout). Тихо завершується, якщо токен
+   * вже недійсний/прострочений/відсутній — logout має бути ідемпотентним.
    */
   async revokeRefreshToken(refreshToken) {
     if (!refreshToken) return;
@@ -51,7 +51,7 @@ export const TokenService = {
       const payload = TokenProvider.verifyRefreshToken(refreshToken);
       await TokenRepository.deleteRefreshToken(payload.jti);
     } catch {
-      // токен уже истёк/невалиден — отзывать нечего
+      // токен вже минув/недійсний — відкликати нема чого
     }
   },
 };

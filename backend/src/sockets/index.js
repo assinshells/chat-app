@@ -7,13 +7,13 @@ export function initSockets(io) {
   io.use(socketAuthGuard);
 
   io.on("connection", (socket) => {
-    logger.debug(`Socket connected: user=${socket.data.userId} login=${socket.data.login}`);
+    logger.debug(`Сокет підключено: user=${socket.data.userId} login=${socket.data.login}`);
 
     registerChatSocket(io, socket);
     registerDmSocket(io, socket);
 
     socket.on("disconnect", (reason) => {
-      logger.debug(`Socket disconnected: user=${socket.data.userId} reason=${reason}`);
+      logger.debug(`Сокет відключено: user=${socket.data.userId} reason=${reason}`);
     });
   });
 }

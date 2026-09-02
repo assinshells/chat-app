@@ -1,34 +1,34 @@
 export const AUTH_ERRORS = Object.freeze({
-  INVALID_CREDENTIALS: "Invalid login or password",
-  LOGIN_TAKEN: "Login already taken",
-  EMAIL_TAKEN: "Email already taken",
-  USER_NOT_FOUND: "User not found",
-  OTP_EXPIRED: "OTP expired or not found",
-  OTP_INVALID: "Invalid OTP",
-  RESET_TOKEN_INVALID: "Reset token expired or invalid",
-  UNAUTHORIZED: "Unauthorized",
-  ACCESS_TOKEN_INVALID: "Access token missing or invalid",
-  REFRESH_TOKEN_INVALID: "Refresh token expired or invalid",
-  RATE_LIMIT_EXCEEDED: "Too many requests, please try again later",
-  INTERNAL_ERROR: "Internal server error",
-  VALIDATION_FAILED: "Validation failed",
-  CSRF_TOKEN_INVALID: "Invalid or missing CSRF token",
+  INVALID_CREDENTIALS: "Невірний логін або пароль",
+  LOGIN_TAKEN: "Цей логін вже зайнято",
+  EMAIL_TAKEN: "Ця email-адреса вже зайнята",
+  USER_NOT_FOUND: "Користувача не знайдено",
+  OTP_EXPIRED: "Код OTP прострочено або не знайдено",
+  OTP_INVALID: "Невірний код OTP",
+  RESET_TOKEN_INVALID: "Токен скидання прострочено або недійсний",
+  UNAUTHORIZED: "Не авторизовано",
+  ACCESS_TOKEN_INVALID: "Токен доступу відсутній або недійсний",
+  REFRESH_TOKEN_INVALID: "Токен оновлення прострочено або недійсний",
+  RATE_LIMIT_EXCEEDED: "Забагато запитів, спробуйте пізніше",
+  INTERNAL_ERROR: "Внутрішня помилка сервера",
+  VALIDATION_FAILED: "Помилка валідації",
+  CSRF_TOKEN_INVALID: "Невірний або відсутній CSRF-токен",
 });
 
-// Cookie names for the httpOnly refresh-token flow. The refresh token
-// itself never touches JS (httpOnly); the CSRF token cookie is
-// intentionally readable by JS — that's what makes the double-submit
-// pattern work (see middlewares/csrf.middleware.js).
+// Назви cookie для httpOnly-потоку refresh-токена. Сам refresh-токен
+// ніколи не торкається JS (httpOnly); cookie з CSRF-токеном
+// навмисно доступна для читання з JS — саме це і робить можливим
+// double-submit-патерн (див. middlewares/csrf.middleware.js).
 export const COOKIE_NAMES = Object.freeze({
   refreshToken: "refreshToken",
   csrfToken: "csrfToken",
 });
 
-// Gender is a required registration field with no default value —
-// the client must always send one of these explicit values.
-// 'unknown' сознательно убран: гендер используется для родовых форм
-// системных сообщений (увійшов/увійшла тощо, см. sockets/chat.socket.js),
-// а без конкретного значения такое сообщение сформировать нельзя.
+// Стать — обов'язкове поле реєстрації без значення за замовчуванням —
+// клієнт завжди повинен надіслати одне з цих явних значень.
+// 'unknown' свідомо прибрано: стать використовується для родових форм
+// системних повідомлень (увійшов/увійшла тощо, див. sockets/chat.socket.js),
+// а без конкретного значення таке повідомлення сформувати не можна.
 export const GENDER_VALUES = Object.freeze({
   MALE: "male",
   FEMALE: "female",
@@ -36,8 +36,8 @@ export const GENDER_VALUES = Object.freeze({
 
 export const GENDER_OPTIONS = Object.freeze(Object.values(GENDER_VALUES));
 
-// Цвет сообщений/ника пользователя, выбирается в настройках профиля.
-// 'black' — значение по умолчанию (совпадает с DEFAULT в БД).
+// Колір повідомлень/ніка користувача, обирається в налаштуваннях профілю.
+// 'black' — значення за замовчуванням (збігається з DEFAULT у БД).
 export const COLOR_VALUES = Object.freeze({
   BLACK: "black",
   BLUE: "blue",

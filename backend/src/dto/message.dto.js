@@ -3,11 +3,11 @@ import { DEFAULT_COLOR } from "../constants/auth.constants.js";
 /**
  * @typedef {Object} MessageDto
  * @property {string} id
- * @property {string} author - login автора сообщения
+ * @property {string} author - login автора повідомлення
  * @property {string} text
- * @property {number} timestamp - unix ms, совместимо с formatMessageTime на фронтенде
+ * @property {number} timestamp - unix ms, сумісно з formatMessageTime на фронтенді
  * @property {string} room
- * @property {string} color - цвет сообщения/ника автора на момент отправки
+ * @property {string} color - колір повідомлення/ніка автора на момент відправлення
  *   ('black' | 'blue' | 'green' | 'purple' | 'orange'), см. COLOR_OPTIONS
  */
 

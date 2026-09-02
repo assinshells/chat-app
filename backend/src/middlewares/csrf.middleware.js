@@ -2,18 +2,18 @@ import { COOKIE_NAMES, AUTH_ERRORS } from "../constants/auth.constants.js";
 import { AuthorizationException } from "../exceptions/auth.exceptions.js";
 
 /**
- * csrfProtection — double-submit-cookie CSRF защита.
+ * csrfProtection — CSRF-захист за схемою double-submit-cookie.
  *
- * Работает вместе с CookieProvider: при login/refresh сервер выставляет
- * непрозрачный csrfToken одновременно как cookie (читаемую JS) и ожидает
- * получить то же значение обратно в заголовке X-CSRF-Token. Сторонний
- * сайт может заставить браузер жертвы отправить cookie (это и есть CSRF),
- * но не может прочитать её значение и подставить в заголовок — same-origin
- * policy не даёт читать document.cookie чужого origin.
+ * Працює разом з CookieProvider: при login/refresh сервер виставляє
+ * непрозорий csrfToken одночасно як cookie (доступну для читання JS) і
+ * очікує отримати те саме значення назад у заголовку X-CSRF-Token. Сторонній
+ * сайт може змусити браузер жертви надіслати cookie (це і є CSRF),
+ * але не може прочитати її значення і підставити в заголовок — same-origin
+ * policy не дає читати document.cookie чужого origin.
  *
- * Если cookie отсутствует — значит нет активной cookie-based сессии,
- * которую нужно защищать (например logout без предварительного login),
- * поэтому пропускаем: этому запросу нечего подделывать.
+ * Якщо cookie відсутня — значить немає активної cookie-based сесії,
+ * яку потрібно захищати (наприклад logout без попереднього login),
+ * тому пропускаємо: цьому запиту нема чого підробляти.
  */
 export const csrfProtection = (req, _res, next) => {
   const cookieToken = req.cookies?.[COOKIE_NAMES.csrfToken];

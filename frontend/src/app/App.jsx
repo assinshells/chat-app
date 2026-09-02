@@ -18,10 +18,10 @@ const USER_KEY = "userLogin";
 const ROOM_KEY = "userRoom";
 
 export default function App() {
-  // accessToken живёt только в памяти (AuthSession) и не переживает
-  // перезагрузку страницы — поэтому при монтировании делаем "тихий"
-  // refresh: если у браузера есть валидная httpOnly refreshToken-cookie,
-  // сессия восстановится сама, без повторного логина.
+  // accessToken живе лише в пам'яті (AuthSession) і не переживає
+  // перезавантаження сторінки — тому при монтуванні робимо "тихий"
+  // refresh: якщо у браузера є дійсна httpOnly refreshToken-cookie,
+  // сесія відновиться сама, без повторного логіну.
   const [booting, setBooting] = useState(true);
   const [screen, setScreen] = useState(AUTH_SCREENS.LOGIN);
   const [screenParams, setScreenParams] = useState({});
@@ -35,7 +35,7 @@ export default function App() {
         if (!cancelled) setScreen(AUTH_SCREENS.APP);
       })
       .catch(() => {
-        // Нет валидной cookie-сессии — остаёмся на экране логина.
+        // Немає дійсної cookie-сесії — залишаємося на екрані логіну.
       })
       .finally(() => {
         if (!cancelled) setBooting(false);
@@ -58,8 +58,8 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    // logout() сам шлёт /api/auth/logout и чистит AuthSession (access-токен
-    // в памяти), даже если сессия уже истекла — см. useLogoutStore.
+    // logout() сам надсилає /api/auth/logout і чистить AuthSession (access-токен
+    // у пам'яті), навіть якщо сесія вже минула — див. useLogoutStore.
     logout(() => {
       Storage.remove(USER_KEY);
       navigate(AUTH_SCREENS.LOGIN);

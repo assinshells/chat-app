@@ -21,14 +21,14 @@ import { CookieProvider } from "../providers/cookie.provider.js";
 import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
 
 /**
- * AuthController — только routing-логика:
- * получить запрос → вызвать сервис → вернуть ответ.
- * Никакой бизнес-логики. Все ошибки передаются в next(err).
+ * AuthController — лише routing-логіка:
+ * отримати запит → викликати сервіс → повернути відповідь.
+ * Жодної бізнес-логіки. Усі помилки передаються в next(err).
  *
- * login/refresh выставляют refreshToken как httpOnly cookie и csrfToken
- * как читаемую cookie (CookieProvider); в JSON-теле наружу уходит только
- * accessToken (+ csrfToken, для удобства клиента — то же значение, что и
- * в cookie). refreshToken в теле ответа никогда не возвращается.
+ * login/refresh встановлюють refreshToken як httpOnly cookie і csrfToken
+ * як доступну для читання cookie (CookieProvider); у JSON-тілі назовні
+ * йде лише accessToken (+ csrfToken, для зручності клієнта — те саме
+ * значення, що й у cookie). refreshToken у тілі відповіді ніколи не повертається.
  */
 export const AuthController = {
   login: async (req, res, next) => {
@@ -90,7 +90,7 @@ export const AuthController = {
 
   refresh: async (req, res, next) => {
     try {
-      // req.refreshToken — из httpOnly cookie, см. refreshCookieGuard.
+      // req.refreshToken — з httpOnly cookie, див. refreshCookieGuard.
       const { accessToken, refreshToken, csrfToken } =
         await AuthService.refreshTokens({ refreshToken: req.refreshToken });
       CookieProvider.setAuthCookies(res, { refreshToken, csrfToken });
@@ -102,8 +102,8 @@ export const AuthController = {
 
   logout: async (req, res, next) => {
     try {
-      // Читаем напрямую из cookie (не через guard) — logout должен
-      // оставаться идемпотентным и в отсутствие cookie (сессия уже истекла).
+      // Читаємо напряму з cookie (не через guard) — logout має
+      // залишатися ідемпотентним навіть за відсутності cookie (сесія вже минула).
       const refreshToken = req.cookies?.[COOKIE_NAMES.refreshToken];
       const result = await AuthService.logout({ refreshToken });
       CookieProvider.clearAuthCookies(res);

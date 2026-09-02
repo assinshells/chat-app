@@ -3,20 +3,20 @@ CREATE TABLE IF NOT EXISTS users (
     login VARCHAR(64) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     email VARCHAR(255) UNIQUE,
-    -- 'unknown' сознательно не входит в набор значений: гендер нужен для
-    -- родових форм системных повідомлень (увійшов/увійшла тощо), а без
+    -- 'unknown' свідомо не входить до набору значень: стать потрібна для
+    -- родових форм системних повідомлень (увійшов/увійшла тощо), а без
     -- конкретного значення таке повідомлення сформувати не можна.
     gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female')),
-    -- Цвет сообщений/ника пользователя в сайдбаре, выбирается в настройках.
-    -- 'black' — значение по умолчанию, ставится всем новым пользователям.
+    -- Колір повідомлень/ніка користувача в сайдбарі, обирається в налаштуваннях.
+    -- 'black' — значення за замовчуванням, ставиться всім новим користувачам.
     color VARCHAR(16) NOT NULL DEFAULT 'black'
         CHECK (color IN ('black', 'blue', 'green', 'purple', 'orange')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Для баз, созданных до появления поля color (init.sql выполняется только
--- на пустой базе через docker-entrypoint-initdb.d) — добить существующую
--- таблицу колонкой без падения, если она уже есть.
+-- Для баз, створених до появи поля color (init.sql виконується лише
+-- на порожній базі через docker-entrypoint-initdb.d) — доповнити наявну
+-- таблицю колонкою без падіння, якщо вона вже є.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS color VARCHAR(16) NOT NULL DEFAULT 'black';
 DO $$
 BEGIN
@@ -28,13 +28,13 @@ BEGIN
     END IF;
 END $$;
 
--- Убираем значение 'unknown' из gender для уже существующих баз (init.sql
--- выполняется только на пустой базе, поэтому старые окружения нужно
--- домигрировать явно). Так как выбрать "правильный" пол за пользователя
--- нельзя, а поле обязательное и без дефолта — оставшиеся строки со
--- значением 'unknown' переводим в 'male' как нейтральный технический
--- выбор (просто чтобы CHECK не упал); если для вашей базы это не
--- подходит — поправьте построчно перед следующим деплоем.
+-- Прибираємо значення 'unknown' зі статі для вже наявних баз (init.sql
+-- виконується лише на порожній базі, тому старі оточення потрібно
+-- домігрувати явно). Оскільки обрати "правильну" стать за користувача
+-- не можна, а поле обов'язкове і без дефолту — рядки, що залишилися зі
+-- значенням 'unknown', переводимо в 'male' як нейтральний технічний
+-- вибір (просто щоб CHECK не впав); якщо для вашої бази це не
+-- підходить — поправте порядково перед наступним деплоєм.
 UPDATE users SET gender = 'male' WHERE gender = 'unknown';
 
 DO $$
@@ -51,8 +51,8 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
--- Общий чат (комнаты из ROOMS, см. backend/src/constants/chat.constants.js).
--- text не содержит переносов строк — это гарантируется на уровне backend
+-- Загальний чат (кімнати з ROOMS, див. backend/src/constants/chat.constants.js).
+-- text не містить переносів рядків — це гарантується на рівні backend
 -- (message.service.js).
 CREATE TABLE IF NOT EXISTS messages (
     id BIGSERIAL PRIMARY KEY,
@@ -64,10 +64,10 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE INDEX IF NOT EXISTS idx_messages_room_created_at ON messages(room, created_at);
 
--- Личные сообщения (DM) — отдельная таблица, а не messages с room=NULL:
--- у личики нет ни гендерных групп участников, ни системных подій
--- вхід/вихід, ни общего "списка комнат", это принципиально другая
--- сущность (переписка ровно двух конкретных людей), см.
+-- Особисті повідомлення (DM) — окрема таблиця, а не messages з room=NULL:
+-- у особистих немає ні гендерних груп учасників, ні системних подій
+-- вхід/вихід, ні загального "списку кімнат", це принципово інша
+-- сутність (листування рівно двох конкретних людей), див.
 -- backend/src/repositories/privateMessage.repository.js.
 CREATE TABLE IF NOT EXISTS private_messages (
     id BIGSERIAL PRIMARY KEY,
@@ -78,9 +78,9 @@ CREATE TABLE IF NOT EXISTS private_messages (
     CONSTRAINT private_messages_no_self_dm CHECK (sender_id <> recipient_id)
 );
 
--- Один индекс покрывает оба типичных запроса: "переписка между A и Б"
--- (WHERE LEAST/GREATEST(...) = конкретная пара, ORDER BY created_at) и
--- "список диалогов пользователя" (см. PrivateMessageRepository) — вместо
--- отдельных индексов на sender_id/recipient_id по отдельности.
+-- Один індекс покриває обидва типові запити: "листування між A і Б"
+-- (WHERE LEAST/GREATEST(...) = конкретна пара, ORDER BY created_at) і
+-- "список діалогів користувача" (див. PrivateMessageRepository) — замість
+-- окремих індексів на sender_id/recipient_id окремо.
 CREATE INDEX IF NOT EXISTS idx_private_messages_pair
     ON private_messages (LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id), created_at);

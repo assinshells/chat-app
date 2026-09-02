@@ -48,13 +48,13 @@ export function SettingsModal({ modalId = "settingsModal" }) {
     applyTheme(next);
   };
 
-  // Портал в document.body обязателен: Bootstrap-модалка использует
-  // position: fixed относительно вьюпорта, а не своего DOM-родителя.
-  // Если рендерить её как обычного React-child внутри .app-sidebar,
-  // она попадёт в поддерево с transform/overflow:hidden (см. _sidebar.css)
-  // — это создаёт новый containing block для fixed-элементов, и модалка
-  // либо обрежется по ширине свёрнутого сайдбара, либо будет смещена
-  // и отцентрована относительно него, а не относительно экрана.
+  // Портал у document.body обов'язковий: Bootstrap-модалка використовує
+  // position: fixed відносно вьюпорта, а не свого DOM-батька.
+  // Якщо рендерити її як звичайного React-child всередині .app-sidebar,
+  // вона потрапить у піддерево з transform/overflow:hidden (див. _sidebar.css)
+  // — це створює новий containing block для fixed-елементів, і модалка
+  // або обріжеться по ширині згорнутого сайдбара, або буде зміщена
+  // і відцентрована відносно нього, а не відносно екрана.
   return createPortal(
     <div
       className="modal fade"

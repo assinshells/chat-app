@@ -5,12 +5,12 @@ import { getCsrfToken } from "@shared/lib/csrf.js";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 if (!apiUrl) {
-  console.error("[axios] VITE_API_URL is not set. API calls will fail.");
+  console.error("[axios] VITE_API_URL не задано. Запити до API не працюватимуть.");
 }
 
-// withCredentials — обязателен: refreshToken/csrfToken живут в cookie,
-// без этого флага браузер не отправит и не примет их на кросс-origin
-// запросах (frontend и backend на разных портах в dev).
+// withCredentials — обов'язковий: refreshToken/csrfToken живуть у cookie,
+// без цього прапорця браузер не надішле і не прийме їх у кросс-origin
+// запитах (frontend і backend на різних портах у dev).
 export const apiClient = axios.create({
   baseURL: apiUrl,
   withCredentials: true,
@@ -20,8 +20,8 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
-// Отдельный инстанс без интерсепторов — иначе запрос на /refresh,
-// получивший 401, сам попадёт в обработчик ниже и зациклится.
+// Окремий інстанс без інтерсепторів — інакше запит на /refresh,
+// що отримав 401, сам потрапить в обробник нижче і зациклиться.
 const refreshClient = axios.create({
   baseURL: apiUrl,
   withCredentials: true,
@@ -34,8 +34,8 @@ apiClient.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
-    // Безвредно отправлять всегда: backend проверяет заголовок только
-    // если у запроса есть csrfToken cookie (см. csrf.middleware.js).
+    // Безпечно надсилати завжди: backend перевіряє заголовок лише
+    // якщо у запиту є csrfToken cookie (див. csrf.middleware.js).
     const csrfToken = getCsrfToken();
     if (csrfToken) {
       config.headers["X-CSRF-Token"] = csrfToken;
@@ -52,7 +52,7 @@ const normalizeError = (error) => {
       ? error.response.data.error
       : null) ||
     error.message ||
-    "Request failed";
+    "Запит не вдався";
 
   const code = error.response?.data?.error?.code || "UNKNOWN_ERROR";
   const status = error.response?.status ?? 0;
@@ -63,20 +63,20 @@ const normalizeError = (error) => {
   return normalized;
 };
 
-// Пока идёт обновление access-токена, все параллельные 401-запросы
-// ждут один и тот же промис вместо того, чтобы каждый бил в /refresh
-// своим собственным запросом.
+// Поки триває оновлення access-токена, всі паралельні 401-запити
+// чекають той самий проміс замість того, щоб кожен бив у /refresh
+// власним окремим запитом.
 let refreshPromise = null;
 
 const AUTH_ENDPOINTS_WITHOUT_RETRY = ["/api/auth/login", "/api/auth/refresh"];
 
 /**
- * refreshAccessToken — вызывает /api/auth/refresh (refreshToken уходит
- * автоматически как httpOnly cookie, тело запроса не нужно) и кладёт
- * новый accessToken в AuthSession. Используется как интерцептором 401
- * ниже, так и App.jsx при монтировании — для восстановления сессии
- * после полной перезагрузки страницы (accessToken в памяти не переживает
- * reload, в отличие от refreshToken-cookie).
+ * refreshAccessToken — викликає /api/auth/refresh (refreshToken йде
+ * автоматично як httpOnly cookie, тіло запиту не потрібне) і кладе
+ * новий accessToken в AuthSession. Використовується як інтерсептором 401
+ * нижче, так і App.jsx при монтуванні — для відновлення сесії
+ * після повного перезавантаження сторінки (accessToken у пам'яті не
+ * переживає reload, на відміну від refreshToken-cookie).
  */
 export const refreshAccessToken = () => {
   if (!refreshPromise) {
@@ -126,7 +126,7 @@ apiClient.interceptors.response.use(
       config.headers.Authorization = `Bearer ${accessToken}`;
       return apiClient(config);
     } catch (refreshError) {
-      // Refresh-cookie тоже недействителен — сессия завершена окончательно.
+      // Refresh-cookie теж недійсна — сесія завершена остаточно.
       AuthSession.clear();
       window.location.reload();
       return Promise.reject(refreshError);

@@ -1,16 +1,16 @@
 # React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Цей шаблон надає мінімальне налаштування для роботи React у Vite з HMR і деякими правилами ESLint.
 
-Currently, two official plugins are available:
+Наразі доступні два офіційні плагіни:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) використовує [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) використовує [SWC](https://swc.rs/)
 
 ## React Compiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React Compiler не увімкнено в цьому шаблоні через його вплив на продуктивність розробки та збірки. Щоб додати його, дивіться [цю документацію](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
+## Розширення конфігурації ESLint
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Якщо ви розробляєте продакшн-застосунок, ми рекомендуємо використовувати TypeScript з увімкненими правилами лінтингу з урахуванням типів. Перегляньте [TS-шаблон](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts), щоб дізнатися, як інтегрувати TypeScript і [`typescript-eslint`](https://typescript-eslint.io) у ваш проєкт.

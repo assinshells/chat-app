@@ -21,13 +21,13 @@ export const PrivateMessageRepository = {
   },
 
   /**
-   * findConversation — вся переписка между двумя КОНКРЕТНЫМИ людьми
-   * (в обе стороны), последние `limit` сообщений в хронологическом
-   * порядке (старые -> новые), готовые к прямому рендеру. userIdA/
-   * userIdB не обязаны быть отсортированы — сравниваются в обе стороны,
-   * порядок аргументов не важен (см. idx_private_messages_pair в
-   * init.sql, который построен через LEAST/GREATEST ровно под этот
-   * запрос).
+   * findConversation — усе листування між двома КОНКРЕТНИМИ людьми
+   * (в обидва боки), останні `limit` повідомлень у хронологічному
+   * порядку (старі -> нові), готові до прямого рендеру. userIdA/
+   * userIdB не обов'язково мають бути відсортовані — порівнюються в
+   * обидва боки, порядок аргументів не важливий (див. idx_private_messages_pair
+   * у init.sql, який побудований через LEAST/GREATEST саме під цей
+   * запит).
    */
   async findConversation(userIdA, userIdB, limit = 50) {
     const { rows } = await pool.query(
@@ -42,11 +42,11 @@ export const PrivateMessageRepository = {
   },
 
   /**
-   * findConversationsList — по одному "последнему сообщению" на каждого
-   * собеседника userId когда-либо писал/получал, для списка диалогов
-   * в DirectMessagesModal (вертикальные вкладки). DISTINCT ON + сортировка
-   * внутри той же колонки — стандартный Postgres-паттерн "последняя
-   * запись в каждой группе" без оконных функций.
+   * findConversationsList — по одному "останньому повідомленню" на
+   * кожного співрозмовника, з яким userId коли-небудь писав/отримував,
+   * для списку діалогів у DirectMessagesModal (вертикальні вкладки).
+   * DISTINCT ON + сортування всередині тієї самої колонки — стандартний
+   * Postgres-патерн "останній запис у кожній групі" без віконних функцій.
    */
   async findConversationsList(userId, limit = 50) {
     const { rows } = await pool.query(
@@ -71,10 +71,10 @@ export const PrivateMessageRepository = {
          JOIN users r ON r.id = pm.recipient_id
          WHERE pm.sender_id = $1 OR pm.recipient_id = $1
        ) AS conversation
-       -- id DESC как вторичный тай-брейкер: created_at у сообщений,
-       -- вставленных в одной транзакции/той же миллисекунде, может
-       -- совпасть (NOW() в Postgres фиксируется один раз на транзакцию),
-       -- id AUTOINCREMENT гарантированно однозначен.
+       -- id DESC як вторинний тай-брейкер: created_at у повідомлень,
+       -- вставлених в одній транзакції/тій самій мілісекунді, може
+       -- збігтися (NOW() у Postgres фіксується один раз на транзакцію),
+       -- id AUTOINCREMENT гарантовано однозначний.
        ORDER BY other_user_id, last_at DESC, id DESC
        LIMIT $2`,
       [userId, limit],

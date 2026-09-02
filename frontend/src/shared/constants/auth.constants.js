@@ -9,8 +9,8 @@ export const AUTH_SCREENS = Object.freeze({
 
 export const APP_NAME = "Балачка";
 
-// Обязательное поле при регистрации — значения совпадают с backend GENDER_VALUES.
-// 'unknown' сознательно не входит в набір: гендер потрібен для родових
+// Обов'язкове поле при реєстрації — значення збігаються з backend GENDER_VALUES.
+// 'unknown' свідомо не входить у набір: стать потрібна для родових
 // форм системних повідомлень (увійшов/увійшла тощо, див. shared/lib/systemMessage.js).
 export const GENDER_OPTIONS = Object.freeze([
   { value: "male", label: "Чоловік" },

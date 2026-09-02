@@ -12,27 +12,28 @@ const ROOMS_STATE = "rooms:state";
 const SYSTEM_EVENT = "system:event";
 
 /**
- * useChatSocket — держит живое Socket.IO-соединение и текущую активную
- * комнату. История сообщений и список онлайн-пользователей комнаты
- * приходят не через отдельный REST-запрос, а прямо в ack на room:join —
- * сервер всё равно должен обработать join через сокет (чтобы посчитать
- * presence), так что отдавать снапшот в том же round-trip дешевле, чем
- * дублировать его отдельным HTTP-запросом.
+ * useChatSocket — тримає живе Socket.IO-з'єднання і поточну активну
+ * кімнату. Історія повідомлень і список онлайн-користувачів кімнати
+ * приходять не через окремий REST-запит, а прямо в ack на room:join —
+ * сервер все одно повинен обробити join через сокет (щоб порахувати
+ * presence), тож віддавати знімок у тому самому round-trip дешевше, ніж
+ * дублювати його окремим HTTP-запитом.
  *
- * roomCounts — счётчики участников по ВСЕМ комнатам (обновляются живьём
- * через rooms:state), нужны для списка комнат в сайдбаре, даже для тех,
- * в которых пользователь сейчас не находится.
- * roomUsers — участники ТОЛЬКО активной комнаты (с гендером), нужны для
- * вкладки "Користувачі" в сайдбаре.
+ * roomCounts — лічильники учасників по УСІХ кімнатах (оновлюються
+ * наживо через rooms:state), потрібні для списку кімнат у сайдбарі,
+ * навіть для тих, в яких користувач зараз не перебуває.
+ * roomUsers — учасники ЛИШЕ активної кімнати (зі статтю), потрібні для
+ * вкладки "Користувачі" в сайдбарі.
  *
- * Системные сообщения (event: 'join'|'switch'|'leave') приходят как
- * отдельное событие (system:event, см. backend) и подмешиваются в тот
- * же массив messages, что и обычные сообщения чата — ChatConversation
- * различает их по полю message.type === 'system'. В отличие от обычных
- * сообщений это НЕ глобальная рассылка: сервер шлёт их только
- * участникам конкретной Socket.IO room (io.to(room).emit) — "Добро
- * пожаловать" видят только те, кто сейчас в комнате, куда кто-то вошёл;
- * "переходит в комнату X" — только те, кто остался в СТАРОЙ комнате.
+ * Системні повідомлення (event: 'join'|'switch'|'leave') приходять як
+ * окрема подія (system:event, див. backend) і підмішуються в той самий
+ * масив messages, що й звичайні повідомлення чату — ChatConversation
+ * розрізняє їх за полем message.type === 'system'. На відміну від
+ * звичайних повідомлень це НЕ глобальна розсилка: сервер надсилає їх
+ * лише учасникам конкретної Socket.IO room (io.to(room).emit) —
+ * "Ласкаво просимо" бачать лише ті, хто зараз у кімнаті, куди хтось
+ * увійшов; "переходить у кімнату X" — лише ті, хто залишився в
+ * СТАРІЙ кімнаті.
  */
 export function useChatSocket({ enabled, initialRoom }) {
   const startRoom = initialRoom || DEFAULT_ROOM;
@@ -70,10 +71,10 @@ export function useChatSocket({ enabled, initialRoom }) {
     const handleConnect = () => {
       setConnected(true);
 
-      // При (пере)подключении явно (пере)заходим в текущую комнату —
-      // presence на сервере привязан к socket.id, после реконнекта нужен
-      // новый join, чтобы нас снова посчитали "онлайн", плюс это даёт
-      // свежую историю сообщений на случай, если она успела измениться.
+      // При (пере)підключенні явно (пере)заходимо в поточну кімнату —
+      // presence на сервері прив'язаний до socket.id, після реконекту
+      // потрібен новий join, щоб нас знову порахували "онлайн", плюс
+      // це дає свіжу історію повідомлень на випадок, якщо вона встигла змінитися.
       chatSocket.emit(ROOM_JOIN, { room: activeRoomRef.current }, (result) => {
         if (result?.success) applySnapshot(result);
       });
@@ -82,20 +83,20 @@ export function useChatSocket({ enabled, initialRoom }) {
     const handleDisconnect = () => setConnected(false);
 
     const handleMessageNew = (message) => {
-      // Сообщение приходит только тем, кто состоит в Socket.IO room этой
-      // комнаты (io.to(room).emit на бэкенде) — на клиенте достаточно
-      // просто добавить его, доп. фильтрация по room не нужна.
+      // Повідомлення приходить лише тим, хто перебуває в Socket.IO room
+      // цієї кімнати (io.to(room).emit на бекенді) — на клієнті достатньо
+      // просто додати його, дод. фільтрація за room не потрібна.
       setMessages((prev) => {
         if (prev.some((m) => m.id === message.id)) return prev;
         return [...prev, message];
       });
     };
 
-    // Системные сообщения (вхід/перехід/вихід) приходят так же, как
-    // message:new — только участникам конкретной Socket.IO room
-    // (io.to(room).emit на бэкенде, см. sockets/chat.socket.js), поэтому
-    // доп. фильтрация по room не нужна: если это событие дошло до нас,
-    // значит оно про нашу текущую комнату.
+    // Системні повідомлення (вхід/перехід/вихід) приходять так само, як
+    // message:new — лише учасникам конкретної Socket.IO room
+    // (io.to(room).emit на бекенді, див. sockets/chat.socket.js), тому
+    // дод. фільтрація за room не потрібна: якщо ця подія дійшла до нас,
+    // значить вона про нашу поточну кімнату.
     const handleSystemEvent = (message) => {
       setMessages((prev) => {
         if (prev.some((m) => m.id === message.id)) return prev;
@@ -137,10 +138,10 @@ export function useChatSocket({ enabled, initialRoom }) {
   }, [enabled]);
 
   /**
-   * switchRoom — переключает активную комнату: сразу обновляет UI-стейт
-   * (без ожидания сети — плавнее для пользователя), затем просит сервер
-   * перевести сокет в новую Socket.IO room и подтягивает актуальный
-   * снапшот (историю + участников) из ack.
+   * switchRoom — перемикає активну кімнату: одразу оновлює UI-стан
+   * (без очікування мережі — плавніше для користувача), потім просить
+   * сервер перевести сокет у нову Socket.IO room і підтягує актуальний
+   * знімок (історію + учасників) з ack.
    */
   const switchRoom = useCallback((room) => {
     if (!room || room === activeRoomRef.current) return;
@@ -154,9 +155,9 @@ export function useChatSocket({ enabled, initialRoom }) {
     if (!chatSocket.connected) return;
 
     chatSocket.emit(ROOM_JOIN, { room }, (result) => {
-      // Пользователь мог успеть переключиться на другую комнату, пока
-      // шёл этот запрос — применяем ответ, только если он всё ещё
-      // относится к комнате, которая активна прямо сейчас.
+      // Користувач міг встигнути перемкнутися на іншу кімнату, поки
+      // йшов цей запит — застосовуємо відповідь лише якщо вона все ще
+      // стосується кімнати, яка активна прямо зараз.
       if (result?.success && result.room === activeRoomRef.current) {
         setMessages(result.messages ?? []);
         setRoomUsers(result.users ?? []);
@@ -171,19 +172,19 @@ export function useChatSocket({ enabled, initialRoom }) {
   const sendMessage = useCallback((text) => {
     return new Promise((resolve, reject) => {
       if (!chatSocket.connected) {
-        reject(new Error("No connection to server"));
+        reject(new Error("Немає з'єднання з сервером"));
         return;
       }
 
-      // Локальный rate-limit ДО похода на сервер (зеркалит серверный
-      // лимит, см. messageRateLimiter.js): если пользователь уже
-      // выбрал окно, сервер всё равно отклонит запрос — нет смысла
-      // тратить round-trip, и пользователь мгновенно видит причину и
-      // обратный отсчёт, а не молчаливое "сообщение не ушло".
+      // Локальний rate-limit ДО походу на сервер (дзеркалить серверний
+      // ліміт, див. messageRateLimiter.js): якщо користувач уже
+      // вичерпав вікно, сервер все одно відхилить запит — немає сенсу
+      // витрачати round-trip, і користувач миттєво бачить причину і
+      // зворотний відлік, а не мовчазне "повідомлення не пішло".
       const localRetryAfterMs = registerSend();
       if (localRetryAfterMs) {
         startCooldown(localRetryAfterMs);
-        const err = new Error("Too many messages");
+        const err = new Error("Забагато повідомлень");
         err.code = "RATE_LIMITED";
         err.details = { retryAfterMs: localRetryAfterMs };
         reject(err);
@@ -199,16 +200,16 @@ export function useChatSocket({ enabled, initialRoom }) {
             return;
           }
 
-          // RATE_LIMITED/MUTED от сервера — источник истины по факту
-          // (локальный лимитер мог разойтись: несколько вкладок,
-          // реконнект после сна ноутбука, реальный мут автомодератора,
-          // о котором локальный счётчик вообще не знает). Кулдаун
-          // синхронизируется с реальным retryAfterMs от сервера.
+          // RATE_LIMITED/MUTED від сервера — джерело істини по факту
+          // (локальний лімітер міг розійтися: кілька вкладок,
+          // реконект після сну ноутбука, реальний мут автомодератора,
+          // про який локальний лічильник взагалі не знає). Кулдаун
+          // синхронізується з реальним retryAfterMs від сервера.
           if (result?.details?.retryAfterMs) {
             startCooldown(result.details.retryAfterMs);
           }
 
-          const err = new Error(result?.message || "Failed to send message");
+          const err = new Error(result?.message || "Не вдалося надіслати повідомлення");
           err.code = result?.code;
           err.details = result?.details;
           reject(err);

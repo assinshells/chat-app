@@ -7,8 +7,8 @@ import {
 import { PrivateMessageValidationException } from "../exceptions/chat.exceptions.js";
 import { DM_ERRORS, DM_LIMITS } from "../constants/chat.constants.js";
 
-// Тот же принцип, что и в message.service.js: сервер никогда не доверяет
-// клиентской нормализации текста, даже если запрос идёт мимо обычного UI.
+// Той самий принцип, що й у message.service.js: сервер ніколи не довіряє
+// клієнтській нормалізації тексту, навіть якщо запит йде повз звичайний UI.
 const normalizeText = (value) =>
   String(value ?? "")
     .replace(/[\r\n\u2028\u2029]+/g, " ")
@@ -16,9 +16,9 @@ const normalizeText = (value) =>
 
 export const PrivateMessageService = {
   /**
-   * sendPrivateMessage — резолвит получателя по логину (клиент не знает
-   * и не должен знать чужие user id), валидирует текст, запрещает
-   * писать самому себе, сохраняет и возвращает готовый DTO.
+   * sendPrivateMessage — резолвить одержувача за логіном (клієнт не знає
+   * і не повинен знати чужі user id), валідує текст, забороняє
+   * писати самому собі, зберігає і повертає готовий DTO.
    */
   async sendPrivateMessage({ senderId, senderLogin, recipientLogin, text }) {
     const normalized = normalizeText(text);
@@ -55,9 +55,9 @@ export const PrivateMessageService = {
   },
 
   /**
-   * getConversation — история переписки с конкретным собеседником
-   * (по логину). otherLogin не найден -> пустая история (не ошибка:
-   * диалога с несуществующим/ещё не открытым пользователем просто нет).
+   * getConversation — історія листування з конкретним співрозмовником
+   * (за логіном). otherLogin не знайдено -> порожня історія (не помилка:
+   * діалогу з неіснуючим/ще не відкритим користувачем просто немає).
    */
   async getConversation({
     userId,
@@ -81,9 +81,9 @@ export const PrivateMessageService = {
   },
 
   /**
-   * listConversations — сводка по всем диалогам пользователя (для
-   * вертикальных вкладок в DirectMessagesModal), последние активные —
-   * первыми.
+   * listConversations — зведення по всіх діалогах користувача (для
+   * вертикальних вкладок у DirectMessagesModal), останні активні —
+   * першими.
    */
   async listConversations({ userId }) {
     const rows = await PrivateMessageRepository.findConversationsList(userId);

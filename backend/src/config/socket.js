@@ -2,9 +2,9 @@ import { Server } from "socket.io";
 import { env } from "./env.js";
 
 /**
- * createSocketServer — тот же CORS-контракт, что и у Express (app.js):
- * единственный разрешённый origin — CLIENT_URL, с credentials для
- * согласованности (сам handshake токен несёт в auth-payload, не в cookie).
+ * createSocketServer — той самий CORS-контракт, що й у Express (app.js):
+ * єдиний дозволений origin — CLIENT_URL, з credentials для
+ * узгодженості (сам токен рукостискання передається в auth-payload, а не в cookie).
  */
 export function createSocketServer(httpServer) {
   return new Server(httpServer, {

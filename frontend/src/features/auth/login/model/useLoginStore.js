@@ -10,8 +10,8 @@ export const useLoginStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await loginRequest({ login, password });
-      // refreshToken/csrfToken пришли как cookie (см. axios.js/backend);
-      // в теле ответа — только accessToken, он живёт в памяти вкладки.
+      // refreshToken/csrfToken прийшли як cookie (див. axios.js/backend);
+      // у тілі відповіді — лише accessToken, він живе в пам'яті вкладки.
       AuthSession.setAccessToken(data.accessToken);
       onSuccess();
     } catch (err) {

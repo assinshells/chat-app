@@ -3,9 +3,9 @@ import { RefreshTokenInvalidException } from "../exceptions/auth.exceptions.js";
 
 /**
  * refreshCookieGuard — Express middleware.
- * Достаёт refresh-токен из httpOnly cookie (устанавливается CookieProvider
- * при login/refresh) и кладёт в req.refreshToken. Заменяет прежнее чтение
- * refreshToken из тела запроса — токен больше не должен быть доступен JS.
+ * Дістає refresh-токен з httpOnly cookie (встановлюється CookieProvider
+ * при login/refresh) і кладе в req.refreshToken. Замінює попереднє читання
+ * refreshToken з тіла запиту — токен більше не повинен бути доступний JS.
  */
 export const refreshCookieGuard = (req, _res, next) => {
   const token = req.cookies?.[COOKIE_NAMES.refreshToken];

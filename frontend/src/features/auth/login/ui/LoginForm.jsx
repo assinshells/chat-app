@@ -3,9 +3,9 @@ import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
 import { ROOMS, DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
 /**
- * LoginForm — тупой компонент.
- * onSuccess(login, room) — вызывается с логином и выбранной комнатой
- * после успешного входа, чтобы сразу открыть чат в нужной комнате.
+ * LoginForm — "тупий" компонент.
+ * onSuccess(login, room) — викликається з логіном і обраною кімнатою
+ * після успішного входу, щоб одразу відкрити чат у потрібній кімнаті.
  */
 export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const [login, setLogin] = useState("");

@@ -25,23 +25,23 @@ export function ChatHeader({
 
         <div className="chat-header-start">
 
-          {/* Мобильный триггер: сайдбар всегда свёрнут по умолчанию, открывается drawer'ом */}
+          {/* Мобільний тригер: сайдбар завжди згорнутий за замовчуванням, відкривається drawer'ом */}
           <button
             type="button"
             className="chat-header-btn sidebar-trigger d-lg-none"
-            title="Открыть меню"
+            title="Відкрити меню"
             onClick={onOpenMobileSidebar}
           >
             <PanelLeft size={18} />
           </button>
 
-          {/* Десктопный триггер: показывается только если сайдбар свёрнут.
-              Наведение — превью, клик — закрепить обратно. */}
+          {/* Десктопний тригер: показується лише якщо сайдбар згорнутий.
+              Наведення — прев'ю, клік — закріпити назад. */}
           {sidebarCollapsed && (
             <button
               type="button"
               className="chat-header-btn sidebar-trigger d-none d-lg-flex"
-              title="Показать боковую панель"
+              title="Показати бічну панель"
               onMouseEnter={onHoverSidebarIcon}
               onClick={onOpenSidebar}
             >
@@ -49,8 +49,8 @@ export function ChatHeader({
             </button>
           )}
 
-          {/* Название текущей комнаты (с фолбэком на имя приложения,
-              пока комната ещё не резолвилась). Логотип убран. */}
+          {/* Назва поточної кімнати (з фолбеком на ім'я застосунку,
+              поки кімната ще не резолвилась). Логотип прибрано. */}
           <div className="chat-brand">
             <div className="chat-brand-info">
               <h5 className="chat-brand-title">
@@ -60,7 +60,7 @@ export function ChatHeader({
               <span
                 className={`chat-brand-status ${online ? "is-online" : "is-offline"}`}
               >
-                {online ? "Online" : "Connecting…"}
+                {online ? "Онлайн" : "Підключення…"}
               </span>
             </div>
           </div>

@@ -19,8 +19,8 @@ export const MessageRepository = {
   },
 
   /**
-   * findRecent — последние `limit` сообщений room в хронологическом
-   * порядке (старые -> новые), готовые к прямому рендеру в ленте.
+   * findRecent — останні `limit` повідомлень room у хронологічному
+   * порядку (старі -> нові), готові до прямого рендеру в стрічці.
    */
   async findRecent(room = DEFAULT_ROOM, limit = 50) {
     const { rows } = await pool.query(

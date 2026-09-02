@@ -1,14 +1,14 @@
 import { apiClient } from "@shared/api/axios.js";
 
 /**
- * fetchMessageHistory — REST fallback для получения истории сообщений
- * комнаты. useChatSocket больше не вызывает эту функцию в обычном
- * потоке (снапшот истории приходит в ack на room:join через сокет —
- * это тот же round-trip, который всё равно нужен серверу для presence),
- * но функция остаётся доступной как явный REST-эндпоинт.
+ * fetchMessageHistory — REST fallback для отримання історії повідомлень
+ * кімнати. useChatSocket більше не викликає цю функцію у звичайному
+ * потоці (знімок історії приходить в ack на room:join через сокет —
+ * це той самий round-trip, який все одно потрібен серверу для presence),
+ * але функція залишається доступною як явний REST-ендпоінт.
  *
- * @param {string} [room] - id комнаты; без параметра бэкенд вернёт
- *   историю комнаты по умолчанию.
+ * @param {string} [room] - id кімнати; без параметра бекенд поверне
+ *   історію кімнати за замовчуванням.
  * @returns {Promise<Array<{id: string, author: string, text: string, timestamp: number, room: string}>>}
  */
 export const fetchMessageHistory = (room) =>

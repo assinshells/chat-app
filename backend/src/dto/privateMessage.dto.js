@@ -3,12 +3,12 @@ import { DEFAULT_COLOR } from "../constants/auth.constants.js";
 /**
  * @typedef {Object} PrivateMessageDto
  * @property {string} id
- * @property {string} sender - login отправителя
- * @property {string} recipient - login получателя
+ * @property {string} sender - login відправника
+ * @property {string} recipient - login одержувача
  * @property {string} text
  * @property {number} timestamp - unix ms
- * @property {string} color - цвет отправителя на момент отправки (та же
- *   палитра, что и у публичных сообщений, см. COLOR_OPTIONS)
+ * @property {string} color - колір відправника на момент відправлення (та сама
+ *   палітра, що й у публічних повідомленнях, див. COLOR_OPTIONS)
  */
 export const toPrivateMessageDto = (row) => ({
   id: String(row.id),
@@ -21,7 +21,7 @@ export const toPrivateMessageDto = (row) => ({
 
 /**
  * @typedef {Object} ConversationSummaryDto
- * @property {string} login - собеседник (не сам пользователь)
+ * @property {string} login - співрозмовник (не сам користувач)
  * @property {string} color
  * @property {{ text: string, timestamp: number, own: boolean }} lastMessage
  */

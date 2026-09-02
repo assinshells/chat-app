@@ -10,7 +10,7 @@ export const useLogoutStore = create((set) => ({
     try {
       await logoutRequest();
     } catch {
-      // Игнорируем — refresh-токен может быть уже истекшим/отозванным
+      // Ігноруємо — refresh-токен може бути вже прострочений/відкликаний
     } finally {
       AuthSession.clear();
       set({ loading: false });

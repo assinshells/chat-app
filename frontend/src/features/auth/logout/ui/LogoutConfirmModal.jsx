@@ -2,15 +2,15 @@ import { createPortal } from "react-dom";
 import { LogOut } from "lucide-react";
 
 /**
- * LogoutConfirmModal — Bootstrap-модалка подтверждения выхода из аккаунта.
- * Открывается по data-bs-toggle="modal" / data-bs-target={`#${modalId}`}
- * (см. Sidebar.jsx). Сам логаут выполняется в onConfirm — модалка ничего
- * не знает про useLogoutStore/AuthSession, только просит подтверждение.
+ * LogoutConfirmModal — Bootstrap-модалка підтвердження виходу з акаунту.
+ * Відкривається через data-bs-toggle="modal" / data-bs-target={`#${modalId}`}
+ * (див. Sidebar.jsx). Сам логаут виконується в onConfirm — модалка нічого
+ * не знає про useLogoutStore/AuthSession, лише просить підтвердження.
  *
- * Рендерится через портал в document.body по той же причине, что и
- * SettingsModal: если оставить её обычным React-child внутри .app-sidebar,
- * она попадёт в поддерево с transform/overflow:hidden и будет либо
- * обрезана, либо смещена относительно свёрнутого сайдбара вместо экрана.
+ * Рендериться через портал у document.body з тієї самої причини, що й
+ * SettingsModal: якщо залишити її звичайним React-child всередині
+ * .app-sidebar, вона потрапить у піддерево з transform/overflow:hidden і
+ * буде або обрізана, або зміщена відносно згорнутого сайдбара замість екрана.
  */
 export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }) {
   return createPortal(

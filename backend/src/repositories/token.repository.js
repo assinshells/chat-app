@@ -3,9 +3,9 @@ import { REDIS_KEYS } from "../constants/auth.constants.js";
 import { authConfig } from "../config/auth.config.js";
 
 /**
- * TokenRepository — whitelist выданных refresh-токенов в Redis.
- * Ключ — jti токена, значение — userId. Наличие записи означает,
- * что токен ещё не отозван (logout, ротация, компрометация).
+ * TokenRepository — whitelist виданих refresh-токенів у Redis.
+ * Ключ — jti токена, значення — userId. Наявність запису означає,
+ * що токен ще не відкликано (logout, ротація, компрометація).
  */
 export const TokenRepository = {
   async saveRefreshToken(jti, userId) {

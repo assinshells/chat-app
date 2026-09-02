@@ -3,13 +3,13 @@ import crypto from "crypto";
 import { authConfig } from "../config/auth.config.js";
 
 /**
- * TokenProvider — единственная точка работы с JWT (подпись/проверка).
- * Access-токен: короткоживущий, содержит только userId, проверяется
- * без обращения к БД/Redis (полностью stateless).
- * Refresh-токен: долгоживущий, содержит userId + jti (уникальный id
- * токена); сам jti кладётся в Redis-репозиторий, чтобы токен можно
- * было отозвать (logout / ротация) — иначе валидный JWT нельзя было
- * бы аннулировать до истечения срока действия.
+ * TokenProvider — єдина точка роботи з JWT (підпис/перевірка).
+ * Access-токен: короткоживучий, містить лише userId, перевіряється
+ * без звернення до БД/Redis (повністю stateless).
+ * Refresh-токен: довгоживучий, містить userId + jti (унікальний id
+ * токена); сам jti кладеться в Redis-репозиторій, щоб токен можна
+ * було відкликати (logout / ротація) — інакше валідний JWT не можна
+ * було б анулювати до завершення терміну дії.
  */
 export const TokenProvider = {
   signAccessToken(userId) {
@@ -35,9 +35,9 @@ export const TokenProvider = {
     return jwt.verify(token, authConfig.jwt.refreshToken.secret);
   },
 
-  // Opaque token for the double-submit CSRF cookie. Not a JWT — it carries
-  // no claims, it only needs to be unguessable and to match the value the
-  // client echoes back in the X-CSRF-Token header.
+  // Opaque-токен для double-submit CSRF-cookie. Не JWT — не несе
+  // жодних claims, йому потрібно лише бути непередбачуваним і
+  // збігатися зі значенням, яке клієнт повертає в заголовку X-CSRF-Token.
   generateCsrfToken() {
     return crypto.randomBytes(32).toString("hex");
   },

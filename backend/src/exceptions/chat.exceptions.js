@@ -15,10 +15,10 @@ export class PrivateMessageValidationException extends BaseException {
 }
 
 /**
- * Исключения автомодератора (см. moderation/moderation.service.js).
- * Каждое несёт свой `code`, по которому фронтенд подбирает конкретную
- * подсказку пользователю (см. shared/lib/moderationMessages.js) вместо
- * общего "не удалось отправить сообщение".
+ * Винятки автомодератора (див. moderation/moderation.service.js).
+ * Кожен несе свій `code`, за яким фронтенд підбирає конкретну
+ * підказку користувачу (див. shared/lib/moderationMessages.js) замість
+ * загального "не вдалося надіслати повідомлення".
  */
 export class ProfanityException extends BaseException {
   constructor(message = CHAT_ERRORS.PROFANITY) {
@@ -43,7 +43,7 @@ export class SpamException extends BaseException {
 
 export class MutedException extends BaseException {
   /**
-   * @param {number} retryAfterMs - через сколько мс мут снимется
+   * @param {number} retryAfterMs - через скільки мс мут знімається
    */
   constructor(retryAfterMs, message = CHAT_ERRORS.MUTED) {
     super(message, HTTP_STATUS.TOO_MANY, "MUTED");

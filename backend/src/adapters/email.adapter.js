@@ -1,12 +1,12 @@
 import logger from "../config/logger.js";
 
 /**
- * EmailAdapter — адаптер отправки email.
- * DEV MODE: реальная отправка не производится, OTP выводится в лог.
+ * EmailAdapter — адаптер відправки email.
+ * DEV MODE: реальна відправка не виконується, OTP виводиться в лог.
  */
 export const EmailAdapter = {
   async sendOtp(email, otp) {
-    logger.info(`Forgot Password OTP:\nemail=${email}\notp=${otp}`);
-    // TODO: replace with real email provider (nodemailer, SendGrid, etc.)
+    logger.info(`OTP для відновлення пароля:\nemail=${email}\notp=${otp}`);
+    // TODO: замінити на реального провайдера email (nodemailer, SendGrid тощо)
   },
 };

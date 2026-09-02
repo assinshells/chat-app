@@ -8,10 +8,10 @@ export const OtpProvider = {
     ).padStart(authConfig.otp.length, "0");
   },
 
-  // Opaque одноразовый токен для короткоживущего "verified" состояния
-  // после успешной проверки OTP (используется reset-password флоу).
-  // Не JWT и не связан с access/refresh токенами — это отдельный,
-  // непрозрачный идентификатор записи в Redis.
+  // Opaque одноразовий токен для короткоживучого стану "verified"
+  // після успішної перевірки OTP (використовується в reset-password флоу).
+  // Не JWT і не пов'язаний з access/refresh токенами — це окремий,
+  // непрозорий ідентифікатор запису в Redis.
   generateVerifiedToken() {
     return crypto.randomBytes(32).toString("hex");
   },

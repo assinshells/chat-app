@@ -6,21 +6,21 @@ import { describeSendError, describeCooldownHint } from "@shared/lib/moderationM
 const MAX_MESSAGE_LENGTH = 2000;
 
 /**
- * ChatComposer — форма отправки сообщения.
+ * ChatComposer — форма відправлення повідомлення.
  *
- * targetNicknames / targetTimes — "цели" сообщения (до 3 каждого),
- * добавленные кликом по нику/времени в ChatConversation (см. ChatLayout,
- * где живёт это состояние). Они показываются чипами над полем ввода и
- * могут быть удалены по одному (крестик на чипе) или все сразу (кнопка
- * "Clear"). Сами по себе, без текста сообщения, они никуда не
- * отправляются — только вместе с непустым текстом.
+ * targetNicknames / targetTimes — "цілі" повідомлення (до 3 кожного),
+ * додані кліком по ніку/часу в ChatConversation (див. ChatLayout,
+ * де живе цей стан). Вони показуються чипами над полем вводу і
+ * можуть бути видалені по одному (хрестик на чипі) або всі одразу
+ * (кнопка "Очистити"). Самі по собі, без тексту повідомлення, вони
+ * нікуди не відправляються — лише разом з непорожнім текстом.
  *
- * cooldownMs — сколько мс осталось до следующей разрешённой отправки
- * (клиентский rate-limit или серверный RATE_LIMITED/MUTED, см.
- * useChatSocket.js/useMessageCooldown.js). Пока > 0, кнопка отправки
- * заблокирована, а под полем ввода — живой обратный отсчёт вместо
- * молчаливого "сообщение не ушло": раньше лимит проверялся только на
- * сокете, и пользователь не понимал причину.
+ * cooldownMs — скільки мс залишилося до наступного дозволеного
+ * відправлення (клієнтський rate-limit або серверний
+ * RATE_LIMITED/MUTED, див. useChatSocket.js/useMessageCooldown.js).
+ * Поки > 0, кнопка відправлення заблокована, а під полем вводу —
+ * живий зворотний відлік замість мовчазного "повідомлення не пішло":
+ * раніше ліміт перевірявся лише на сокеті, і користувач не розумів причину.
  */
 export function ChatComposer({
   onSend,
@@ -40,17 +40,17 @@ export function ChatComposer({
   const hasTargets = targetNicknames.length > 0 || targetTimes.length > 0;
   const cooldownActive = cooldownMs > 0;
 
-  // Как только кулдаун, который спровоцировал последнюю ошибку
-  // (RATE_LIMITED/MUTED), истёк — эта ошибка считается устаревшей и
-  // больше не показывается (без setState в эффекте: просто не
-  // используем её при вычислении hintText ниже, см. activeError).
+  // Щойно кулдаун, який спровокував останню помилку
+  // (RATE_LIMITED/MUTED), минув — ця помилка вважається застарілою і
+  // більше не показується (без setState в ефекті: просто не
+  // використовуємо її при обчисленні hintText нижче, див. activeError).
   const errorCooldownExpired =
     sendError && (sendError.code === "RATE_LIMITED" || sendError.code === "MUTED") && cooldownMs <= 0;
   const activeError = errorCooldownExpired ? null : sendError;
 
   const handleChange = (e) => {
-    // Переносы строк (в т.ч. из вставленного многострочного текста)
-    // схлопываются в пробел — сообщение всегда остаётся одной строкой.
+    // Переноси рядків (у т.ч. з вставленого багаторядкового тексту)
+    // згортаються в пробіл — повідомлення завжди залишається одним рядком.
     const value = normalizeMessageText(e.target.value);
 
     if (value.length <= MAX_MESSAGE_LENGTH) {
@@ -62,8 +62,8 @@ export function ChatComposer({
     if (sendError) setSendError(null);
   };
 
-  // Enter — всегда отправляет сообщение (переносы строк в сообщениях
-  // не допускаются, поэтому у Shift+Enter нет отдельного поведения).
+  // Enter — завжди відправляє повідомлення (переноси рядків у
+  // повідомленнях не допускаються, тому у Shift+Enter немає окремої поведінки).
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -72,10 +72,10 @@ export function ChatComposer({
   };
 
   /**
-   * buildOutgoingText — собирает финальный текст сообщения из выбранных
-   * ников (@nick) и меток времени ([HH:MM:SS]) плюс собственно текста.
-   * Вызывается только когда есть непустой текст — пустые ник/время сами
-   * по себе никогда не формируют и не отправляют сообщение.
+   * buildOutgoingText — збирає фінальний текст повідомлення з обраних
+   * ніків (@nick) і міток часу ([HH:MM:SS]) плюс власне тексту.
+   * Викликається лише коли є непорожній текст — порожні нік/час самі
+   * по собі ніколи не формують і не відправляють повідомлення.
    */
   const buildOutgoingText = (text) => {
     const mentionsPrefix = targetNicknames.length
@@ -102,20 +102,20 @@ export function ChatComposer({
 
     const result = onSend?.(outgoingText);
 
-    // onSend может быть асинхронным (реальная отправка через сокет) —
-    // если сервер отклонил сообщение или связь оборвалась, возвращаем
-    // текст и выбранные цели обратно в форму, чтобы пользователь не
-    // терял набранное.
+    // onSend може бути асинхронним (реальне відправлення через сокет) —
+    // якщо сервер відхилив повідомлення або зв'язок обірвався, повертаємо
+    // текст і обрані цілі назад у форму, щоб користувач не
+    // втрачав набране.
     if (result?.then) {
       setSending(true);
       result
         .catch((err) => {
-          // Сервер отклонил сообщение или связь оборвалась — возвращаем
-          // и текст, и выбранные ранее цели (ники/время), чтобы
-          // пользователь мог просто повторить отправку. Сохраняем сам
-          // объект ошибки (не только message) — в нём code/details,
-          // по которым describeSendError ниже подбирает понятную
-          // формулировку и живой обратный отсчёт вместо технического
+          // Сервер відхилив повідомлення або зв'язок обірвався — повертаємо
+          // і текст, і обрані раніше цілі (ніки/час), щоб
+          // користувач міг просто повторити відправлення. Зберігаємо сам
+          // об'єкт помилки (не лише message) — у ньому code/details,
+          // за якими describeSendError нижче підбирає зрозуміле
+          // формулювання і живий зворотний відлік замість технічного
           // "Failed to send message".
           setMessage(text);
           onRestoreTargets?.(targetsSnapshot);
@@ -133,15 +133,15 @@ export function ChatComposer({
     setMessage((prev) => `${prev}${emoji}`);
   };
 
-  // Приоритет подсказки под полем ввода:
-  //  1. если есть ошибка последней отправки — понятный текст по её коду
-  //     (для RATE_LIMITED/MUTED секунды берутся из ЖИВОГО cooldownMs,
-  //     а не из зафиксированного в момент ошибки числа — так отсчёт не
-  //     "замирает");
-  //  2. если ошибки нет, но кулдаун всё ещё идёт (например, отправка
-  //     была заблокирована локальным лимитером ДО обращения к серверу)
-  //     — тот же живой отсчёт;
-  //  3. иначе — стандартная подсказка.
+  // Пріоритет підказки під полем вводу:
+  //  1. якщо є помилка останнього відправлення — зрозумілий текст за її
+  //     кодом (для RATE_LIMITED/MUTED секунди беруться з ЖИВОГО cooldownMs,
+  //     а не із зафіксованого в момент помилки числа — так відлік не
+  //     "завмирає");
+  //  2. якщо помилки немає, але кулдаун все ще триває (наприклад,
+  //     відправлення було заблоковано локальним лімітером ДО звернення
+  //     до сервера) — той самий живий відлік;
+  //  3. інакше — стандартна підказка.
   const hintText =
     (activeError && (describeSendError(activeError.code, cooldownMs || activeError.details?.retryAfterMs) ?? activeError.message)) ||
     (cooldownActive ? describeCooldownHint(cooldownMs) : null);
@@ -152,7 +152,7 @@ export function ChatComposer({
       <div className="chat-composer">
 
         {/* =========================================
-            TARGETS (selected nicknames / times)
+            ЦІЛІ (обрані ніки / час)
             ========================================= */}
 
         {hasTargets && (
@@ -164,7 +164,7 @@ export function ChatComposer({
                 <button
                   type="button"
                   className="composer-chip-remove"
-                  title={`Remove ${nick}`}
+                  title={`Прибрати ${nick}`}
                   onClick={() => onRemoveNickname?.(nick)}
                 >
                   <X size={12} />
@@ -178,7 +178,7 @@ export function ChatComposer({
                 <button
                   type="button"
                   className="composer-chip-remove"
-                  title={`Remove ${time}`}
+                  title={`Прибрати ${time}`}
                   onClick={() => onRemoveTime?.(time)}
                 >
                   <X size={12} />
@@ -191,7 +191,7 @@ export function ChatComposer({
               className="composer-chip-clear"
               onClick={() => onClearTargets?.()}
             >
-              Clear
+              Очистити
             </button>
 
           </div>
@@ -199,7 +199,7 @@ export function ChatComposer({
 
 
         {/* =========================================
-            TEXTAREA
+            ПОЛЕ ВВОДУ
             ========================================= */}
 
         <textarea
@@ -211,39 +211,39 @@ export function ChatComposer({
           rows={1}
           placeholder={
             targetNicknames.length
-              ? `Message ${targetNicknames.map((n) => `@${n}`).join(", ")}...`
-              : "Message..."
+              ? `Повідомлення для ${targetNicknames.map((n) => `@${n}`).join(", ")}...`
+              : "Повідомлення..."
           }
         />
 
 
         {/* =========================================
-            COMPOSER BOTTOM
+            НИЖНЯ ЧАСТИНА COMPOSER
             ========================================= */}
 
         <div className="chat-composer-bottom">
 
           <div className="chat-composer-left">
 
-            {/* Attachment */}
+            {/* Вкладення */}
 
             <button
               type="button"
               className="composer-tool-btn"
-              title="Attach file"
+              title="Прикріпити файл"
             >
               <Paperclip size={18} />
             </button>
 
 
-            {/* Emoji */}
+            {/* Емодзі */}
 
             <div className="composer-dropdown">
 
               <button
                 type="button"
                 className="composer-tool-btn"
-                title="Emoji"
+                title="Емодзі"
                 onClick={() =>
                   setShowEmoji((prev) => !prev)
                 }
@@ -291,7 +291,7 @@ export function ChatComposer({
 
 
           {/* =========================================
-              COUNTER + SEND
+              ЛІЧИЛЬНИК + ВІДПРАВЛЕННЯ
               ========================================= */}
 
           <div className="chat-composer-right">
@@ -311,7 +311,7 @@ export function ChatComposer({
               type="button"
               className="chat-send-btn"
               disabled={!message.trim() || sending || cooldownActive}
-              title={cooldownActive ? describeCooldownHint(cooldownMs) : "Send message"}
+              title={cooldownActive ? describeCooldownHint(cooldownMs) : "Надіслати повідомлення"}
               onClick={handleSend}
             >
               <Send size={17} />
@@ -328,7 +328,7 @@ export function ChatComposer({
         {hintText ? (
           <span className="chat-input-error">{hintText}</span>
         ) : (
-          "AI can make mistakes. Check important information."
+          "ШІ може помилятися. Перевіряйте важливу інформацію."
         )}
       </div>
 

@@ -8,30 +8,30 @@ import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 
 /**
- * DirectMessagesModal — единая модалка личных сообщений на всё
- * приложение (рендерится один раз в ChatLayout, как SettingsModal/
- * LogoutConfirmModal в Sidebar — см. их комментарий про createPortal).
- * Доставка реальная — через персональный сокет-канал пользователя (см.
- * backend sockets/dm.socket.js) и таблицу private_messages, а не
- * локальный стейт-стаб.
+ * DirectMessagesModal — єдина модалка особистих повідомлень на весь
+ * застосунок (рендериться один раз у ChatLayout, як SettingsModal/
+ * LogoutConfirmModal у Sidebar — див. їхній коментар про createPortal).
+ * Доставка реальна — через персональний сокет-канал користувача (див.
+ * backend sockets/dm.socket.js) і таблицю private_messages, а не
+ * локальний стейт-стаб.
  *
- * Два входа в неё (см. Sidebar.jsx, ChatConversation.jsx, ChatHeader.jsx):
- *  - "Написати особисте повідомлення" у конкретного ніка — открывает
- *    сразу на диалоге с этим человеком (useDmStore.openConversation);
- *  - иконка в шапке — открывает "инбокс" как есть, без выбора конкретного
- *    адресата, всегда с актуальным списком диалогов (useDmStore.openInbox).
+ * Два входи в неї (див. Sidebar.jsx, ChatConversation.jsx, ChatHeader.jsx):
+ *  - "Написати особисте повідомлення" у конкретного ніка — відкриває
+ *    одразу діалог з цією людиною (useDmStore.openConversation);
+ *  - іконка в шапці — відкриває "інбокс" як є, без вибору конкретного
+ *    адресата, завжди з актуальним списком діалогів (useDmStore.openInbox).
  *
- * Раскладка: слева вертикальные вкладки диалогов со своим скроллбаром
- * (app-scrollbar, как и везде в приложении), справа — само окно
- * переписки с выбранным собеседником.
+ * Розкладка: зліва вертикальні вкладки діалогів зі своїм скролбаром
+ * (app-scrollbar, як і всюди в застосунку), справа — саме вікно
+ * листування з обраним співрозмовником.
  *
- * На мобильном (см. @media в app.css) панели показываются по одной —
- * какая именно, решает useDmStore.mobileView, а не эта точка входа
- * сама по себе: openInbox (шапка) выставляет 'list', openConversation
- * (клик у ніка) — сразу 'conversation'. Кнопка "Назад" в шапке
- * переписки (видна только на мобильном, см. .dm-modal-back-btn)
- * возвращает к списку, не закрывая модалку. На десктопе mobileView ни
- * на что не влияет — обе панели видны всегда.
+ * На мобільному (див. @media в app.css) панелі показуються по одній —
+ * яка саме, вирішує useDmStore.mobileView, а не ця точка входу сама по
+ * собі: openInbox (шапка) виставляє 'list', openConversation
+ * (клік у ніка) — одразу 'conversation'. Кнопка "Назад" у шапці
+ * листування (видна лише на мобільному, див. .dm-modal-back-btn)
+ * повертає до списку, не закриваючи модалку. На десктопі mobileView ні
+ * на що не впливає — обидві панелі видно завжди.
  */
 export function DirectMessagesModal({ modalId = "dmModal" }) {
   const {
@@ -59,12 +59,12 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
   useAutoHideScrollbar(tabsRef);
   useAutoHideScrollbar(messagesRef);
 
-  // Модалка рендерится всегда (портал в document.body), видимость на
-  // экране переключает сам Bootstrap через CSS/JS — React об этом
-  // иначе не узнал бы. Нужно для счётчика непрочитанных: пока модалка
-  // реально не видна, новые dm:new засчитываются как непрочитанные
-  // (см. modalOpen в useDmStore), а как только показалась — активная
-  // вкладка сразу помечается прочитанной.
+  // Модалка рендериться завжди (портал у document.body), видимість на
+  // екрані перемикає сам Bootstrap через CSS/JS — React про це інакше
+  // не дізнався б. Потрібно для лічильника непрочитаних: поки модалка
+  // реально не видна, нові dm:new зараховуються як непрочитані
+  // (див. modalOpen у useDmStore), а щойно з'явилася — активна
+  // вкладка одразу позначається прочитаною.
   useEffect(() => {
     const el = modalRef.current;
     if (!el) return undefined;
@@ -73,9 +73,9 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
       setModalOpen(true);
       const login = useDmStore.getState().activeLogin;
       if (login) markAsRead(login);
-      // Пока модалка была скрыта (display:none у Bootstrap-модалки),
-      // scrollIntoView из эффекта ниже мог не сработать — довернём
-      // прокрутку теперь, когда контент реально виден и имеет layout.
+      // Поки модалка була прихована (display:none у Bootstrap-модалки),
+      // scrollIntoView з ефекту нижче міг не спрацювати — довершимо
+      // прокрутку тепер, коли контент реально видно і він має layout.
       endRef.current?.scrollIntoView({ block: "end" });
     };
     const handleHidden = () => setModalOpen(false);
@@ -90,10 +90,11 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
   const active = activeLogin ? conversations[activeLogin] : null;
 
-  // Автопрокрутка к последнему сообщению — при переключении диалога и
-  // при появлении новых сообщений (пришла история с сервера, отправили
-  // своё, получили входящее). Тот же паттерн, что и в ChatConversation
-  // (endRef — пустой якорь в конце списка, scrollIntoView без анимации).
+  // Автопрокрутка до останнього повідомлення — при перемиканні діалогу
+  // і при появі нових повідомлень (прийшла історія з сервера,
+  // надіслали своє, отримали вхідне). Той самий патерн, що й у
+  // ChatConversation (endRef — порожній якір в кінці списку, scrollIntoView
+  // без анімації).
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [activeLogin, active?.messages?.length]);
@@ -105,14 +106,14 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
     setDraft("");
     await sendMessage(activeLogin, text);
-    // При ошибке (см. sendError в сторе) текст пользователю возвращать
-    // не будем — проще оставить как есть и дать перепечатать: черновик
-    // мог успеть устареть (например, ошибка "recipient not found").
+    // При помилці (див. sendError у сторі) текст користувачу
+    // повертати не будемо — простіше залишити як є і дати передрукувати:
+    // чернетка могла встигнути застаріти (наприклад, помилка "recipient not found").
   };
 
-  // Портал в document.body — см. подробное объяснение в SettingsModal.jsx
-  // (тот же самый паттерн: Bootstrap-модалка не должна попадать в
-  // поддерево сайдбара с overflow/transform).
+  // Портал у document.body — див. детальне пояснення в SettingsModal.jsx
+  // (той самий патерн: Bootstrap-модалка не повинна потрапляти в
+  // піддерево сайдбара з overflow/transform).
   return createPortal(
     <div
       ref={modalRef}
@@ -185,18 +186,18 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
               )}
             </div>
 
-            {/* Само вікно повідомлень обраного діалогу. Контейнер
-                .dm-modal-messages рендерится ВСЕГДА (а не только когда
-                есть активный диалог) — так ref для useAutoHideScrollbar
-                привязывается сразу при первом монтировании модалки, а не
-                теряется при переключении между "нет диалога"/"диалог
-                открыт" (эффект в хуке не переподписывается на смену
-                .current, только на смену самого объекта ref). */}
+            {/* Саме вікно повідомлень обраного діалогу. Контейнер
+                .dm-modal-messages рендериться ЗАВЖДИ (а не лише коли
+                є активний діалог) — так ref для useAutoHideScrollbar
+                прив'язується одразу при першому монтуванні модалки, а
+                не втрачається при перемиканні між "немає діалогу"/"діалог
+                відкрито" (ефект у хуку не перепідписується на зміну
+                .current, лише на зміну самого об'єкта ref). */}
             <div className="dm-modal-conversation">
               {active && (
                 <div className="dm-modal-conversation-header">
-                  {/* Видна только на мобильном (см. app.css) — на
-                      десктопе список диалогов и так всегда рядом. */}
+                  {/* Видна лише на мобільному (див. app.css) — на
+                      десктопі список діалогів і так завжди поруч. */}
                   <button
                     type="button"
                     className="dm-modal-back-btn"
@@ -247,9 +248,9 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                     </div>
                   ))
                 )}
-                {/* Якорь для автопрокрутки (см. эффект выше) — пустой,
-                    рендерится всегда, в т.ч. при пустом/загружающемся
-                    диалоге, чтобы ref не терялся при смене состояния. */}
+                {/* Якір для автопрокрутки (див. ефект вище) — порожній,
+                    рендериться завжди, у т.ч. при порожньому/завантажуваному
+                    діалозі, щоб ref не втрачався при зміні стану. */}
                 <div ref={endRef} />
               </div>
 

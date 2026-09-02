@@ -3,18 +3,18 @@ import { useEffect, useRef } from "react";
 const HIDE_DELAY = 900;
 
 /**
- * useAutoHideScrollbar — имитирует поведение SimpleBar autoHide поверх
- * нативного скролла: во время скролла на элемент вешается класс
- * "is-scrolling" (см. CSS-правила .app-scrollbar.is-scrolling /
- * html.is-scrolling), который делает трек/бегунок видимым, а спустя
- * HIDE_DELAY мс без скролла класс снимается и скроллбар снова прячется.
- * Наведение мышью показывает скроллбар независимо от этого класса —
- * это уже чистый CSS (:hover), JS тут не нужен.
+ * useAutoHideScrollbar — імітує поведінку SimpleBar autoHide поверх
+ * нативного скролу: під час скролу на елемент вішається клас
+ * "is-scrolling" (див. CSS-правила .app-scrollbar.is-scrolling /
+ * html.is-scrolling), який робить трек/повзунок видимим, а через
+ * HIDE_DELAY мс без скролу клас знімається і скролбар знову ховається.
+ * Наведення мишею показує скролбар незалежно від цього класу —
+ * це вже чистий CSS (:hover), JS тут не потрібен.
  *
- * targetRef  — ref на скроллящийся элемент (overflow-y: auto/scroll).
- * options.window — true, если сам элемент не скроллится, а скроллится
- *                  документ целиком (например AuthLayout) — тогда слушаем
- *                  window, а класс вешаем на <html>.
+ * targetRef  — ref на елемент, що скролиться (overflow-y: auto/scroll).
+ * options.window — true, якщо сам елемент не скролиться, а скролиться
+ *                  документ цілком (наприклад AuthLayout) — тоді слухаємо
+ *                  window, а клас вішаємо на <html>.
  */
 export function useAutoHideScrollbar(targetRef, { window: isWindowScroll = false } = {}) {
   const timeoutRef = useRef(null);

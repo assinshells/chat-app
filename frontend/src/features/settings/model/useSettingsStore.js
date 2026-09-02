@@ -14,8 +14,8 @@ export const useSettingsStore = create((set) => ({
   error: null,
   success: false,
   gender: Storage.get(GENDER_KEY) ?? "",
-  // Цвет своих сообщений/ника (см. настройки → "Колір"). 'black' —
-  // значение по умолчанию, совпадает с DEFAULT в БД для новых пользователей.
+  // Колір своїх повідомлень/ніка (див. налаштування → "Колір"). 'black' —
+  // значення за замовчуванням, збігається з DEFAULT у БД для нових користувачів.
   color: Storage.get(COLOR_KEY) ?? DEFAULT_COLOR,
 
   clearStatus: () => set({ error: null, success: false }),

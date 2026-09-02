@@ -8,19 +8,19 @@ import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { DmTriggerButton } from "@features/dm";
 
 /**
- * renderMessageText — рендерит текст сообщения, подсвечивая упоминания
- * ников (например "@login", добавленное кликом по нику в ChatComposer):
+ * renderMessageText — рендерить текст повідомлення, підсвічуючи згадки
+ * ніків (наприклад "@login", додане кліком по ніку в ChatComposer):
  *
- *  - упоминание САМОГО СЕБЯ — всегда красным (.nickname-own), чтобы
- *    пользователь сразу замечал сообщения, адресованные лично ему —
- *    так же, как выделен его ник-автор в собственных сообщениях;
- *  - упоминание ЛЮБОГО ДРУГОГО известного пользователя (получателя
- *    сообщения) — цветом самого сообщения (см. messageColor/getColorHex),
- *    т.е. цветом, который выбрал в настройках автор сообщения.
+ *  - згадка САМОГО СЕБЕ — завжди червоним (.nickname-own), щоб
+ *    користувач одразу помічав повідомлення, адресовані особисто йому —
+ *    так само, як виділений його нік-автор у власних повідомленнях;
+ *  - згадка БУДЬ-ЯКОГО ІНШОГО відомого користувача (отримувача
+ *    повідомлення) — кольором самого повідомлення (див. messageColor/getColorHex),
+ *    тобто кольором, який обрав у налаштуваннях автор повідомлення.
  *
- * knownLogins — Set логинов участников текущей комнаты (см. roomUsers в
- * ChatLayout), нужен, чтобы не подсвечивать случайное "@что-то" в
- * тексте, не являющееся реальным ником.
+ * knownLogins — Set логінів учасників поточної кімнати (див. roomUsers в
+ * ChatLayout), потрібен, щоб не підсвічувати випадкове "@щось" у
+ * тексті, що не є реальним ніком.
  */
 function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
   const ownMention = currentUser ? `@${currentUser}` : null;
@@ -48,22 +48,22 @@ function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
 }
 
 /**
- * SystemMessageRow — системное уведомление о входе/переходе/выходе
- * (event: 'join'|'switch'|'leave', см. backend sockets/chat.socket.js).
- * Текст без родовых форм (не зависит от пола), у каждого события —
- * свой порядок слов:
+ * SystemMessageRow — системне сповіщення про вхід/перехід/вихід
+ * (event: 'join'|'switch'|'leave', див. backend sockets/chat.socket.js).
+ * Текст без родових форм (не залежить від статі), у кожної події —
+ * свій порядок слів:
  *
- *  - join:   "{час} Добро пожаловать в чат, {Нік}!"
- *  - switch: "{час} {Нік} переходит в комнату {Назва}"
- *  - leave:  "{час} {Нік} покидает чат"
+ *  - join:   "{час} Ласкаво просимо до чату, {Нік}!"
+ *  - switch: "{час} {Нік} переходить у кімнату {Назва}"
+ *  - leave:  "{час} {Нік} покидає чат"
  *
- * Ник и назва кімнати (для switch) — клікабельні: ник — добавляет как
- * адресата в форму отправки (как и в обычных сообщениях), кімната —
- * переключает пользователя туда же.
+ * Нік і назва кімнати (для switch) — клікабельні: нік — додає як
+ * адресата у форму відправлення (як і в звичайних повідомленнях), кімната —
+ * перемикає користувача туди ж.
  *
- * Цвет ника: свой собственный — красный (.nickname-own, тот же акцент,
- * что и везде в приложении), чужой — цвет, который тот пользователь
- * выбрал в настройках (см. features/settings).
+ * Колір ніка: свій власний — червоний (.nickname-own, той самий акцент,
+ * що й усюди в застосунку), чужий — колір, який той користувач
+ * обрав у налаштуваннях (див. features/settings).
  */
 function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }) {
   const isOwn = message.login === currentUser;
@@ -76,7 +76,7 @@ function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }
     <button
       type="button"
       className="system-message-nickname-btn"
-      title="Add user to message form"
+      title="Додати користувача у форму повідомлення"
       style={
         message.color && message.color !== "black"
           ? { "--user-color": getColorHex(message.color) }
@@ -92,7 +92,7 @@ function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }
     <button
       type="button"
       className="system-message-room-btn"
-      title="Go to room"
+      title="Перейти до кімнати"
       onClick={() => onRoomClick?.(message.room)}
     >
       {roomName}
@@ -105,16 +105,16 @@ function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }
         <span className="message-time">{timeLabel}</span>{" "}
         {message.event === "join" && (
           <span className="system-message-text">
-            Добро пожаловать в чат, {nicknameEl}!
+            Ласкаво просимо до чату, {nicknameEl}!
           </span>
         )}
         {message.event === "switch" && (
           <span className="system-message-text">
-            {nicknameEl} переходит в комнату {roomEl}
+            {nicknameEl} переходить у кімнату {roomEl}
           </span>
         )}
         {message.event === "leave" && (
-          <span className="system-message-text">{nicknameEl} покидает чат</span>
+          <span className="system-message-text">{nicknameEl} покидає чат</span>
         )}
       </div>
     </div>
@@ -122,12 +122,12 @@ function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }
 }
 
 /**
- * ChatConversation — список сообщений комнаты.
+ * ChatConversation — список повідомлень кімнати.
  *
- * Ник автора (кроме своего собственного) и время сообщения кликабельны:
- * клик передаётся наверх через onNicknameClick/onTimeClick, чтобы
- * ChatComposer мог добавить их как "цели" отправки (до 3 ников и 3 меток
- * времени, см. ChatLayout). Уже выбранные значения подсвечиваются.
+ * Нік автора (крім власного) і час повідомлення клікабельні:
+ * клік передається наверх через onNicknameClick/onTimeClick, щоб
+ * ChatComposer міг додати їх як "цілі" відправлення (до 3 ніків і 3 міток
+ * часу, див. ChatLayout). Вже обрані значення підсвічуються.
  */
 export function ChatConversation({
   messages = [],
@@ -144,12 +144,12 @@ export function ChatConversation({
 
   useAutoHideScrollbar(scrollRef);
 
-  // Множество логинов участников комнаты — используется в renderMessageText,
-  // чтобы подсветить цветом сообщения только реальные упоминания ников,
-  // а не любой текст, случайно начинающийся с "@".
+  // Множина логінів учасників кімнати — використовується в renderMessageText,
+  // щоб підсвітити кольором повідомлення лише реальні згадки ніків,
+  // а не будь-який текст, що випадково починається з "@".
   const knownLogins = new Set(roomUsers.map((user) => user.login));
 
-  // Автопрокрутка к последнему сообщению при добавлении нового.
+  // Автопрокрутка до останнього повідомлення при додаванні нового.
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
@@ -160,7 +160,7 @@ export function ChatConversation({
 
         {messages.length === 0 ? (
           <div className="chat-empty-state">
-            <p>No messages yet. Say hi!</p>
+            <p>Повідомлень ще немає. Напишіть перше!</p>
           </div>
         ) : (
           <div className="message-list">
@@ -184,14 +184,15 @@ export function ChatConversation({
               const isNicknameSelected = selectedNicknames.includes(message.author);
               const isTimeSelected = selectedTimes.includes(timeLabel);
 
-              // Цвет текста сообщения — тот, что автор выбрал в настройках.
-              // 'black' (значение по умолчанию) — НЕ форсируется явным
-              // hex-кодом: в тёмной теме чистый чёрный текст был бы
-              // нечитаемым на тёмном фоне, поэтому для дефолтного цвета
-              // просто ничего не переопределяем и остаётся обычный
-              // адаптивный цвет темы (var(--bs-body-color)). Ник автора
-              // при этом цвет вообще не меняет — остаётся обычным, кроме
-              // своего собственного (он всегда красный, .nickname-own).
+              // Колір тексту повідомлення — той, що автор обрав у
+              // налаштуваннях. 'black' (значення за замовчуванням) — НЕ
+              // форсується явним hex-кодом: у темній темі чистий чорний
+              // текст був би нечитабельним на темному фоні, тому для
+              // дефолтного кольору просто нічого не перевизначаємо і
+              // залишається звичайний адаптивний колір теми
+              // (var(--bs-body-color)). Нік автора при цьому колір
+              // взагалі не змінює — залишається звичайним, крім
+              // власного (він завжди червоний, .nickname-own).
               const messageColorHex =
                 message.color && message.color !== "black"
                   ? getColorHex(message.color)
@@ -205,21 +206,21 @@ export function ChatConversation({
 
                   <div className="message-content">
 
-                    {/* Время — кликабельно всегда: добавляет метку времени
-                        в форму отправки (до 3 шт, см. ChatComposer). */}
+                    {/* Час — клікабельний завжди: додає мітку часу
+                        у форму відправлення (до 3 шт, див. ChatComposer). */}
                     <button
                       type="button"
                       className={`message-time message-time-btn ${
                         isTimeSelected ? "is-selected" : ""
                       }`}
-                      title="Add time to message form"
+                      title="Додати час у форму повідомлення"
                       onClick={() => onTimeClick?.(timeLabel)}
                     >
                       {timeLabel}
                     </button>{" "}
 
-                    {/* Ник — кликабелен, кроме собственного: добавляет
-                        адресата в форму отправки (до 3 шт). */}
+                    {/* Нік — клікабельний, крім власного: додає
+                        адресата у форму відправлення (до 3 шт). */}
                     {isOwn ? (
                       <span className="message-author nickname-own">
                         {message.author}
@@ -232,7 +233,7 @@ export function ChatConversation({
                           className={`message-author message-author-btn ${
                             isNicknameSelected ? "is-selected" : ""
                           }`}
-                          title="Add user to message form"
+                          title="Додати користувача у форму повідомлення"
                           onClick={() => onNicknameClick?.(message.author)}
                         >
                           {message.author}

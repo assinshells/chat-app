@@ -3,9 +3,9 @@ import { moderationConfig } from "../config/moderation.config.js";
 
 export const capsFilter = {
   /**
-   * isShouting — true, если в тексте достаточно букв (короткие реплики
-   * вроде "ОК", "ДА!" не наказываются, см. caps.minLength) И доля
-   * заглавных среди них превышает caps.threshold.
+   * isShouting — true, якщо в тексті достатньо букв (короткі репліки
+   * на кшталт "ОК", "ТАК!" не караються, див. caps.minLength) І частка
+   * великих серед них перевищує caps.threshold.
    */
   isShouting(text) {
     const letterCount = (String(text ?? "").match(/\p{L}/gu) ?? []).length;

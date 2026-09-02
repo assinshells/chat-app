@@ -1,8 +1,9 @@
 /**
- * Centralized, validated access to environment variables.
- * Fails fast at startup if a required variable is missing, instead of
- * letting the app boot into a broken state (e.g. undefined DB connection
- * string, CORS silently blocking every request).
+ * Централізований, перевірений доступ до змінних оточення.
+ * Одразу завершує роботу при старті, якщо відсутня обов'язкова змінна,
+ * замість того щоб дозволити застосунку запуститись у зламаному стані
+ * (наприклад, undefined рядок підключення до БД, CORS, що мовчки
+ * блокує кожен запит).
  */
 
 const REQUIRED_VARS = [
@@ -24,8 +25,8 @@ function assertRequiredEnv() {
   const missing = REQUIRED_VARS.filter((name) => !process.env[name]);
   if (missing.length > 0) {
     throw new Error(
-      `Missing required environment variable(s): ${missing.join(", ")}. ` +
-        "Check your .env file against backend/.env.example.",
+      `Відсутні обов'язкові змінні оточення: ${missing.join(", ")}. ` +
+        "Перевірте свій файл .env відносно backend/.env.example.",
     );
   }
 }
@@ -42,16 +43,16 @@ export const env = {
     refreshSecret: getEnv("JWT_REFRESH_SECRET"),
     accessExpiresIn: getEnv("JWT_ACCESS_EXPIRES_IN", "15m"),
     refreshExpiresIn: getEnv("JWT_REFRESH_EXPIRES_IN", "7d"),
-    // Must stay in sync with refreshExpiresIn above — used as the Redis
-    // whitelist TTL (seconds) for the refresh token, since jsonwebtoken's
-    // `expiresIn` accepts human strings ("7d") that Redis EX cannot.
+    // Має залишатися синхронізованим з refreshExpiresIn вище — використовується
+    // як TTL (у секундах) для білого списку в Redis для refresh-токена, оскільки
+    // `expiresIn` у jsonwebtoken приймає рядки на кшталт "7d", які Redis EX не розуміє.
     refreshTtlSeconds: Number(getEnv("JWT_REFRESH_TTL_SECONDS", 604800)),
   },
   otpTtlSeconds: Number(getEnv("OTP_TTL_SECONDS", 600)),
   otpLength: Number(getEnv("OTP_LENGTH", 6)),
-  // Максимум неверных попыток ввода OTP до его принудительной инвалидации.
-  // Без этого лимита OTP (6 цифр) можно подобрать перебором в пределах TTL,
-  // так как express-rate-limit ограничивает запросы по IP, а не по коду.
+  // Максимум невірних спроб введення OTP до його примусової інвалідації.
+  // Без цього ліміту OTP (6 цифр) можна підібрати перебором у межах TTL,
+  // оскільки express-rate-limit обмежує запити за IP, а не за кодом.
   otpMaxAttempts: Number(getEnv("OTP_MAX_ATTEMPTS", 5)),
   rateLimit: {
     loginMax: Number(getEnv("RATE_LIMIT_LOGIN_MAX", 10)),
