@@ -83,10 +83,10 @@ export const AuthService = {
     return { success: true };
   },
   async updateGender({ userId, gender }) {
-  const updated = await UserRepository.updateGender(userId, gender);
-  if (!updated) throw new NotFoundException();
-  return { success: true, gender: updated.gender };
-},
+    const updated = await UserRepository.updateGender(userId, gender);
+    if (!updated) throw new NotFoundException();
+    return { success: true, gender: updated.gender };
+  },
   async updateColor({ userId, color }) {
     const updated = await UserRepository.updateColor(userId, color);
     if (!updated) throw new NotFoundException();

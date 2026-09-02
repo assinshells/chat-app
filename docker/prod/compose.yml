@@ -6,8 +6,14 @@ services:
     container_name: chat-postgres
     restart: unless-stopped
     environment:
+      # POSTGRES_PASSWORD навмисно без :- фолбеку: у dev compose.yml
+      # дефолт "root" зручний, але в prod compose тихий дефолт до
+      # слабкого пароля — реальний ризик (хтось забув .env на сервері,
+      # контейнер все одно піднявся б з POSTGRES_PASSWORD=root). Якщо
+      # змінна не задана, Docker Compose впаде з помилкою при старті —
+      # це навмисно, "fail fast" кращий за тихий незахищений продакшн.
       POSTGRES_USER: ${POSTGRES_USER:-postgre}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD обов'язковий у продакшні}
       POSTGRES_DB: ${POSTGRES_DB:-postgre}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -52,7 +58,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: ${BACKEND_PORT:-3000}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgre}:${POSTGRES_PASSWORD:-root}@postgres:5432/${POSTGRES_DB:-postgre}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgre}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD обов'язковий у продакшні}@postgres:5432/${POSTGRES_DB:-postgre}
       REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
