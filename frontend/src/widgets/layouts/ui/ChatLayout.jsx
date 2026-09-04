@@ -108,7 +108,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onHoverEnter={() => setHovering(true)}
         onHoverLeave={() => setHovering(false)}
         onCloseMobile={() => setMobileOpen(false)}
-        onLogout={onLogout}
         login={login}
         activeRoom={activeRoom}
         roomCounts={roomCounts}
@@ -134,6 +133,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             onOpenSidebar={() => setPinned(true)}
             onHoverSidebarIcon={() => setHovering(true)}
             onOpenMobileSidebar={() => setMobileOpen(true)}
+            onLogout={onLogout}
           />
           <ChatConversation
             messages={messages}

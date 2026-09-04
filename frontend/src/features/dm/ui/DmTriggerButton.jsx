@@ -1,4 +1,4 @@
-import { MoreVertical } from "lucide-react";
+import { User } from "lucide-react";
 
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 
@@ -24,7 +24,7 @@ export function DmTriggerButton({ login, color, modalId = "dmModal" }) {
         title="Дії"
         onClick={(e) => e.stopPropagation()}
       >
-        <MoreVertical size="1em" />
+        <User size="0.8em" />
       </button>
 
       <div className="dropdown-menu dm-trigger-menu">

@@ -1,7 +1,12 @@
-import { Mail, PanelLeft } from "lucide-react";
+import { LogOut, Mail, PanelLeft, Settings } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
+import { SettingsModal } from "@features/settings";
+import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
+
+const SETTINGS_MODAL_ID = "settingsModal";
+const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 export function ChatHeader({
   title,
@@ -10,6 +15,7 @@ export function ChatHeader({
   onOpenSidebar,
   onHoverSidebarIcon,
   onOpenMobileSidebar,
+  onLogout,
   dmModalId = "dmModal",
 }) {
   const openInbox = useDmStore((state) => state.openInbox);
@@ -86,8 +92,31 @@ export function ChatHeader({
             )}
           </button>
 
+          <button
+            type="button"
+            className="chat-header-btn"
+            title="Налаштування"
+            data-bs-toggle="modal"
+            data-bs-target={`#${SETTINGS_MODAL_ID}`}
+          >
+            <Settings size={18} />
+          </button>
+
+          <button
+            type="button"
+            className="chat-header-btn"
+            title="Вийти"
+            data-bs-toggle="modal"
+            data-bs-target={`#${LOGOUT_MODAL_ID}`}
+          >
+            <LogOut size={18} />
+          </button>
+
         </div>
       </div>
+
+      <SettingsModal modalId={SETTINGS_MODAL_ID} />
+      <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
     </header>
   );
 }

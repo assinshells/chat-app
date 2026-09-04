@@ -1,7 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { LogOut, PanelLeft, Settings, X } from "lucide-react";
-import { SettingsModal } from "@features/settings";
-import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
+import { PanelLeft, X } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
@@ -18,9 +16,6 @@ const MAIN_TABS = [
   { id: "rooms", label: "Кімнати" },
   { id: "users", label: "Користувачі" },
 ];
-
-const SETTINGS_MODAL_ID = "settingsModal";
-const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 /**
  * Бічна панель у дусі Claude / ChatGPT.
@@ -51,7 +46,6 @@ export function Sidebar({
   onHoverEnter,
   onHoverLeave,
   onCloseMobile,
-  onLogout,
   login,
   activeRoom,
   roomCounts,
@@ -240,45 +234,12 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* Профіль користувача внизу панелі: нік (з дропдауном логауту)
-            і кнопка згортання — дві незалежні кнопки зі своїм
-            ховером у кожної, однієї висоти. */}
+        {/* Профіль користувача внизу панелі: просто нік (без дропдауну —
+            налаштування і вихід перенесені в шапку чата, див. ChatHeader)
+            і кнопка згортання, однієї висоти. */}
         <div className="app-sidebar-footer">
-          <div className="dropdown dropup app-sidebar-user-dropdown">
-            <button
-              type="button"
-              className="app-sidebar-user"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <span className="app-sidebar-user-name">{login || "Гість"}</span>
-            </button>
-
-            <div className="dropdown-menu app-sidebar-user-menu">
-  <a className="dropdown-item"
-    href="#"
-    data-bs-toggle="modal"
-    data-bs-target={`#${SETTINGS_MODAL_ID}`}
-    onClick={(e) => e.preventDefault()}
-  >
-    <Settings size={16} strokeWidth={2} />
-    <span>Налаштування</span>
-  </a>
-
-  <div className="dropdown-divider"></div>
-
-  <a  className="dropdown-item"
-    href="#"
-    data-bs-toggle="modal"
-    data-bs-target={`#${LOGOUT_MODAL_ID}`}
-    onClick={(e) => e.preventDefault()}
-  >
-    <LogOut size={16} strokeWidth={2} />
-    <span>Вийти</span>
-  </a>
-</div>
-<SettingsModal modalId={SETTINGS_MODAL_ID} />
-<LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
+          <div className="app-sidebar-user">
+            <span className="app-sidebar-user-name">{login || "Гість"}</span>
           </div>
 
           {/* На десктопі — поруч з ніком. У прев'ю CSS переносить її

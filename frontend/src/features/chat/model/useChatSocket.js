@@ -3,9 +3,11 @@ import { chatSocket } from "@shared/api/socket.js";
 import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 import { registerSend } from "@features/chat/model/messageRateLimiter.js";
 import { useMessageCooldown } from "@features/chat/model/useMessageCooldown.js";
+import { Storage } from "@shared/lib/storage.js";
 
 const MESSAGE_NEW = "message:new";
 const MESSAGE_SEND = "message:send";
+const ROOM_KEY = "userRoom";
 const ROOM_JOIN = "room:join";
 const ROOM_USERS = "room:users";
 const ROOMS_STATE = "rooms:state";
@@ -50,6 +52,10 @@ export function useChatSocket({ enabled, initialRoom }) {
     activeRoomRef.current = activeRoom;
   }, [activeRoom]);
 
+    useEffect(() => {
+    Storage.set(ROOM_KEY, activeRoom);
+  }, [activeRoom]);
+  
   useEffect(() => {
     if (!enabled) return undefined;
 
