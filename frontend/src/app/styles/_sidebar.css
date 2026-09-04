@@ -437,6 +437,8 @@
   flex: 1 1 auto;
   min-width: 0;
 
+  text-align: left;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -514,17 +516,23 @@
 
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 
   padding: 0 0.65rem;
+
+  text-align: left;
 }
 
 .app-sidebar-user-name {
+  width: 100%;
   min-width: 0;
 
   font-size: 0.85rem;
   font-weight: 600;
 
   color: var(--bs-body-color);
+
+  text-align: left;
 
   white-space: nowrap;
   overflow: hidden;
