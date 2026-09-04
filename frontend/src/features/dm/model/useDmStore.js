@@ -65,11 +65,46 @@ export const useDmStore = create((set, get) => ({
   mobileView: "list",
 
   /**
-   * setCurrentUser — викликається один раз з ChatLayout (див. проп login):
-   * потрібно знати свій логін, щоб за вхідним dm:new {sender, recipient}
-   * зрозуміти, ХТО тут "співрозмовник", а не "я".
+   * setCurrentUser — викликається з ChatLayout (див. проп login): потрібно
+   * знати свій логін, щоб за вхідним dm:new {sender, recipient} зрозуміти,
+   * ХТО тут "співрозмовник", а не "я".
+   *
+   * useDmStore — singleton-стор на рівні модуля (переживає
+   * mount/unmount ChatLayout), тому просто перезаписати currentUser
+   * НЕДОСТАТНЬО: якщо в цій самій вкладці відбувся logout -> login
+   * (навіть під ІНШИМ акаунтом, без перезавантаження сторінки),
+   * conversations/order/activeLogin від попередньої сесії лишалися б
+   * висіти в сторі і змішувалися б із діалогами нового користувача —
+   * саме це виглядало як "діалоги/лічильники плутаються між собою".
+   * Тому при РЕАЛЬНІЙ зміні логіна (не при першому виклику з null)
+   * стан особистих повідомлень повністю скидається.
    */
-  setCurrentUser: (login) => set({ currentUser: login }),
+  setCurrentUser: (login) => {
+    const { currentUser } = get();
+    if (currentUser !== null && currentUser !== login) {
+      get().reset();
+    }
+    set({ currentUser: login });
+  },
+
+  /**
+   * reset — повне очищення стану модалки особистих повідомлень.
+   * Викликається явно при logout (див. useLogoutStore) і захисно при
+   * зміні currentUser (див. setCurrentUser вище) — два незалежні
+   * запобіжники від одного й того самого класу бага (витік стану між
+   * сесіями в тій самій вкладці).
+   */
+  reset: () =>
+    set({
+      conversations: {},
+      order: [],
+      activeLogin: null,
+      listLoading: false,
+      listLoaded: false,
+      sendError: null,
+      modalOpen: false,
+      mobileView: "list",
+    }),
 
   /**
    * setModalOpen — викликається з DirectMessagesModal за нативними
@@ -309,10 +344,24 @@ export const useDmStore = create((set, get) => ({
   },
 }));
 
-// Персональний канал слухається рівно один раз за життя вкладки (модуль
-// імпортується одноразово) — незалежно від того, чи змонтована зараз
-// DirectMessagesModal, щоб лічильники/превью у списку діалогів
-// залишалися живими, навіть поки модалка закрита.
-chatSocket.on(DM_NEW, (message) => {
+// Персональний канал слухається рівно один раз за життя вкладки —
+// незалежно від того, чи змонтована зараз DirectMessagesModal, щоб
+// лічильники/превью у списку діалогів залишалися живими, навіть поки
+// модалка закрита.
+//
+// ВАЖЛИВО: у dev-режимі (Vite HMR) цей модуль може переоцінюватися
+// повторно (наприклад, при редагуванні самого useDmStore.js), а
+// chatSocket — імпортований singleton, який HMR не перестворює. Без
+// захисту нижче кожен такий "гарячий" реімпорт додавав би ЩЕ ОДИН
+// обробник dm:new поверх старого (замість заміни) — кожне вхідне
+// повідомлення оброблялося б N разів, unreadCount ріс би не на 1, а
+// на N (звідси "лічильник рахує неправильно" навіть у межах ОДНІЄЇ
+// сесії, без жодного relogin). Прибираємо попередній обробник з тим
+// самим маркером ПЕРЕД тим, як вішати новий.
+if (chatSocket.__dmNewHandler) {
+  chatSocket.off(DM_NEW, chatSocket.__dmNewHandler);
+}
+chatSocket.__dmNewHandler = (message) => {
   useDmStore.getState()._handleIncoming(message);
-});
+};
+chatSocket.on(DM_NEW, chatSocket.__dmNewHandler);
