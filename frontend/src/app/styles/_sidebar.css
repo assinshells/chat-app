@@ -42,8 +42,12 @@
 }
 
 @keyframes sidebar-backdrop-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .app-sidebar-inner {
@@ -63,13 +67,11 @@
   overflow-x: hidden;
 }
 
-
 /* =========================================================
    SIDEBAR — desktop (>= 992px): закреплена / свёрнута / превью
    ========================================================= */
 
 @media (min-width: 992px) {
-
   /* База для десктопа: и «свёрнут», и «превью» — всегда position: fixed,
      то есть полностью вне потока. Ширина (0 → 280px и обратно) анимируется
      свободно и никогда не влияет на layout .user-chat — контент чата не
@@ -91,7 +93,9 @@
 
     box-shadow: none;
 
-    transition: width 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      width 0.2s ease,
+      box-shadow 0.2s ease;
 
     z-index: 1030;
   }
@@ -151,7 +155,6 @@
   }
 }
 
-
 /* =========================================================
    SIDEBAR TOP (только мобильная кнопка закрытия drawer'а)
    ========================================================= */
@@ -200,7 +203,9 @@
 
   cursor: pointer;
 
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .app-sidebar-btn:hover {
@@ -212,7 +217,6 @@
   outline: none;
   box-shadow: none;
 }
-
 
 /* =========================================================
    TABS: «Кімнати» / «Користувачі» — занимают всё место
@@ -261,7 +265,9 @@
 
   cursor: pointer;
 
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .app-sidebar-tab-btn:hover {
@@ -323,7 +329,9 @@
 
   cursor: pointer;
 
-  transition: background-color 0.15s ease, color 0.15s ease,
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
     border-color 0.15s ease;
 }
 
@@ -342,7 +350,6 @@
 .app-sidebar-list {
   display: flex;
   flex-direction: column;
-
   gap: 0.05rem;
 }
 
@@ -464,7 +471,9 @@
 
   border-radius: 4px;
 
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .app-sidebar-online-name-btn:hover {
@@ -477,7 +486,6 @@
   background: rgba(var(--bs-primary-rgb), 0.14);
 }
 
-
 /* Пустое состояние: в выбранной гендерной группе никого нет онлайн */
 .app-sidebar-empty {
   padding: 0.65rem;
@@ -487,7 +495,6 @@
 
   color: var(--bs-secondary-color);
 }
-
 
 /* =========================================================
    FOOTER / USER
@@ -546,7 +553,6 @@
 
   flex: 0 0 30px;
 }
-
 
 /* =========================================================
    HEADER: зона с триггером сайдбара

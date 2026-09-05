@@ -19,15 +19,14 @@ export function AuthLayout({ title, subtitle, children }) {
                 >
                   <div className="mb-5">
                     <header>
+                      <h4 className="mb-0">
+                        <span className="text-muted text-break">{title}</span>
+                      </h4>
                       {subtitle && (
                         <span className="d-block text-muted text-break">
                           {subtitle}
                         </span>
                       )}
-
-                      <h4 className="mb-0">
-                        <span className="text-muted text-break">{title}</span>
-                      </h4>
                     </header>
                   </div>
 

@@ -15,7 +15,6 @@ body,
   height: 100%;
 }
 
-
 /* =========================================================
    SCROLLBARS — единый тонкий автоскрывающийся скроллбар нативными
    средствами браузера (вместо SimpleBar). По умолчанию скроллбар
@@ -78,26 +77,13 @@ html.is-scrolling::-webkit-scrollbar-thumb,
   background-color: var(--bs-body-color) !important;
 }
 
-
 body {
   min-height: 100vh;
   margin: 0;
-
+  font-weight: 400;
   font-family: var(--bs-font-family);
-  color: var(--bs-secondary-color);
-
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgba(139, 92, 246, 0.18),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
-      rgba(34, 211, 238, 0.1),
-      transparent 35%
-    ),
-    var(--bs-background-color);
+  color: rgb(75 85 99 / var(--bs-text-opacity));
+  background-color: rgb(var(--bs-background-color) / var(--bs-bg-opacity));
 }
 .chat-brand-status.is-online {
   color: var(--bs-success);
@@ -137,7 +123,6 @@ body {
   background: var(--bs-body-bg);
 }
 
-
 /* =========================================================
    CHAT HEADER
    ========================================================= */
@@ -147,11 +132,7 @@ body {
 
   width: 100%;
 
-  background: color-mix(
-    in srgb,
-    var(--bs-body-bg) 94%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--bs-body-bg) 94%, transparent);
 
   border-bottom: 1px solid var(--bs-border-color);
 
@@ -173,7 +154,6 @@ body {
 
   gap: 1rem;
 }
-
 
 /* =========================================================
    BRAND
@@ -217,7 +197,6 @@ body {
 
   color: var(--bs-secondary-color);
 }
-
 
 /* =========================================================
    HEADER ACTIONS
@@ -269,7 +248,6 @@ body {
   font-size: 1.15rem;
 }
 
-
 /* =========================================================
    DROPDOWN
    ========================================================= */
@@ -284,8 +262,7 @@ body {
 
   background: var(--bs-body-bg);
 
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .chat-dropdown .dropdown-item {
@@ -320,7 +297,6 @@ body {
   color: var(--bs-secondary-color);
 }
 
-
 /* =========================================================
    CONVERSATION
    ========================================================= */
@@ -340,7 +316,6 @@ body {
 
   background: var(--bs-body-bg);
 }
-
 
 /* =========================================================
    MESSAGE CONTAINER
@@ -362,7 +337,6 @@ body {
   gap: 0.5rem;
 }
 
-
 /* =========================================================
    MESSAGE
    ========================================================= */
@@ -376,7 +350,6 @@ body {
 
   font-size: 0.95rem;
 }
-
 
 /* =========================================================
    USER MESSAGE
@@ -393,7 +366,6 @@ body {
 
   color: var(--bs-body-color);
 }
-
 
 /* =========================================================
    ASSISTANT MESSAGE
@@ -417,7 +389,6 @@ body {
   margin: 0;
 }
 
-
 /* =========================================================
    CHAT COMPOSER
    ========================================================= */
@@ -432,12 +403,12 @@ body {
   background: var(--bs-body-bg);
 }
 .chat-input-hint.has-error {
-   opacity: 1;
- }
- 
- .chat-input-error {
-   color: var(--bs-danger);
- }
+  opacity: 1;
+}
+
+.chat-input-error {
+  color: var(--bs-danger);
+}
 
 /* =========================================================
    COMPOSER BOX
@@ -471,7 +442,6 @@ body {
     box-shadow 0.2s ease;
 }
 
-
 /* Подсветка всей области composer */
 
 .chat-composer:focus-within {
@@ -479,12 +449,8 @@ body {
 
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.04),
-    0 0 0 3px rgba(
-      var(--bs-primary-rgb),
-      0.08
-    );
+    0 0 0 3px rgba(var(--bs-primary-rgb), 0.08);
 }
-
 
 /* =========================================================
    COMPOSER TARGETS (selected nicknames / times)
@@ -564,14 +530,15 @@ body {
 
   cursor: pointer;
 
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .composer-chip-clear:hover {
   color: var(--bs-danger);
   background: rgba(var(--bs-danger-rgb), 0.08);
 }
-
 
 /* =========================================================
    TEXTAREA
@@ -615,7 +582,6 @@ body {
   box-shadow: none !important;
 }
 
-
 /* =========================================================
    COMPOSER BOTTOM
    ========================================================= */
@@ -627,7 +593,6 @@ body {
   align-items: center;
   justify-content: space-between;
 }
-
 
 /* =========================================================
    LEFT TOOLS
@@ -679,7 +644,6 @@ body {
   font-size: 1.1rem;
 }
 
-
 /* =========================================================
    SEND BUTTON
    ========================================================= */
@@ -724,7 +688,6 @@ body {
   font-size: 1.15rem;
 }
 
-
 /* =========================================================
    INPUT HINT
    ========================================================= */
@@ -745,13 +708,11 @@ body {
   opacity: 0.7;
 }
 
-
 /* =========================================================
    MOBILE
    ========================================================= */
 
 @media (max-width: 767.98px) {
-
   .chat-header-inner {
     min-height: 60px;
 
@@ -771,39 +732,29 @@ body {
     height: 36px;
   }
 
-
   .chat-conversation {
     padding: 1rem 0.85rem 1.5rem;
   }
-
 
   .chat-messages {
     max-width: 100%;
   }
 
-
   .message-list {
     gap: 0.4rem;
   }
-
 
   .message-user .message-content {
     max-width: 85%;
   }
 
-
   .message-assistant .message-content {
     max-width: 100%;
   }
 
-
   .chat-input-section {
-    padding:
-      0.5rem
-      0.75rem
-      0.75rem;
+    padding: 0.5rem 0.75rem 0.75rem;
   }
-
 
   .chat-composer {
     min-height: 64px;
@@ -813,20 +764,16 @@ body {
     padding: 0.65rem;
   }
 
-
   .chat-input-hint {
     display: none;
   }
-
 }
-
 
 /* =========================================================
    VERY SMALL SCREENS
    ========================================================= */
 
 @media (max-width: 400px) {
-
   .chat-brand-title {
     max-width: 140px;
   }
@@ -834,7 +781,6 @@ body {
   .message-user .message-content {
     max-width: 90%;
   }
-
 }
 
 /* =========================================================
@@ -855,7 +801,6 @@ input {
     background-color 0.15s ease;
 }
 
-
 /* Убираем стандартный Bootstrap focus */
 
 .form-control:focus,
@@ -865,7 +810,6 @@ input:focus {
   outline: none !important;
 }
 
-
 /* ---------------------------------------------------------
    TEXT INPUT / TEXTAREA
    --------------------------------------------------------- */
@@ -874,13 +818,8 @@ input:focus {
 .form-select:focus {
   border-color: var(--bs-primary) !important;
 
-  box-shadow:
-    0 0 0 3px rgba(
-      var(--bs-primary-rgb),
-      0.08
-    ) !important;
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.08) !important;
 }
-
 
 /* ---------------------------------------------------------
    LIGHT INPUT
@@ -892,7 +831,6 @@ input:focus {
 
   border-color: var(--bs-primary) !important;
 }
-
 
 /* ---------------------------------------------------------
    CHAT TEXTAREA
@@ -906,7 +844,6 @@ input:focus {
   box-shadow: none !important;
 }
 
-
 /*
    У textarea внутри composer свой focus.
    Focus отображается у .chat-composer,
@@ -916,7 +853,6 @@ input:focus {
 .chat-composer:focus-within .chat-input {
   box-shadow: none !important;
 }
-
 
 /* ---------------------------------------------------------
    PLACEHOLDER
@@ -938,7 +874,6 @@ input:focus::placeholder {
   opacity: 0.5;
 }
 
-
 /* ---------------------------------------------------------
    CHECKBOX / RADIO
    --------------------------------------------------------- */
@@ -953,7 +888,6 @@ input:focus::placeholder {
     transform 0.1s ease;
 }
 
-
 /* Focus */
 
 .form-check-input:focus {
@@ -961,20 +895,14 @@ input:focus::placeholder {
 
   border-color: var(--bs-primary) !important;
 
-  box-shadow:
-    0 0 0 3px rgba(
-      var(--bs-primary-rgb),
-      0.12
-    ) !important;
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.12) !important;
 }
-
 
 /* Hover */
 
 .form-check-input:hover {
   border-color: var(--bs-primary);
 }
-
 
 /* Checked */
 
@@ -984,19 +912,13 @@ input:focus::placeholder {
   background-color: var(--bs-primary);
 }
 
-
 /* Active */
 
 .form-check-input:active {
   transform: scale(0.95);
 
-  box-shadow:
-    0 0 0 3px rgba(
-      var(--bs-primary-rgb),
-      0.1
-    );
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
 }
-
 
 /* ---------------------------------------------------------
    RADIO
@@ -1006,7 +928,6 @@ input:focus::placeholder {
   border-radius: 50%;
 }
 
-
 /* Radio checked */
 
 .form-check-input[type="radio"]:checked {
@@ -1014,7 +935,6 @@ input:focus::placeholder {
 
   border-color: var(--bs-primary);
 }
-
 
 /* ---------------------------------------------------------
    CHECKBOX
@@ -1024,7 +944,6 @@ input:focus::placeholder {
   border-radius: 5px;
 }
 
-
 /* ---------------------------------------------------------
    LABEL
    --------------------------------------------------------- */
@@ -1032,7 +951,6 @@ input:focus::placeholder {
 .form-check-label {
   cursor: pointer;
 }
-
 
 /* ---------------------------------------------------------
    DISABLED
@@ -1046,7 +964,6 @@ input:focus::placeholder {
   opacity: 0.6;
 }
 
-
 /* ---------------------------------------------------------
    BUTTONS — GLOBAL FOCUS
    --------------------------------------------------------- */
@@ -1058,22 +975,16 @@ button:focus,
   box-shadow: none !important;
 }
 
-
 /* Keyboard accessibility */
 
 button:focus-visible,
 .btn:focus-visible {
-  outline: 2px solid
-    rgba(
-      var(--bs-primary-rgb),
-      0.5
-    ) !important;
+  outline: 2px solid rgba(var(--bs-primary-rgb), 0.5) !important;
 
   outline-offset: 2px;
 
   box-shadow: none !important;
 }
-
 
 /* ---------------------------------------------------------
    OUTLINE PRIMARY
@@ -1090,11 +1001,7 @@ button:focus-visible,
 
   color: var(--bs-primary);
 
-  background-color:
-    rgba(
-      var(--bs-primary-rgb),
-      0.08
-    );
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
 }
 
 .btn-outline-primary:focus,
@@ -1104,7 +1011,6 @@ button:focus-visible,
   box-shadow: none !important;
 }
 
-
 /* ---------------------------------------------------------
    FORM VALIDATION
    --------------------------------------------------------- */
@@ -1113,11 +1019,7 @@ button:focus-visible,
 .form-control.is-invalid:focus,
 .was-validated .form-control:valid:focus,
 .was-validated .form-control:invalid:focus {
-  box-shadow:
-    0 0 0 3px rgba(
-      var(--bs-primary-rgb),
-      0.08
-    ) !important;
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.08) !important;
 }
 
 /* =========================================================
@@ -1130,7 +1032,6 @@ button:focus-visible,
 
   gap: 0.6rem;
 }
-
 
 /* =========================================================
    CHARACTER COUNTER
@@ -1152,7 +1053,6 @@ button:focus-visible,
   color: var(--bs-danger);
 }
 
-
 /* =========================================================
    COMPOSER DROPDOWN
    ========================================================= */
@@ -1160,7 +1060,6 @@ button:focus-visible,
 .composer-dropdown {
   position: relative;
 }
-
 
 /* =========================================================
    TOOL BUTTON
@@ -1201,7 +1100,6 @@ button:focus-visible,
   box-shadow: none;
 }
 
-
 /* =========================================================
    EMOJI PICKER
    ========================================================= */
@@ -1218,8 +1116,7 @@ button:focus-visible,
 
   display: grid;
 
-  grid-template-columns:
-    repeat(6, 1fr);
+  grid-template-columns: repeat(6, 1fr);
 
   gap: 0.25rem;
 
@@ -1229,8 +1126,7 @@ button:focus-visible,
 
   background: var(--bs-body-bg);
 
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 
   z-index: 100;
 }
@@ -1265,7 +1161,6 @@ button:focus-visible,
   transform: scale(1.1);
 }
 
-
 /* =========================================================
    USER ACTIONS MENU
    ========================================================= */
@@ -1286,12 +1181,10 @@ button:focus-visible,
 
   background: var(--bs-body-bg);
 
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 
   z-index: 100;
 }
-
 
 /* Header */
 
@@ -1300,8 +1193,7 @@ button:focus-visible,
 
   margin-bottom: 0.25rem;
 
-  border-bottom:
-    1px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--bs-border-color);
 
   font-size: 0.8rem;
 
@@ -1315,7 +1207,6 @@ button:focus-visible,
 
   text-overflow: ellipsis;
 }
-
 
 /* Action */
 
@@ -1360,7 +1251,6 @@ button:focus-visible,
   color: var(--bs-secondary-color);
 }
 
-
 /* Danger */
 
 .user-action-item.danger {
@@ -1372,13 +1262,8 @@ button:focus-visible,
 }
 
 .user-action-item.danger:hover {
-  background:
-    rgba(
-      var(--bs-danger-rgb),
-      0.08
-    );
+  background: rgba(var(--bs-danger-rgb), 0.08);
 }
-
 
 /* =========================================================
    SEND BUTTON
@@ -1398,198 +1283,200 @@ button:focus-visible,
 /* =========================================================
     OTHER USER MESSAGE (chat participant, not the assistant)
     ========================================================= */
- 
- .message-other {
-   align-items: flex-start;
- }
- 
- .message-other .message-content {
-   max-width: 80%;
- 
-   padding: 0.15rem 0;
- 
-   color: var(--bs-body-color);
- }
- 
- 
- /* =========================================================
+
+.message-other {
+  align-items: flex-start;
+}
+
+.message-other .message-content {
+  max-width: 80%;
+
+  padding: 0.15rem 0;
+
+  color: var(--bs-body-color);
+}
+
+/* =========================================================
     MESSAGE META (time   nickname)   TEXT
     вид строки: "20:10:05 nickname message text"
     ========================================================= */
- 
- .message-time {
-   opacity: 0.65;
- 
-   font-size: 0.8em;
-   font-variant-numeric: tabular-nums;
- }
- 
- .message-author {
-   font-weight: 600;
- }
 
+.message-time {
+  opacity: 0.65;
 
- /* =========================================================
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+
+.message-author {
+  font-weight: 600;
+}
+
+/* =========================================================
     OWN NICKNAME — единый акцент для собственного ника пользователя
     везде, где он показывается (список сообщений, список онлайн-
     пользователей в сайдбаре). Кроме футера сайдбара — там ник в
     выпадающем меню логаута/настроек и остаётся обычным.
     ========================================================= */
 
- .nickname-own {
-   color: var(--bs-danger) !important;
- }
+.nickname-own {
+  color: var(--bs-danger) !important;
+}
 
-
- /* =========================================================
+/* =========================================================
     CLICKABLE TIME / NICKNAME
     Клик добавляет ник/время в форму отправки (см. ChatComposer).
     ========================================================= */
 
- .message-time-btn,
- .message-author-btn {
-   padding: 0;
-   margin: 0;
+.message-time-btn,
+.message-author-btn {
+  padding: 0;
+  margin: 0;
 
-   border: 0;
-   background: transparent;
+  border: 0;
+  background: transparent;
 
-   font: inherit;
-   font-size: 0.8em;
-   font-variant-numeric: tabular-nums;
-   color: inherit;
-   opacity: 0.65;
+  font: inherit;
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+  opacity: 0.65;
 
-   cursor: pointer;
+  cursor: pointer;
 
-   border-radius: 4px;
+  border-radius: 4px;
 
-   transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
- }
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
 
- .message-author-btn {
-   font-size: 1em;
-   font-weight: 600;
-   opacity: 1;
- }
+.message-author-btn {
+  font-size: 1em;
+  font-weight: 600;
+  opacity: 1;
+}
 
- .message-time-btn:hover,
- .message-author-btn:hover {
-   opacity: 1;
-   color: var(--bs-primary);
-   background: rgba(var(--bs-primary-rgb), 0.08);
- }
+.message-time-btn:hover,
+.message-author-btn:hover {
+  opacity: 1;
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.08);
+}
 
- .message-time-btn.is-selected,
- .message-author-btn.is-selected {
-   opacity: 1;
-   color: var(--bs-primary);
-   background: rgba(var(--bs-primary-rgb), 0.14);
- }
+.message-time-btn.is-selected,
+.message-author-btn.is-selected {
+  opacity: 1;
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.14);
+}
 
- .message-text {
-   white-space: pre-wrap;
-   word-break: break-word;
- }
+.message-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
-
- /* =========================================================
+/* =========================================================
     SYSTEM MESSAGE — вхід / перехід / вихід користувача
     вид рядка: "20:10:05 Нікнейм увійшов у кімнату Назва"
     Без бульбашки, по лівому краю (як звичайні повідомлення), лише
     приглушено — щоб не змагатися за увагу зі звичайними повідомленнями.
     ========================================================= */
 
- .message-system {
-   justify-content: flex-start;
- }
+.message-system {
+  justify-content: flex-start;
+}
 
- .message-system .message-content {
-   max-width: 100%;
+.message-system .message-content {
+  max-width: 100%;
 
-   padding: 0.1rem 0;
+  padding: 0.1rem 0;
 
-   font-size: 0.82rem;
-   text-align: left;
+  font-size: 0.82rem;
+  text-align: left;
 
-   color: var(--bs-secondary-color);
- }
+  color: var(--bs-secondary-color);
+}
 
- .system-message-text {
-   opacity: 0.85;
- }
+.system-message-text {
+  opacity: 0.85;
+}
 
- .system-message-nickname-btn {
-   padding: 0 2px;
-   margin: 0;
+.system-message-nickname-btn {
+  padding: 0 2px;
+  margin: 0;
 
-   border: 0;
-   background: transparent;
+  border: 0;
+  background: transparent;
 
-   font: inherit;
-   font-weight: 600;
-   /* --user-color задаётся инлайн (см. ChatConversation.jsx) — цвет,
+  font: inherit;
+  font-weight: 600;
+  /* --user-color задаётся инлайн (см. ChatConversation.jsx) — цвет,
       выбранный этим пользователем в настройках; по умолчанию (чёрный,
       не задан) наследует обычный приглушённый цвет системной строки. */
-   color: var(--user-color, inherit);
+  color: var(--user-color, inherit);
 
-   cursor: pointer;
+  cursor: pointer;
 
-   border-radius: 4px;
+  border-radius: 4px;
 
-   transition: color 0.15s ease, background-color 0.15s ease;
- }
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
 
- .system-message-nickname-btn:hover {
-   color: var(--bs-primary);
-   background: rgba(var(--bs-primary-rgb), 0.08);
- }
+.system-message-nickname-btn:hover {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.08);
+}
 
- .system-message-room-btn {
-   padding: 0 2px;
-   margin: 0;
+.system-message-room-btn {
+  padding: 0 2px;
+  margin: 0;
 
-   border: 0;
-   background: transparent;
+  border: 0;
+  background: transparent;
 
-   font: inherit;
-   font-weight: 600;
-   color: var(--bs-primary);
-   text-decoration: underline;
-   text-decoration-style: dotted;
-   text-underline-offset: 2px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--bs-primary);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
 
-   cursor: pointer;
+  cursor: pointer;
 
-   border-radius: 4px;
+  border-radius: 4px;
 
-   transition: background-color 0.15s ease, text-decoration-style 0.15s ease;
- }
+  transition:
+    background-color 0.15s ease,
+    text-decoration-style 0.15s ease;
+}
 
- .system-message-room-btn:hover {
-   background: rgba(var(--bs-primary-rgb), 0.08);
-   text-decoration-style: solid;
- }
+.system-message-room-btn:hover {
+  background: rgba(var(--bs-primary-rgb), 0.08);
+  text-decoration-style: solid;
+}
 
-
- /* =========================================================
+/* =========================================================
     EMPTY CONVERSATION STATE
     ========================================================= */
- 
- .chat-empty-state {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
- 
-   gap: 0.75rem;
- 
-   padding: 3rem 1rem;
- 
-   color: var(--bs-secondary-color);
-   text-align: center;
- }
- /* =========================================================
+
+.chat-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.75rem;
+
+  padding: 3rem 1rem;
+
+  color: var(--bs-secondary-color);
+  text-align: center;
+}
+/* =========================================================
    SETTINGS MODAL: профиль (пол) + тема
    ========================================================= */
 
@@ -1620,7 +1507,9 @@ button:focus-visible,
   color: var(--bs-secondary-color);
 
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .settings-tab-btn:hover {
@@ -1657,7 +1546,9 @@ button:focus-visible,
   color: var(--bs-body-color);
 
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .settings-theme-btn:hover {
@@ -1668,7 +1559,6 @@ button:focus-visible,
   border-color: var(--bs-primary);
   color: var(--bs-primary);
 }
-
 
 /* =========================================================
    SETTINGS MODAL: вибір кольору повідомлень/ніка
@@ -1719,7 +1609,10 @@ button:focus-visible,
   border: 2px solid var(--bs-border-color);
   box-shadow: 0 0 0 2px transparent;
 
-  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .settings-color-option:hover .settings-color-swatch {
@@ -1728,7 +1621,9 @@ button:focus-visible,
 
 .settings-color-option.is-active .settings-color-swatch {
   border-color: var(--settings-swatch-color);
-  box-shadow: 0 0 0 2px var(--bs-body-bg), 0 0 0 4px var(--settings-swatch-color);
+  box-shadow:
+    0 0 0 2px var(--bs-body-bg),
+    0 0 0 4px var(--settings-swatch-color);
 }
 
 .settings-color-input:focus-visible ~ .settings-color-swatch {
@@ -1745,7 +1640,6 @@ button:focus-visible,
   color: var(--bs-body-color);
   font-weight: 600;
 }
-
 
 /* =========================================================
    DM TRIGGER — кнопка "три вертикальні точки" біля чужого ніка
@@ -1778,7 +1672,9 @@ button:focus-visible,
 
   cursor: pointer;
 
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .dm-trigger-btn:hover,
@@ -1790,7 +1686,6 @@ button:focus-visible,
 .dm-trigger-menu {
   font-size: 0.85rem;
 }
-
 
 /* Бейдж непрочитанных на иконке DM в шапке */
 .dm-header-btn {
@@ -1819,7 +1714,6 @@ button:focus-visible,
   font-weight: 700;
   line-height: 1;
 }
-
 
 /* =========================================================
    DIRECT MESSAGES MODAL — "Особисті повідомлення"
@@ -2123,7 +2017,6 @@ button:focus-visible,
   font-size: 0.78rem;
   color: var(--bs-danger);
 }
-
 
 /* На узких экранах модалка ЛС показывает ОДНУ панель за раз — список
    диалогов или переписку (см. useDmStore.mobileView), а не обе колонки

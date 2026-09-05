@@ -328,7 +328,7 @@ export function ChatComposer({
         {hintText ? (
           <span className="chat-input-error">{hintText}</span>
         ) : (
-          "ШІ може помилятися. Перевіряйте важливу інформацію."
+          "&nbsp;"
         )}
       </div>
 
