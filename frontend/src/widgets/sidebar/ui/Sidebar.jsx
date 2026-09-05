@@ -115,9 +115,11 @@ export function Sidebar({
 
         {/* Верх панелі: назва сайту (десктоп і мобільний, без логотипа),
             кнопка згортання/закріплення (лише десктоп — раніше жила в
-            футері поруч із ніком, перенесена сюди, щоб бути завжди під
-            рукою одразу біля назви сайту) і кнопка закриття drawer'а
-            (лише мобільний). */}
+            футері поруч із ніком, тепер у закріпленому стані живе тут,
+            поруч із назвою сайту; у прев'ю CSS, як і раніше, переносить
+            її в лівий верхній кут, врівень з кнопкою-тригером у шапці
+            чата, див. .app-sidebar.is-preview .app-sidebar-collapse-btn
+            у _sidebar.css) і кнопка закриття drawer'а (лише мобільний). */}
         <div className="app-sidebar-top">
           <span className="app-sidebar-site-name">
             {APP_NAME}
@@ -126,7 +128,7 @@ export function Sidebar({
           <div className="app-sidebar-top-actions">
             <button
               type="button"
-              className="app-sidebar-btn d-none d-lg-flex"
+              className="app-sidebar-btn app-sidebar-collapse-btn d-none d-lg-flex"
               title={pinned ? "Згорнути бічну панель" : "Закріпити бічну панель"}
               onClick={pinned ? onCollapse : onPin}
             >
