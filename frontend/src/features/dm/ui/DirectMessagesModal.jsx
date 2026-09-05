@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, MessagesSquare, Send } from "lucide-react";
 
 import { getColorHex } from "@shared/constants/color.constants.js";
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
+
+// Той самий ліміт, що й у публічному чаті (див. ChatComposer.jsx) і на
+// бекенді (DM_LIMITS.MAX_MESSAGE_LENGTH) — особисті повідомлення не
+// повинні дозволяти довше, ніж дозволяє сервер.
+const MAX_MESSAGE_LENGTH = 300;
 
 /**
  * DirectMessagesModal — єдина модалка особистих повідомлень на весь
@@ -222,8 +227,12 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
               <div ref={messagesRef} className="dm-modal-messages app-scrollbar">
                 {!active ? (
                   <div className="dm-modal-placeholder">
-                    Виберіть діалог зліва або натисніть «Написати особисте
-                    повідомлення» біля ніка користувача в сайдбарі чи в чаті
+                    <MessagesSquare size={36} strokeWidth={1.5} />
+                    <p className="dm-modal-placeholder-title">Немає обраного діалогу</p>
+                    <p className="dm-modal-placeholder-text">
+                      Виберіть діалог зліва або натисніть «Написати особисте
+                      повідомлення» біля ніка користувача в сайдбарі чи в чаті
+                    </p>
                   </div>
                 ) : active.loading ? (
                   <div className="dm-modal-empty-messages">Завантаження…</div>
@@ -266,11 +275,19 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                       className="dm-modal-input"
                       placeholder={`Повідомлення ${active.login}...`}
                       value={draft}
+                      maxLength={MAX_MESSAGE_LENGTH}
                       onChange={(e) => {
-                        setDraft(e.target.value);
+                        setDraft(e.target.value.slice(0, MAX_MESSAGE_LENGTH));
                         if (sendError) clearSendError();
                       }}
                     />
+                    <span
+                      className={`dm-modal-char-count ${
+                        draft.length >= MAX_MESSAGE_LENGTH ? "is-limit" : ""
+                      }`}
+                    >
+                      {draft.length}/{MAX_MESSAGE_LENGTH}
+                    </span>
                     <button
                       type="submit"
                       className="dm-modal-send-btn"

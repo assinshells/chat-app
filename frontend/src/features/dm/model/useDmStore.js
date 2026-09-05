@@ -170,6 +170,21 @@ export const useDmStore = create((set, get) => ({
 
     if (existing?.loaded) return;
 
+    await get()._loadHistory(login, color);
+  },
+
+  /**
+   * _loadHistory — фактичний запит повної історії листування через
+   * dm:open і запис результату в conversations[login]. Винесено з
+   * openConversation окремо, щоб той самий код можна було використати і
+   * з openInbox (див. нижче) — там теж потрібно довантажити історію
+   * автоматично обраного за замовчуванням діалогу, але БЕЗ побічних
+   * ефектів openConversation типу зміни activeLogin/order/mobileView
+   * (openInbox сам вирішує ці поля — на мобільному, наприклад, відкриття
+   * з шапки завжди повинно показувати список, а не листування, навіть
+   * якщо якийсь діалог обрано активним "під капотом").
+   */
+  _loadHistory: async (login, color) => {
     const result = await emitWithAck(DM_OPEN, { login });
 
     set((state) => {
@@ -209,6 +224,15 @@ export const useDmStore = create((set, get) => ({
    * діалогів через dm:list, щоб вкладки не були застарілими, якщо
    * прийшли нові діалоги, розпочаті з інших пристроїв/вкладок.
    *
+   * dm:list повертає лише ЗВЕДЕННЯ по діалогах (превью останнього
+   * повідомлення), а не повний список повідомлень — його підвантажує
+   * окремо dm:open (див. openConversation/_loadHistory). Якщо при
+   * першому відкритті модалки за сесію діалог обирається активним
+   * автоматично (нижче — коли ще немає state.activeLogin), його повну
+   * історію теж треба підвантажити явно, інакше показувалась би пуста
+   * заглушка "Повідомлень ще немає. Напишіть перше!" замість реальної
+   * переписки — саме так і виглядав баг, який тут виправлено.
+   *
    * mobileView скидається на 'list' безумовно: це вхід "хочу
    * подивитися всі діалоги", навіть якщо до цього на мобільному було
    * відкрито конкретне листування (через openConversation) — відкриття
@@ -218,6 +242,11 @@ export const useDmStore = create((set, get) => ({
   openInbox: async () => {
     set({ listLoading: true, mobileView: "list" });
     const result = await emitWithAck(DM_LIST, {});
+
+    // Заповнюється нижче, лише якщо активний діалог щойно обрано
+    // автоматично (раніше activeLogin був null) — саме цей випадок і
+    // потребує довантаження повної історії.
+    let autoSelectedLogin = null;
 
     set((state) => {
       if (!result?.success) return { listLoading: false };
@@ -247,12 +276,15 @@ export const useDmStore = create((set, get) => ({
         if (!order.includes(login)) order.push(login);
       }
 
+      const activeLogin = state.activeLogin ?? order[0] ?? null;
+      if (!state.activeLogin && activeLogin) autoSelectedLogin = activeLogin;
+
       return {
         conversations,
         order,
         listLoading: false,
         listLoaded: true,
-        activeLogin: state.activeLogin ?? order[0] ?? null,
+        activeLogin,
       };
     });
 
@@ -263,6 +295,22 @@ export const useDmStore = create((set, get) => ({
     // показу модалки).
     const { activeLogin } = get();
     if (activeLogin) get().markAsRead(activeLogin);
+
+    // Довантажуємо повну історію автоматично обраного діалогу (див.
+    // коментар до функції вище) — рівно тими ж кроками, що й ручний
+    // вибір вкладки (selectConversation), але не чіпаючи mobileView.
+    if (autoSelectedLogin) {
+      const convo = get().conversations[autoSelectedLogin];
+      if (convo && !convo.loaded && !convo.loading) {
+        set((state) => ({
+          conversations: {
+            ...state.conversations,
+            [autoSelectedLogin]: { ...state.conversations[autoSelectedLogin], loading: true },
+          },
+        }));
+        await get()._loadHistory(autoSelectedLogin, convo.color);
+      }
+    }
   },
 
   /**

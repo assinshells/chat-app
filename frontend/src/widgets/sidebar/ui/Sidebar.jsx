@@ -1,11 +1,15 @@
 import { useMemo, useRef, useState } from "react";
 import { PanelLeft, X } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
+import { RulesModal, FeedbackModal } from "@features/info";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getColorHex } from "@shared/constants/color.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
+
+const RULES_MODAL_ID = "sidebarRulesModal";
+const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
 
 const USER_GROUPS = [
   { id: "male", label: "Чоловіки" },
@@ -109,21 +113,35 @@ export function Sidebar({
     >
       <div className="app-sidebar-inner app-scrollbar">
 
-        {/* Верх панелі: назва сайту (десктоп і мобільний, без логотипа) /
-            кнопка закриття drawer'а (лише мобільний). */}
+        {/* Верх панелі: назва сайту (десктоп і мобільний, без логотипа),
+            кнопка згортання/закріплення (лише десктоп — раніше жила в
+            футері поруч із ніком, перенесена сюди, щоб бути завжди під
+            рукою одразу біля назви сайту) і кнопка закриття drawer'а
+            (лише мобільний). */}
         <div className="app-sidebar-top">
           <span className="app-sidebar-site-name">
             {APP_NAME}
           </span>
 
-          <button
-            type="button"
-            className="app-sidebar-btn d-lg-none"
-            title="Закрити меню"
-            onClick={onCloseMobile}
-          >
-            <X size={18} />
-          </button>
+          <div className="app-sidebar-top-actions">
+            <button
+              type="button"
+              className="app-sidebar-btn d-none d-lg-flex"
+              title={pinned ? "Згорнути бічну панель" : "Закріпити бічну панель"}
+              onClick={pinned ? onCollapse : onPin}
+            >
+              <PanelLeft size={16} />
+            </button>
+
+            <button
+              type="button"
+              className="app-sidebar-btn d-lg-none"
+              title="Закрити меню"
+              onClick={onCloseMobile}
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Таби: «Кімнати» / «Користувачі». Займають усе місце від верху
@@ -234,27 +252,36 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* Профіль користувача внизу панелі: просто нік (без дропдауну —
-            налаштування і вихід перенесені в шапку чата, див. ChatHeader)
-            і кнопка згортання, однієї висоти. */}
+        {/* Футер панелі: замість ніка (він і так завжди видно в шапці
+            чата, див. ChatHeader) — посилання на допоміжні модалки,
+            завжди доступні незалежно від того, в якій кімнаті/вкладці
+            зараз користувач. Кнопку згортання перенесено нагору, див.
+            app-sidebar-top вище. */}
         <div className="app-sidebar-footer">
-          <div className="app-sidebar-user">
-            <span className="app-sidebar-user-name">{login || "Гість"}</span>
-          </div>
-
-          {/* На десктопі — поруч з ніком. У прев'ю CSS переносить її
-              у лівий верхній кут, врівень з кнопкою в шапці. */}
-          <button
-            type="button"
-            className="app-sidebar-btn app-sidebar-collapse-btn d-none d-lg-flex"
-            title={pinned ? "Згорнути бічну панель" : "Закріпити бічну панель"}
-            onClick={pinned ? onCollapse : onPin}
+          <a
+            href="#"
+            className="app-sidebar-footer-link"
+            data-bs-toggle="modal"
+            data-bs-target={`#${RULES_MODAL_ID}`}
+            onClick={(e) => e.preventDefault()}
           >
-            <PanelLeft size={16} />
-          </button>
+            Правила
+          </a>
+
+          <a
+            href="#"
+            className="app-sidebar-footer-link"
+            data-bs-toggle="modal"
+            data-bs-target={`#${FEEDBACK_MODAL_ID}`}
+            onClick={(e) => e.preventDefault()}
+          >
+            Зворотний зв&apos;язок
+          </a>
         </div>
       </div>
+
+      <RulesModal modalId={RULES_MODAL_ID} />
+      <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
     </aside>
-    
   );
 }

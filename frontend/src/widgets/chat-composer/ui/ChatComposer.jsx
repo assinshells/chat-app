@@ -3,7 +3,7 @@ import { Smile, Paperclip, Send, X } from "lucide-react";
 import { normalizeMessageText } from "@shared/lib/message.js";
 import { describeSendError, describeCooldownHint } from "@shared/lib/moderationMessages.js";
 
-const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGE_LENGTH = 300;
 
 /**
  * ChatComposer — форма відправлення повідомлення.

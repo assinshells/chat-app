@@ -2,6 +2,11 @@ import { useState } from "react";
 import { useRegisterStore } from "@features/auth/register/model/useRegisterStore.js";
 import { GENDER_OPTIONS } from "@shared/constants/auth.constants.js";
 
+// Той самий ліміт, що й на бекенді (див.
+// backend/src/validators/auth.validator.js, MAX_LOGIN_LENGTH) —
+// довший нікнейм сервер все одно відхилить, тому обрізаємо ще на вводі.
+const MAX_LOGIN_LENGTH = 20;
+
 export function RegisterForm({ onSuccess, onBack }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -26,9 +31,13 @@ export function RegisterForm({ onSuccess, onBack }) {
             className="form-control"
             placeholder="Введіть нікнейм"
             value={login}
-            onChange={(e) => setLogin(e.target.value)}
+            maxLength={MAX_LOGIN_LENGTH}
+            onChange={(e) => setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))}
             required
           />
+          <div className="form-text text-end">
+            {login.length}/{MAX_LOGIN_LENGTH}
+          </div>
         </div>
         <div className="mb-3">
           <input

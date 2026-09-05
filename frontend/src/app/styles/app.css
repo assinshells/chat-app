@@ -334,7 +334,7 @@ body {
   display: flex;
   flex-direction: column;
 
-  gap: 0.5rem;
+  gap: 0.15rem;
 }
 
 /* =========================================================
@@ -362,7 +362,7 @@ body {
 .message-user .message-content {
   max-width: 75%;
 
-  padding: 0.15rem 0;
+  padding: 0.05rem 0;
 
   color: var(--bs-body-color);
 }
@@ -741,7 +741,7 @@ body {
   }
 
   .message-list {
-    gap: 0.4rem;
+    gap: 0.1rem;
   }
 
   .message-user .message-content {
@@ -1291,7 +1291,7 @@ button:focus-visible,
 .message-other .message-content {
   max-width: 80%;
 
-  padding: 0.15rem 0;
+  padding: 0.05rem 0;
 
   color: var(--bs-body-color);
 }
@@ -1844,14 +1844,34 @@ button:focus-visible,
   flex: 1 1 auto;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 
+  gap: 0.5rem;
+
   padding: 1.5rem;
 
-  font-size: 0.85rem;
   text-align: center;
   color: var(--bs-secondary-color);
+
+  opacity: 0.85;
+}
+
+.dm-modal-placeholder-title {
+  margin: 0.25rem 0 0;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.dm-modal-placeholder-text {
+  max-width: 320px;
+  margin: 0;
+
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 
 .dm-modal-conversation-header {
@@ -1974,6 +1994,25 @@ button:focus-visible,
 .dm-modal-input:focus {
   outline: none;
   border-color: var(--bs-primary);
+}
+
+.dm-modal-char-count {
+  flex: 0 0 auto;
+
+  align-self: center;
+
+  font-size: 0.7rem;
+  line-height: 1;
+
+  color: var(--bs-secondary-color);
+
+  white-space: nowrap;
+
+  user-select: none;
+}
+
+.dm-modal-char-count.is-limit {
+  color: var(--bs-danger);
 }
 
 .dm-modal-send-btn {

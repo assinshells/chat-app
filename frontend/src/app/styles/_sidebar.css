@@ -125,38 +125,14 @@
     z-index: 5;
   }
 
-  /* В обычном (закреплённом) состоянии кнопка сворачивания живёт в футере,
-     рядом с ником. В превью она визуально «перепрыгивает» в левый верхний
-     угол панели — вровень с кнопкой-триггером в шапке, чтобы курсор мог
-     без разрыва перейти от иконки в шапке к кнопке внутри сайдбара. */
-  .app-sidebar.is-preview .app-sidebar-collapse-btn {
-    position: absolute;
-    top: 17px;
-    left: 24px;
-
-    z-index: 5;
-  }
-
-  /* В превью тот же угол занимает выпрыгнувшая кнопка сворачивания —
-     название сайта не прячем, а сдвигаем правее кнопки, чтобы они
-     не накладывались друг на друга. */
-  .app-sidebar.is-preview .app-sidebar-top {
-    padding-left: 3.5rem;
-  }
-
-  /* На десктопе видно только название сайта (кнопка закрытия — мобильная,
-     скрыта d-lg-none), поэтому выравниваем содержимое по левому краю. */
-  .app-sidebar-top {
-    justify-content: flex-start;
-  }
-
   .sidebar-backdrop {
     display: none;
   }
 }
 
 /* =========================================================
-   SIDEBAR TOP (только мобильная кнопка закрытия drawer'а)
+   SIDEBAR TOP: название сайта + кнопка сворачивания/закрепления
+   (десктоп) + кнопка закрытия drawer'а (мобильный)
    ========================================================= */
 
 .app-sidebar-top {
@@ -168,6 +144,15 @@
 
   min-height: 44px;
   padding: 0.25rem 0.25rem 0.75rem 0.65rem;
+}
+
+.app-sidebar-top-actions {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.15rem;
 }
 
 .app-sidebar-site-name {
@@ -497,61 +482,59 @@
 }
 
 /* =========================================================
-   FOOTER / USER
+   FOOTER: посилання на допоміжні модалки (правила / фідбек)
    ========================================================= */
 
 .app-sidebar-footer {
   flex: 0 0 auto;
 
   display: flex;
-  align-items: center;
+  align-items: stretch;
 
-  gap: 0.3rem;
+  gap: 0.25rem;
 
   padding-top: 0.5rem;
 
   border-top: 1px solid var(--bs-border-color);
 }
 
-/* Нік користувача — статичний, займає всё доступне місце поруч із
-   кнопкою згортання. Налаштування і вихід перенесені в шапку чата
-   (див. ChatHeader), тому тут більше немає дропдауну — просто напис. */
-.app-sidebar-user {
-  flex: 1 1 auto;
+/* Посилання-заглушки на допоміжні модалки (правила / зворотний зв'язок).
+   Замінили нік користувача — сам нік і так завжди видно в шапці чата
+   (див. ChatHeader), дублювати його тут більше не потрібно. */
+.app-sidebar-footer-link {
+  flex: 1 1 0;
   min-width: 0;
-  height: 30px;
+  height: 34px;
 
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 
-  padding: 0 0.65rem;
+  padding: 0 0.4rem;
 
-  text-align: left;
-}
+  border-radius: 9px;
 
-.app-sidebar-user-name {
-  width: 100%;
-  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
 
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  color: var(--bs-body-color);
-
-  text-align: left;
+  color: var(--bs-secondary-color);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
-/* Кнопка сворачивания в футере — компактнее обычных кнопок сайдбара */
-.app-sidebar-collapse-btn {
-  width: 30px;
-  height: 30px;
-
-  flex: 0 0 30px;
+.app-sidebar-footer-link:hover {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
 }
 
 /* =========================================================

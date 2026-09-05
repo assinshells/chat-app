@@ -16,7 +16,7 @@ export const CHAT_ERRORS = Object.freeze({
 });
 
 export const CHAT_LIMITS = Object.freeze({
-  MAX_MESSAGE_LENGTH: 2000,
+  MAX_MESSAGE_LENGTH: 300,
   HISTORY_DEFAULT_LIMIT: 50,
   HISTORY_MAX_LIMIT: 200,
 });
@@ -33,7 +33,7 @@ export const DM_ERRORS = Object.freeze({
 });
 
 export const DM_LIMITS = Object.freeze({
-  MAX_MESSAGE_LENGTH: 2000,
+  MAX_MESSAGE_LENGTH: 300,
   HISTORY_DEFAULT_LIMIT: 50,
   HISTORY_MAX_LIMIT: 200,
 });
