@@ -7,6 +7,7 @@ import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { RoleManageModal } from "@features/roles";
+import { ModerationModal, BannedScreen, EjectionBanner } from "@features/moderation";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
@@ -29,6 +30,10 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     roomUsers,
     sendMessage,
     cooldownMs,
+    ejection,
+    dismissEjection,
+    banInfo,
+    joinError,
   } = useChatSocket({
     enabled: Boolean(login),
     initialRoom,
@@ -98,6 +103,16 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     setTargetTimes(times);
   };
 
+  // Глобальний бан — рендеримо ЗАМІСТЬ усього чату. Важливо: перевірка
+  // йде ПІСЛЯ всіх hooks вище (useState/useEffect для сайдбара, цілей
+  // тощо) — banInfo може з'явитися вже після монтування (жива подія
+  // moderation:banned), і якби early return стояв РАНІШЕ якогось hook,
+  // кількість викликаних hooks між рендерами різнилася б (порушення
+  // Rules of Hooks). Тут гілкується лише JSX, hooks усі й завжди викликані.
+  if (banInfo) {
+    return <BannedScreen banInfo={banInfo} onLogout={onLogout} />;
+  }
+
   return (
     <div className="layout-wrapper d-lg-flex">
       <Sidebar
@@ -136,6 +151,14 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             onOpenMobileSidebar={() => setMobileOpen(true)}
             onLogout={onLogout}
           />
+          <EjectionBanner ejection={ejection} onDismiss={dismissEjection} />
+          {joinError && (
+            <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
+              {joinError.message || "Не вдалося приєднатися до кімнати"}
+              {joinError.details?.expiresAt &&
+                ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
+            </div>
+          )}
           <ChatConversation
             messages={messages}
             currentUser={login}
@@ -145,6 +168,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             selectedNicknames={targetNicknames}
             selectedTimes={targetTimes}
             roomUsers={roomUsers}
+            activeRoom={activeRoom}
           />
           <ChatComposer
             onSend={sendMessage}
@@ -161,6 +185,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
       <DirectMessagesModal />
       <RoleManageModal />
+      <ModerationModal />
     </div>
   );
 }

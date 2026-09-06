@@ -83,6 +83,47 @@ CREATE TABLE IF NOT EXISTS moderator_rooms (
     PRIMARY KEY (user_id, room)
 );
 
+-- Бани. room = NULL означає ГЛОБАЛЬНИЙ бан (на весь чат), інакше — бан
+-- лише в конкретній кімнаті. Активний бан = revoked_at IS NULL AND
+-- (expires_at IS NULL OR expires_at > now()); expires_at IS NULL — назавжди.
+-- На відміну від ролей, тут навмисно НЕ підтримується "один активний
+-- бан на пару (user, room)" через UNIQUE — історія старих
+-- (роз)банів для одного й того самого користувача/кімнати зберігається
+-- в цій же таблиці (revoked_at IS NOT NULL = вже неактивний), а не
+-- виноситься в окремий журнал.
+CREATE TABLE IF NOT EXISTS bans (
+    id SERIAL PRIMARY KEY,
+    target_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    room VARCHAR(64),
+    issued_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at TIMESTAMPTZ,
+    revoked_at TIMESTAMPTZ,
+    revoked_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Часткові індекси лише по активних банах — саме вони на гарячому
+-- шляху (перевіряються при кожному connect/room:join/message:send).
+CREATE INDEX IF NOT EXISTS idx_bans_active_by_user
+    ON bans(target_user_id) WHERE revoked_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_bans_active_by_user_room
+    ON bans(target_user_id, room) WHERE revoked_at IS NULL;
+
+-- Журнал дій модерації (кік/бан/розбан) — для аудиту. Кік не створює
+-- рядок у bans (це миттєва безстанова дія), тому фіксується лише тут.
+CREATE TABLE IF NOT EXISTS moderation_log (
+    id SERIAL PRIMARY KEY,
+    action VARCHAR(16) NOT NULL CHECK (action IN ('kick', 'ban', 'unban')),
+    target_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    room VARCHAR(64),
+    actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    reason TEXT,
+    expires_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_moderation_log_target ON moderation_log(target_user_id);
+
 -- Загальний чат (кімнати з ROOMS, див. backend/src/constants/chat.constants.js).
 -- text не містить переносів рядків — це гарантується на рівні backend
 -- (message.service.js).

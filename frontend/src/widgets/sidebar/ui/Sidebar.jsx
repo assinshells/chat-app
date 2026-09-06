@@ -226,7 +226,11 @@ export function Sidebar({
                             </span>
                           ) : (
                             <>
-                              <DmTriggerButton login={user.login} color={user.color} />
+                              <DmTriggerButton
+                                login={user.login}
+                                color={user.color}
+                                room={activeRoom}
+                              />
                               <button
                                 type="button"
                                 className={`app-sidebar-online-name app-sidebar-online-name-btn ${

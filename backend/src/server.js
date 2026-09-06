@@ -22,6 +22,12 @@ const httpServer = http.createServer(app);
 const io = createSocketServer(httpServer);
 initSockets(io);
 
+// app.set("io", ...) — єдиний спосіб дістатися до Socket.IO сервера з
+// Express-роутів (див. controllers/moderationAction.controller.js):
+// кік/бан видаються через звичайний HTTP-запит, але мають одразу
+// вплинути на вже підключені сокети жертви, а не лише "заднім числом".
+app.set("io", io);
+
 const shutdown = async (signal) => {
   logger.info(`Отримано ${signal}. Починаємо штатне завершення роботи...`);
 

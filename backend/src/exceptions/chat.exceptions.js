@@ -51,3 +51,22 @@ export class MutedException extends BaseException {
     this.details = { retryAfterMs };
   }
 }
+
+/**
+ * BannedException — на відміну від MutedException (тимчасова
+ * автоматична кара за спам/мат), кидається при активному РУЧНОМУ бані
+ * (див. services/moderationAction.service.js, sockets/chat.socket.js).
+ * expiresAt: null означає бан назавжди.
+ */
+export class BannedException extends BaseException {
+  constructor({ scope, room, reason, expiresAt }) {
+    super(
+      scope === "global"
+        ? "Вас заблоковано в чаті"
+        : "Вас заблоковано в цій кімнаті",
+      HTTP_STATUS.FORBIDDEN,
+      "BANNED",
+    );
+    this.details = { scope, room, reason: reason ?? null, expiresAt: expiresAt ?? null };
+  }
+}

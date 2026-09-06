@@ -1,6 +1,9 @@
 import { MessageService } from "../services/message.service.js";
 import { DEFAULT_ROOM, SOCKET_EVENTS, isValidRoom } from "../constants/chat.constants.js";
 import { RoomPresence } from "./presence.js";
+import { broadcastRoomUsers, broadcastRoomsState } from "./broadcast.js";
+import { BanRepository } from "../repositories/ban.repository.js";
+import { BannedException } from "../exceptions/chat.exceptions.js";
 import logger from "../config/logger.js";
 
 // Проста in-memory-защита від флуду: не більше N повідомлень за
@@ -34,18 +37,6 @@ function checkRateLimit(socket) {
   timestamps.push(now);
   socket.data.messageTimestamps = timestamps;
   return { limited: false };
-}
-
-function broadcastRoomUsers(io, room) {
-  io.to(room).emit(SOCKET_EVENTS.ROOM_USERS, {
-    room,
-    users: RoomPresence.listUsers(room),
-    count: RoomPresence.countUsers(room),
-  });
-}
-
-function broadcastRoomsState(io) {
-  io.emit(SOCKET_EVENTS.ROOMS_STATE, RoomPresence.countsByRoom());
 }
 
 /**
@@ -89,6 +80,25 @@ function broadcastSystemEvent(io, scopeRoom, { event, login, color, room }) {
  */
 async function joinRoom(io, socket, requestedRoom) {
   const targetRoom = isValidRoom(requestedRoom) ? requestedRoom : DEFAULT_ROOM;
+
+  // Перевірка бану — ДО будь-яких змін стану (leave/join/presence).
+  // Глобальний бан ловиться вже при connect (socketAuth.guard.js), але
+  // тут дублюємо: бан могли видати вже ПІСЛЯ того, як сокет
+  // підключився і сидить у сесії — саме тому активний бан завжди
+  // перевіряється в момент конкретної дії, а не лише один раз при вході.
+  const activeBan = await BanRepository.findActive({
+    userId: socket.data.userId,
+    room: targetRoom,
+  });
+  if (activeBan) {
+    throw new BannedException({
+      scope: activeBan.room ? "room" : "global",
+      room: activeBan.room,
+      reason: activeBan.reason,
+      expiresAt: activeBan.expires_at,
+    });
+  }
+
   const previousRoom = socket.data.currentRoom;
   const systemEvents = [];
 
@@ -185,7 +195,15 @@ export function registerChatSocket(io, socket) {
         `room:join не вдався для користувача ${socket.data.userId}: ${err.message}`,
       );
       if (typeof ack === "function") {
-        ack({ success: false, message: "Не вдалося приєднатися до кімнати" });
+        ack({
+          success: false,
+          code: err.code ?? "ROOM_JOIN_FAILED",
+          message:
+            err.code === "BANNED" ? err.message : "Не вдалося приєднатися до кімнати",
+          // details.expiresAt/reason — лише для BannedException, фронту
+          // потрібні, щоб показати "заблоковано до .../причина: ...".
+          ...(err.details ? { details: err.details } : {}),
+        });
       }
     }
   });
@@ -209,8 +227,52 @@ export function registerChatSocket(io, socket) {
       });
     }
 
-    const room = socket.data.currentRoom || DEFAULT_ROOM;
+    const room = socket.data.currentRoom;
     const text = typeof payload === "string" ? payload : payload?.text;
+
+    // room обов'язково береться з серверного стану сокета (не з
+    // payload — клієнт номінально й не передає room, див.
+    // useChatSocket), і, на відміну від попередньої версії, БЕЗ
+    // тихого fallback на DEFAULT_ROOM: клієнт завжди викликає
+    // room:join одразу після connect, тому legit-сценарію з порожнім
+    // currentRoom тут не буває. Явна відмова тут важлива саме для
+    // кіку/бану — sockets/moderationEnforcement.js обнуляє
+    // currentRoom, виштовхуючи сокет із кімнати, і без цієї перевірки
+    // повідомлення просто мовчки пішло б у DEFAULT_ROOM, куди сокет
+    // фактично не приєднаний (він не отримав би власне повідомлення
+    // назад, але решта учасників DEFAULT_ROOM — так, тобто кік із
+    // DEFAULT_ROOM нічого фактично не забороняв би).
+    if (!room) {
+      return respond({
+        success: false,
+        code: "ROOM_REQUIRED",
+        message: "Спочатку потрібно приєднатися до кімнати",
+      });
+    }
+
+    // Дублюємо перевірку бану ще й тут (не лише в joinRoom): бан могли
+    // видати вже ПІСЛЯ того, як сокет зайшов у кімнату, і без цієї
+    // перевірки він продовжував би писати в неї аж до наступного
+    // room:join/reconnect. Для миттєвого ефекту активний бан ще й
+    // примусово виштовхує вже підключені сокети — див.
+    // sockets/moderationEnforcement.js — це лише другий рубіж захисту.
+    const activeBan = await BanRepository.findActive({
+      userId: socket.data.userId,
+      room,
+    });
+    if (activeBan) {
+      return respond({
+        success: false,
+        code: "BANNED",
+        message: activeBan.room ? "Вас заблоковано в цій кімнаті" : "Вас заблоковано в чаті",
+        details: {
+          scope: activeBan.room ? "room" : "global",
+          room: activeBan.room,
+          reason: activeBan.reason,
+          expiresAt: activeBan.expires_at,
+        },
+      });
+    }
 
     try {
       const message = await MessageService.sendMessage({

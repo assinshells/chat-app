@@ -121,4 +121,10 @@ export const SOCKET_EVENTS = Object.freeze({
   DM_SEND: "dm:send",
   DM_NEW: "dm:new",
   DM_ERROR: "dm:error",
+
+  // Модерація (кік/бан) — надсилаються АДРЕСНО жертві дії (див.
+  // sockets/moderationEnforcement.js), а не всій кімнаті: інші учасники
+  // дізнаються про звільнене місце лише через звичайний ROOM_USERS.
+  MODERATION_KICKED: "moderation:kicked",
+  MODERATION_BANNED: "moderation:banned",
 });

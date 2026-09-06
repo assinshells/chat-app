@@ -138,6 +138,7 @@ export function ChatConversation({
   selectedNicknames = [],
   selectedTimes = [],
   roomUsers = [],
+  activeRoom,
 }) {
   const endRef = useRef(null);
   const scrollRef = useRef(null);
@@ -227,7 +228,11 @@ export function ChatConversation({
                       </span>
                     ) : (
                       <>
-                        <DmTriggerButton login={message.author} color={message.color} />
+                        <DmTriggerButton
+                          login={message.author}
+                          color={message.color}
+                          room={activeRoom}
+                        />
                         <button
                           type="button"
                           className={`message-author message-author-btn ${
