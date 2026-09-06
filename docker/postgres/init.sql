@@ -51,6 +51,38 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
+-- Ролі (див. backend/src/constants/auth.constants.js — ROLE_VALUES).
+-- 'user' — значення за замовчуванням для всіх звичайних користувачів.
+-- 'moderator' модерує лише кімнати, перелічені в moderator_rooms нижче;
+-- 'admin' і 'superadmin' модерують усі кімнати без винятку (перевіряється
+-- на рівні коду, а не БД). Один суперадмін заводиться автоматично при
+-- старті бекенда (див. services/superadminBootstrap.service.js) —
+-- саме він може призначати/знімати ролі іншим користувачам.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(16) NOT NULL DEFAULT 'user';
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_role_check'
+    ) THEN
+        ALTER TABLE users ADD CONSTRAINT users_role_check
+            CHECK (role IN ('user', 'moderator', 'admin', 'superadmin'));
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+
+-- Кімнати, які конкретний модератор має право модерувати. Заповнюється
+-- лише для role = 'moderator' (для admin/superadmin — модерація всіх
+-- кімнат одразу, окремого переліку не потрібно; для user — порожньо).
+-- room не має FK, оскільки кімнати — фіксований список у коді
+-- (backend/src/constants/chat.constants.js ROOM_IDS), а не таблиця в БД —
+-- коректність значення room перевіряється на рівні сервісу (isValidRoom).
+CREATE TABLE IF NOT EXISTS moderator_rooms (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    room VARCHAR(64) NOT NULL,
+    PRIMARY KEY (user_id, room)
+);
+
 -- Загальний чат (кімнати з ROOMS, див. backend/src/constants/chat.constants.js).
 -- text не містить переносів рядків — це гарантується на рівні backend
 -- (message.service.js).

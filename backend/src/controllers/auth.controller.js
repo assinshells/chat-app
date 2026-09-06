@@ -138,4 +138,12 @@ export const AuthController = {
       next(err);
     }
   },
+  getMe: async (req, res, next) => {
+    try {
+      const result = await AuthService.getMe({ userId: req.userId });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
 };

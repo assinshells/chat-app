@@ -13,6 +13,15 @@ export const AUTH_ERRORS = Object.freeze({
   INTERNAL_ERROR: "Внутрішня помилка сервера",
   VALIDATION_FAILED: "Помилка валідації",
   CSRF_TOKEN_INVALID: "Невірний або відсутній CSRF-токен",
+
+  // Керування ролями (routes/role.routes.js, services/role.service.js).
+  ROLE_FORBIDDEN: "Недостатньо прав для цієї дії",
+  ROLE_INVALID: "Невірна роль",
+  ROLE_ROOMS_REQUIRED: "Потрібно обрати хоча б одну кімнату для модератора",
+  ROLE_ROOMS_INVALID: "Невідома кімната серед обраних",
+  ROLE_CANNOT_TARGET_SUPERADMIN: "Не можна змінювати роль суперадміністратора",
+  ROLE_CANNOT_TARGET_SELF: "Не можна змінювати власну роль",
+  ROLE_ADMIN_ONLY_SUPERADMIN: "Лише суперадміністратор може призначати або знімати роль адміністратора",
 });
 
 // Назви cookie для httpOnly-потоку refresh-токена. Сам refresh-токен
@@ -48,6 +57,37 @@ export const COLOR_VALUES = Object.freeze({
 
 export const COLOR_OPTIONS = Object.freeze(Object.values(COLOR_VALUES));
 export const DEFAULT_COLOR = COLOR_VALUES.BLACK;
+
+// Ролі користувачів. 'user' — значення за замовчуванням (звичайний
+// учасник чату, без прав модерації). 'moderator' модерує лише кімнати
+// зі свого переліку (moderator_rooms), 'admin' і 'superadmin' — усі
+// кімнати без винятку. Рівно один 'superadmin' заводиться автоматично
+// при старті бекенда (див. services/superadminBootstrap.service.js) —
+// див. коментар там щодо того, чому саме він, а не 'admin', може
+// призначати роль 'admin' іншим.
+export const ROLE_VALUES = Object.freeze({
+  USER: "user",
+  MODERATOR: "moderator",
+  ADMIN: "admin",
+  SUPERADMIN: "superadmin",
+});
+
+export const ROLE_OPTIONS = Object.freeze(Object.values(ROLE_VALUES));
+
+// Ролі, які можна видати/зняти через API керування ролями (routes/role.routes.js).
+// 'user' — це "немає ролі", а не роль, яку хтось "призначає" (див.
+// RoleService.removeRole); 'superadmin' в принципі не видається через API —
+// існує рівно один, заведений при старті бекенда.
+export const ASSIGNABLE_ROLES = Object.freeze([
+  ROLE_VALUES.MODERATOR,
+  ROLE_VALUES.ADMIN,
+]);
+
+// Ролі, яким дозволено керувати ролями інших (POST /api/roles/*).
+export const ROLE_MANAGER_ROLES = Object.freeze([
+  ROLE_VALUES.ADMIN,
+  ROLE_VALUES.SUPERADMIN,
+]);
 
 export const REDIS_KEYS = Object.freeze({
   refreshToken: (jti) => `refresh_token:${jti}`,

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { AUTH_SCREENS, APP_NAME } from "@shared/constants/auth.constants.js";
 import { Storage } from "@shared/lib/storage.js";
 import { refreshAccessToken } from "@shared/api/axios.js";
+import { fetchMe } from "@shared/api/me.api.js";
+import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { useLogoutStore } from "@features/auth/logout/model/useLogoutStore.js";
 import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
@@ -16,6 +18,19 @@ import "@app/styles/index.css";
 
 const USER_KEY = "userLogin";
 const ROOM_KEY = "userRoom";
+
+// loadCurrentUser — підтягує власну роль (та інше з /api/auth/me) в
+// useCurrentUserStore. Викликається "у фоні" (fire-and-forget) після
+// успішного login/refresh: якщо запит впаде, просто не покажемо пункти
+// меню для admin/superadmin — це некритично для решти застосунку.
+const loadCurrentUser = () => {
+  fetchMe()
+    .then(({ user }) => useCurrentUserStore.getState().setUser(user))
+    .catch(() => {
+      // Немає сесії або тимчасова помилка мережі — роль лишається null,
+      // пункти керування роллю просто не показуються.
+    });
+};
 
 export default function App() {
   // accessToken живе лише в пам'яті (AuthSession) і не переживає
@@ -32,7 +47,10 @@ export default function App() {
 
     refreshAccessToken()
       .then(() => {
-        if (!cancelled) setScreen(AUTH_SCREENS.APP);
+        if (!cancelled) {
+          setScreen(AUTH_SCREENS.APP);
+          loadCurrentUser();
+        }
       })
       .catch(() => {
         // Немає дійсної cookie-сесії — залишаємося на екрані логіну.
@@ -55,6 +73,7 @@ export default function App() {
     Storage.set(USER_KEY, login);
     Storage.set(ROOM_KEY, room || DEFAULT_ROOM);
     navigate(AUTH_SCREENS.APP);
+    loadCurrentUser();
   };
 
   const handleLogout = () => {
@@ -62,6 +81,7 @@ export default function App() {
     // у пам'яті), навіть якщо сесія вже минула — див. useLogoutStore.
     logout(() => {
       Storage.remove(USER_KEY);
+      useCurrentUserStore.getState().clear();
       navigate(AUTH_SCREENS.LOGIN);
     });
   };

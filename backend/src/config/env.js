@@ -63,6 +63,16 @@ export const env = {
     refreshMax: Number(getEnv("RATE_LIMIT_REFRESH_MAX", 30)),
     windowMs: Number(getEnv("RATE_LIMIT_WINDOW_MS", 900000)),
   },
+  // Дефолтний суперадмін, що заводиться/оновлюється автоматично при
+  // кожному старті бекенда (див. services/superadminBootstrap.service.js).
+  // Не входить у REQUIRED_VARS: без нього застосунок все одно
+  // запускається, просто з дефолтними логіном/паролем нижче — їх варто
+  // змінити в .env для будь-якого оточення, відкритого назовні.
+  superadmin: {
+    login: getEnv("SUPERADMIN_LOGIN", "superadmin"),
+    password: getEnv("SUPERADMIN_PASSWORD", "ChangeMe123!"),
+    email: getEnv("SUPERADMIN_EMAIL") || undefined,
+  },
 };
 
 export { assertRequiredEnv };

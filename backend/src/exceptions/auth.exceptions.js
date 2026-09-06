@@ -61,3 +61,13 @@ export class OtpInvalidException extends BaseException {
     super(message, HTTP_STATUS.BAD_REQUEST, "OTP_INVALID");
   }
 }
+
+// Керування ролями (routes/role.routes.js, services/role.service.js) —
+// окремий підклас AuthorizationException лише для зручного розрізнення
+// в логах/тестах, статус-код і форма відповіді ті самі (403).
+export class RoleForbiddenException extends AuthorizationException {
+  constructor(message = AUTH_ERRORS.ROLE_FORBIDDEN) {
+    super(message);
+    this.code = "ROLE_FORBIDDEN";
+  }
+}

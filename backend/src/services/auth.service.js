@@ -1,4 +1,5 @@
 import { UserRepository } from "../repositories/user.repository.js";
+import { ModeratorRoomRepository } from "../repositories/moderatorRoom.repository.js";
 import { TokenService } from "./token.service.js";
 import { OtpService } from "./otp.service.js";
 import { PasswordProvider } from "../providers/password.provider.js";
@@ -9,7 +10,7 @@ import {
   NotFoundException,
   AuthorizationException,
 } from "../exceptions/auth.exceptions.js";
-import { AUTH_ERRORS } from "../constants/auth.constants.js";
+import { AUTH_ERRORS, ROLE_VALUES } from "../constants/auth.constants.js";
 
 export const AuthService = {
   async login({ login, password }) {
@@ -91,5 +92,34 @@ export const AuthService = {
     const updated = await UserRepository.updateColor(userId, color);
     if (!updated) throw new NotFoundException();
     return { success: true, color: updated.color };
+  },
+
+  /**
+   * getMe — профіль поточного користувача, включно з роллю і (для
+   * модераторів) переліком кімнат, які він модерує. Викликається
+   * фронтом одразу після login/refresh, щоб знати, чи показувати пункт
+   * "Керувати роллю" в меню користувача (див. features/roles) —
+   * access-токен навмисно не несе роль (див. коментар у guards/role.guard.js).
+   */
+  async getMe({ userId }) {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new NotFoundException();
+
+    const moderatorRooms =
+      user.role === ROLE_VALUES.MODERATOR
+        ? await ModeratorRoomRepository.listByUserId(user.id)
+        : [];
+
+    return {
+      user: {
+        id: user.id,
+        login: user.login,
+        email: user.email,
+        gender: user.gender,
+        color: user.color,
+        role: user.role,
+        moderatorRooms,
+      },
+    };
   },
 };
