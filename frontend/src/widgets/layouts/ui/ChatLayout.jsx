@@ -7,7 +7,13 @@ import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { RoleManageModal } from "@features/roles";
-import { ModerationModal, BannedScreen, ConfinementBanner } from "@features/moderation";
+import {
+  KickModal,
+  BanModal,
+  BannedScreen,
+  ConfinementBanner,
+  RoomBanNoticeBanner,
+} from "@features/moderation";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
@@ -32,6 +38,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     cooldownMs,
     roomBan,
     confinement,
+    roomBanNotice,
     banInfo,
     joinError,
     dismissJoinError,
@@ -153,6 +160,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             onLogout={onLogout}
           />
           <ConfinementBanner confinement={confinement} />
+          <RoomBanNoticeBanner notice={roomBanNotice} />
           {roomBan && (
             <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
               Вас заблоковано в цій кімнаті
@@ -212,7 +220,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
       <DirectMessagesModal />
       <RoleManageModal />
-      <ModerationModal />
+      <KickModal />
+      <BanModal />
     </div>
   );
 }

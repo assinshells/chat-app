@@ -7,19 +7,61 @@ import {
   forceLeaveRoom,
   forceDisconnectUser,
   enforceKickConfinement,
+  enforceRoomBanRelocate,
   ModerationEvents,
 } from "../sockets/moderationEnforcement.js";
 import { ROLE_VALUES } from "../constants/auth.constants.js";
 import {
   MODERATION_ACTIONS,
   MODERATION_ERRORS,
+  DEFAULT_MODERATOR_DURATION_MS,
 } from "../constants/moderationAction.constants.js";
-import { isValidRoom, KICK_CONFINEMENT_ROOM } from "../constants/chat.constants.js";
+import { ROOM_IDS, isValidRoom, KICK_CONFINEMENT_ROOM } from "../constants/chat.constants.js";
 import {
   NotFoundException,
   ValidationException,
   AuthorizationException,
 } from "../exceptions/auth.exceptions.js";
+
+/**
+ * resolveDurationMs — центральне місце, де тривалість дії
+ * ПЕРЕЗАПИСУЄТЬСЯ для модератора: незалежно від того, що прийшло від
+ * клієнта (навіть якщо запит підроблений напряму через API, в обхід
+ * UI), для actorRole === 'moderator' завжди застосовується фіксований
+ * DEFAULT_MODERATOR_DURATION_MS (10 хв) — "для адмінів можливість
+ * встановлювати час" означає, що САМЕ ЦЯ можливість недоступна
+ * модератору, а не лише прихована в інтерфейсі.
+ *
+ * allowPermanent — чи можна передати durationMs === null/undefined,
+ * щоб отримати "назавжди" (лише для BAN/BAN_ROOM, коли актор —
+ * admin/superadmin; кік і "з чату" завжди тимчасові).
+ */
+function resolveDurationMs({ actorRole, requestedDurationMs, allowPermanent = false }) {
+  if (actorRole === ROLE_VALUES.MODERATOR) {
+    return DEFAULT_MODERATOR_DURATION_MS;
+  }
+
+  if (requestedDurationMs === null || requestedDurationMs === undefined) {
+    if (allowPermanent) return null;
+    return DEFAULT_MODERATOR_DURATION_MS;
+  }
+
+  return requestedDurationMs;
+}
+
+/**
+ * resolveActorRooms — кімнати, у яких actor має право модерувати "весь
+ * список одразу" (потрібно для BAN_ROOM): для moderator — це рівно
+ * moderatorRooms; для admin/superadmin — усі кімнати чату, ОКРІМ
+ * KICK_CONFINEMENT_ROOM (bespredel навмисно лишається відкритою —
+ * саме туди жертву переносить сама дія, замикати її й там немає сенсу).
+ */
+async function resolveActorRooms({ actorId, actorRole }) {
+  if (actorRole === ROLE_VALUES.MODERATOR) {
+    return ModeratorRoomRepository.listByUserId(actorId);
+  }
+  return ROOM_IDS.filter((room) => room !== KICK_CONFINEMENT_ROOM);
+}
 
 /**
  * assertCanAct — спільні перевірки прав для кіку/бану/розбану:
@@ -67,7 +109,12 @@ export const ModerationActionService = {
     if (!isValidRoom(room)) {
       throw new ValidationException(MODERATION_ERRORS.ROOM_INVALID);
     }
-    if (!durationMs || durationMs <= 0) {
+
+    const effectiveDurationMs = resolveDurationMs({
+      actorRole,
+      requestedDurationMs: durationMs,
+    });
+    if (!effectiveDurationMs || effectiveDurationMs <= 0) {
       throw new ValidationException(MODERATION_ERRORS.DURATION_REQUIRED);
     }
 
@@ -76,7 +123,7 @@ export const ModerationActionService = {
 
     await assertCanAct({ actorId, actorRole, target, room });
 
-    const expiresAt = new Date(Date.now() + durationMs);
+    const expiresAt = new Date(Date.now() + effectiveDurationMs);
 
     await ConfinementRepository.upsert({
       userId: target.id,
@@ -107,6 +154,73 @@ export const ModerationActionService = {
   },
 
   /**
+   * kickChat — "кикнути з чату": на відміну від kick() (замкнення в
+   * bespredel, можна лишатись у чаті), тут жертва одразу повністю
+   * втрачає доступ до чату на durationMs — не може зайти в ЖОДНУ
+   * кімнату, поки бан не спливе (технічно це global-бан із room=null,
+   * як і BAN зі scope="global", але завжди ТИМЧАСОВИЙ — durationMs
+   * ніколи не буває null/"назавжди", на відміну від повноцінного бану;
+   * для постійного вилучення з чату є саме BAN). Room тут не
+   * потрібен — це не прив'язана до конкретної кімнати дія, тому
+   * проходить без room-перевірки moderatorRooms (кожен модератор
+   * модерує принаймні одну кімнату, і "викинути з чату" стосується
+   * людини в цілому, а не конкретної кімнати).
+   */
+  async kickChat({ io, actorId, actorRole, targetLogin, durationMs, reason }) {
+    const effectiveDurationMs = resolveDurationMs({ actorRole, requestedDurationMs: durationMs });
+    if (!effectiveDurationMs || effectiveDurationMs <= 0) {
+      throw new ValidationException(MODERATION_ERRORS.DURATION_REQUIRED);
+    }
+
+    const target = await UserRepository.findByLogin(targetLogin);
+    if (!target) throw new NotFoundException();
+
+    // room: null — це не "глобальна дія модератора" в сенсі
+    // GLOBAL_FORBIDDEN_FOR_MODERATOR (та заборона стосується
+    // повноцінного БАНУ на весь чат назавжди/надовго), а разова
+    // тимчасова дія в межах прав, які модератор і так має — тому
+    // перевіряються лише self/superadmin/admin-обмеження, без виклику
+    // assertCanAct(room: null), яка кинула б GLOBAL_FORBIDDEN_FOR_MODERATOR.
+    if (target.id === actorId) {
+      throw new AuthorizationException(MODERATION_ERRORS.CANNOT_TARGET_SELF);
+    }
+    if (target.role === ROLE_VALUES.SUPERADMIN) {
+      throw new AuthorizationException(MODERATION_ERRORS.CANNOT_TARGET_SUPERADMIN);
+    }
+    if (target.role === ROLE_VALUES.ADMIN && actorRole !== ROLE_VALUES.SUPERADMIN) {
+      throw new AuthorizationException(MODERATION_ERRORS.ADMIN_ONLY_SUPERADMIN);
+    }
+
+    const expiresAt = new Date(Date.now() + effectiveDurationMs);
+
+    const ban = await BanRepository.create({
+      targetUserId: target.id,
+      room: null,
+      issuedBy: actorId,
+      reason,
+      expiresAt,
+    });
+
+    await ModerationLogRepository.record({
+      action: MODERATION_ACTIONS.KICK_CHAT,
+      targetUserId: target.id,
+      room: null,
+      actorId,
+      reason,
+      expiresAt,
+    });
+
+    await forceDisconnectUser(io, target.id, {
+      event: ModerationEvents.BANNED,
+      scope: "global",
+      reason,
+      expiresAt,
+    });
+
+    return { id: ban.id, login: target.login, expiresAt };
+  },
+
+  /**
    * ban — створює запис у bans (стан, що діє в часі) і, якщо жертва
    * зараз онлайн, одразу застосовує його: room-бан виштовхує лише з
    * цієї кімнати (forceLeaveRoom), глобальний — рве з'єднання повністю
@@ -125,7 +239,12 @@ export const ModerationActionService = {
     await assertCanAct({ actorId, actorRole, target, room: isGlobal ? null : room });
 
     const banRoom = isGlobal ? null : room;
-    const expiresAt = durationMs ? new Date(Date.now() + durationMs) : null;
+    const effectiveDurationMs = resolveDurationMs({
+      actorRole,
+      requestedDurationMs: durationMs,
+      allowPermanent: true,
+    });
+    const expiresAt = effectiveDurationMs ? new Date(Date.now() + effectiveDurationMs) : null;
 
     const ban = await BanRepository.create({
       targetUserId: target.id,
@@ -167,6 +286,90 @@ export const ModerationActionService = {
       room: banRoom,
       reason: ban.reason,
       expiresAt: ban.expires_at,
+    };
+  },
+
+  /**
+   * banRoom — "бан кімнати": на відміну від ban({scope:"room"}) (одна
+   * конкретна кімната), тут одразу банить жертву у ВСІХ кімнатах, де
+   * ПРАВА МАЄ САМЕ ЦЕЙ АКТОР (moderatorRooms для модератора, усі
+   * кімнати чату для admin/superadmin), і одноразово переносить її в
+   * bespredel — але, на відміну від kick(), БЕЗ персистентного
+   * замкнення: жертва може одразу переходити в будь-яку ІНШУ кімнату,
+   * якщо там немає активного бану (перевіряється звичайним room-бан
+   * механізмом). Саме тому це не record у room_confinements, а просто
+   * пакет room-банів + одноразовий redirect (enforceRoomBanRelocate).
+   */
+  async banRoom({ io, actorId, actorRole, targetLogin, durationMs, reason }) {
+    const target = await UserRepository.findByLogin(targetLogin);
+    if (!target) throw new NotFoundException();
+
+    // Як і в kickChat — це дія в межах кімнат, де актор і так має
+    // права, а не "глобальна" дія в сенсі GLOBAL_FORBIDDEN_FOR_MODERATOR,
+    // тому перевіряються лише self/superadmin/admin-обмеження.
+    if (target.id === actorId) {
+      throw new AuthorizationException(MODERATION_ERRORS.CANNOT_TARGET_SELF);
+    }
+    if (target.role === ROLE_VALUES.SUPERADMIN) {
+      throw new AuthorizationException(MODERATION_ERRORS.CANNOT_TARGET_SUPERADMIN);
+    }
+    if (target.role === ROLE_VALUES.ADMIN && actorRole !== ROLE_VALUES.SUPERADMIN) {
+      throw new AuthorizationException(MODERATION_ERRORS.ADMIN_ONLY_SUPERADMIN);
+    }
+
+    const rooms = await resolveActorRooms({ actorId, actorRole });
+    if (rooms.length === 0) {
+      // Модератор без жодної кімнати — стан, що не мав би трапитись
+      // (роль призначається лише з непорожнім переліком, див.
+      // RoleService.assignRole), але про всяк випадок не мовчимо.
+      throw new AuthorizationException(MODERATION_ERRORS.NOT_MODERATED_ROOM);
+    }
+
+    const effectiveDurationMs = resolveDurationMs({
+      actorRole,
+      requestedDurationMs: durationMs,
+      allowPermanent: true,
+    });
+    const expiresAt = effectiveDurationMs ? new Date(Date.now() + effectiveDurationMs) : null;
+
+    const bans = [];
+    for (const room of rooms) {
+       
+      // відкривати `rooms.length` одночасних з'єднань із пулу на один запит.
+      const ban = await BanRepository.create({
+        targetUserId: target.id,
+        room,
+        issuedBy: actorId,
+        reason,
+        expiresAt,
+      });
+      bans.push(ban);
+
+       
+      await ModerationLogRepository.record({
+        action: MODERATION_ACTIONS.BAN_ROOM,
+        targetUserId: target.id,
+        room,
+        actorId,
+        reason,
+        expiresAt,
+      });
+    }
+
+    await enforceRoomBanRelocate(io, target.id, {
+      bannedRooms: rooms,
+      redirectRoom: KICK_CONFINEMENT_ROOM,
+      reason,
+      expiresAt,
+    });
+
+    return {
+      login: target.login,
+      rooms,
+      redirectRoom: KICK_CONFINEMENT_ROOM,
+      reason,
+      expiresAt,
+      banIds: bans.map((b) => b.id),
     };
   },
 

@@ -1,40 +1,58 @@
 import { create } from "zustand";
 import {
   kickRequest,
+  kickChatRequest,
   banRequest,
+  banRoomRequest,
   unbanRequest,
   releaseConfinementRequest,
   listActiveBansRequest,
 } from "@features/moderation/api/moderation.api.js";
-import {
-  BAN_DURATION_PRESETS,
-  KICK_DURATION_PRESETS,
-} from "@shared/constants/moderationAction.constants.js";
+import { DEFAULT_MODERATOR_DURATION_MS } from "@shared/constants/moderationAction.constants.js";
 
 /**
- * useModerationStore — стан єдиної на застосунок модалки кіку/бану
- * (ModerationModal, рендериться один раз у ChatLayout — та сама схема,
- * що й useRolesStore/useDmStore: openFor(login, color, room) виставляє
- * ціль і кімнату, з якої відкрили меню, і одразу підвантажує активні
- * бани І поточне кік-обмеження цієї людини (якщо є), щоб показати
- * статус і кнопки "Зняти"/"Звільнити".
+ * useModerationStore — стан двох модалок кіку й бану (KickModal,
+ * BanModal — обидві рендеряться один раз у ChatLayout, як і
+ * useRolesStore/useDmStore). openFor(login, color, room) відкриває
+ * будь-яку з них і одразу підвантажує активні бани (тепер може бути
+ * КІЛЬКА рядків — "бан кімнати" банить одразу в усіх кімнатах, де
+ * актор модерує) і поточне кік-обмеження ("в беспредел").
+ *
+ * Чотири незалежні дії:
+ *  - kickToBespredel — замкнення в bespredel (без переходів по кімнатах);
+ *  - kickFromChat — тимчасове повне вилучення з чату;
+ *  - banRoom — бан у ВСІХ кімнатах актора + перенесення в bespredel
+ *    (звідти можна переходити куди завгодно, окрім забанених кімнат);
+ *  - banChat — постійний/тривалий бан усього чату (може бути "назавжди").
+ *
+ * *Ms-поля (kickBespredelMs/kickChatMs/banRoomMs/banChatMs) —
+ * ВИКЛЮЧНО для адмінів/суперадмінів (див. canSetCustomDuration):
+ * модератор кнопки викликає без жодного поля вводу, і сервіс на
+ * бекенді все одно форсує дефолт 10 хв незалежно від того, що прийшло
+ * б у тілі запиту.
  */
 export const useModerationStore = create((set, get) => ({
   targetLogin: null,
   targetColor: undefined,
-  room: null, // кімната, з меню якої відкрили модалку — контекст для кіку і room-бану
+  room: null, // кімната, з меню якої відкрили модалку (потрібна лише для kickToBespredel)
 
   activeBans: [],
   confinement: null, // {confinedRoom, sourceRoom, reason, expiresAt} | null
   loadingStatus: false,
 
-  banScope: "room", // "room" | "global"
-  banDurationPreset: BAN_DURATION_PRESETS[0].value,
-  kickDurationPreset: KICK_DURATION_PRESETS[0].value,
   reason: "",
 
-  kicking: false,
-  banning: false,
+  kickBespredelMs: DEFAULT_MODERATOR_DURATION_MS,
+  kickChatMs: DEFAULT_MODERATOR_DURATION_MS,
+  banRoomMs: DEFAULT_MODERATOR_DURATION_MS,
+  banChatMs: DEFAULT_MODERATOR_DURATION_MS,
+  banRoomPermanent: false,
+  banChatPermanent: false,
+
+  kickingBespredel: false,
+  kickingChat: false,
+  banningRoom: false,
+  banningChat: false,
   unbanningId: null,
   releasing: false,
   error: null,
@@ -46,16 +64,21 @@ export const useModerationStore = create((set, get) => ({
       targetColor: color,
       room,
       loadingStatus: true,
-      kicking: false,
-      banning: false,
+      kickingBespredel: false,
+      kickingChat: false,
+      banningRoom: false,
+      banningChat: false,
       unbanningId: null,
       releasing: false,
       error: null,
       success: null,
-      banScope: "room",
-      banDurationPreset: BAN_DURATION_PRESETS[0].value,
-      kickDurationPreset: KICK_DURATION_PRESETS[0].value,
       reason: "",
+      kickBespredelMs: DEFAULT_MODERATOR_DURATION_MS,
+      kickChatMs: DEFAULT_MODERATOR_DURATION_MS,
+      banRoomMs: DEFAULT_MODERATOR_DURATION_MS,
+      banChatMs: DEFAULT_MODERATOR_DURATION_MS,
+      banRoomPermanent: false,
+      banChatPermanent: false,
     });
 
     try {
@@ -71,30 +94,31 @@ export const useModerationStore = create((set, get) => ({
     }
   },
 
-  setBanScope: (scope) => set({ banScope: scope, error: null, success: null }),
-  setBanDurationPreset: (preset) => set({ banDurationPreset: preset, error: null, success: null }),
-  setKickDurationPreset: (preset) => set({ kickDurationPreset: preset, error: null, success: null }),
   setReason: (reason) => set({ reason, error: null, success: null }),
+  setKickBespredelMs: (ms) => set({ kickBespredelMs: ms }),
+  setKickChatMs: (ms) => set({ kickChatMs: ms }),
+  setBanRoomMs: (ms) => set({ banRoomMs: ms }),
+  setBanChatMs: (ms) => set({ banChatMs: ms }),
+  setBanRoomPermanent: (permanent) => set({ banRoomPermanent: permanent }),
+  setBanChatPermanent: (permanent) => set({ banChatPermanent: permanent }),
   clearStatus: () => set({ error: null, success: null }),
 
-  kick: async () => {
-    const { targetLogin, room, kickDurationPreset, reason, kicking } = get();
-    if (!targetLogin || !room || kicking) return;
+  /** kickToBespredel — "Кикнути" > "В беспредел". */
+  kickToBespredel: async (customDurationMs) => {
+    const { targetLogin, room, kickBespredelMs, reason, kickingBespredel } = get();
+    if (!targetLogin || !room || kickingBespredel) return;
 
-    const preset = KICK_DURATION_PRESETS.find((p) => p.value === kickDurationPreset);
-    const durationMs = preset?.ms ?? KICK_DURATION_PRESETS[0].ms;
-
-    set({ kicking: true, error: null, success: null });
+    set({ kickingBespredel: true, error: null, success: null });
     try {
       const result = await kickRequest({
         login: targetLogin,
         room,
-        durationMs,
+        durationMs: customDurationMs ?? kickBespredelMs,
         reason: reason || undefined,
       });
       set({
-        kicking: false,
-        success: "Користувача кикнуто",
+        kickingBespredel: false,
+        success: "Користувача переведено в «Бєспрєдєл»",
         confinement: {
           confinedRoom: result.confinedRoom,
           sourceRoom: result.room,
@@ -103,29 +127,79 @@ export const useModerationStore = create((set, get) => ({
         },
       });
     } catch (err) {
-      set({ kicking: false, error: err.message || "Не вдалося кикнути користувача" });
+      set({ kickingBespredel: false, error: err.message || "Не вдалося кикнути користувача" });
     }
   },
 
-  ban: async () => {
-    const { targetLogin, room, banScope, banDurationPreset, reason, banning } = get();
-    if (!targetLogin || banning) return;
+  /** kickFromChat — "Кикнути" > "Із чату". */
+  kickFromChat: async (customDurationMs) => {
+    const { targetLogin, kickChatMs, reason, kickingChat } = get();
+    if (!targetLogin || kickingChat) return;
 
-    const preset = BAN_DURATION_PRESETS.find((p) => p.value === banDurationPreset);
-    const durationMs = preset?.ms ?? null;
-
-    set({ banning: true, error: null, success: null });
+    set({ kickingChat: true, error: null, success: null });
     try {
-      const result = await banRequest({
+      await kickChatRequest({
         login: targetLogin,
-        scope: banScope,
-        room: banScope === "room" ? room : undefined,
+        durationMs: customDurationMs ?? kickChatMs,
+        reason: reason || undefined,
+      });
+      set({ kickingChat: false, success: "Користувача тимчасово вилучено з чату" });
+    } catch (err) {
+      set({ kickingChat: false, error: err.message || "Не вдалося кикнути користувача з чату" });
+    }
+  },
+
+  /** banRoom — "Бан" > "Бан кімнати". */
+  banRoom: async (customDurationMs) => {
+    const { targetLogin, banRoomMs, banRoomPermanent, reason, banningRoom } = get();
+    if (!targetLogin || banningRoom) return;
+
+    const durationMs = banRoomPermanent ? null : customDurationMs ?? banRoomMs;
+
+    set({ banningRoom: true, error: null, success: null });
+    try {
+      const result = await banRoomRequest({
+        login: targetLogin,
         durationMs,
         reason: reason || undefined,
       });
       set((state) => ({
-        banning: false,
-        success: "Бан видано",
+        banningRoom: false,
+        success: `Користувача забанено у кімнатах: ${result.rooms.join(", ")}`,
+        activeBans: [
+          ...result.rooms.map((room, i) => ({
+            id: result.banIds?.[i],
+            room,
+            scope: "room",
+            reason: reason || null,
+            expiresAt: result.expiresAt,
+          })),
+          ...state.activeBans,
+        ],
+      }));
+    } catch (err) {
+      set({ banningRoom: false, error: err.message || "Не вдалося забанити кімнати" });
+    }
+  },
+
+  /** banChat — "Бан" > "Бан чату". */
+  banChat: async (customDurationMs) => {
+    const { targetLogin, banChatMs, banChatPermanent, reason, banningChat } = get();
+    if (!targetLogin || banningChat) return;
+
+    const durationMs = banChatPermanent ? null : customDurationMs ?? banChatMs;
+
+    set({ banningChat: true, error: null, success: null });
+    try {
+      const result = await banRequest({
+        login: targetLogin,
+        scope: "global",
+        durationMs,
+        reason: reason || undefined,
+      });
+      set((state) => ({
+        banningChat: false,
+        success: "Бан чату видано",
         activeBans: [
           {
             id: result.id,
@@ -138,7 +212,7 @@ export const useModerationStore = create((set, get) => ({
         ],
       }));
     } catch (err) {
-      set({ banning: false, error: err.message || "Не вдалося видати бан" });
+      set({ banningChat: false, error: err.message || "Не вдалося забанити чат" });
     }
   },
 

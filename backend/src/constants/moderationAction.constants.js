@@ -1,10 +1,26 @@
 import { ROLE_VALUES } from "./auth.constants.js";
 
 export const MODERATION_ACTIONS = Object.freeze({
-  KICK: "kick",
-  BAN: "ban",
+  KICK: "kick", // "в беспредел" — замкнення в KICK_CONFINEMENT_ROOM, без переходів по кімнатах
+  KICK_CHAT: "kick_chat", // "з чату" — тимчасово повне вилучення з чату (короткий термін, не може бути "назавжди")
+  BAN: "ban", // "бан чату" — global-скоуп бан (room=null), може бути "назавжди"
+  BAN_ROOM: "ban_room", // "бан кімнати" — банить одразу в УСІХ кімнатах, де актор модерує + переводить у bespredel
   UNBAN: "unban",
 });
+
+// Фіксована тривалість дій модератора (на відміну від admin/superadmin,
+// модератор НЕ може вказати власну тривалість — ані з фронта, ані
+// напряму через API: сервіс завжди перезаписує durationMs цим
+// значенням для actorRole === 'moderator', див.
+// services/moderationAction.service.js). 10 хвилин — дефолт, спільний
+// для всіх чотирьох кнопок (кік/з чату/бан кімнати/бан чату).
+export const DEFAULT_MODERATOR_DURATION_MS = 10 * 60 * 1000;
+
+// Верхня межа для "з чату" (KICK_CHAT), яку може виставити admin/superadmin:
+// це все ще КІК за змістом (тимчасово, "охолонути"), тому, на відміну
+// від BAN (там є "назавжди"), тут завжди є durationMs і він не може
+// бути безмежним.
+export const MAX_KICK_CHAT_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 
 // Ролі, яким доступні самі HTTP-роути кіку/бану (routes/moderationAction.routes.js).
 // На відміну від керування ролями (ROLE_MANAGER_ROLES — лише admin/superadmin),
@@ -51,6 +67,7 @@ export const MODERATION_ERRORS = Object.freeze({
   ROOM_INVALID: "Невідома кімната",
   DURATION_INVALID: "Невірна тривалість бану",
   DURATION_REQUIRED: "Потрібно вказати тривалість кіку",
+  DURATION_CUSTOM_FORBIDDEN: "Лише адміністратор може встановлювати власну тривалість",
   BAN_NOT_FOUND: "Активний бан не знайдено",
 
   // Показуються самому забаненому/кікнутому користувачу на фронті.

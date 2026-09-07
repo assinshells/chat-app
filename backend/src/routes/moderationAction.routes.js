@@ -16,7 +16,9 @@ router.use(authGuard, requireRole(MODERATION_ACTOR_ROLES));
 
 router.get("/bans/:login", ModerationActionController.listActiveBans);
 router.post("/kick", csrfProtection, ModerationActionController.kick);
+router.post("/kick-chat", csrfProtection, ModerationActionController.kickChat);
 router.post("/ban", csrfProtection, ModerationActionController.ban);
+router.post("/ban-room", csrfProtection, ModerationActionController.banRoom);
 router.post("/unban", csrfProtection, ModerationActionController.unban);
 router.post(
   "/release-confinement",

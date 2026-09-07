@@ -80,6 +80,7 @@ export async function forceDisconnectUser(io, userId, { event, ...notifyPayload 
 export const ModerationEvents = {
   KICKED: SOCKET_EVENTS.MODERATION_KICKED,
   BANNED: SOCKET_EVENTS.MODERATION_BANNED,
+  ROOM_BANNED: SOCKET_EVENTS.MODERATION_ROOM_BANNED,
 };
 
 /**
@@ -100,6 +101,72 @@ export const ModerationEvents = {
  * захистом (працює і для сокетів, що були офлайн у момент кіку) — це
  * лише миттєве застосування для вже підключених.
  */
+/**
+ * enforceRoomBanRelocate — застосовується "бан кімнати" (BAN_ROOM):
+ * жертва одразу переноситься в redirectRoom (завжди bespredel), АЛЕ,
+ * на відміну від enforceKickConfinement, це РІВНО ОДНОРАЗОВЕ
+ * перенесення, не персистентний лок — жодного запису в
+ * room_confinements не створюється. Подальші переходи в БУДЬ-ЯКУ
+ * кімнату дозволені, окрім bannedRooms — це вже звичайні room-бани
+ * (bans, room = кожна з bannedRooms), які перевіряються так само, як і
+ * будь-який інший room-бан у room:join/message:send. Тому фронт має
+ * реагувати на MODERATION_ROOM_BANNED інакше, ніж на MODERATION_KICKED:
+ * лише одноразовий redirect + інформаційний банер, БЕЗ виставлення
+ * "заблокованого" стану, що забороняв би клієнту саму спробу
+ * перемкнутися на іншу (не забанену) кімнату.
+ */
+export async function enforceRoomBanRelocate(io, userId, { bannedRooms, redirectRoom, reason, expiresAt }) {
+  const sockets = await io.in(dmChannel(userId)).fetchSockets();
+  if (sockets.length === 0) return;
+
+  const vacatedRooms = new Set();
+
+  for (const s of sockets) {
+    const prevRoom = s.data.currentRoom;
+    if (prevRoom && prevRoom !== redirectRoom) {
+      s.leave(prevRoom);
+      RoomPresence.leave(prevRoom, s.id);
+      vacatedRooms.add(prevRoom);
+    }
+
+    if (prevRoom !== redirectRoom) {
+      s.join(redirectRoom);
+      RoomPresence.join(redirectRoom, s.id, {
+        id: s.data.userId,
+        login: s.data.login,
+        gender: s.data.gender,
+        color: s.data.color,
+      });
+    }
+
+    s.data.currentRoom = redirectRoom;
+  }
+
+  const messages = await MessageService.getHistory({ room: redirectRoom });
+  const snapshot = {
+    room: redirectRoom,
+    messages,
+    users: RoomPresence.listUsers(redirectRoom),
+    count: RoomPresence.countUsers(redirectRoom),
+  };
+
+  for (const s of sockets) {
+    s.emit(ModerationEvents.ROOM_BANNED, {
+      bannedRooms,
+      redirectRoom,
+      reason,
+      expiresAt,
+      snapshot,
+    });
+  }
+
+  for (const room of vacatedRooms) {
+    broadcastRoomUsers(io, room);
+  }
+  broadcastRoomUsers(io, redirectRoom);
+  broadcastRoomsState(io);
+}
+
 export async function enforceKickConfinement(io, userId, { sourceRoom, confinedRoom, reason, expiresAt }) {
   const sockets = await io.in(dmChannel(userId)).fetchSockets();
   if (sockets.length === 0) return;

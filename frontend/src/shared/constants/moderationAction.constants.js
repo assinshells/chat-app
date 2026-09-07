@@ -1,11 +1,25 @@
 import { ROLE_VALUES } from "@shared/constants/role.constants.js";
 
+// Дзеркалить backend/src/constants/moderationAction.constants.js —
+// фіксована тривалість для модератора (не адміна) на всіх чотирьох
+// кнопках: "В беспредел", "Із чату", "Бан кімнати", "Бан чату".
+// Модератор НЕ бачить поле вводу тривалості взагалі (canSetCustomDuration
+// нижче), а адмін/суперадмін — бачить і може задати своє значення;
+// реальне обмеження все одно перевіряється на бекенді (resolveDurationMs).
+export const DEFAULT_MODERATOR_DURATION_MS = 10 * 60 * 1000;
+export const DEFAULT_MODERATOR_DURATION_LABEL = "10 хвилин";
+
+/** canSetCustomDuration — лише admin/superadmin можуть вказати власну тривалість. */
+export function canSetCustomDuration(role) {
+  return role === ROLE_VALUES.ADMIN || role === ROLE_VALUES.SUPERADMIN;
+}
+
 // Значення (value) точно збігаються з тим, що приймає backend
 // (durationMs обчислюється тут з ms і надсилається як число, самі
 // value/ms — лише зручність для UI, бекенд приймає будь-який durationMs
 // в розумних межах, а не лише ці пресети).
 export const BAN_DURATION_PRESETS = Object.freeze([
-  { value: "15m", ms: 15 * 60 * 1000, label: "15 хвилин" },
+  { value: "10m", ms: 10 * 60 * 1000, label: "10 хвилин" },
   { value: "1h", ms: 60 * 60 * 1000, label: "1 година" },
   { value: "1d", ms: 24 * 60 * 60 * 1000, label: "1 день" },
   { value: "7d", ms: 7 * 24 * 60 * 60 * 1000, label: "7 днів" },
@@ -19,8 +33,20 @@ export const BAN_DURATION_PRESETS = Object.freeze([
 export const KICK_DURATION_PRESETS = Object.freeze([
   { value: "2m", ms: 2 * 60 * 1000, label: "2 хвилини" },
   { value: "5m", ms: 5 * 60 * 1000, label: "5 хвилин" },
+  { value: "10m", ms: 10 * 60 * 1000, label: "10 хвилин" },
   { value: "15m", ms: 15 * 60 * 1000, label: "15 хвилин" },
   { value: "1h", ms: 60 * 60 * 1000, label: "1 година" },
+  { value: "24h", ms: 24 * 60 * 60 * 1000, label: "24 години" },
+]);
+
+// "Із чату" (KICK_CHAT) — так само без "назавжди" (це все ще кік), але
+// верхня межа на бекенді ширша (до 30 днів, MAX_KICK_CHAT_DURATION_MS) —
+// пресети відповідно трохи довші за звичайний KICK_DURATION_PRESETS.
+export const KICK_CHAT_DURATION_PRESETS = Object.freeze([
+  { value: "10m", ms: 10 * 60 * 1000, label: "10 хвилин" },
+  { value: "1h", ms: 60 * 60 * 1000, label: "1 година" },
+  { value: "24h", ms: 24 * 60 * 60 * 1000, label: "24 години" },
+  { value: "7d", ms: 7 * 24 * 60 * 60 * 1000, label: "7 днів" },
 ]);
 
 /**

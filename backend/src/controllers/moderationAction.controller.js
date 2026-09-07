@@ -1,12 +1,16 @@
 import { ModerationActionService } from "../services/moderationAction.service.js";
 import {
   toKickDto,
+  toKickChatDto,
   toBanDto,
+  toBanRoomDto,
   toUnbanDto,
 } from "../dto/moderationAction.dto.js";
 import {
   validateKickRequest,
+  validateKickChatRequest,
   validateBanRequest,
+  validateBanRoomRequest,
   validateUnbanRequest,
   validateReleaseConfinementRequest,
 } from "../validators/moderationAction.validator.js";
@@ -32,6 +36,42 @@ export const ModerationActionController = {
         actorRole: req.userRole,
         targetLogin: dto.login,
         room: dto.room,
+        durationMs: dto.durationMs,
+        reason: dto.reason,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  kickChat: async (req, res, next) => {
+    try {
+      validateKickChatRequest(req.body);
+      const dto = toKickChatDto(req.body);
+      const result = await ModerationActionService.kickChat({
+        io: req.app.get("io"),
+        actorId: req.userId,
+        actorRole: req.userRole,
+        targetLogin: dto.login,
+        durationMs: dto.durationMs,
+        reason: dto.reason,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  banRoom: async (req, res, next) => {
+    try {
+      validateBanRoomRequest(req.body);
+      const dto = toBanRoomDto(req.body);
+      const result = await ModerationActionService.banRoom({
+        io: req.app.get("io"),
+        actorId: req.userId,
+        actorRole: req.userRole,
+        targetLogin: dto.login,
         durationMs: dto.durationMs,
         reason: dto.reason,
       });

@@ -14,9 +14,13 @@ import { canModerateRoom } from "@shared/constants/moderationAction.constants.js
  *  - написати особисте повідомлення (усім, завжди);
  *  - "Керувати роллю" — лише якщо ВЛАСНА роль admin/superadmin
  *    (ROLE_MANAGER_ROLES);
- *  - "Кик / бан" — якщо власна роль може модерувати саме `room`
+ *  - "Кикнути" / "Бан" — якщо власна роль може модерувати саме `room`
  *    (canModerateRoom: admin/superadmin — будь-яку, moderator —
- *    лише свої moderatorRooms, див. useCurrentUserStore).
+ *    лише свої moderatorRooms, див. useCurrentUserStore). Кожен пункт
+ *    відкриває СВОЮ модалку (KickModal/BanModal, обидві рендеряться
+ *    один раз у ChatLayout) — вибір кнопки всередині кожної модалки
+ *    вже визначає, яка саме дія (в беспредел/із чату, бан
+ *    кімнати/бан чату) виконується.
  * Реальна перевірка прав у всіх випадках все одно на бекенді — тут
  * лише видимість пунктів меню.
  *
@@ -24,7 +28,8 @@ import { canModerateRoom } from "@shared/constants/moderationAction.constants.js
  * щоб модалка одразу могла зафарбувати ім'я, не роблячи окремого
  * запиту). room — кімната, з чийого списку/стрічки відкрито меню
  * (Sidebar передає activeRoom, ChatConversation — той самий activeRoom
- * ChatLayout'а) — саме вона є ціллю кіку/room-бану.
+ * ChatLayout'а) — саме вона є ціллю "в беспредел" (kickToBespredel);
+ * "із чату"/"бан кімнати"/"бан чату" від конкретної room не залежать.
  */
 export function DmTriggerButton({
   login,
@@ -32,7 +37,8 @@ export function DmTriggerButton({
   room,
   modalId = "dmModal",
   roleModalId = "roleManageModal",
-  moderationModalId = "moderationModal",
+  kickModalId = "kickModerationModal",
+  banModalId = "banModerationModal",
 }) {
   const openConversation = useDmStore((state) => state.openConversation);
   const openRoleManager = useRolesStore((state) => state.openFor);
@@ -89,19 +95,34 @@ export function DmTriggerButton({
         )}
 
         {canModerate && (
-          <a
-            className="dropdown-item"
-            href="#"
-            data-bs-toggle="modal"
-            data-bs-target={`#${moderationModalId}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openModeration(login, color, room);
-            }}
-          >
-            Кик / бан
-          </a>
+          <>
+            <a
+              className="dropdown-item"
+              href="#"
+              data-bs-toggle="modal"
+              data-bs-target={`#${kickModalId}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openModeration(login, color, room);
+              }}
+            >
+              Кикнути
+            </a>
+            <a
+              className="dropdown-item"
+              href="#"
+              data-bs-toggle="modal"
+              data-bs-target={`#${banModalId}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openModeration(login, color, room);
+              }}
+            >
+              Бан
+            </a>
+          </>
         )}
       </div>
     </div>

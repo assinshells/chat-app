@@ -114,7 +114,7 @@ CREATE INDEX IF NOT EXISTS idx_bans_active_by_user_room
 -- рядок у bans (це миттєва безстанова дія), тому фіксується лише тут.
 CREATE TABLE IF NOT EXISTS moderation_log (
     id SERIAL PRIMARY KEY,
-    action VARCHAR(16) NOT NULL CHECK (action IN ('kick', 'ban', 'unban')),
+    action VARCHAR(16) NOT NULL CHECK (action IN ('kick', 'kick_chat', 'ban', 'ban_room', 'unban')),
     target_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     room VARCHAR(64),
     actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -123,6 +123,23 @@ CREATE TABLE IF NOT EXISTS moderation_log (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_moderation_log_target ON moderation_log(target_user_id);
+
+-- Домігрування для баз, створених до появи 'kick_chat'/'ban_room'
+-- (дропдавн "Кикнути" > "Із чату" і "Бан" > "Бан кімнати" — див.
+-- services/moderationAction.service.js kickChat/banRoom): init.sql
+-- виконується лише на порожній базі, тому наявний CHECK на старих
+-- оточеннях потрібно замінити явно, а не покладатись на CREATE TABLE
+-- IF NOT EXISTS вище.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'moderation_log_action_check'
+    ) THEN
+        ALTER TABLE moderation_log DROP CONSTRAINT moderation_log_action_check;
+    END IF;
+    ALTER TABLE moderation_log ADD CONSTRAINT moderation_log_action_check
+        CHECK (action IN ('kick', 'kick_chat', 'ban', 'ban_room', 'unban'));
+END $$;
 
 -- Кік більше не є "виштовхнули і одразу можна повернутися" — на час
 -- kick_confinement користувач переводиться в конкретну "камеру"

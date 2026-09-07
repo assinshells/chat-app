@@ -14,6 +14,7 @@ const ROOMS_STATE = "rooms:state";
 const SYSTEM_EVENT = "system:event";
 const MODERATION_KICKED = "moderation:kicked";
 const MODERATION_BANNED = "moderation:banned";
+const MODERATION_ROOM_BANNED = "moderation:room_banned";
 
 /**
  * useChatSocket — тримає живе Socket.IO-з'єднання і поточну активну
@@ -78,6 +79,14 @@ export function useChatSocket({ enabled, initialRoom }) {
   // ChatLayout).
   const [banInfo, setBanInfo] = useState(null);
 
+  // roomBanNotice — інформаційний банер після "бан кімнати" (BAN_ROOM):
+  // на відміну від confinement, це НЕ блокує клієнту спроби перейти в
+  // інші кімнати (сервер сам відхилить лише конкретні bannedRooms —
+  // див. коментар у sockets/moderationEnforcement.js
+  // enforceRoomBanRelocate) — банер лише пояснює, чому саме зараз
+  // користувача перенесло в bespredel і які кімнати йому недоступні.
+  const [roomBanNotice, setRoomBanNotice] = useState(null);
+
   // joinError — явна відмова СЕРВЕРА на конкретний room:join, яка не є
   // ані room-баном (для нього є roomBan), ані кік-обмеженням (для
   // нього — confinement): наприклад, спроба перейти в невідому кімнату.
@@ -123,6 +132,17 @@ export function useChatSocket({ enabled, initialRoom }) {
     const timer = setTimeout(() => setConfinement(null), delay);
     return () => clearTimeout(timer);
   }, [confinement]);
+
+  useEffect(() => {
+    if (!roomBanNotice?.expiresAt) return undefined;
+    const delay = new Date(roomBanNotice.expiresAt).getTime() - Date.now();
+    if (delay <= 0) {
+      setRoomBanNotice(null);
+      return undefined;
+    }
+    const timer = setTimeout(() => setRoomBanNotice(null), delay);
+    return () => clearTimeout(timer);
+  }, [roomBanNotice]);
 
   /**
    * applyJoinOutcome — єдина точка обробки результату room:join, чи то
@@ -268,6 +288,25 @@ export function useChatSocket({ enabled, initialRoom }) {
       applySnapshot(payload.snapshot);
     };
 
+    // "Бан кімнати" (BAN_ROOM): сервер уже переніс усі сокети жертви в
+    // redirectRoom (bespredel) і додав готовий знімок прямо в payload —
+    // так само, як і handleKicked. АЛЕ на відміну від handleKicked,
+    // тут НЕ виставляється confinement — це одноразовий redirect, а
+    // не персистентний лок (див. докблок enforceRoomBanRelocate):
+    // switchRoom далі дозволить спроби перейти в будь-яку ІНШУ кімнату,
+    // а конкретні bannedRooms сервер відхилить звичайним кодом BANNED,
+    // так само як і будь-який інший room-бан.
+    const handleRoomBanned = (payload) => {
+      setRoomBanNotice({
+        bannedRooms: payload.bannedRooms ?? [],
+        reason: payload.reason,
+        expiresAt: payload.expiresAt,
+      });
+      activeRoomRef.current = payload.redirectRoom;
+      setActiveRoom(payload.redirectRoom);
+      applySnapshot(payload.snapshot);
+    };
+
     // Бан, застосований, поки сокет уже онлайн. scope='global' —
     // з'єднання буде розірвано сервером за мить (forceDisconnectUser),
     // тому тут лише виставляємо banInfo — сам disconnect прийде окремою
@@ -308,6 +347,7 @@ export function useChatSocket({ enabled, initialRoom }) {
     chatSocket.on(ROOMS_STATE, handleRoomsState);
     chatSocket.on(MODERATION_KICKED, handleKicked);
     chatSocket.on(MODERATION_BANNED, handleBanned);
+    chatSocket.on(MODERATION_ROOM_BANNED, handleRoomBanned);
 
     chatSocket.connect();
 
@@ -322,6 +362,7 @@ export function useChatSocket({ enabled, initialRoom }) {
       chatSocket.off(ROOMS_STATE, handleRoomsState);
       chatSocket.off(MODERATION_KICKED, handleKicked);
       chatSocket.off(MODERATION_BANNED, handleBanned);
+      chatSocket.off(MODERATION_ROOM_BANNED, handleRoomBanned);
       chatSocket.disconnect();
     };
   }, [enabled, applyJoinOutcome]);
@@ -453,6 +494,7 @@ export function useChatSocket({ enabled, initialRoom }) {
     cooldownMs,
     roomBan: isComposerDisabled ? roomBan : null,
     confinement,
+    roomBanNotice,
     banInfo,
     joinError,
     dismissJoinError: useCallback(() => setJoinError(null), []),

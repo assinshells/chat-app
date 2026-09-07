@@ -136,4 +136,12 @@ export const SOCKET_EVENTS = Object.freeze({
   // дізнаються про звільнене місце лише через звичайний ROOM_USERS.
   MODERATION_KICKED: "moderation:kicked",
   MODERATION_BANNED: "moderation:banned",
+  // "Бан кімнати" (MODERATION_ACTIONS.BAN_ROOM) — на відміну від
+  // MODERATION_KICKED, це НЕ повне замкнення: жертву лише переносить у
+  // KICK_CONFINEMENT_ROOM одноразово (стартова точка), а надалі вона
+  // може переходити в будь-яку кімнату, окрім тих, куди видано
+  // room-бан (перевіряється звичайним BanRepository.findActive у
+  // room:join, як і будь-який інший room-бан) — тому це окрема подія,
+  // а не варіант MODERATION_KICKED.
+  MODERATION_ROOM_BANNED: "moderation:room_banned",
 });
