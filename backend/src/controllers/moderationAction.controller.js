@@ -8,6 +8,7 @@ import {
   validateKickRequest,
   validateBanRequest,
   validateUnbanRequest,
+  validateReleaseConfinementRequest,
 } from "../validators/moderationAction.validator.js";
 import { HTTP_STATUS } from "../constants/auth.constants.js";
 
@@ -31,6 +32,7 @@ export const ModerationActionController = {
         actorRole: req.userRole,
         targetLogin: dto.login,
         room: dto.room,
+        durationMs: dto.durationMs,
         reason: dto.reason,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, ...result });
@@ -76,9 +78,11 @@ export const ModerationActionController = {
 
   listActiveBans: async (req, res, next) => {
     try {
-      const bans = await ModerationActionService.listActiveBans({
-        login: req.params.login,
-      });
+      const login = req.params.login;
+      const [bans, confinement] = await Promise.all([
+        ModerationActionService.listActiveBans({ login }),
+        ModerationActionService.getActiveConfinement({ login }),
+      ]);
       res.status(HTTP_STATUS.OK).json({
         success: true,
         bans: bans.map((b) => ({
@@ -89,7 +93,29 @@ export const ModerationActionController = {
           createdAt: b.created_at,
           expiresAt: b.expires_at,
         })),
+        confinement: confinement
+          ? {
+              confinedRoom: confinement.confined_room,
+              sourceRoom: confinement.source_room,
+              reason: confinement.reason,
+              expiresAt: confinement.expires_at,
+            }
+          : null,
       });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  releaseConfinement: async (req, res, next) => {
+    try {
+      validateReleaseConfinementRequest(req.body);
+      const result = await ModerationActionService.releaseConfinement({
+        actorId: req.userId,
+        actorRole: req.userRole,
+        targetLogin: req.body.login,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
     } catch (err) {
       next(err);
     }

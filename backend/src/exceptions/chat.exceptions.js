@@ -70,3 +70,18 @@ export class BannedException extends BaseException {
     this.details = { scope, room, reason: reason ?? null, expiresAt: expiresAt ?? null };
   }
 }
+
+/**
+ * ConfinedException — кидається при спробі перейти в БУДЬ-ЯКУ кімнату,
+ * ОКРІМ confinedRoom, поки діє кік-обмеження (room_confinements, див.
+ * repositories/confinement.repository.js). На відміну від BannedException
+ * (не можна ЗАЙТИ в конкретну кімнату), тут навпаки: не можна вийти з
+ * ОДНІЄЇ конкретної (confinedRoom) — обмеження завжди тимчасове
+ * (expiresAt не буває null, кік не видається "назавжди").
+ */
+export class ConfinedException extends BaseException {
+  constructor({ confinedRoom, reason, expiresAt }) {
+    super("Ви тимчасово обмежені однією кімнатою", HTTP_STATUS.FORBIDDEN, "CONFINED");
+    this.details = { confinedRoom, reason: reason ?? null, expiresAt };
+  }
+}

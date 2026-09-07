@@ -124,6 +124,29 @@ CREATE TABLE IF NOT EXISTS moderation_log (
 );
 CREATE INDEX IF NOT EXISTS idx_moderation_log_target ON moderation_log(target_user_id);
 
+-- Кік більше не є "виштовхнули і одразу можна повернутися" — на час
+-- kick_confinement користувач переводиться в конкретну "камеру"
+-- (confined_room, завжди KICK_CONFINEMENT_ROOM='bespredel', див.
+-- backend/src/constants/chat.constants.js) і НЕ може перейти в жодну
+-- ІНШУ кімнату, поки не спливе expires_at — перевіряється в room:join
+-- (sockets/chat.socket.js). UNIQUE(target_user_id): одночасно діє
+-- щонайбільше одне обмеження на людину — повторний кік лише
+-- оновлює/продовжує той самий рядок (UPSERT, див. ConfinementRepository).
+CREATE TABLE IF NOT EXISTS room_confinements (
+    id SERIAL PRIMARY KEY,
+    target_user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    confined_room VARCHAR(64) NOT NULL,
+    source_room VARCHAR(64),
+    issued_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
+    revoked_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_room_confinements_active
+    ON room_confinements(target_user_id) WHERE revoked_at IS NULL;
+
 -- Загальний чат (кімнати з ROOMS, див. backend/src/constants/chat.constants.js).
 -- text не містить переносів рядків — це гарантується на рівні backend
 -- (message.service.js).

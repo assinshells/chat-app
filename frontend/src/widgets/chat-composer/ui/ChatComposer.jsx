@@ -31,6 +31,8 @@ export function ChatComposer({
   onRemoveTime,
   onClearTargets,
   onRestoreTargets,
+  disabled = false,
+  disabledReason,
 }) {
   const [message, setMessage] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
@@ -91,7 +93,7 @@ export function ChatComposer({
   const handleSend = () => {
     const text = normalizeMessageText(message).trim();
 
-    if (!text || sending || cooldownActive) return;
+    if (!text || sending || cooldownActive || disabled) return;
 
     const outgoingText = buildOutgoingText(text);
     const targetsSnapshot = { nicknames: targetNicknames, times: targetTimes };
@@ -134,6 +136,9 @@ export function ChatComposer({
   };
 
   // Пріоритет підказки під полем вводу:
+  //  0. якщо композер вимкнено ЗОВНІ (roomBan — заблоковано саме в цій
+  //     кімнаті, див. useChatSocket.js/ChatLayout.jsx) — причина бану,
+  //     вона важливіша за будь-яку локальну помилку/кулдаун;
   //  1. якщо є помилка останнього відправлення — зрозумілий текст за її
   //     кодом (для RATE_LIMITED/MUTED секунди беруться з ЖИВОГО cooldownMs,
   //     а не із зафіксованого в момент помилки числа — так відлік не
@@ -143,6 +148,7 @@ export function ChatComposer({
   //     до сервера) — той самий живий відлік;
   //  3. інакше — стандартна підказка.
   const hintText =
+    (disabled && disabledReason) ||
     (activeError && (describeSendError(activeError.code, cooldownMs || activeError.details?.retryAfterMs) ?? activeError.message)) ||
     (cooldownActive ? describeCooldownHint(cooldownMs) : null);
 
@@ -209,8 +215,11 @@ export function ChatComposer({
           onKeyDown={handleKeyDown}
           maxLength={MAX_MESSAGE_LENGTH}
           rows={1}
+          disabled={disabled}
           placeholder={
-            targetNicknames.length
+            disabled
+              ? disabledReason || "Надсилання недоступне в цій кімнаті"
+              : targetNicknames.length
               ? `Повідомлення для ${targetNicknames.map((n) => `@${n}`).join(", ")}...`
               : "Повідомлення..."
           }
@@ -310,8 +319,14 @@ export function ChatComposer({
             <button
               type="button"
               className="chat-send-btn"
-              disabled={!message.trim() || sending || cooldownActive}
-              title={cooldownActive ? describeCooldownHint(cooldownMs) : "Надіслати повідомлення"}
+              disabled={!message.trim() || sending || cooldownActive || disabled}
+              title={
+                disabled
+                  ? disabledReason || "Надсилання недоступне"
+                  : cooldownActive
+                  ? describeCooldownHint(cooldownMs)
+                  : "Надіслати повідомлення"
+              }
               onClick={handleSend}
             >
               <Send size={17} />

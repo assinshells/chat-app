@@ -1,6 +1,7 @@
 import { SOCKET_EVENTS, dmChannel } from "../constants/chat.constants.js";
 import { RoomPresence } from "./presence.js";
 import { broadcastRoomUsers, broadcastRoomsState } from "./broadcast.js";
+import { MessageService } from "../services/message.service.js";
 
 /**
  * moderationEnforcement — застосовує кік/бан ПРЯМО ЗАРАЗ до вже
@@ -80,3 +81,67 @@ export const ModerationEvents = {
   KICKED: SOCKET_EVENTS.MODERATION_KICKED,
   BANNED: SOCKET_EVENTS.MODERATION_BANNED,
 };
+
+/**
+ * enforceKickConfinement — на відміну від forceLeaveRoom (просто
+ * виштовхує і лишає "без кімнати"), кік ПЕРЕВОДИТЬ усі сокети жертви
+ * в confinedRoom (KICK_CONFINEMENT_ROOM, зазвичай лише один — bespredel)
+ * ОДРАЗУ Ж, а не лише блокує повернення в sourceRoom: інакше клієнту
+ * довелося б самому здогадуватися, куди його "кинули", окремим
+ * room:join з гонкою станів. Тут сервер сам:
+ *  1) виводить кожен сокет із кімнати, де він фактично сидів (яка може
+ *     відрізнятися від sourceRoom — наприклад, у іншій вкладці);
+ *  2) заводить його в confinedRoom (і Socket.IO room, і presence);
+ *  3) один раз віддає СПІЛЬНИЙ знімок confinedRoom (історія+учасники)
+ *     усім її постраждалим сокетам одразу в самій події —
+ *     MODERATION_KICKED, а не окремим наступним room:join.
+ *
+ * Room-check у room:join (chat.socket.js) все одно лишається головним
+ * захистом (працює і для сокетів, що були офлайн у момент кіку) — це
+ * лише миттєве застосування для вже підключених.
+ */
+export async function enforceKickConfinement(io, userId, { sourceRoom, confinedRoom, reason, expiresAt }) {
+  const sockets = await io.in(dmChannel(userId)).fetchSockets();
+  if (sockets.length === 0) return;
+
+  const vacatedRooms = new Set();
+
+  for (const s of sockets) {
+    const prevRoom = s.data.currentRoom;
+    if (prevRoom && prevRoom !== confinedRoom) {
+      s.leave(prevRoom);
+      RoomPresence.leave(prevRoom, s.id);
+      vacatedRooms.add(prevRoom);
+    }
+
+    if (prevRoom !== confinedRoom) {
+      s.join(confinedRoom);
+      RoomPresence.join(confinedRoom, s.id, {
+        id: s.data.userId,
+        login: s.data.login,
+        gender: s.data.gender,
+        color: s.data.color,
+      });
+    }
+
+    s.data.currentRoom = confinedRoom;
+  }
+
+  const messages = await MessageService.getHistory({ room: confinedRoom });
+  const snapshot = {
+    room: confinedRoom,
+    messages,
+    users: RoomPresence.listUsers(confinedRoom),
+    count: RoomPresence.countUsers(confinedRoom),
+  };
+
+  for (const s of sockets) {
+    s.emit(ModerationEvents.KICKED, { sourceRoom, confinedRoom, reason, expiresAt, snapshot });
+  }
+
+  for (const room of vacatedRooms) {
+    broadcastRoomUsers(io, room);
+  }
+  broadcastRoomUsers(io, confinedRoom);
+  broadcastRoomsState(io);
+}

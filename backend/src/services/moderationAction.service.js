@@ -1,10 +1,12 @@
 import { UserRepository } from "../repositories/user.repository.js";
 import { ModeratorRoomRepository } from "../repositories/moderatorRoom.repository.js";
 import { BanRepository } from "../repositories/ban.repository.js";
+import { ConfinementRepository } from "../repositories/confinement.repository.js";
 import { ModerationLogRepository } from "../repositories/moderationLog.repository.js";
 import {
   forceLeaveRoom,
   forceDisconnectUser,
+  enforceKickConfinement,
   ModerationEvents,
 } from "../sockets/moderationEnforcement.js";
 import { ROLE_VALUES } from "../constants/auth.constants.js";
@@ -12,7 +14,7 @@ import {
   MODERATION_ACTIONS,
   MODERATION_ERRORS,
 } from "../constants/moderationAction.constants.js";
-import { isValidRoom } from "../constants/chat.constants.js";
+import { isValidRoom, KICK_CONFINEMENT_ROOM } from "../constants/chat.constants.js";
 import {
   NotFoundException,
   ValidationException,
@@ -54,13 +56,19 @@ async function assertCanAct({ actorId, actorRole, target, room }) {
 
 export const ModerationActionService = {
   /**
-   * kick — миттєве, безстанове видалення з КОНКРЕТНОЇ кімнати. Не
-   * створює запис у bans (нічого не "діє в часі") — лише запис в
-   * аудит-журналі та примусовий socket.leave на вже підключених сокетах.
+   * kick — на відміну від "виштовхнути і одразу можна повернутися",
+   * тепер це ТИМЧАСОВЕ ОБМЕЖЕННЯ (room_confinements): жертву переводить
+   * у KICK_CONFINEMENT_ROOM ("bespredel") і на durationMs забороняє
+   * переходити в БУДЬ-ЯКУ іншу кімнату (перевіряється в room:join, див.
+   * sockets/chat.socket.js) — інакше кік нічим не відрізнявся б від
+   * "нічого не сталося", бо кікнутий міг би одразу зайти назад.
    */
-  async kick({ io, actorId, actorRole, targetLogin, room, reason }) {
+  async kick({ io, actorId, actorRole, targetLogin, room, durationMs, reason }) {
     if (!isValidRoom(room)) {
       throw new ValidationException(MODERATION_ERRORS.ROOM_INVALID);
+    }
+    if (!durationMs || durationMs <= 0) {
+      throw new ValidationException(MODERATION_ERRORS.DURATION_REQUIRED);
     }
 
     const target = await UserRepository.findByLogin(targetLogin);
@@ -68,20 +76,34 @@ export const ModerationActionService = {
 
     await assertCanAct({ actorId, actorRole, target, room });
 
+    const expiresAt = new Date(Date.now() + durationMs);
+
+    await ConfinementRepository.upsert({
+      userId: target.id,
+      confinedRoom: KICK_CONFINEMENT_ROOM,
+      sourceRoom: room,
+      issuedBy: actorId,
+      reason,
+      expiresAt,
+    });
+
     await ModerationLogRepository.record({
       action: MODERATION_ACTIONS.KICK,
       targetUserId: target.id,
       room,
       actorId,
       reason,
+      expiresAt,
     });
 
-    await forceLeaveRoom(io, target.id, room, {
-      event: ModerationEvents.KICKED,
+    await enforceKickConfinement(io, target.id, {
+      sourceRoom: room,
+      confinedRoom: KICK_CONFINEMENT_ROOM,
       reason,
+      expiresAt,
     });
 
-    return { login: target.login, room };
+    return { login: target.login, room, confinedRoom: KICK_CONFINEMENT_ROOM, expiresAt };
   },
 
   /**
@@ -186,5 +208,34 @@ export const ModerationActionService = {
     const user = await UserRepository.findByLogin(login);
     if (!user) throw new NotFoundException();
     return BanRepository.listActiveForUser(user.id);
+  },
+
+  /** getActiveConfinement — поточне кік-обмеження користувача, якщо є (для тієї ж модалки). */
+  async getActiveConfinement({ login }) {
+    const user = await UserRepository.findByLogin(login);
+    if (!user) throw new NotFoundException();
+    return ConfinementRepository.findActive(user.id);
+  },
+
+  /**
+   * releaseConfinement — дострокове зняття кік-обмеження (не чекати
+   * expires_at). Права перевіряються за source_room (кімната, ЗВІДКИ
+   * кикнули) — саме вона визначає, чи міг би модератор взагалі видати
+   * цей кік, а не room=null (це означало б "глобальна дія", якою кік
+   * ніколи не є).
+   */
+  async releaseConfinement({ actorId, actorRole, targetLogin }) {
+    const target = await UserRepository.findByLogin(targetLogin);
+    if (!target) throw new NotFoundException();
+
+    const confinement = await ConfinementRepository.findActive(target.id);
+    if (!confinement) {
+      return { login: target.login, released: true };
+    }
+
+    await assertCanAct({ actorId, actorRole, target, room: confinement.source_room });
+
+    await ConfinementRepository.revoke(target.id, actorId);
+    return { login: target.login, released: true };
   },
 };

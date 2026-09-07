@@ -6,6 +6,7 @@ const cleanReason = (reason) =>
 export const toKickDto = (body) => ({
   login: body.login,
   room: body.room,
+  durationMs: Number(body.durationMs),
   reason: cleanReason(body.reason),
 });
 

@@ -18,5 +18,10 @@ router.get("/bans/:login", ModerationActionController.listActiveBans);
 router.post("/kick", csrfProtection, ModerationActionController.kick);
 router.post("/ban", csrfProtection, ModerationActionController.ban);
 router.post("/unban", csrfProtection, ModerationActionController.unban);
+router.post(
+  "/release-confinement",
+  csrfProtection,
+  ModerationActionController.releaseConfinement,
+);
 
 export default router;

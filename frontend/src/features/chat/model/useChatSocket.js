@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { chatSocket } from "@shared/api/socket.js";
-import { DEFAULT_ROOM, ROOMS } from "@features/chat/constants/rooms.constants.js";
+import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 import { registerSend } from "@features/chat/model/messageRateLimiter.js";
 import { useMessageCooldown } from "@features/chat/model/useMessageCooldown.js";
 import { Storage } from "@shared/lib/storage.js";
@@ -32,12 +32,19 @@ const MODERATION_BANNED = "moderation:banned";
  * Системні повідомлення (event: 'join'|'switch'|'leave') приходять як
  * окрема подія (system:event, див. backend) і підмішуються в той самий
  * масив messages, що й звичайні повідомлення чату — ChatConversation
- * розрізняє їх за полем message.type === 'system'. На відміну від
- * звичайних повідомлень це НЕ глобальна розсилка: сервер надсилає їх
- * лише учасникам конкретної Socket.IO room (io.to(room).emit) —
- * "Ласкаво просимо" бачать лише ті, хто зараз у кімнаті, куди хтось
- * увійшов; "переходить у кімнату X" — лише ті, хто залишився в
- * СТАРІЙ кімнаті.
+ * розрізняє їх за полем message.type === 'system'.
+ *
+ * === Модерація (кік/бан) ===
+ * roomBan — активний бан САМЕ на поточну activeRoom: composer має бути
+ * заблокований (disabled), а НЕ мовчки перенаправляти кудись ще —
+ * інакше повідомлення, набране до того, як користувач помітив
+ * перемикання, "полетіло б" не туди, куди він думав.
+ * confinement — активне кік-обмеження ("замкнено" в одній конкретній
+ * кімнаті, зазвичай bespredel): на відміну від бану, тут користувача
+ * ДІЙСНО переводить сервер (одразу зі знімком історії нової кімнати в
+ * тій самій події) — бо кік має реальний ефект лише якщо повернутися
+ * назад неможливо, а не просто "перекинули і одразу відпустили".
+ * banInfo — активний ГЛОБАЛЬНИЙ бан, замінює весь чат на BannedScreen.
  */
 export function useChatSocket({ enabled, initialRoom }) {
   const startRoom = initialRoom || DEFAULT_ROOM;
@@ -50,34 +57,135 @@ export function useChatSocket({ enabled, initialRoom }) {
   const [roomCounts, setRoomCounts] = useState({});
   const [roomUsers, setRoomUsers] = useState([]);
 
-  // ejection — щойно кикнули/забанили з ПОТОЧНОЇ кімнати (не глобально):
-  // {type: 'kicked'|'banned', room, reason, expiresAt?}. Показується
-  // тимчасовим банером (EjectionBanner), закривається вручну
-  // (dismissEjection) — сам факт вже застосований на сервері.
-  const [ejection, setEjection] = useState(null);
+  // roomBan — бан САМЕ на activeRoom (не інші кімнати — про них ми
+  // просто не знаємо, поки не спробуємо туди зайти). null означає
+  // "у поточній кімнаті писати можна". Скидається при будь-якому
+  // успішному вступі в кімнату (applySnapshot).
+  const [roomBan, setRoomBan] = useState(null);
+  const roomBanRef = useRef(null);
+
+  // confinement — активне кік-обмеження: {confinedRoom, sourceRoom,
+  // reason, expiresAt} або null. Поки воно активне, перехід у БУДЬ-ЯКУ
+  // кімнату, окрім confinedRoom, безглуздий (сервер все одно відхилить) —
+  // switchRoom перевіряє це заздалегідь, щоб не було зайвого "стрибка"
+  // activeRoom туди-назад.
+  const [confinement, setConfinement] = useState(null);
+  const confinementRef = useRef(null);
 
   // banInfo — активний ГЛОБАЛЬНИЙ бан: або з'ясувалось одразу при
   // спробі підключення (connect_error), або прийшло живою подією, поки
   // сокет уже був підключений. Заміняє весь чат на BannedScreen (див.
-  // ChatLayout) — на відміну від ejection, тут дисмісити нічого: доступ
-  // дійсно закритий, а не просто "перекинули в іншу кімнату".
+  // ChatLayout).
   const [banInfo, setBanInfo] = useState(null);
 
-  // joinError — явна відмова СЕРВЕРА на конкретний room:join, ініційований
-  // самим користувачем (клік по кімнаті в сайдбарі) — на відміну від
-  // ejection (нас звідкись ВИШТОВХНУЛИ), тут ми самі намагались зайти в
-  // кімнату, куди вхід заборонений (наприклад, room-бан, виданий раніше,
-  // ще до цієї спроби). Показується замість порожньої стрічки повідомлень.
+  // joinError — явна відмова СЕРВЕРА на конкретний room:join, яка не є
+  // ані room-баном (для нього є roomBan), ані кік-обмеженням (для
+  // нього — confinement): наприклад, спроба перейти в невідому кімнату.
   const [joinError, setJoinError] = useState(null);
 
   useEffect(() => {
     activeRoomRef.current = activeRoom;
   }, [activeRoom]);
 
-    useEffect(() => {
+  useEffect(() => {
+    roomBanRef.current = roomBan;
+  }, [roomBan]);
+
+  useEffect(() => {
+    confinementRef.current = confinement;
+  }, [confinement]);
+
+  useEffect(() => {
     Storage.set(ROOM_KEY, activeRoom);
   }, [activeRoom]);
-  
+
+  // Автознімання roomBan/confinement по спливанню expiresAt — без
+  // цього довелося б чекати на наступну спробу переходу в кімнату,
+  // щоб клієнт "дізнався", що обмеження вже не діє.
+  useEffect(() => {
+    if (!roomBan?.expiresAt) return undefined;
+    const delay = new Date(roomBan.expiresAt).getTime() - Date.now();
+    if (delay <= 0) {
+      setRoomBan(null);
+      return undefined;
+    }
+    const timer = setTimeout(() => setRoomBan(null), delay);
+    return () => clearTimeout(timer);
+  }, [roomBan]);
+
+  useEffect(() => {
+    if (!confinement?.expiresAt) return undefined;
+    const delay = new Date(confinement.expiresAt).getTime() - Date.now();
+    if (delay <= 0) {
+      setConfinement(null);
+      return undefined;
+    }
+    const timer = setTimeout(() => setConfinement(null), delay);
+    return () => clearTimeout(timer);
+  }, [confinement]);
+
+  /**
+   * applyJoinOutcome — єдина точка обробки результату room:join, чи то
+   * початкового (при connect), чи то ручного (switchRoom). Спільна
+   * логіка потрібна, бо обидва місця мають однаково реагувати на
+   * BANNED/CONFINED — інакше поведінка розійшлася б і хтось із них
+   * знову почав би мовчки перекидати користувача в іншу кімнату.
+   */
+  const applyJoinOutcome = useCallback((target, result) => {
+    if (result?.success) {
+      setMessages(result.messages ?? []);
+      setRoomUsers(result.users ?? []);
+      setRoomCounts((prev) => ({ ...prev, [result.room]: result.count }));
+      setJoinError(null);
+      setRoomBan(null);
+      setHistoryLoaded(true);
+      return;
+    }
+
+    if (result?.code === "BANNED") {
+      // Лишаємось на місці (target) — composer заблокується через
+      // roomBan, а НЕ мовчки перенаправляємо кудись ще (див. docblock).
+      setRoomBan({
+        room: target,
+        reason: result.details?.reason,
+        expiresAt: result.details?.expiresAt,
+      });
+      setMessages([]);
+      setRoomUsers([]);
+      setHistoryLoaded(true);
+      return;
+    }
+
+    if (result?.code === "CONFINED") {
+      const confinedRoom = result.details?.confinedRoom;
+      setConfinement({
+        confinedRoom,
+        reason: result.details?.reason,
+        expiresAt: result.details?.expiresAt,
+      });
+
+      if (confinedRoom && confinedRoom !== target) {
+        activeRoomRef.current = confinedRoom;
+        setActiveRoom(confinedRoom);
+        if (chatSocket.connected) {
+          chatSocket.emit(ROOM_JOIN, { room: confinedRoom }, (r2) =>
+            applyJoinOutcome(confinedRoom, r2),
+          );
+          return;
+        }
+      }
+      setHistoryLoaded(true);
+      return;
+    }
+
+    setJoinError({
+      code: result?.code,
+      message: result?.message,
+      details: result?.details,
+    });
+    setHistoryLoaded(true);
+  }, []);
+
   useEffect(() => {
     if (!enabled) return undefined;
 
@@ -85,15 +193,14 @@ export function useChatSocket({ enabled, initialRoom }) {
 
     const applySnapshot = (snapshot) => {
       if (cancelled || !snapshot) return;
-
       setMessages(snapshot.messages ?? []);
       setRoomUsers(snapshot.users ?? []);
       setJoinError(null);
+      setRoomBan(null);
 
       if (snapshot.room && typeof snapshot.count === "number") {
         setRoomCounts((prev) => ({ ...prev, [snapshot.room]: snapshot.count }));
       }
-
       setHistoryLoaded(true);
     };
 
@@ -106,11 +213,13 @@ export function useChatSocket({ enabled, initialRoom }) {
 
       // При (пере)підключенні явно (пере)заходимо в поточну кімнату —
       // presence на сервері прив'язаний до socket.id, після реконекту
-      // потрібен новий join, щоб нас знову порахували "онлайн", плюс
-      // це дає свіжу історію повідомлень на випадок, якщо вона встигла змінитися.
-      chatSocket.emit(ROOM_JOIN, { room: activeRoomRef.current }, (result) => {
-        if (result?.success) applySnapshot(result);
-      });
+      // потрібен новий join. Якщо за час офлайну виник room-бан або
+      // кік-обмеження саме на цю кімнату — applyJoinOutcome відреагує
+      // так само, як і на ручне перемикання (заблокує композер або
+      // перенаправить у confinedRoom).
+      chatSocket.emit(ROOM_JOIN, { room: activeRoomRef.current }, (result) =>
+        applyJoinOutcome(activeRoomRef.current, result),
+      );
     };
 
     const handleDisconnect = () => setConnected(false);
@@ -125,11 +234,6 @@ export function useChatSocket({ enabled, initialRoom }) {
       });
     };
 
-    // Системні повідомлення (вхід/перехід/вихід) приходять так само, як
-    // message:new — лише учасникам конкретної Socket.IO room
-    // (io.to(room).emit на бекенді, див. sockets/chat.socket.js), тому
-    // дод. фільтрація за room не потрібна: якщо ця подія дійшла до нас,
-    // значить вона про нашу поточну кімнату.
     const handleSystemEvent = (message) => {
       setMessages((prev) => {
         if (prev.some((m) => m.id === message.id)) return prev;
@@ -139,7 +243,6 @@ export function useChatSocket({ enabled, initialRoom }) {
 
     const handleRoomUsers = (payload) => {
       setRoomCounts((prev) => ({ ...prev, [payload.room]: payload.count }));
-
       if (payload.room === activeRoomRef.current) {
         setRoomUsers(payload.users ?? []);
       }
@@ -149,64 +252,42 @@ export function useChatSocket({ enabled, initialRoom }) {
       setRoomCounts((prev) => ({ ...prev, ...counts }));
     };
 
-    /**
-     * rejoinAfterEjection — після кіку/room-бану сервер уже прибрав нас
-     * із Socket.IO room і обнулив currentRoom (див. chat.socket.js/
-     * moderationEnforcement.js) — клієнту потрібно самому переключитись
-     * на іншу кімнату, інакше UI продовжував би показувати
-     * activeRoom = кімната, з якої нас щойно видалили. DEFAULT_ROOM —
-     * природний вибір, ЯКЩО нас видалили не з нього самого; у зворотному
-     * (рідкісному) випадку беремо першу-ліпшу іншу кімнату зі списку.
-     */
-    const rejoinAfterEjection = (bannedRoom) => {
-      const target =
-        bannedRoom === DEFAULT_ROOM
-          ? ROOMS.find((r) => r.id !== bannedRoom)?.id ?? DEFAULT_ROOM
-          : DEFAULT_ROOM;
-
-      activeRoomRef.current = target;
-      setActiveRoom(target);
-      setMessages([]);
-      setRoomUsers([]);
-      setHistoryLoaded(false);
-
-      if (!chatSocket.connected) return;
-
-      chatSocket.emit(ROOM_JOIN, { room: target }, (result) => {
-        if (result?.success && result.room === activeRoomRef.current) {
-          applySnapshot(result);
-        } else {
-          setHistoryLoaded(true);
-        }
-      });
-    };
-
-    // Кік — миттєва разова дія: показуємо банер і переключаємо на іншу
-    // кімнату. payload: { room, reason }.
+    // Кік: сервер уже переніс усі сокети жертви в confinedRoom і додав
+    // готовий знімок (історія+учасники) прямо в payload — окремий
+    // room:join не потрібен, інакше був би проміжок, коли UI ще
+    // показує стару кімнату, хоча сервер із неї вже вигнав.
     const handleKicked = (payload) => {
-      setEjection({ type: "kicked", room: payload.room, reason: payload.reason });
-      rejoinAfterEjection(payload.room);
+      setConfinement({
+        confinedRoom: payload.confinedRoom,
+        sourceRoom: payload.sourceRoom,
+        reason: payload.reason,
+        expiresAt: payload.expiresAt,
+      });
+      activeRoomRef.current = payload.confinedRoom;
+      setActiveRoom(payload.confinedRoom);
+      applySnapshot(payload.snapshot);
     };
 
     // Бан, застосований, поки сокет уже онлайн. scope='global' —
     // з'єднання буде розірвано сервером за мить (forceDisconnectUser),
     // тому тут лише виставляємо banInfo — сам disconnect прийде окремою
     // подією і НЕ спричинить авто-реконект (Socket.IO навмисно не
-    // перепідключає після "io server disconnect"). scope='room' —
-    // так само, як кік, але з терміном/причиною бану.
+    // перепідключає після "io server disconnect"). scope='room' — НЕ
+    // перемикаємо кімнату (див. docblock вище): якщо це саме та
+    // кімната, яку користувач зараз бачить, просто блокуємо composer.
     const handleBanned = (payload) => {
       if (payload.scope === "global") {
         setBanInfo({ reason: payload.reason, expiresAt: payload.expiresAt });
         return;
       }
 
-      setEjection({
-        type: "banned",
-        room: payload.room,
-        reason: payload.reason,
-        expiresAt: payload.expiresAt,
-      });
-      rejoinAfterEjection(payload.room);
+      if (payload.room === activeRoomRef.current) {
+        setRoomBan({
+          room: payload.room,
+          reason: payload.reason,
+          expiresAt: payload.expiresAt,
+        });
+      }
     };
 
     // connect_error з БЕКЕНДА (не мережева помилка) — глобальний бан
@@ -243,49 +324,56 @@ export function useChatSocket({ enabled, initialRoom }) {
       chatSocket.off(MODERATION_BANNED, handleBanned);
       chatSocket.disconnect();
     };
-  }, [enabled]);
+  }, [enabled, applyJoinOutcome]);
 
   /**
-   * switchRoom — перемикає активну кімнату: одразу оновлює UI-стан
-   * (без очікування мережі — плавніше для користувача), потім просить
-   * сервер перевести сокет у нову Socket.IO room і підтягує актуальний
-   * знімок (історію + учасників) з ack.
+   * switchRoom — перемикає активну кімнату. Якщо активне
+   * кік-обмеження і цільова кімната — не confinedRoom, узагалі не
+   * чіпаємо мережу й activeRoom: результат все одно був би
+   * відхилений сервером, а так користувач одразу бачить причину без
+   * зайвого "стрибка" інтерфейсу туди й назад.
    */
-  const switchRoom = useCallback((room) => {
-    if (!room || room === activeRoomRef.current) return;
+  const switchRoom = useCallback(
+    (room) => {
+      if (!room || room === activeRoomRef.current) return;
 
-    activeRoomRef.current = room;
-    setActiveRoom(room);
-    setMessages([]);
-    setRoomUsers([]);
-    setHistoryLoaded(false);
-    setJoinError(null);
-
-    if (!chatSocket.connected) return;
-
-    chatSocket.emit(ROOM_JOIN, { room }, (result) => {
-      // Користувач міг встигнути перемкнутися на іншу кімнату, поки
-      // йшов цей запит — застосовуємо відповідь лише якщо вона все ще
-      // стосується кімнати, яка активна прямо зараз.
-      if (result?.room && result.room !== activeRoomRef.current) {
-        setHistoryLoaded(true);
+      const activeConfinement = confinementRef.current;
+      if (
+        activeConfinement &&
+        activeConfinement.confinedRoom !== room &&
+        (!activeConfinement.expiresAt || new Date(activeConfinement.expiresAt) > new Date())
+      ) {
+        setJoinError({
+          code: "CONFINED",
+          message: "Ви тимчасово обмежені однією кімнатою",
+          details: activeConfinement,
+        });
         return;
       }
 
-      if (result?.success) {
-        setMessages(result.messages ?? []);
-        setRoomUsers(result.users ?? []);
-        setRoomCounts((prev) => ({ ...prev, [result.room]: result.count }));
-      } else {
-        setJoinError({
-          code: result?.code,
-          message: result?.message,
-          details: result?.details,
-        });
-      }
-      setHistoryLoaded(true);
-    });
-  }, []);
+      activeRoomRef.current = room;
+      setActiveRoom(room);
+      setMessages([]);
+      setRoomUsers([]);
+      setHistoryLoaded(false);
+      setJoinError(null);
+      setRoomBan(null);
+
+      if (!chatSocket.connected) return;
+
+      chatSocket.emit(ROOM_JOIN, { room }, (result) => {
+        // Користувач міг встигнути перемкнутися на іншу кімнату, поки
+        // йшов цей запит — застосовуємо відповідь лише якщо вона все
+        // ще стосується кімнати, яка активна прямо зараз.
+        if (result?.success && result.room !== activeRoomRef.current) {
+          setHistoryLoaded(true);
+          return;
+        }
+        applyJoinOutcome(room, result);
+      });
+    },
+    [applyJoinOutcome],
+  );
 
   const { remainingMs: cooldownMs, startCooldown } = useMessageCooldown();
 
@@ -293,6 +381,11 @@ export function useChatSocket({ enabled, initialRoom }) {
     return new Promise((resolve, reject) => {
       if (!chatSocket.connected) {
         reject(new Error("Немає з'єднання з сервером"));
+        return;
+      }
+
+      if (roomBanRef.current?.room === activeRoomRef.current) {
+        reject(new Error("Вас заблоковано в цій кімнаті"));
         return;
       }
 
@@ -320,6 +413,14 @@ export function useChatSocket({ enabled, initialRoom }) {
             return;
           }
 
+          if (result?.code === "BANNED") {
+            setRoomBan({
+              room: activeRoomRef.current,
+              reason: result.details?.reason,
+              expiresAt: result.details?.expiresAt,
+            });
+          }
+
           // RATE_LIMITED/MUTED від сервера — джерело істини по факту
           // (локальний лімітер міг розійтися: кілька вкладок,
           // реконект після сну ноутбука, реальний мут автомодератора,
@@ -338,6 +439,8 @@ export function useChatSocket({ enabled, initialRoom }) {
     });
   }, [startCooldown]);
 
+  const isComposerDisabled = Boolean(roomBan?.room === activeRoom);
+
   return {
     activeRoom,
     switchRoom,
@@ -348,9 +451,10 @@ export function useChatSocket({ enabled, initialRoom }) {
     roomUsers,
     sendMessage,
     cooldownMs,
-    ejection,
-    dismissEjection: useCallback(() => setEjection(null), []),
+    roomBan: isComposerDisabled ? roomBan : null,
+    confinement,
     banInfo,
     joinError,
+    dismissJoinError: useCallback(() => setJoinError(null), []),
   };
 }

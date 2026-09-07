@@ -3,7 +3,8 @@ import { DEFAULT_ROOM, SOCKET_EVENTS, isValidRoom } from "../constants/chat.cons
 import { RoomPresence } from "./presence.js";
 import { broadcastRoomUsers, broadcastRoomsState } from "./broadcast.js";
 import { BanRepository } from "../repositories/ban.repository.js";
-import { BannedException } from "../exceptions/chat.exceptions.js";
+import { ConfinementRepository } from "../repositories/confinement.repository.js";
+import { BannedException, ConfinedException } from "../exceptions/chat.exceptions.js";
 import logger from "../config/logger.js";
 
 // Проста in-memory-защита від флуду: не більше N повідомлень за
@@ -80,6 +81,21 @@ function broadcastSystemEvent(io, scopeRoom, { event, login, color, room }) {
  */
 async function joinRoom(io, socket, requestedRoom) {
   const targetRoom = isValidRoom(requestedRoom) ? requestedRoom : DEFAULT_ROOM;
+
+  // Кік-обмеження — перевіряється ПЕРШИМ і окремо від бану: це не
+  // "заборона зайти в targetRoom", а "заборона зайти в БУДЬ-ЯКУ кімнату,
+  // окрім confined_room" (див. repositories/confinement.repository.js,
+  // constants/chat.constants.js KICK_CONFINEMENT_ROOM). Якщо цілься сама
+  // й є confined_room — обмеження не заважає, перевірку бану нижче
+  // проходимо як завжди.
+  const confinement = await ConfinementRepository.findActive(socket.data.userId);
+  if (confinement && targetRoom !== confinement.confined_room) {
+    throw new ConfinedException({
+      confinedRoom: confinement.confined_room,
+      reason: confinement.reason,
+      expiresAt: confinement.expires_at,
+    });
+  }
 
   // Перевірка бану — ДО будь-яких змін стану (leave/join/presence).
   // Глобальний бан ловиться вже при connect (socketAuth.guard.js), але
@@ -199,9 +215,12 @@ export function registerChatSocket(io, socket) {
           success: false,
           code: err.code ?? "ROOM_JOIN_FAILED",
           message:
-            err.code === "BANNED" ? err.message : "Не вдалося приєднатися до кімнати",
-          // details.expiresAt/reason — лише для BannedException, фронту
-          // потрібні, щоб показати "заблоковано до .../причина: ...".
+            err.code === "BANNED" || err.code === "CONFINED"
+              ? err.message
+              : "Не вдалося приєднатися до кімнати",
+          // details — лише для BannedException/ConfinedException, фронту
+          // потрібні, щоб показати "заблоковано до .../причина: ..." або
+          // автоматично перенаправити в confinedRoom.
           ...(err.details ? { details: err.details } : {}),
         });
       }

@@ -4,6 +4,7 @@ import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { getColorHex } from "@shared/constants/color.constants.js";
 import {
   BAN_DURATION_PRESETS,
+  KICK_DURATION_PRESETS,
   canBanGlobally,
 } from "@shared/constants/moderationAction.constants.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
@@ -24,6 +25,11 @@ function roomLabel(room) {
  * room у сторі — та кімната, з меню якої модалку відкрили: саме вона
  * пропонується як ціль кіку і room-бану (кімнату не можна обрати іншу —
  * модератор фізично бачить меню лише поруч з людьми у СВОЇХ кімнатах).
+ *
+ * Кік тепер видає ТИМЧАСОВЕ ОБМЕЖЕННЯ (замкнення в bespredel на
+ * durationMs), а не просто "виштовхнути і одразу можна повернутися" —
+ * тому має власний вибір тривалості, а активне обмеження показується
+ * окремим блоком із можливістю зняти його достроково.
  */
 export function ModerationModal({ modalId = "moderationModal" }) {
   const {
@@ -31,22 +37,27 @@ export function ModerationModal({ modalId = "moderationModal" }) {
     targetColor,
     room,
     activeBans,
-    loadingBans,
+    confinement,
+    loadingStatus,
     banScope,
-    durationPreset,
+    banDurationPreset,
+    kickDurationPreset,
     reason,
     kicking,
     banning,
     unbanningId,
+    releasing,
     error,
     success,
     setBanScope,
-    setDurationPreset,
+    setBanDurationPreset,
+    setKickDurationPreset,
     setReason,
     clearStatus,
     kick,
     ban,
     unban,
+    releaseConfinement,
   } = useModerationStore();
 
   const ownRole = useCurrentUserStore((state) => state.role);
@@ -94,6 +105,39 @@ export function ModerationModal({ modalId = "moderationModal" }) {
               Кімната: <strong>{roomLabel(room)}</strong>
             </p>
 
+            {confinement && (
+              <div className="alert alert-warning py-2 px-3 small mb-3">
+                Зараз замкнений у «{roomLabel(confinement.confinedRoom)}» до{" "}
+                {formatExpiresAt(confinement.expiresAt)}
+                {confinement.reason ? ` · ${confinement.reason}` : ""}
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary rounded-4"
+                    disabled={releasing}
+                    onClick={releaseConfinement}
+                  >
+                    {releasing ? "..." : "Звільнити достроково"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <p className="mb-2 text-muted small">
+              Кикнути (тимчасово замкне в «Бєспрєдєл», без можливості перейти в
+              інші кімнати)
+            </p>
+            <select
+              className="form-select mb-2"
+              value={kickDurationPreset}
+              onChange={(e) => setKickDurationPreset(e.target.value)}
+            >
+              {KICK_DURATION_PRESETS.map((preset) => (
+                <option key={preset.value} value={preset.value}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
             <div className="d-flex gap-2 mb-3">
               <button
                 type="button"
@@ -101,7 +145,7 @@ export function ModerationModal({ modalId = "moderationModal" }) {
                 disabled={kicking}
                 onClick={kick}
               >
-                {kicking ? "Кикаємо..." : "Кикнути з кімнати"}
+                {kicking ? "Кикаємо..." : "Кикнути"}
               </button>
             </div>
 
@@ -142,8 +186,8 @@ export function ModerationModal({ modalId = "moderationModal" }) {
 
             <select
               className="form-select mb-2"
-              value={durationPreset}
-              onChange={(e) => setDurationPreset(e.target.value)}
+              value={banDurationPreset}
+              onChange={(e) => setBanDurationPreset(e.target.value)}
             >
               {BAN_DURATION_PRESETS.map((preset) => (
                 <option key={preset.value} value={preset.value}>
@@ -176,7 +220,7 @@ export function ModerationModal({ modalId = "moderationModal" }) {
             <hr />
 
             <p className="mb-2 text-muted small">Активні бани цього користувача</p>
-            {loadingBans ? (
+            {loadingStatus ? (
               <p className="text-muted small mb-0">Завантаження...</p>
             ) : activeBans.length === 0 ? (
               <p className="text-muted small mb-0">Немає активних банів</p>

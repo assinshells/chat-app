@@ -12,6 +12,17 @@ export const BAN_DURATION_PRESETS = Object.freeze([
   { value: "permanent", ms: null, label: "Назавжди" },
 ]);
 
+// Кік тепер — тимчасове замкнення в одній кімнаті (bespredel), а не
+// "виштовхнути і одразу можна повернутися" — тому теж потребує
+// тривалості, але в набагато коротшому масштабі за бан і без "назавжди"
+// (для цього є бан).
+export const KICK_DURATION_PRESETS = Object.freeze([
+  { value: "2m", ms: 2 * 60 * 1000, label: "2 хвилини" },
+  { value: "5m", ms: 5 * 60 * 1000, label: "5 хвилин" },
+  { value: "15m", ms: 15 * 60 * 1000, label: "15 хвилин" },
+  { value: "1h", ms: 60 * 60 * 1000, label: "1 година" },
+]);
+
 /**
  * canModerateRoom — чи може користувач з роллю `role` (і, для
  * модератора, переліком moderatorRooms — див. useCurrentUserStore)

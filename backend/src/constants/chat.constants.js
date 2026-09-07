@@ -89,6 +89,15 @@ export const ROOM_IDS = Object.freeze(ROOMS.map((room) => room.id));
 
 export const DEFAULT_ROOM = "general";
 
+// Кімната-"відстійник", куди примусово переводиться кожен кікнутий
+// (див. services/moderationAction.service.js, sockets/moderationEnforcement.js):
+// на час кіку користувач НЕ може перейти в жодну ІНШУ кімнату (перевіряється
+// в joinRoom, chat.socket.js), сама ж bespredel лишається звичайною
+// доступною кімнатою — тому саме вона, а не повний дисконект, і зроблена
+// "камерою": людина не випадає з чату повністю, просто на деякий час
+// обмежена одним конкретним місцем.
+export const KICK_CONFINEMENT_ROOM = "bespredel";
+
 export const isValidRoom = (room) => ROOM_IDS.includes(room);
 
 export const SOCKET_EVENTS = Object.freeze({

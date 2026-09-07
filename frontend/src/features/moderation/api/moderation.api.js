@@ -11,6 +11,11 @@ export const banRequest = ({ login, scope, room, durationMs, reason }) =>
 export const unbanRequest = (banId) =>
   apiClient.post("/api/moderation/unban", { banId }).then((r) => r.data);
 
+export const releaseConfinementRequest = (login) =>
+  apiClient
+    .post("/api/moderation/release-confinement", { login })
+    .then((r) => r.data);
+
 export const listActiveBansRequest = (login) =>
   apiClient
     .get(`/api/moderation/bans/${encodeURIComponent(login)}`)

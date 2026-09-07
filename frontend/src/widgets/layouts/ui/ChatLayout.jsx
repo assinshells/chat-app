@@ -7,7 +7,7 @@ import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { RoleManageModal } from "@features/roles";
-import { ModerationModal, BannedScreen, EjectionBanner } from "@features/moderation";
+import { ModerationModal, BannedScreen, ConfinementBanner } from "@features/moderation";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
@@ -30,10 +30,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     roomUsers,
     sendMessage,
     cooldownMs,
-    ejection,
-    dismissEjection,
+    roomBan,
+    confinement,
     banInfo,
     joinError,
+    dismissJoinError,
   } = useChatSocket({
     enabled: Boolean(login),
     initialRoom,
@@ -151,12 +152,29 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             onOpenMobileSidebar={() => setMobileOpen(true)}
             onLogout={onLogout}
           />
-          <EjectionBanner ejection={ejection} onDismiss={dismissEjection} />
-          {joinError && (
+          <ConfinementBanner confinement={confinement} />
+          {roomBan && (
             <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
-              {joinError.message || "Не вдалося приєднатися до кімнати"}
-              {joinError.details?.expiresAt &&
-                ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
+              Вас заблоковано в цій кімнаті
+              {roomBan.expiresAt
+                ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                : " назавжди"}
+              {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
+            </div>
+          )}
+          {joinError && (
+            <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
+              <span>
+                {joinError.message || "Не вдалося приєднатися до кімнати"}
+                {joinError.details?.expiresAt &&
+                  ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
+              </span>
+              <button
+                type="button"
+                className="btn-close ms-2"
+                aria-label="Закрити"
+                onClick={dismissJoinError}
+              />
             </div>
           )}
           <ChatConversation
@@ -179,6 +197,15 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             onRemoveTime={handleRemoveTime}
             onClearTargets={handleClearTargets}
             onRestoreTargets={handleRestoreTargets}
+            disabled={Boolean(roomBan)}
+            disabledReason={
+              roomBan &&
+              `Вас заблоковано в цій кімнаті${
+                roomBan.expiresAt
+                  ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                  : " назавжди"
+              }`
+            }
           />
         </div>
       </div>
