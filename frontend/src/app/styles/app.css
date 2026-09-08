@@ -1561,6 +1561,33 @@ button:focus-visible,
 }
 
 /* =========================================================
+   AUTH FORMS: лічильник символів нікнейма всередині інпута
+   (замість form-text під полем) — .form-control отримує запас
+   праворуч (padding-right), а лічильник абсолютно позиціонується
+   поверх нього по вертикальному центру.
+   ========================================================= */
+
+.input-with-counter {
+  position: relative;
+}
+
+.input-with-counter .form-control {
+  padding-right: 3.25rem;
+}
+
+.input-inline-counter {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+
+  font-size: 0.78rem;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* =========================================================
    SETTINGS MODAL: вибір кольору повідомлень/ніка
    Радіокнопка прихована — клікабельне коло-свотч навколо неї
    саме і є "радіокнопкою" (обводка кольором з'являється при

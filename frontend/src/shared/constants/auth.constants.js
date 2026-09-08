@@ -9,7 +9,8 @@ export const AUTH_SCREENS = Object.freeze({
 
 export const APP_NAME = "Балачка";
 
-// Обов'язкове поле при реєстрації — значення збігаються з backend GENDER_VALUES.
+// Обов'язкове поле — обирається на формі входу (LoginForm.jsx), не на
+// реєстрації. Значення збігаються з backend GENDER_VALUES.
 // 'unknown' свідомо не входить у набір: стать потрібна для родових
 // форм системних повідомлень (увійшов/увійшла тощо, див. shared/lib/systemMessage.js).
 export const GENDER_OPTIONS = Object.freeze([

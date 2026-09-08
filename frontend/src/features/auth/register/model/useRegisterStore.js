@@ -5,14 +5,10 @@ export const useRegisterStore = create((set) => ({
   loading: false,
   error: null,
 
-  register: async ({ login, password, email, gender }, onSuccess) => {
-    if (!gender) {
-      set({ error: "Будь ласка, оберіть стать" });
-      return;
-    }
+  register: async ({ login, password, email }, onSuccess) => {
     set({ loading: true, error: null });
     try {
-      await registerRequest({ login, password, email: email || undefined, gender });
+      await registerRequest({ login, password, email: email || undefined });
       onSuccess();
     } catch (err) {
       set({ error: err.message });

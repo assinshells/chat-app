@@ -1,0 +1,239 @@
+/* =========================================================
+   FORM CONTROLS — GLOBAL
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   INPUT / TEXTAREA / SELECT
+   --------------------------------------------------------- */
+
+.form-control,
+.form-select,
+textarea,
+input {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+/* Убираем стандартный Bootstrap focus */
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus,
+input:focus {
+  outline: none !important;
+}
+
+/* ---------------------------------------------------------
+   TEXT INPUT / TEXTAREA
+   --------------------------------------------------------- */
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bs-primary) !important;
+
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.08) !important;
+}
+
+/* ---------------------------------------------------------
+   LIGHT INPUT
+   --------------------------------------------------------- */
+
+.form-control.bg-light:focus,
+.form-select.bg-light:focus {
+  background-color: var(--bs-body-bg) !important;
+
+  border-color: var(--bs-primary) !important;
+}
+
+/* ---------------------------------------------------------
+   CHAT TEXTAREA
+   --------------------------------------------------------- */
+
+.chat-input:focus {
+  border: 0 !important;
+
+  outline: none !important;
+
+  box-shadow: none !important;
+}
+
+/*
+   У textarea внутри composer свой focus.
+   Focus отображается у .chat-composer,
+   а не у самого textarea.
+*/
+
+.chat-composer:focus-within .chat-input {
+  box-shadow: none !important;
+}
+
+/* ---------------------------------------------------------
+   PLACEHOLDER
+   --------------------------------------------------------- */
+
+.form-control::placeholder,
+textarea::placeholder,
+input::placeholder {
+  color: var(--bs-secondary-color);
+
+  opacity: 0.7;
+
+  transition: opacity 0.15s ease;
+}
+
+.form-control:focus::placeholder,
+textarea:focus::placeholder,
+input:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* ---------------------------------------------------------
+   CHECKBOX / RADIO
+   --------------------------------------------------------- */
+
+.form-check-input {
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+
+/* Focus */
+
+.form-check-input:focus {
+  outline: none !important;
+
+  border-color: var(--bs-primary) !important;
+
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.12) !important;
+}
+
+/* Hover */
+
+.form-check-input:hover {
+  border-color: var(--bs-primary);
+}
+
+/* Checked */
+
+.form-check-input:checked {
+  border-color: var(--bs-primary);
+
+  background-color: var(--bs-primary);
+}
+
+/* Active */
+
+.form-check-input:active {
+  transform: scale(0.95);
+
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* ---------------------------------------------------------
+   RADIO
+   --------------------------------------------------------- */
+
+.form-check-input[type="radio"] {
+  border-radius: 50%;
+}
+
+/* Radio checked */
+
+.form-check-input[type="radio"]:checked {
+  background-color: var(--bs-primary);
+
+  border-color: var(--bs-primary);
+}
+
+/* ---------------------------------------------------------
+   CHECKBOX
+   --------------------------------------------------------- */
+
+.form-check-input[type="checkbox"] {
+  border-radius: 5px;
+}
+
+/* ---------------------------------------------------------
+   LABEL
+   --------------------------------------------------------- */
+
+.form-check-label {
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------
+   DISABLED
+   --------------------------------------------------------- */
+
+.form-control:disabled,
+.form-select:disabled,
+.form-check-input:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+/* ---------------------------------------------------------
+   BUTTONS — GLOBAL FOCUS
+   --------------------------------------------------------- */
+
+button:focus,
+.btn:focus {
+  outline: none !important;
+
+  box-shadow: none !important;
+}
+
+/* Keyboard accessibility */
+
+button:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid rgba(var(--bs-primary-rgb), 0.5) !important;
+
+  outline-offset: 2px;
+
+  box-shadow: none !important;
+}
+
+/* ---------------------------------------------------------
+   OUTLINE PRIMARY
+   --------------------------------------------------------- */
+
+.btn-outline-primary {
+  border-color: transparent;
+
+  color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+  border-color: transparent;
+
+  color: var(--bs-primary);
+
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  border-color: transparent !important;
+
+  box-shadow: none !important;
+}
+
+/* ---------------------------------------------------------
+   FORM VALIDATION
+   --------------------------------------------------------- */
+
+.form-control.is-valid:focus,
+.form-control.is-invalid:focus,
+.was-validated .form-control:valid:focus,
+.was-validated .form-control:invalid:focus {
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.08) !important;
+}
+

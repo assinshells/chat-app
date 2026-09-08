@@ -32,8 +32,8 @@ export const validateRegisterRequest = (body) => {
   if (!isValidPassword(body.password))
     errors.push("пароль має містити щонайменше 6 символів");
   if (body.email && !isValidEmail(body.email)) errors.push("email недійсний");
-  if (!isValidGender(body.gender))
-    errors.push(`стать обов'язкова і має бути однією з: ${GENDER_OPTIONS.join(", ")}`);
+  // Стать більше не збирається на формі реєстрації (перенесена на форму
+  // входу, див. LoginForm.jsx) — тут її свідомо не валідуємо.
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 

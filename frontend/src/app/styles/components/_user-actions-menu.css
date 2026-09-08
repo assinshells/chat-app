@@ -1,0 +1,103 @@
+/* =========================================================
+   USER ACTIONS MENU
+   ========================================================= */
+
+.user-actions-menu {
+  position: absolute;
+
+  left: 0;
+  bottom: calc(100% + 10px);
+
+  width: 220px;
+
+  padding: 0.4rem;
+
+  border: 1px solid var(--bs-border-color);
+
+  border-radius: 14px;
+
+  background: var(--bs-body-bg);
+
+  box-shadow: 0 12px 30px rgba(var(--app-shadow-color), var(--app-shadow-strong));
+
+  z-index: 100;
+}
+
+/* Header */
+
+.user-actions-header {
+  padding: 0.6rem 0.7rem 0.5rem;
+
+  margin-bottom: 0.25rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+
+  font-size: 0.8rem;
+
+  font-weight: 600;
+
+  color: var(--bs-body-color);
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+/* Action */
+
+.user-action-item {
+  width: 100%;
+
+  min-height: 38px;
+
+  padding: 0.5rem 0.65rem;
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.65rem;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: var(--bs-body-color);
+
+  font-size: 0.82rem;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.user-action-item:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.user-action-item svg {
+  flex: 0 0 auto;
+
+  color: var(--bs-secondary-color);
+}
+
+/* Danger */
+
+.user-action-item.danger {
+  color: var(--bs-danger);
+}
+
+.user-action-item.danger svg {
+  color: var(--bs-danger);
+}
+
+.user-action-item.danger:hover {
+  background: rgba(var(--bs-danger-rgb), 0.08);
+}

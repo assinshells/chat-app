@@ -1,0 +1,48 @@
+/* =========================================================
+   DROPDOWN
+   ========================================================= */
+
+.chat-dropdown {
+  min-width: 190px;
+
+  padding: 0.45rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+
+  background: var(--bs-body-bg);
+
+  box-shadow: 0 10px 30px rgba(var(--app-shadow-color), var(--app-shadow-strong));
+}
+
+.chat-dropdown .dropdown-item {
+  min-height: 38px;
+
+  padding: 0.55rem 0.7rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  border-radius: 8px;
+
+  font-size: 0.875rem;
+
+  color: var(--bs-body-color);
+}
+
+.chat-dropdown .dropdown-item:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.chat-dropdown .dropdown-item i {
+  font-size: 1rem;
+
+  color: var(--bs-secondary-color);
+}
+
+.chat-dropdown .dropdown-item svg {
+  color: var(--bs-secondary-color);
+}

@@ -1,0 +1,82 @@
+/* =========================================================
+   RESPONSIVE OVERRIDES
+   Затрагивает сразу несколько компонентов (шапку, ленту сообщений,
+   composer), поэтому вынесено в отдельный файл, а не размазано по
+   компонентным файлам. Должен подключаться в index.css последним,
+   чтобы медиа-запросы гарантированно перебивали базовые правила.
+   ========================================================= */
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+  .chat-header-inner {
+    min-height: 60px;
+
+    padding: 0.65rem 0.85rem;
+  }
+
+  .chat-brand-status {
+    display: none;
+  }
+
+  .chat-header-actions {
+    gap: 0;
+  }
+
+  .chat-header-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chat-conversation {
+    padding: 1rem 0.85rem 1.5rem;
+  }
+
+  .chat-messages {
+    max-width: 100%;
+  }
+
+  .message-list {
+    gap: 0.1rem;
+  }
+
+  .message-user .message-content {
+    max-width: 85%;
+  }
+
+  .message-assistant .message-content {
+    max-width: 100%;
+  }
+
+  .chat-input-section {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  .chat-composer {
+    min-height: 64px;
+
+    border-radius: 16px;
+
+    padding: 0.65rem;
+  }
+
+  .chat-input-hint {
+    display: none;
+  }
+}
+
+/* =========================================================
+   VERY SMALL SCREENS
+   ========================================================= */
+
+@media (max-width: 400px) {
+  .chat-brand-title {
+    max-width: 140px;
+  }
+
+  .message-user .message-content {
+    max-width: 90%;
+  }
+}

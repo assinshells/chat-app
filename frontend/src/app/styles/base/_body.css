@@ -1,0 +1,32 @@
+/* =========================================================
+   BODY
+   Раніше фон/колір тексту body бралися з окремих кастомних
+   змінних (--bs-background-color тощо), які ніколи не мінялися
+   разом з темою — через це, наприклад, сторінки логіна/реєстрації
+   (AuthLayout, у якого немає власного фонового контейнера на весь
+   екран) лишалися зі світлим фоном навіть при увімкненій темній
+   темі. Тепер body напряму використовує --bs-body-bg/--bs-body-color
+   — ті самі змінні Bootstrap, які автоматично підмінюються при
+   зміні [data-bs-theme] (див. themes/_light.css, themes/_dark.css,
+   shared/lib/theme.js), тож перемикання теми одразу коректно
+   пофарбовує й body.
+   ========================================================= */
+
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  font-weight: 400;
+  font-family: var(--bs-font-family);
+
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+}
+
+.chat-brand-status.is-online {
+  color: var(--bs-success);
+}
+
+.chat-brand-status.is-offline {
+  color: var(--bs-warning);
+}

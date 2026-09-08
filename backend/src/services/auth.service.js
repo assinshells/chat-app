@@ -10,7 +10,11 @@ import {
   NotFoundException,
   AuthorizationException,
 } from "../exceptions/auth.exceptions.js";
-import { AUTH_ERRORS, ROLE_VALUES } from "../constants/auth.constants.js";
+import {
+  AUTH_ERRORS,
+  ROLE_VALUES,
+  PROVISIONAL_REGISTER_GENDER,
+} from "../constants/auth.constants.js";
 
 export const AuthService = {
   async login({ login, password }) {
@@ -23,7 +27,7 @@ export const AuthService = {
     return TokenService.issueTokenPair(user.id);
   },
 
-  async register({ login, password, email, gender }) {
+  async register({ login, password, email }) {
     const existingLogin = await UserRepository.findByLogin(login);
     if (existingLogin) throw new ConflictException(AUTH_ERRORS.LOGIN_TAKEN);
 
@@ -37,7 +41,10 @@ export const AuthService = {
       login,
       passwordHash,
       email,
-      gender,
+      // Реальну стать користувач обирає на формі входу одразу після
+      // реєстрації — тут лише заглушка, щоб задовольнити NOT NULL
+      // (див. коментар біля PROVISIONAL_REGISTER_GENDER).
+      gender: PROVISIONAL_REGISTER_GENDER,
     });
 
     if (!created) throw new ConflictException(AUTH_ERRORS.LOGIN_TAKEN);

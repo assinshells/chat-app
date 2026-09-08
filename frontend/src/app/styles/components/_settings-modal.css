@@ -1,0 +1,52 @@
+/* =========================================================
+   SETTINGS MODAL: тема
+   Раніше тут ще були стилі вкладок (settings-tabs-nav/settings-tab-btn)
+   і вибору кольору (settings-color-*) — прибрані разом із самими
+   вкладками "Профіль"/"Колір" у SettingsModal.jsx. Свотчі кольору
+   тепер живуть у components/_color-picker.css (використовуються у
+   формі реєстрації).
+   ========================================================= */
+
+.settings-modal {
+  border-radius: 16px;
+  border: none;
+}
+
+.settings-theme-options {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.settings-theme-btn {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 0.5rem;
+
+  padding: 1.1rem 0.75rem;
+
+  background: var(--bs-tertiary-bg);
+  border: 2px solid transparent;
+  border-radius: 12px;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.settings-theme-btn:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.settings-theme-btn.is-active {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}

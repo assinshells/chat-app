@@ -15,7 +15,9 @@
  * @property {string} login
  * @property {string} password
  * @property {string|undefined} email
- * @property {"male"|"female"} gender
+ *
+ * Стать сюди більше не входить — вона обирається на формі входу
+ * і виставляється окремо через PATCH /api/auth/gender.
  */
 
 /**
@@ -62,7 +64,6 @@ export const toRegisterRequestDto = (body) => ({
   login: body.login,
   password: body.password,
   email: body.email || undefined,
-  gender: body.gender,
 });
 
 export const toForgotPasswordDto = (body) => ({
