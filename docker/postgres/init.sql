@@ -3,10 +3,10 @@ CREATE TABLE IF NOT EXISTS users (
     login VARCHAR(64) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     email VARCHAR(255) UNIQUE,
-    -- 'unknown' свідомо не входить до набору значень: стать потрібна для
-    -- родових форм системних повідомлень (увійшов/увійшла тощо), а без
-    -- конкретного значення таке повідомлення сформувати не можна.
-    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female')),
+    -- Текст системних повідомлень (увійшов/вийшов тощо) нейтральний і не
+    -- залежить від статі (див. frontend shared/lib/systemMessage.js), тому
+    -- 'unknown' — коректне значення поряд із 'male'/'female'.
+    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female', 'unknown')),
     -- Колір повідомлень/ніка користувача в сайдбарі, обирається в налаштуваннях.
     -- 'black' — значення за замовчуванням, ставиться всім новим користувачам.
     color VARCHAR(16) NOT NULL DEFAULT 'black'
@@ -28,15 +28,12 @@ BEGIN
     END IF;
 END $$;
 
--- Прибираємо значення 'unknown' зі статі для вже наявних баз (init.sql
--- виконується лише на порожній базі, тому старі оточення потрібно
--- домігрувати явно). Оскільки обрати "правильну" стать за користувача
--- не можна, а поле обов'язкове і без дефолту — рядки, що залишилися зі
--- значенням 'unknown', переводимо в 'male' як нейтральний технічний
--- вибір (просто щоб CHECK не впав); якщо для вашої бази це не
--- підходить — поправте порядково перед наступним деплоєм.
-UPDATE users SET gender = 'male' WHERE gender = 'unknown';
-
+-- Домігрування для баз, створених до появи гендеру 'unknown' (init.sql
+-- виконується лише на порожній базі, тому наявний CHECK на старих
+-- оточеннях потрібно розширити явно, а не покладатись на CREATE TABLE
+-- IF NOT EXISTS вище). На відміну від попередньої версії міграції тут
+-- НІЧОГО не переписуємо в самих даних — 'unknown' тепер легітимне
+-- значення, тож рядки з ним лишаються як є.
 DO $$
 BEGIN
     IF EXISTS (
@@ -45,7 +42,7 @@ BEGIN
         ALTER TABLE users DROP CONSTRAINT users_gender_check;
     END IF;
     ALTER TABLE users ADD CONSTRAINT users_gender_check
-        CHECK (gender IN ('male', 'female'));
+        CHECK (gender IN ('male', 'female', 'unknown'));
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);

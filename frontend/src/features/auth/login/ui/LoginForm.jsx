@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
 import { ROOMS, DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
-import { GENDER_OPTIONS } from "@shared/constants/auth.constants.js";
-import { COLOR_OPTIONS } from "@shared/constants/color.constants.js";
+import { GENDER_OPTIONS, DEFAULT_GENDER } from "@shared/constants/auth.constants.js";
+import { COLOR_OPTIONS, DEFAULT_COLOR } from "@shared/constants/color.constants.js";
 
 /**
  * LoginForm — "тупий" компонент.
  * onSuccess(login, room) — викликається з логіном і обраною кімнатою
  * після успішного входу, щоб одразу відкрити чат у потрібній кімнаті.
  *
- * Стать і колір нікнейма/повідомлень тепер обираються тут, а не на
- * формі реєстрації (див. RegisterForm.jsx): при вході useLoginStore
+ * Стать і колір нікнейма/повідомлень обираються тут, а не на формі
+ * реєстрації (див. RegisterForm.jsx) і не в модалці налаштувань чату
+ * (SettingsModal.jsx, звідки їх прибрано): при вході useLoginStore
  * одразу після успішної автентифікації зберігає їх через
  * PATCH /api/auth/gender і /api/auth/color.
  */
@@ -18,8 +19,8 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [room, setRoom] = useState(DEFAULT_ROOM);
-  const [gender, setGender] = useState("");
-  const [color, setColor] = useState("");
+  const [gender, setGender] = useState(DEFAULT_GENDER);
+  const [color, setColor] = useState(DEFAULT_COLOR);
   const { loading, error, login: doLogin, clearError } = useLoginStore();
 
   const handleSubmit = (e) => {
@@ -72,50 +73,47 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
           </select>
         </div>
 
-        <label className="mb-2 text-muted small">Як ви себе ідентифікуєте?</label>
-        <div className="d-flex align-items-center mb-3 px-0">
+        <div className="btn-group w-100 mb-3" role="group" aria-label="Стать">
           {GENDER_OPTIONS.map((option) => (
-            <div className="form-check me-3" key={option.value}>
+            <Fragment key={option.value}>
               <input
-                className="form-check-input"
                 type="radio"
+                className="btn-check"
                 name="gender"
                 id={`gender-${option.value}`}
+                autoComplete="off"
                 value={option.value}
                 checked={gender === option.value}
                 onChange={(e) => setGender(e.target.value)}
                 required
               />
-              <label className="form-check-label" htmlFor={`gender-${option.value}`}>
+              <label className="btn btn-outline-primary" htmlFor={`gender-${option.value}`}>
                 {option.label}
               </label>
-            </div>
+            </Fragment>
           ))}
         </div>
 
-        <label className="mb-2 text-muted small d-block">
-          Колір ваших повідомлень і ніка
-        </label>
-        <div className="settings-color-options mb-4">
+        <div className="color-swatch-options mb-4">
           {COLOR_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className={`settings-color-option ${
+              className={`color-swatch-option ${
                 color === option.value ? "is-active" : ""
               }`}
-              style={{ "--settings-swatch-color": option.hex }}
+              style={{ "--swatch-color": option.hex }}
             >
               <input
-                className="settings-color-input"
+                className="color-swatch-input"
                 type="radio"
                 name="color"
                 value={option.value}
                 checked={color === option.value}
                 onChange={(e) => setColor(e.target.value)}
                 required
+                aria-label={option.label}
               />
-              <span className="settings-color-swatch" aria-hidden="true" />
-              <span className="settings-color-label">{option.label}</span>
+              <span className="color-swatch" aria-hidden="true" />
             </label>
           ))}
         </div>

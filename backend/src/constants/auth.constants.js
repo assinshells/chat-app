@@ -35,12 +35,13 @@ export const COOKIE_NAMES = Object.freeze({
 
 // Стать — обов'язкове поле реєстрації без значення за замовчуванням —
 // клієнт завжди повинен надіслати одне з цих явних значень.
-// 'unknown' свідомо прибрано: стать використовується для родових форм
-// системних повідомлень (увійшов/увійшла тощо, див. sockets/chat.socket.js),
-// а без конкретного значення таке повідомлення сформувати не можна.
+// 'unknown' присутнє в наборі: текст системних повідомлень
+// (увійшов/вийшов тощо, див. sockets/chat.socket.js) вже нейтральний
+// і не залежить від статі, тому окреме родове узгодження не потрібне.
 export const GENDER_VALUES = Object.freeze({
   MALE: "male",
   FEMALE: "female",
+  UNKNOWN: "unknown",
 });
 
 export const GENDER_OPTIONS = Object.freeze(Object.values(GENDER_VALUES));
