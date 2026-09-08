@@ -1504,6 +1504,45 @@ button:focus-visible,
 }
 
 /* =========================================================
+   AUTH FORMS: гендер — radio toggle button group (LoginForm.jsx)
+   Навмисно НЕ .btn-outline-primary: цей клас в проєкті глобально
+   обнуляє border-color (див. "OUTLINE PRIMARY" нижче) — він
+   зроблений для плоских кнопок на кшталт "Надіслати код повторно"
+   і зробив би межі сегментів невидимими. Тому окремий клас із
+   власною, завжди видимою межею.
+   ========================================================= */
+
+.gender-toggle-btn {
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+
+  font-weight: 600;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.gender-toggle-btn:hover {
+  background: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color);
+}
+
+.btn-check:checked + .gender-toggle-btn,
+.btn-check:checked + .gender-toggle-btn:hover {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+
+.btn-check:focus-visible + .gender-toggle-btn {
+  outline: 2px solid rgba(var(--bs-primary-rgb), 0.5);
+  outline-offset: 2px;
+}
+
+/* =========================================================
    DM TRIGGER — кнопка "три вертикальні точки" біля чужого ніка
    (Sidebar.jsx: список "Користувачі"; ChatConversation.jsx: автор
    повідомлення). Один пункт меню — відкрити DirectMessagesModal.

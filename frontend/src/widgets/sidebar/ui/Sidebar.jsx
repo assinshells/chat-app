@@ -14,6 +14,7 @@ const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
 const USER_GROUPS = [
   { id: "male", label: "Чоловіки" },
   { id: "female", label: "Жінки" },
+  { id: "unknown", label: "Невідомі" },
 ];
 
 const MAIN_TABS = [
@@ -68,10 +69,11 @@ export function Sidebar({
 
   // Групуємо учасників активної кімнати за статтю один раз за рендер,
   // а не на кожен чих — список учасників кімнати може бути довгим.
-  // gender гарантовано 'male' | 'female' (див. GENDER_VALUES на бекенді,
-  // значення 'unknown' прибрано), третя група більше не потрібна.
+  // gender може бути 'male' | 'female' | 'unknown' (див. GENDER_VALUES
+  // на бекенді) — усі три кошики завжди присутні, щоб користувачі з
+  // 'unknown' не губилися мовчки.
   const usersByGroup = useMemo(() => {
-    const grouped = { male: [], female: [] };
+    const grouped = { male: [], female: [], unknown: [] };
 
     for (const user of roomUsers) {
       if (grouped[user.gender]) grouped[user.gender].push(user);

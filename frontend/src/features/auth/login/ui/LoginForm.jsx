@@ -57,7 +57,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-3">
           <select
             id="roomSelect"
             className="form-select"
@@ -87,24 +87,23 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
                 onChange={(e) => setGender(e.target.value)}
                 required
               />
-              <label className="btn btn-outline-primary" htmlFor={`gender-${option.value}`}>
+              <label className="btn gender-toggle-btn" htmlFor={`gender-${option.value}`}>
                 {option.label}
               </label>
             </Fragment>
           ))}
         </div>
 
-        <div className="color-swatch-options mb-4">
+        <div className="color-radio-options mb-4">
           {COLOR_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className={`color-swatch-option ${
-                color === option.value ? "is-active" : ""
-              }`}
+              className="color-radio-option"
               style={{ "--swatch-color": option.hex }}
             >
+              <span className="color-radio-swatch" aria-hidden="true" />
               <input
-                className="color-swatch-input"
+                className="color-radio-input"
                 type="radio"
                 name="color"
                 value={option.value}
@@ -113,7 +112,6 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
                 required
                 aria-label={option.label}
               />
-              <span className="color-swatch" aria-hidden="true" />
             </label>
           ))}
         </div>
