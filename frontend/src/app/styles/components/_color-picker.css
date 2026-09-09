@@ -8,9 +8,9 @@
    CSS-тултип з назвою кольору (без Bootstrap Tooltip JS —
    ::after/::before, керовані atрибутом data-tooltip), а під
    усією палітрою — назва поточно обраного кольору (див.
-   .color-radio-selected-name, текст рендериться в LoginForm.jsx
+   .color-radio-selected-name, текст рендериться в RegisterForm.jsx
    через getColorLabel(color), не в CSS).
-   Використовується у формі входу (LoginForm.jsx).
+   Використовується у формі реєстрації (RegisterForm.jsx).
    ========================================================= */
 
 .color-radio-options {

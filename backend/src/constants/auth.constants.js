@@ -46,14 +46,10 @@ export const GENDER_VALUES = Object.freeze({
 
 export const GENDER_OPTIONS = Object.freeze(Object.values(GENDER_VALUES));
 
-// users.gender у БД — NOT NULL без DEFAULT (див. docker/postgres/init.sql),
-// тому запис при реєстрації все одно повинен мати якесь значення.
-// Стать тепер обирається не на формі реєстрації, а на формі входу
-// (RegisterForm.jsx більше не питає її) і одразу після успішного
-// першого логіну переписується реальним значенням через
-// PATCH /api/auth/gender (див. useLoginStore.js на фронті). Це значення —
-// лише тимчасова заглушка на момент INSERT, користувач його не бачить.
-export const PROVISIONAL_REGISTER_GENDER = GENDER_VALUES.MALE;
+// users.gender у БД — NOT NULL без DEFAULT (див. docker/postgres/init.sql).
+// Стать обирається прямо на формі реєстрації (RegisterForm.jsx, select)
+// і приходить у POST /api/auth/register разом з логіном/паролем —
+// окремого PATCH-запиту після логіну більше не потрібно.
 
 // Колір повідомлень/ніка користувача, обирається в налаштуваннях профілю.
 // 'black' — значення за замовчуванням (збігається з DEFAULT у БД).

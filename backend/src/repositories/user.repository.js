@@ -25,7 +25,7 @@ export const UserRepository = {
     return rows[0] ?? null;
   },
 
-  async create({ login, passwordHash, email, gender, role }) {
+  async create({ login, passwordHash, email, gender, color, role }) {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -55,8 +55,12 @@ export const UserRepository = {
         // DEFAULT 'user' з таблиці (звичайна реєстрація), явне значення
         // передається лише при заведенні дефолтного суперадміна (див.
         // services/superadminBootstrap.service.js).
-        "INSERT INTO users (login, password_hash, email, gender, role) VALUES ($1, $2, $3, $4, COALESCE($5, 'user')) RETURNING id",
-        [login, passwordHash, email ?? null, gender, role ?? null],
+        // color так само необов'язковий — на формі реєстрації користувач
+        // завжди обирає його явно, але COALESCE(..., 'black') лишається
+        // підстраховкою на випадок відсутнього значення (збігається з
+        // DEFAULT колонки в БД).
+        "INSERT INTO users (login, password_hash, email, gender, color, role) VALUES ($1, $2, $3, $4, COALESCE($5, 'black'), COALESCE($6, 'user')) RETURNING id",
+        [login, passwordHash, email ?? null, gender, color ?? null, role ?? null],
       );
 
       await client.query("COMMIT");

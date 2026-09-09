@@ -15,9 +15,11 @@
  * @property {string} login
  * @property {string} password
  * @property {string|undefined} email
+ * @property {string} gender - одне з GENDER_OPTIONS (constants/auth.constants.js)
+ * @property {string|undefined} color - одне з COLOR_OPTIONS, за відсутності
+ *   на рівні БД застосовується DEFAULT 'black'
  *
- * Стать сюди більше не входить — вона обирається на формі входу
- * і виставляється окремо через PATCH /api/auth/gender.
+ * Стать і колір обираються прямо на формі реєстрації.
  */
 
 /**
@@ -64,6 +66,8 @@ export const toRegisterRequestDto = (body) => ({
   login: body.login,
   password: body.password,
   email: body.email || undefined,
+  gender: body.gender,
+  color: body.color || undefined,
 });
 
 export const toForgotPasswordDto = (body) => ({

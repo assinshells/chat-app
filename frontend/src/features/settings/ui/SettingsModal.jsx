@@ -5,8 +5,8 @@ import { Moon, Sun } from "lucide-react";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
 
 // Стать і колір нікнейма/повідомлень тепер обираються лише один раз —
-// на формі входу (LoginForm.jsx) — і більше не редагуються з цієї
-// модалки: тут залишається тільки вибір теми.
+// на формі реєстрації (RegisterForm.jsx) — і більше не редагуються з
+// цієї модалки: тут залишається тільки вибір теми.
 export function SettingsModal({ modalId = "settingsModal" }) {
   const [theme, setThemeState] = useState(() => getStoredTheme());
 

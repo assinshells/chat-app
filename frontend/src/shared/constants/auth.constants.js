@@ -9,8 +9,8 @@ export const AUTH_SCREENS = Object.freeze({
 
 export const APP_NAME = "Балачка";
 
-// Обов'язкове поле — обирається на формі входу (LoginForm.jsx), не на
-// реєстрації. Значення збігаються з backend GENDER_VALUES.
+// Обов'язкове поле — обирається на формі реєстрації (RegisterForm.jsx,
+// select). Значення збігаються з backend GENDER_VALUES.
 // Текст системних повідомлень (увійшов/вийшов тощо) вже нейтральний і
 // не залежить від статі (див. shared/lib/systemMessage.js), тому
 // 'unknown' — цілком коректне значення.
@@ -20,6 +20,6 @@ export const GENDER_OPTIONS = Object.freeze([
   { value: "unknown", label: "Невідомий" },
 ]);
 
-// Значення статі, обране на формі входу за замовчуванням (перший
-// пункт у toggle-групі), доки користувач не обере інше явно.
+// Значення статі, обране на формі реєстрації за замовчуванням (перший
+// пункт у select), доки користувач не обере інше явно.
 export const DEFAULT_GENDER = "male";

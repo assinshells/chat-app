@@ -32,8 +32,13 @@ export const validateRegisterRequest = (body) => {
   if (!isValidPassword(body.password))
     errors.push("пароль має містити щонайменше 6 символів");
   if (body.email && !isValidEmail(body.email)) errors.push("email недійсний");
-  // Стать більше не збирається на формі реєстрації (перенесена на форму
-  // входу, див. LoginForm.jsx) — тут її свідомо не валідуємо.
+  // Стать тепер обов'язково обирається на формі реєстрації (select).
+  if (!isValidGender(body.gender))
+    errors.push(`стать обов'язкова і має бути однією з: ${GENDER_OPTIONS.join(", ")}`);
+  // Колір необов'язковий: якщо не переданий, застосовується DEFAULT
+  // з БД ('black'); але якщо переданий — має бути валідним значенням.
+  if (body.color !== undefined && !isValidColor(body.color))
+    errors.push(`колір має бути одним із: ${COLOR_OPTIONS.join(", ")}`);
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
