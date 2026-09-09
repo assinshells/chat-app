@@ -57,12 +57,31 @@ export const PROVISIONAL_REGISTER_GENDER = GENDER_VALUES.MALE;
 
 // Колір повідомлень/ніка користувача, обирається в налаштуваннях профілю.
 // 'black' — значення за замовчуванням (збігається з DEFAULT у БД).
+// Повний спектр (20 відтінків) — порядок значень навмисно збігається з
+// порядком у палітрі на фронтенді (shared/constants/color.constants.js:
+// COLOR_OPTIONS) і з CHECK-обмеженням users_color_check у БД
+// (docker/postgres/init.sql) — усі три місця змінюються разом.
 export const COLOR_VALUES = Object.freeze({
-  BLACK: "black",
-  BLUE: "blue",
-  GREEN: "green",
-  PURPLE: "purple",
+  MAROON: "maroon",
+  RED: "red",
+  CORAL: "coral",
+  PINK: "pink",
   ORANGE: "orange",
+  PEACH: "peach",
+  YELLOW: "yellow",
+  GOLD: "gold",
+  LIME: "lime",
+  GREEN: "green",
+  MINT: "mint",
+  TURQUOISE: "turquoise",
+  SKYBLUE: "skyblue",
+  BLUE: "blue",
+  NAVY: "navy",
+  PURPLE: "purple",
+  BLACK: "black",
+  WHITE: "white",
+  GRAY: "gray",
+  BROWN: "brown",
 });
 
 export const COLOR_OPTIONS = Object.freeze(Object.values(COLOR_VALUES));

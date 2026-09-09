@@ -2,7 +2,14 @@ import { Fragment, useState } from "react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
 import { ROOMS, DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 import { GENDER_OPTIONS, DEFAULT_GENDER } from "@shared/constants/auth.constants.js";
-import { COLOR_OPTIONS, DEFAULT_COLOR } from "@shared/constants/color.constants.js";
+import {
+  getColorLabel,
+  getColorHex,
+  getColorHexDark,
+  getVisibleColorOptions,
+  getDefaultColorForTheme,
+} from "@shared/constants/color.constants.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 /**
  * LoginForm — "тупий" компонент.
@@ -20,13 +27,31 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const [password, setPassword] = useState("");
   const [room, setRoom] = useState(DEFAULT_ROOM);
   const [gender, setGender] = useState(DEFAULT_GENDER);
-  const [color, setColor] = useState(DEFAULT_COLOR);
+
+  // "Чорний" за замовчуванням доречний лише на світлій темі (на темній
+  // він майже нечитабельний і взагалі прибраний з палітри нижче) —
+  // тому початкове значення підлаштовується під тему вже при монтуванні.
+  const isDarkTheme = useIsDarkTheme();
+  const [color, setColor] = useState(() => getDefaultColorForTheme(isDarkTheme));
+  const visibleColorOptions = getVisibleColorOptions(isDarkTheme);
+
+  // effectiveColor замість синхронізації через useEffect: якщо тема
+  // змінюється просто під час заповнення форми (перемикач теми на
+  // цьому екрані відсутній, але системна прив'язка prefers-color-scheme
+  // могла спрацювати) і збережений вибір саме той, що ховається на
+  // новій темі ("чорний" на темній / "білий" на світлій) — на льоту
+  // підміняється симетричним дефолтом. Порахований прямо в рендері,
+  // без побічного ефекту й зайвого re-render.
+  const effectiveColor = visibleColorOptions.some((option) => option.value === color)
+    ? color
+    : getDefaultColorForTheme(isDarkTheme);
+
   const { loading, error, login: doLogin, clearError } = useLoginStore();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     clearError();
-    doLogin({ login, password, gender, color }, () => onSuccess(login, room));
+    doLogin({ login, password, gender, color: effectiveColor }, () => onSuccess(login, room));
   };
 
   return (
@@ -73,7 +98,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
           </select>
         </div>
 
-        <div className="btn-group w-100 mb-3" role="group" aria-label="Стать">
+        <div className="gender-pill-group mb-3" role="group" aria-label="Стать">
           {GENDER_OPTIONS.map((option) => (
             <Fragment key={option.value}>
               <input
@@ -87,33 +112,48 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
                 onChange={(e) => setGender(e.target.value)}
                 required
               />
-              <label className="btn gender-toggle-btn" htmlFor={`gender-${option.value}`}>
+              <label className="gender-pill-btn" htmlFor={`gender-${option.value}`}>
                 {option.label}
               </label>
             </Fragment>
           ))}
         </div>
 
-        <div className="color-radio-options mb-4">
-          {COLOR_OPTIONS.map((option) => (
-            <label
-              key={option.value}
-              className="color-radio-option"
-              style={{ "--swatch-color": option.hex }}
-            >
-              <span className="color-radio-swatch" aria-hidden="true" />
-              <input
-                className="color-radio-input"
-                type="radio"
-                name="color"
-                value={option.value}
-                checked={color === option.value}
-                onChange={(e) => setColor(e.target.value)}
-                required
-                aria-label={option.label}
-              />
-            </label>
-          ))}
+        <div className="mb-4">
+          <div className="color-radio-options">
+            {visibleColorOptions.map((option) => (
+              <label
+                key={option.value}
+                className="color-radio-option"
+                style={{ "--swatch-color": option.hex, "--swatch-color-dark": option.hexDark ?? option.hex }}
+                data-tooltip={option.label}
+              >
+                <span className="color-radio-swatch" aria-hidden="true" />
+                <input
+                  className="color-radio-input"
+                  type="radio"
+                  name="color"
+                  value={option.value}
+                  checked={effectiveColor === option.value}
+                  onChange={(e) => setColor(e.target.value)}
+                  required
+                  aria-label={option.label}
+                />
+              </label>
+            ))}
+          </div>
+          {/*
+            Підпис пофарбований у сам обраний колір - саме так нік/
+            повідомлення виглядатиме в чаті (а не нейтральним текстом,
+            як було раніше). isDarkTheme перемикає між hex і hexDark,
+            щоб підпис лишався настільки ж читабельним, як і сам свотч.
+          */}
+          <p
+            className="color-radio-selected-name mb-0"
+            style={{ color: isDarkTheme ? getColorHexDark(effectiveColor) : getColorHex(effectiveColor) }}
+          >
+            {getColorLabel(effectiveColor)}
+          </p>
         </div>
 
         <button

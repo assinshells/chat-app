@@ -86,7 +86,8 @@ export const toUpdateGenderDto = (body) => ({
 
 /**
  * @typedef {Object} UpdateColorDto
- * @property {"black"|"blue"|"green"|"purple"|"orange"} color
+ * @property {string} color - одне з COLOR_OPTIONS (constants/auth.constants.js —
+ *   повний спектр з 20 відтінків)
  */
 export const toUpdateColorDto = (body) => ({
   color: body.color,

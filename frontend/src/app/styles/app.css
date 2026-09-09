@@ -1504,40 +1504,72 @@ button:focus-visible,
 }
 
 /* =========================================================
-   AUTH FORMS: гендер — radio toggle button group (LoginForm.jsx)
+   AUTH FORMS: гендер — pill-кнопки (LoginForm.jsx)
+   На відміну від попередньої версії (суцільна btn-group з
+   квадратними стиками між сегментами) кнопки тут навмисно НЕ
+   з'єднані в один блок: кожна — окрема, повністю заокруглена
+   "пігулка" (border-radius: 50rem) із власним проміжком (gap),
+   тому й немає класу .btn-group на батьківському елементі.
    Навмисно НЕ .btn-outline-primary: цей клас в проєкті глобально
    обнуляє border-color (див. "OUTLINE PRIMARY" нижче) — він
    зроблений для плоских кнопок на кшталт "Надіслати код повторно"
-   і зробив би межі сегментів невидимими. Тому окремий клас із
-   власною, завжди видимою межею.
+   і зробив би межі невидимими. Тому окремий клас із власною,
+   завжди видимою межею.
    ========================================================= */
 
-.gender-toggle-btn {
+.gender-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.gender-pill-btn {
+  flex: 1 1 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Той самий padding/line-height, що й у .form-control та звичайних
+     .btn нижче (вхід/пароль/кімната, "Увійти", "Зареєструватися") —
+     щоб висота pill-кнопок збігалася з рештою контролів форми, а не
+     була "своєю" (раніше 0.5rem зверху/знизу робило їх помітно вищими). */
+  padding: 0.375rem 0.75rem;
+  border-radius: 50rem;
   border: 1px solid var(--bs-border-color);
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
 
   font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
 
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    transform 0.1s ease;
 }
 
-.gender-toggle-btn:hover {
+.gender-pill-btn:hover {
   background: var(--bs-tertiary-bg);
-  border-color: var(--bs-border-color);
+  border-color: var(--bs-primary);
 }
 
-.btn-check:checked + .gender-toggle-btn,
-.btn-check:checked + .gender-toggle-btn:hover {
+.gender-pill-btn:active {
+  transform: scale(0.97);
+}
+
+.btn-check:checked + .gender-pill-btn,
+.btn-check:checked + .gender-pill-btn:hover {
   background: var(--bs-primary);
   border-color: var(--bs-primary);
   color: var(--bs-white);
 }
 
-.btn-check:focus-visible + .gender-toggle-btn {
+.btn-check:focus-visible + .gender-pill-btn {
   outline: 2px solid rgba(var(--bs-primary-rgb), 0.5);
   outline-offset: 2px;
 }

@@ -9,8 +9,14 @@ CREATE TABLE IF NOT EXISTS users (
     gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female', 'unknown')),
     -- Колір повідомлень/ніка користувача в сайдбарі, обирається в налаштуваннях.
     -- 'black' — значення за замовчуванням, ставиться всім новим користувачам.
+    -- Повний спектр (20 відтінків) — див. коментар біля users_color_check
+    -- нижче щодо порядку значень і синхронізації з фронтендом/бекендом.
     color VARCHAR(16) NOT NULL DEFAULT 'black'
-        CHECK (color IN ('black', 'blue', 'green', 'purple', 'orange')),
+        CHECK (color IN (
+            'maroon', 'red', 'coral', 'pink', 'orange', 'peach', 'yellow',
+            'gold', 'lime', 'green', 'mint', 'turquoise', 'skyblue', 'blue',
+            'navy', 'purple', 'black', 'white', 'gray', 'brown'
+        )),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -18,14 +24,27 @@ CREATE TABLE IF NOT EXISTS users (
 -- на порожній базі через docker-entrypoint-initdb.d) — доповнити наявну
 -- таблицю колонкою без падіння, якщо вона вже є.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS color VARCHAR(16) NOT NULL DEFAULT 'black';
+
+-- Домігрування для баз, створених до розширення палітри з 5 до 20
+-- кольорів (init.sql виконується лише на порожній базі, тому наявний
+-- CHECK на старих оточеннях — ще зі старим коротким списком — потрібно
+-- замінити явно, а не покладатись на CREATE TABLE IF NOT EXISTS вище).
+-- Так само, як і з users_gender_check нижче: жодні наявні дані не
+-- переписуються, старі 5 значень лишаються коректними підмножиною
+-- нового списку.
 DO $$
 BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (
         SELECT 1 FROM pg_constraint WHERE conname = 'users_color_check'
     ) THEN
-        ALTER TABLE users ADD CONSTRAINT users_color_check
-            CHECK (color IN ('black', 'blue', 'green', 'purple', 'orange'));
+        ALTER TABLE users DROP CONSTRAINT users_color_check;
     END IF;
+    ALTER TABLE users ADD CONSTRAINT users_color_check
+        CHECK (color IN (
+            'maroon', 'red', 'coral', 'pink', 'orange', 'peach', 'yellow',
+            'gold', 'lime', 'green', 'mint', 'turquoise', 'skyblue', 'blue',
+            'navy', 'purple', 'black', 'white', 'gray', 'brown'
+        ));
 END $$;
 
 -- Домігрування для баз, створених до появи гендеру 'unknown' (init.sql
