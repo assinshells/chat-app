@@ -242,6 +242,65 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
+   * _mergeListSummaries — общая часть openInbox/syncList: сливает
+   * зведення з dm:list у поточні conversations/order, не втрачаючи
+   * локально накопичені messages/unreadCount (existing пріоритетний,
+   * summary — лише фолбек для щойно узнаних діалогів, див. коментар
+   * біля unreadCount нижче).
+   */
+  _mergeListSummaries: (state, summaries) => {
+    const conversations = { ...state.conversations };
+    const order = [];
+
+    for (const summary of summaries) {
+      order.push(summary.login);
+      const existing = conversations[summary.login];
+      conversations[summary.login] = {
+        login: summary.login,
+        color: summary.color,
+        messages: existing?.messages ?? [],
+        lastMessage: summary.lastMessage,
+        loading: existing?.loading ?? false,
+        loaded: existing?.loaded ?? false,
+        // existing.unreadCount пріоритетний: якщо в межах ЦІЄЇ сесії
+        // вже накопичився локальний лічильник (живі dm:new), не
+        // затираємо його застарілим серверним значенням. Якщо existing
+        // ще немає — беремо реальне значення з БД (summary.unreadCount).
+        unreadCount: existing?.unreadCount ?? summary.unreadCount ?? 0,
+      };
+    }
+
+    // Діалоги, вже відкриті локально в цій сесії, але яких ще немає
+    // на сервері (жодного збереженого повідомлення) — не втрачаємо.
+    for (const login of state.order) {
+      if (!order.includes(login)) order.push(login);
+    }
+
+    return { conversations, order };
+  },
+
+  /**
+   * syncList — тиха (без відкриття модалки, без вибору активної вкладки,
+   * без markAsRead) синхронізація зведення діалогів. Викликається одразу
+   * після встановлення/відновлення з'єднання (див. ChatLayout), щоб
+   * бейдж лічильника в шапці (ChatHeader: сума unreadCount по всіх
+   * conversations) показував реальну кількість одразу після входу, а не
+   * лишався порожнім, поки людина сама не натисне на іконку "Пошта" —
+   * саме так і виглядав баг "написав офлайн-користувачу, після заходу
+   * лічильник мовчить": conversations на старті сесії просто порожній,
+   * а нічого, крім кліку по кнопці інбоксу, його раніше не наповнювало.
+   */
+  syncList: async () => {
+    const result = await emitWithAck(DM_LIST, {});
+    if (!result?.success) return;
+
+    set((state) => ({
+      ...get()._mergeListSummaries(state, result.conversations),
+      listLoaded: true,
+    }));
+  },
+
+  /**
    * openInbox — відкриває модалку "як є" (іконка в шапці, без
    * конкретного адресата): завжди повторно запитує свіжий список
    * діалогів через dm:list, щоб вкладки не були застарілими, якщо
@@ -274,39 +333,7 @@ export const useDmStore = create((set, get) => ({
     set((state) => {
       if (!result?.success) return { listLoading: false };
 
-      const conversations = { ...state.conversations };
-      const order = [];
-
-      for (const summary of result.conversations) {
-        order.push(summary.login);
-        const existing = conversations[summary.login];
-        conversations[summary.login] = {
-          login: summary.login,
-          color: summary.color,
-          messages: existing?.messages ?? [],
-          lastMessage: summary.lastMessage,
-          loading: existing?.loading ?? false,
-          loaded: existing?.loaded ?? false,
-          // existing.unreadCount пріоритетний: якщо в межах ЦІЄЇ сесії
-          // вже накопичився локальний лічильник (живі dm:new, поки
-          // модалка була закрита), не затираємо його застарілим
-          // серверним значенням від попереднього dm:list. Якщо ж
-          // existing ще немає (перший dm:list за сесію/після relogin) —
-          // це і є фікс бага: раніше тут стояв жорсткий 0, тепер беремо
-          // реальне значення з БД (summary.unreadCount, див.
-          // toConversationSummaryDto), яке рахує повідомлення, що
-          // прийшли, поки клієнт був офлайн.
-          unreadCount: existing?.unreadCount ?? summary.unreadCount ?? 0,
-        };
-      }
-
-      // Діалоги, вже відкриті локально в цій сесії (клік "Написати
-      // особисте повідомлення"), але в яких ще жодного повідомлення
-      // не збереглося на сервері — dm:list їх не поверне, але втрачати
-      // зі списку вкладок не потрібно, дописуємо в кінець.
-      for (const login of state.order) {
-        if (!order.includes(login)) order.push(login);
-      }
+      const { conversations, order } = get()._mergeListSummaries(state, result.conversations);
 
       const activeLogin = state.activeLogin ?? order[0] ?? null;
       if (!state.activeLogin && activeLogin) autoSelectedLogin = activeLogin;
