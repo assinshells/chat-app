@@ -204,6 +204,12 @@ CREATE TABLE IF NOT EXISTS private_messages (
     recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     text VARCHAR(2000) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- NULL = ще не прочитано одержувачем. Проставляється при dm:open
+    -- (див. PrivateMessageService.getConversation) або явному dm:read.
+    -- Без цієї колонки лічильник непрочитаних не переживає relogin/офлайн —
+    -- він існував лише в оперативній пам'яті вкладки (useDmStore), звідси
+    -- і був баг "прийшло, поки був офлайн — лічильник мовчить".
+    read_at TIMESTAMPTZ,
     CONSTRAINT private_messages_no_self_dm CHECK (sender_id <> recipient_id)
 );
 
@@ -213,3 +219,11 @@ CREATE TABLE IF NOT EXISTS private_messages (
 -- окремих індексів на sender_id/recipient_id окремо.
 CREATE INDEX IF NOT EXISTS idx_private_messages_pair
     ON private_messages (LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id), created_at);
+
+-- Частковий індекс лише під непрочитані — саме за цим фільтром рахується
+-- unread_count у findConversationsList і виконується UPDATE у
+-- markConversationAsRead; таблиця з непрочитаними завжди мала порівняно
+-- з усією історією, тому індекс лишається компактним.
+CREATE INDEX IF NOT EXISTS idx_private_messages_unread
+    ON private_messages (recipient_id, sender_id)
+    WHERE read_at IS NULL;

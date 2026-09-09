@@ -72,6 +72,24 @@ export function registerDmSocket(io, socket) {
     }
   });
 
+  // dm:read — явне позначення діалогу прочитаним без перезапиту історії
+  // (див. коментар у privateMessage.service.js). Викликається клієнтом
+  // без ack (fire-and-forget) — це фонова синхронізація стану, UI на
+  // відповідь сервера не чекає.
+  socket.on(SOCKET_EVENTS.DM_READ, async (payload) => {
+    const login = typeof payload === "string" ? payload : payload?.login;
+    if (!login) return;
+
+    try {
+      await PrivateMessageService.markConversationAsRead({
+        userId: socket.data.userId,
+        otherLogin: login,
+      });
+    } catch (err) {
+      logger.warn(`dm:read не вдався для користувача ${socket.data.userId}: ${err.message}`);
+    }
+  });
+
   socket.on(SOCKET_EVENTS.DM_SEND, async (payload, ack) => {
     const respond = (result) => {
       if (typeof ack === "function") {

@@ -56,7 +56,20 @@ export const PrivateMessageRepository = {
          other_color,
          text AS last_text,
          created_at AS last_at,
-         is_own
+         is_own,
+         -- Скалярний корельований підзапит: рахує непрочитані САМЕ від
+         -- цього співрозмовника (recipient_id = я, sender_id = він,
+         -- read_at ще NULL). Виконується один раз на рядок ПІСЛЯ
+         -- DISTINCT ON (тобто рівно раз на діалог, не на кожне
+         -- повідомлення) — ціна прийнятна завдяки частковому індексу
+         -- idx_private_messages_unread.
+         (
+           SELECT COUNT(*)::int
+           FROM private_messages pm2
+           WHERE pm2.recipient_id = $1
+             AND pm2.sender_id = conversation.other_user_id
+             AND pm2.read_at IS NULL
+         ) AS unread_count
        FROM (
          SELECT
            CASE WHEN pm.sender_id = $1 THEN pm.recipient_id ELSE pm.sender_id END AS other_user_id,
@@ -80,5 +93,22 @@ export const PrivateMessageRepository = {
       [userId, limit],
     );
     return rows.sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
+  },
+
+  /**
+   * markConversationAsRead — позначає прочитаними всі вхідні повідомлення
+   * від конкретного співрозмовника (otherUserId -> userId), яким ще не
+   * проставлено read_at. Викликається при dm:open (історію відкрили —
+   * значить побачили) і при явному dm:read (повідомлення прийшло live,
+   * поки діалог уже й так дивляться, див. dm.socket.js). Ідемпотентно:
+   * WHERE read_at IS NULL — повторний виклик нічого зайвого не чіпає.
+   */
+  async markConversationAsRead(userId, otherUserId) {
+    await pool.query(
+      `UPDATE private_messages
+       SET read_at = NOW()
+       WHERE recipient_id = $1 AND sender_id = $2 AND read_at IS NULL`,
+      [userId, otherUserId],
+    );
   },
 };

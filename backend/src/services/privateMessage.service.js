@@ -77,7 +77,28 @@ export const PrivateMessageService = {
       other.id,
       safeLimit,
     );
+
+    // Відкрили історію — значить побачили все, що там є. Не блокуємо
+    // відповідь: клієнту історія потрібна одразу, позначку "прочитано"
+    // він не чекає (немає ack-поля, яке б на неї реагувало).
+    PrivateMessageRepository.markConversationAsRead(userId, other.id).catch(() => {});
+
     return rows.map(toPrivateMessageDto);
+  },
+
+  /**
+   * markConversationAsRead — явне позначення діалогу прочитаним без
+   * перезапиту історії (dm:read, див. dm.socket.js): потрібно, коли
+   * діалог УЖЕ відкритий і нове повідомлення прийшло live через dm:new —
+   * dm:open для нього вдруге не викликається (клієнт кешує loaded),
+   * тож без цього окремого шляху read_at так і лишався б NULL, і при
+   * наступному вході (інша вкладка/relogin) те саме повідомлення
+   * показалося б непрочитаним, хоч людина його вже бачила.
+   */
+  async markConversationAsRead({ userId, otherLogin }) {
+    const other = await UserRepository.findByLogin(otherLogin);
+    if (!other) return;
+    await PrivateMessageRepository.markConversationAsRead(userId, other.id);
   },
 
   /**

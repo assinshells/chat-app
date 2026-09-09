@@ -8,6 +8,20 @@ const DM_OPEN = "dm:open";
 const DM_LIST = "dm:list";
 const DM_SEND = "dm:send";
 const DM_NEW = "dm:new";
+const DM_READ = "dm:read";
+
+/**
+ * emitRead — фонове "прочитано" без ack: dm:open на бекенді сам
+ * позначає прочитаним усе, що прийшло історією, але для live-повідомлення,
+ * яке прилетіло, поки діалог уже відкритий (dm:open вдруге не
+ * викликається — див. openConversation), потрібен окремий сигнал.
+ * Мовчки ігнорує відсутність з'єднання — це best-effort синхронізація,
+ * а не критична дія: наступний dm:open однаково підчистить хвіст.
+ */
+function emitRead(login) {
+  if (!chatSocket.connected) return;
+  chatSocket.emit(DM_READ, { login });
+}
 
 /**
  * emitWithAck — Socket.IO emit з ack, обгорнутий у Promise. Якщо сокет
@@ -123,7 +137,15 @@ export const useDmStore = create((set, get) => ({
   markAsRead: (login) => {
     const { conversations } = get();
     const convo = conversations[login];
-    if (!convo || !convo.unreadCount) return;
+    if (!convo) return;
+
+    // Сигналимо серверу незалежно від того, чи був локальний unreadCount
+    // > 0: сервер міг накопичити непрочитані, про які ця вкладка ще
+    // навіть не знає (наприклад, повідомлення прийшло, поки сокет був
+    // офлайн, і dm:list із них ще не підвантажувався). Виклик ідемпотентний.
+    emitRead(login);
+
+    if (!convo.unreadCount) return;
 
     set({
       conversations: {
@@ -265,7 +287,16 @@ export const useDmStore = create((set, get) => ({
           lastMessage: summary.lastMessage,
           loading: existing?.loading ?? false,
           loaded: existing?.loaded ?? false,
-          unreadCount: existing?.unreadCount ?? 0,
+          // existing.unreadCount пріоритетний: якщо в межах ЦІЄЇ сесії
+          // вже накопичився локальний лічильник (живі dm:new, поки
+          // модалка була закрита), не затираємо його застарілим
+          // серверним значенням від попереднього dm:list. Якщо ж
+          // existing ще немає (перший dm:list за сесію/після relogin) —
+          // це і є фікс бага: раніше тут стояв жорсткий 0, тепер беремо
+          // реальне значення з БД (summary.unreadCount, див.
+          // toConversationSummaryDto), яке рахує повідомлення, що
+          // прийшли, поки клієнт був офлайн.
+          unreadCount: existing?.unreadCount ?? summary.unreadCount ?? 0,
         };
       }
 
@@ -370,6 +401,14 @@ export const useDmStore = create((set, get) => ({
     const isBeingViewed = modalOpen && activeLogin === otherLogin;
     const unreadCount =
       isOwn || isBeingViewed ? existing?.unreadCount ?? 0 : (existing?.unreadCount ?? 0) + 1;
+
+    // Людина бачить це повідомлення в реальному часі (діалог відкритий і
+    // активний саме зараз) — на бекенді воно все одно лишилося б
+    // read_at IS NULL назавжди, бо dm:open вдруге не викликається для
+    // вже завантаженого діалогу (див. openConversation). Без цього рядка
+    // те саме повідомлення виглядало б непрочитаним при вході з іншого
+    // пристрою/після relogin, хоча людина його вже прочитала тут і зараз.
+    if (!isOwn && isBeingViewed) emitRead(otherLogin);
 
     set({
       conversations: {

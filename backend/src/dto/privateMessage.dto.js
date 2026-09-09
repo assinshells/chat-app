@@ -24,6 +24,9 @@ export const toPrivateMessageDto = (row) => ({
  * @property {string} login - співрозмовник (не сам користувач)
  * @property {string} color
  * @property {{ text: string, timestamp: number, own: boolean }} lastMessage
+ * @property {number} unreadCount - скільки вхідних від нього ще не
+ *   прочитано (read_at IS NULL), рахується в
+ *   PrivateMessageRepository.findConversationsList
  */
 export const toConversationSummaryDto = (row) => ({
   login: row.other_login,
@@ -33,4 +36,5 @@ export const toConversationSummaryDto = (row) => ({
     timestamp: new Date(row.last_at).getTime(),
     own: Boolean(row.is_own),
   },
+  unreadCount: Number(row.unread_count ?? 0),
 });
