@@ -99,7 +99,7 @@
 
 /* Тултип з назвою кольору при наведенні — чистий CSS, без
    ініціалізації Bootstrap Tooltip для кожного елемента. Текст береться
-   з data-tooltip на .color-radio-option (див. LoginForm.jsx). */
+   з data-tooltip на .color-radio-option (див. RegisterForm.jsx). */
 .color-radio-option::after {
   content: attr(data-tooltip);
 
@@ -160,7 +160,7 @@
 /* Назва поточно обраного кольору під палітрою (за замовчуванням —
    "Чорний" на світлій темі / "Білий" на темній, див.
    getDefaultColorForTheme у color.constants.js). Сам колір тексту
-   задається інлайн-стилем у LoginForm.jsx рівно тим hex/hexDark, яким
+   задається інлайн-стилем у RegisterForm.jsx рівно тим hex/hexDark, яким
    намальований обраний свотч, — так одразу видно, як нік виглядатиме
    в чаті, а не просто нейтральним підписом. */
 .color-radio-selected-name {

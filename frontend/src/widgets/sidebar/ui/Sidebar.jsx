@@ -4,9 +4,10 @@ import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal } from "@features/info";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
-import { getColorHex } from "@shared/constants/color.constants.js";
+import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 const RULES_MODAL_ID = "sidebarRulesModal";
 const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
@@ -66,6 +67,11 @@ export function Sidebar({
 
   const tabsBodyRef = useRef(null);
   useAutoHideScrollbar(tabsBodyRef);
+
+  // Тема — щоб --user-color (нік учасника в списку "Користувачі")
+  // рендерився правильним відтінком під поточну тему (див.
+  // getEffectiveColorHex у ChatConversation.jsx — та сама логіка тут).
+  const isDarkTheme = useIsDarkTheme();
 
   // Групуємо учасників активної кімнати за статтю один раз за рендер,
   // а не на кожен чих — список учасників кімнати може бути довгим.
@@ -239,11 +245,7 @@ export function Sidebar({
                                   isSelected ? "is-selected" : ""
                                 }`}
                                 title="Додати користувача у форму повідомлення"
-                                style={
-                                  user.color && user.color !== "black"
-                                    ? { "--user-color": getColorHex(user.color) }
-                                    : undefined
-                                }
+                                style={{ "--user-color": getEffectiveColorHex(user.color, isDarkTheme) }}
                                 onClick={() => onNicknameClick?.(user.login)}
                               >
                                 {user.login}

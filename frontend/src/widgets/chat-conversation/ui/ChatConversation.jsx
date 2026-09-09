@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
-import { getColorHex } from "@shared/constants/color.constants.js";
+import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { hasRoomLink } from "@shared/lib/systemMessage.js";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { DmTriggerButton } from "@features/dm";
@@ -65,7 +66,7 @@ function renderMessageText(text, currentUser, knownLogins, messageColorHex) {
  * що й усюди в застосунку), чужий — колір, який той користувач
  * обрав у налаштуваннях (див. features/settings).
  */
-function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }) {
+function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick, isDarkTheme }) {
   const isOwn = message.login === currentUser;
   const timeLabel = formatMessageTime(message.timestamp);
   const roomName = ROOMS_BY_ID[message.room]?.name ?? message.room;
@@ -77,11 +78,7 @@ function SystemMessageRow({ message, currentUser, onNicknameClick, onRoomClick }
       type="button"
       className="system-message-nickname-btn"
       title="Додати користувача у форму повідомлення"
-      style={
-        message.color && message.color !== "black"
-          ? { "--user-color": getColorHex(message.color) }
-          : undefined
-      }
+      style={{ "--user-color": getEffectiveColorHex(message.color, isDarkTheme) }}
       onClick={() => onNicknameClick?.(message.login)}
     >
       {message.login}
@@ -145,6 +142,13 @@ export function ChatConversation({
 
   useAutoHideScrollbar(scrollRef);
 
+  // Тема — щоб colors.color (нік/текст, обраний автором на реєстрації)
+  // рендерився правильним відтінком (hex/hexDark, див.
+  // getEffectiveColorHex): один і той самий колір інакше виглядає на
+  // світлому й темному фоні (наприклад "чорний" на темному фоні без
+  // адаптації став би нечитабельним).
+  const isDarkTheme = useIsDarkTheme();
+
   // Множина логінів учасників кімнати — використовується в renderMessageText,
   // щоб підсвітити кольором повідомлення лише реальні згадки ніків,
   // а не будь-який текст, що випадково починається з "@".
@@ -175,6 +179,7 @@ export function ChatConversation({
                     currentUser={currentUser}
                     onNicknameClick={onNicknameClick}
                     onRoomClick={onRoomClick}
+                    isDarkTheme={isDarkTheme}
                   />
                 );
               }
@@ -185,19 +190,16 @@ export function ChatConversation({
               const isNicknameSelected = selectedNicknames.includes(message.author);
               const isTimeSelected = selectedTimes.includes(timeLabel);
 
-              // Колір тексту повідомлення — той, що автор обрав у
-              // налаштуваннях. 'black' (значення за замовчуванням) — НЕ
-              // форсується явним hex-кодом: у темній темі чистий чорний
-              // текст був би нечитабельним на темному фоні, тому для
-              // дефолтного кольору просто нічого не перевизначаємо і
-              // залишається звичайний адаптивний колір теми
-              // (var(--bs-body-color)). Нік автора при цьому колір
-              // взагалі не змінює — залишається звичайним, крім
-              // власного (він завжди червоний, .nickname-own).
-              const messageColorHex =
-                message.color && message.color !== "black"
-                  ? getColorHex(message.color)
-                  : undefined;
+              // Колір тексту повідомлення — той, що автор обрав на
+              // реєстрації, у відтінку під поточну тему глядача
+              // (getEffectiveColorHex: hex у світлій темі, hexDark —
+              // у темній). Кожен колір, включно з "чорним" і "білим",
+              // має свою пару hex/hexDark (див. color.constants.js),
+              // тому текст лишається читабельним в обох темах незалежно
+              // від того, в якій темі автор його обирав. Нік автора при
+              // цьому колір взагалі не змінює — залишається звичайним,
+              // крім власного (він завжди червоний, .nickname-own).
+              const messageColorHex = getEffectiveColorHex(message.color, isDarkTheme);
 
               return (
                 <div

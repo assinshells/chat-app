@@ -1,7 +1,8 @@
 import { createPortal } from "react-dom";
 
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
-import { getColorHex } from "@shared/constants/color.constants.js";
+import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 import {
   KICK_DURATION_PRESETS,
   KICK_CHAT_DURATION_PRESETS,
@@ -56,6 +57,10 @@ export function KickModal({ modalId = "kickModerationModal" }) {
   const ownRole = useCurrentUserStore((state) => state.role);
   const canCustomize = canSetCustomDuration(ownRole);
 
+  // Тема — щоб нік у заголовку модалки рендерився правильним відтінком
+  // кольору цілі (див. getEffectiveColorHex у ChatConversation.jsx).
+  const isDarkTheme = useIsDarkTheme();
+
   return createPortal(
     <div
       className="modal fade"
@@ -73,11 +78,7 @@ export function KickModal({ modalId = "kickModerationModal" }) {
                 <>
                   {": "}
                   <span
-                    style={
-                      targetColor && targetColor !== "black"
-                        ? { color: getColorHex(targetColor) }
-                        : undefined
-                    }
+                    style={{ color: getEffectiveColorHex(targetColor, isDarkTheme) }}
                   >
                     {targetLogin}
                   </span>

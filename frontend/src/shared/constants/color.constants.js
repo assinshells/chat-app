@@ -70,6 +70,24 @@ export const getColorHexDark = (value) =>
   COLOR_HEX_DARK_BY_VALUE[value] ?? COLOR_HEX_DARK_BY_VALUE[DEFAULT_COLOR];
 
 /**
+ * getEffectiveColorHex - єдина точка входу для будь-якого інлайн-стилю
+ * в JS (текст повідомлення, нік, підпис у KickModal/BanModal/
+ * RoleManageModal/DirectMessagesModal/Sidebar тощо): сама вирішує,
+ * hex чи hexDark повернути, за прапорцем поточної теми (useIsDarkTheme).
+ *
+ * Раніше "чорний" був єдиним кольором з особливим винятком (інлайн-стиль
+ * узагалі не виставлявся, компонент просто успадковував колір теми) —
+ * це рятувало від чорного тексту на темному фоні, але не рятувало
+ * "білий" від симетричної проблеми на світлому фоні. Тепер, коли стать
+ * і колір обов'язково обираються явно на реєстрації (не мають значення
+ * "не задано"), усі кольори — включно з "чорним" і "білим" —
+ * рівноправні: для кожного просто підставляється відповідний hex/hexDark,
+ * без особливих випадків.
+ */
+export const getEffectiveColorHex = (value, isDarkTheme) =>
+  isDarkTheme ? getColorHexDark(value) : getColorHex(value);
+
+/**
  * getColorLabel - назва кольору для тултипа/підпису під палітрою.
  */
 export const getColorLabel = (value) =>

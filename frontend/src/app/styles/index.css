@@ -1,5 +1,40 @@
-@import './_variable.css';
-@import './app.css';
-@import './_sidebar.css';
-@import './components/_color-picker.css';
-@import './components/_settings-modal.css';
+/* =========================================================
+   ENTRY POINT — порядок імпортів навмисно повторює каскад:
+   1. TOKENS/THEMES — CSS-змінні (шрифт, тіні/оверлей під тему тощо),
+      мають бути визначені ДО будь-яких правил, що їх використовують.
+   2. BASE — reset, скролбар, body/#root: найзагальніші правила.
+   3. LAYOUT — великі структурні блоки застосунку (обгортка, sidebar).
+   4. COMPONENTS — конкретні віджети (шапка, стрічка повідомлень,
+      композер, форми, попапи тощо).
+   5. COMPONENTS/_RESPONSIVE — обов'язково ОСТАННІЙ імпорт: усередині
+      лише @media-перевизначення для класів з файлів вище, а в CSS
+      правило з однаковою специфічністю виграє те, що йде далі в
+      каскаді (порядок @media не підвищує специфічність сам по собі).
+      Якщо цей файл підключити раніше за "свій" компонент, мобільні
+      стилі просто мовчки не спрацюють.
+   ========================================================= */
+
+@import "./themes/_tokens.css";
+@import "./themes/_light.css";
+@import "./themes/_dark.css";
+
+@import "./base/_reset.css";
+@import "./base/_scrollbar.css";
+@import "./base/_body.css";
+
+@import "./layout/_shell.css";
+@import "./layout/_sidebar.css";
+
+@import "./components/_chat-header.css";
+@import "./components/_dropdown.css";
+@import "./components/_chat-conversation.css";
+@import "./components/_messages.css";
+@import "./components/_chat-composer.css";
+@import "./components/_forms.css";
+@import "./components/_emoji-picker.css";
+@import "./components/_user-actions-menu.css";
+@import "./components/_direct-messages.css";
+@import "./components/_color-picker.css";
+@import "./components/_settings-modal.css";
+
+@import "./components/_responsive.css";

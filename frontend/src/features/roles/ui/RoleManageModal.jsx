@@ -1,7 +1,8 @@
 import { createPortal } from "react-dom";
 
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
-import { getColorHex } from "@shared/constants/color.constants.js";
+import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 import {
   ASSIGNABLE_ROLE_OPTIONS,
   ROLE_VALUES,
@@ -58,6 +59,10 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
     submitAssign();
   };
 
+  // Тема — щоб нік у заголовку модалки рендерився правильним відтінком
+  // кольору цілі (див. getEffectiveColorHex у ChatConversation.jsx).
+  const isDarkTheme = useIsDarkTheme();
+
   return createPortal(
     <div
       className="modal fade"
@@ -75,11 +80,7 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
                 <>
                   {": "}
                   <span
-                    style={
-                      targetColor && targetColor !== "black"
-                        ? { color: getColorHex(targetColor) }
-                        : undefined
-                    }
+                    style={{ color: getEffectiveColorHex(targetColor, isDarkTheme) }}
                   >
                     {targetLogin}
                   </span>

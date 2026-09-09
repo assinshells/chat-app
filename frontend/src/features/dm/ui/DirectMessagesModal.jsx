@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, MessagesSquare, Send } from "lucide-react";
 
-import { getColorHex } from "@shared/constants/color.constants.js";
+import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { formatMessageTime } from "@shared/lib/message.js";
 import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 
 // Той самий ліміт, що й у публічному чаті (див. ChatComposer.jsx) і на
@@ -30,7 +31,8 @@ const MAX_MESSAGE_LENGTH = 300;
  * (app-scrollbar, як і всюди в застосунку), справа — саме вікно
  * листування з обраним співрозмовником.
  *
- * На мобільному (див. @media в app.css) панелі показуються по одній —
+ * На мобільному (див. @media в app/styles/components/_responsive.css)
+ * панелі показуються по одній —
  * яка саме, вирішує useDmStore.mobileView, а не ця точка входу сама по
  * собі: openInbox (шапка) виставляє 'list', openConversation
  * (клік у ніка) — одразу 'conversation'. Кнопка "Назад" у шапці
@@ -63,6 +65,11 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
   const endRef = useRef(null);
   useAutoHideScrollbar(tabsRef);
   useAutoHideScrollbar(messagesRef);
+
+  // Тема — щоб колір співрозмовника (список бесід і заголовок активної)
+  // рендерився правильним відтінком (див. getEffectiveColorHex у
+  // ChatConversation.jsx).
+  const isDarkTheme = useIsDarkTheme();
 
   // Модалка рендериться завжди (портал у document.body), видимість на
   // екрані перемикає сам Bootstrap через CSS/JS — React про це інакше
@@ -168,11 +175,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                       <span className="dm-modal-tab-row">
                         <span
                           className="dm-modal-tab-name"
-                          style={
-                            convo.color && convo.color !== "black"
-                              ? { color: getColorHex(convo.color) }
-                              : undefined
-                          }
+                          style={{ color: getEffectiveColorHex(convo.color, isDarkTheme) }}
                         >
                           {login}
                         </span>
@@ -201,7 +204,8 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
             <div className="dm-modal-conversation">
               {active && (
                 <div className="dm-modal-conversation-header">
-                  {/* Видна лише на мобільному (див. app.css) — на
+                  {/* Видна лише на мобільному (див.
+                      app/styles/components/_responsive.css) — на
                       десктопі список діалогів і так завжди поруч. */}
                   <button
                     type="button"
@@ -213,11 +217,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                   </button>
                   <span
                     className="dm-modal-conversation-name"
-                    style={
-                      active.color && active.color !== "black"
-                        ? { color: getColorHex(active.color) }
-                        : undefined
-                    }
+                    style={{ color: getEffectiveColorHex(active.color, isDarkTheme) }}
                   >
                     {active.login}
                   </span>

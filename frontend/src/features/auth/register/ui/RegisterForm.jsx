@@ -3,8 +3,7 @@ import { useRegisterStore } from "@features/auth/register/model/useRegisterStore
 import { GENDER_OPTIONS, DEFAULT_GENDER } from "@shared/constants/auth.constants.js";
 import {
   getColorLabel,
-  getColorHex,
-  getColorHexDark,
+  getEffectiveColorHex,
   getVisibleColorOptions,
   getDefaultColorForTheme,
 } from "@shared/constants/color.constants.js";
@@ -59,7 +58,8 @@ export function RegisterForm({ onSuccess, onBack }) {
         <div className="mb-3">
           {/* Лічильник символів нікнейма перенесено всередину інпута
               (position: absolute відносно .input-with-counter, див.
-              app.css) замість окремого form-text під полем. */}
+              app/styles/components/_forms.css) замість окремого
+              form-text під полем. */}
           <div className="input-with-counter">
             <input
               id="loginInput"
@@ -146,7 +146,7 @@ export function RegisterForm({ onSuccess, onBack }) {
           */}
           <p
             className="color-radio-selected-name mb-0"
-            style={{ color: isDarkTheme ? getColorHexDark(effectiveColor) : getColorHex(effectiveColor) }}
+            style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
           >
             {getColorLabel(effectiveColor)}
           </p>
