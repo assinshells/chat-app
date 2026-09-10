@@ -159,11 +159,11 @@
 }
 
 .message-system .message-content {
-  max-width: 100%;
+  max-width: 80%;
 
-  padding: 0.02rem 0;
+  padding: 0;
 
-  font-size: 0.82rem;
+  font-size: inherit;
   text-align: left;
 
   color: var(--bs-secondary-color);
