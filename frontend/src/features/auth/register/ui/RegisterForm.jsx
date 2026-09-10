@@ -8,6 +8,14 @@ import {
   getDefaultColorForTheme,
 } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
+import { RulesModal } from "@features/info/ui/RulesModal.jsx";
+import { SafetyWarningModal } from "@features/info/ui/SafetyWarningModal.jsx";
+
+// Окремі id, щоб не конфліктувати з модалкою правил у сайдбарі
+// (RulesModal.jsx монтується там лише для залогінених користувачів,
+// тож перетину насправді не буває, але id все одно тримаємо унікальними).
+const REGISTER_RULES_MODAL_ID = "registerRulesModal";
+const REGISTER_SAFETY_WARNING_MODAL_ID = "registerSafetyWarningModal";
 
 // Той самий ліміт, що й на бекенді (див.
 // backend/src/validators/auth.validator.js, MAX_LOGIN_LENGTH) —
@@ -159,7 +167,32 @@ export function RegisterForm({ onSuccess, onBack }) {
         >
           {loading ? "Реєструємо..." : "Зареєструватися"}
         </button>
+
+        <p className="text-muted small text-center mt-2 mb-0">
+          Натискаючи «Зареєструватися», ви погоджуєтеся з{" "}
+          <a
+            href="#"
+            data-bs-toggle="modal"
+            data-bs-target={`#${REGISTER_RULES_MODAL_ID}`}
+            onClick={(e) => e.preventDefault()}
+          >
+            правилами чату
+          </a>{" "}
+          та{" "}
+          <a
+            href="#"
+            data-bs-toggle="modal"
+            data-bs-target={`#${REGISTER_SAFETY_WARNING_MODAL_ID}`}
+            onClick={(e) => e.preventDefault()}
+          >
+            попередженням про безпеку
+          </a>
+          .
+        </p>
       </form>
+
+      <RulesModal modalId={REGISTER_RULES_MODAL_ID} />
+      <SafetyWarningModal modalId={REGISTER_SAFETY_WARNING_MODAL_ID} />
       <p>
         <button
           type="button"
