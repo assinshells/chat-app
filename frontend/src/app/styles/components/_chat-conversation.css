@@ -11,7 +11,14 @@
   overflow-y: auto;
   overflow-x: hidden;
 
-  padding: 1.5rem 1.5rem 2rem;
+  /* Права сторона на 8px менша за ліву: рівно на ширину скролбару
+     (::-webkit-scrollbar { width: 8px } нижче, у _scrollbar.css).
+     Скролбар "з'їдає" ці 8px з внутрішньої ширини контейнера, тому без
+     цієї компенсації центрований .chat-messages був би вужчим і
+     зсунутим вліво відносно .chat-composer у футері, в якого
+     скролбару немає — саме звідси візуальна різниця "форма ширша
+     за повідомлення". */
+  padding: 1.5rem 1rem 2rem 1.5rem;
 
   scroll-behavior: smooth;
 
@@ -35,5 +42,5 @@
   display: flex;
   flex-direction: column;
 
-  gap: 0.15rem;
+  gap: 0;
 }

@@ -31,7 +31,7 @@
   }
 
   .chat-conversation {
-    padding: 1rem 0.85rem 1.5rem;
+    padding: 1rem 0.35rem 1.5rem 0.85rem;
   }
 
   .chat-messages {
@@ -39,7 +39,7 @@
   }
 
   .message-list {
-    gap: 0.1rem;
+    gap: 0;
   }
 
   .message-user .message-content {
@@ -63,7 +63,9 @@
   }
 
   .chat-input-hint {
-    display: none;
+    max-width: calc(100% - 1rem);
+
+    font-size: 0.7rem;
   }
 }
 

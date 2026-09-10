@@ -158,6 +158,21 @@ export function ChatComposer({
       <div className="chat-composer">
 
         {/* =========================================
+            ПІДКАЗКА / ПОМИЛКА ВІДПРАВЛЕННЯ
+            Раніше рендерилась постійною смугою під формою (навіть
+            порожньою, з &nbsp; для збереження висоти) і взагалі
+            ховалась на мобільних (display: none). Тепер — спливаюча
+            підказка над полем вводу, з'являється лише коли справді
+            є що показати, і не займає місце в макеті, коли її немає.
+            ========================================= */}
+
+        {hintText && (
+          <div className="chat-input-hint has-error">
+            <span className="chat-input-error">{hintText}</span>
+          </div>
+        )}
+
+        {/* =========================================
             ЦІЛІ (обрані ніки / час)
             ========================================= */}
 
@@ -336,15 +351,6 @@ export function ChatComposer({
 
         </div>
 
-      </div>
-
-
-      <div className={`chat-input-hint ${hintText ? "has-error" : ""}`}>
-        {hintText ? (
-          <span className="chat-input-error">{hintText}</span>
-        ) : (
-          "&nbsp;"
-        )}
       </div>
 
     </footer>

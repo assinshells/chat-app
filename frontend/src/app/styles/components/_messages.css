@@ -7,7 +7,7 @@
 
   display: flex;
 
-  line-height: 1.6;
+  line-height: 1.35;
 
   font-size: 0.95rem;
 }
@@ -23,7 +23,7 @@
 .message-user .message-content {
   max-width: 75%;
 
-  padding: 0.05rem 0;
+  padding: 0;
 
   color: var(--bs-body-color);
 }
@@ -41,7 +41,7 @@
 .message-assistant .message-content {
   max-width: 80%;
 
-  padding-top: 0.15rem;
+  padding-top: 0;
 
   color: var(--bs-body-color);
 }
@@ -61,7 +61,7 @@
 .message-other .message-content {
   max-width: 80%;
 
-  padding: 0.05rem 0;
+  padding: 0;
 
   color: var(--bs-body-color);
 }
@@ -161,7 +161,7 @@
 .message-system .message-content {
   max-width: 100%;
 
-  padding: 0.1rem 0;
+  padding: 0.02rem 0;
 
   font-size: 0.82rem;
   text-align: left;
