@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-const MAX_FEEDBACK_LENGTH = 500;
+const MAX_FEEDBACK_LENGTH = 300;
 
 /**
  * FeedbackModal — модалка зворотного зв'язку, відкривається за

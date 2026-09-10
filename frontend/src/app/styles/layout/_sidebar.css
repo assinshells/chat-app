@@ -530,52 +530,41 @@
   flex: 0 0 auto;
 
   display: flex;
-  align-items: stretch;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
 
-  gap: 0.25rem;
+  row-gap: 0.3rem;
+  column-gap: 0.75rem;
 
   padding-top: 0.5rem;
 
   border-top: 1px solid var(--bs-border-color);
 }
 
-/* Посилання-заглушки на допоміжні модалки (правила / зворотний зв'язок).
-   Замінили нік користувача — сам нік і так завжди видно в шапці чата
-   (див. ChatHeader), дублювати його тут більше не потрібно. */
+/* Посилання на допоміжні модалки (правила / попередження про безпеку /
+   зворотний зв'язок). Замінили нік користувача — сам нік і так завжди
+   видно в шапці чата (див. ChatHeader), дублювати його тут більше не
+   потрібно. Це саме текстові посилання (не кнопки-плашки): підкреслення
+   з'являється при наведенні, як у звичайних лінків, а не фон-заливка. */
 .app-sidebar-footer-link {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 34px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0 0.4rem;
-
-  border-radius: 9px;
+  padding: 0.1rem 0;
 
   font-size: 0.78rem;
   font-weight: 500;
-  text-align: center;
+  text-align: left;
   text-decoration: none;
 
   color: var(--bs-secondary-color);
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
   cursor: pointer;
 
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 .app-sidebar-footer-link:hover {
   color: var(--bs-body-color);
-  background: var(--bs-secondary-bg);
+  text-decoration: underline;
 }
 
 /* =========================================================

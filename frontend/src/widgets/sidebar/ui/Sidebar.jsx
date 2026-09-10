@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { PanelLeft, X } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
-import { RulesModal, FeedbackModal } from "@features/info";
+import { RulesModal, FeedbackModal, SafetyWarningModal } from "@features/info";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -11,6 +11,7 @@ import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 const RULES_MODAL_ID = "sidebarRulesModal";
 const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
+const SAFETY_WARNING_MODAL_ID = "sidebarSafetyWarningModal";
 
 const USER_GROUPS = [
   { id: "male", label: "Чоловіки" },
@@ -282,6 +283,16 @@ export function Sidebar({
             href="#"
             className="app-sidebar-footer-link"
             data-bs-toggle="modal"
+            data-bs-target={`#${SAFETY_WARNING_MODAL_ID}`}
+            onClick={(e) => e.preventDefault()}
+          >
+            Попередження про безпеку
+          </a>
+
+          <a
+            href="#"
+            className="app-sidebar-footer-link"
+            data-bs-toggle="modal"
             data-bs-target={`#${FEEDBACK_MODAL_ID}`}
             onClick={(e) => e.preventDefault()}
           >
@@ -291,6 +302,7 @@ export function Sidebar({
       </div>
 
       <RulesModal modalId={RULES_MODAL_ID} />
+      <SafetyWarningModal modalId={SAFETY_WARNING_MODAL_ID} />
       <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
     </aside>
   );
