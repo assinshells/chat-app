@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { PanelLeft, X } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal, SafetyWarningModal } from "@features/info";
+import { BlockedUsersList } from "@features/block";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -22,6 +23,7 @@ const USER_GROUPS = [
 const MAIN_TABS = [
   { id: "rooms", label: "Кімнати" },
   { id: "users", label: "Користувачі" },
+  { id: "blocked", label: "Заблоковані" },
 ];
 
 /**
@@ -260,6 +262,8 @@ export function Sidebar({
                 </div>
               </div>
             )}
+
+            {activeTab === "blocked" && <BlockedUsersList />}
           </div>
         </div>
 

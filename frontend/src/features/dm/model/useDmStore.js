@@ -9,6 +9,10 @@ const DM_LIST = "dm:list";
 const DM_SEND = "dm:send";
 const DM_NEW = "dm:new";
 const DM_READ = "dm:read";
+// "Мене (не)заблокував співрозмовник" — жива подія в персональний
+// канал (див. backend sockets/block.socket.js) — оновлює прапорець
+// blocked уже відкритого діалогу, не чекаючи наступного dm:open.
+const DM_BLOCKED_CHANGED = "dm:blocked_changed";
 
 /**
  * emitRead — фонове "прочитано" без ack: dm:open на бекенді сам
@@ -235,9 +239,34 @@ export const useDmStore = create((set, get) => ({
             loading: false,
             loaded: true,
             unreadCount: 0,
+            // blocked — заблокована відправка в цьому діалозі (в один
+            // із двох боків, див. backend privateMessage.service.js):
+            // DirectMessagesModal показує замість форми відправлення
+            // повідомлення "Ви заблоковані" (див. коментар там же).
+            blocked: Boolean(result.blocked),
           },
         },
       };
+    });
+  },
+
+  /**
+   * _handleBlockedChanged — жива реакція на dm:blocked_changed (див.
+   * підписку на модуль-рівні внизу файлу): оновлює прапорець blocked
+   * ЛИШЕ якщо діалог з цією людиною вже підвантажений локально —
+   * якщо його ще не було, наступний dm:open і так принесе актуальний
+   * стан.
+   */
+  _handleBlockedChanged: ({ by, blocked }) => {
+    const { conversations } = get();
+    const existing = conversations[by];
+    if (!existing) return;
+
+    set({
+      conversations: {
+        ...conversations,
+        [by]: { ...existing, blocked },
+      },
     });
   },
 
@@ -267,6 +296,11 @@ export const useDmStore = create((set, get) => ({
         // затираємо його застарілим серверним значенням. Якщо existing
         // ще немає — беремо реальне значення з БД (summary.unreadCount).
         unreadCount: existing?.unreadCount ?? summary.unreadCount ?? 0,
+        // dm:list не перевіряє блокування (це лише зведення прев'ю) —
+        // зберігаємо вже відоме локально значення, якщо є; свіже
+        // прийде при реальному відкритті діалогу (dm:open) або живою
+        // подією dm:blocked_changed.
+        blocked: existing?.blocked ?? false,
       };
     }
 
@@ -399,6 +433,17 @@ export const useDmStore = create((set, get) => ({
    * показати її текст).
    */
   sendMessage: async (login, text) => {
+    // Клієнтська підстраховка перед запитом (реальна заборона все одно
+    // на бекенді, див. privateMessage.service.js): якщо composer уже
+    // прихований/вимкнений через blocked (див. DirectMessagesModal),
+    // сюди в нормальному потоці взагалі не потрапляють, але діалог міг
+    // стати заблокованим ПІСЛЯ рендеру поточного кадру (жива подія
+    // dm:blocked_changed) — не витрачаємо round-trip даремно.
+    if (get().conversations[login]?.blocked) {
+      set({ sendError: "Не можна надіслати повідомлення цьому користувачу" });
+      return { success: false, message: "Не можна надіслати повідомлення цьому користувачу" };
+    }
+
     const result = await emitWithAck(DM_SEND, { to: login, text });
     if (!result?.success) {
       set({ sendError: result?.message ?? "Не вдалося надіслати" });
@@ -452,6 +497,7 @@ export const useDmStore = create((set, get) => ({
           loading: existing?.loading ?? false,
           loaded: existing?.loaded ?? false,
           unreadCount,
+          blocked: existing?.blocked ?? false,
         },
       },
       order: [otherLogin, ...order.filter((l) => l !== otherLogin)],
@@ -480,3 +526,11 @@ chatSocket.__dmNewHandler = (message) => {
   useDmStore.getState()._handleIncoming(message);
 };
 chatSocket.on(DM_NEW, chatSocket.__dmNewHandler);
+
+if (chatSocket.__dmBlockedChangedHandler) {
+  chatSocket.off(DM_BLOCKED_CHANGED, chatSocket.__dmBlockedChangedHandler);
+}
+chatSocket.__dmBlockedChangedHandler = (payload) => {
+  useDmStore.getState()._handleBlockedChanged(payload);
+};
+chatSocket.on(DM_BLOCKED_CHANGED, chatSocket.__dmBlockedChangedHandler);

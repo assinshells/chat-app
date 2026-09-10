@@ -512,6 +512,41 @@
   background: rgba(var(--bs-primary-rgb), 0.14);
 }
 
+/* Кнопка "Розблокувати" у вкладці "Заблоковані" (див.
+   features/block/ui/BlockedUsersList.jsx) — той самий рядок
+   .app-sidebar-online-item, що й у списку "Користувачі", але замість
+   кнопки-меню (три крапки) — явна текстова кнопка дії. */
+.app-sidebar-unblock-btn {
+  flex: 0 0 auto;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  padding: 0.2rem 0.5rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--bs-danger);
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.app-sidebar-unblock-btn:hover {
+  border-color: var(--bs-danger);
+  background: rgba(var(--bs-danger-rgb), 0.1);
+}
+
 /* Пустое состояние: в выбранной гендерной группе никого нет онлайн */
 .app-sidebar-empty {
   padding: 0.65rem;

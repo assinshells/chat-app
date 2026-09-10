@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
@@ -6,6 +6,7 @@ import { ChatComposer } from "@widgets/chat-composer";
 import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
+import { useBlockStore } from "@features/block";
 import { RoleManageModal } from "@features/roles";
 import {
   KickModal,
@@ -60,6 +61,43 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     if (!login || !connected) return;
     useDmStore.getState().syncList();
   }, [login, connected]);
+
+  // Персональні блокування (див. features/block/model/useBlockStore.js):
+  // синхронізуємо одразу після конекту, тим самим принципом, що й
+  // useDmStore.syncList вище — без цього вкладка "Заблоковані" в
+  // сайдбарі лишалася б порожньою аж до першого відкриття, а
+  // заблоковані користувачі не зникали б із чату/списку до неї.
+  useEffect(() => {
+    if (!login || !connected) return;
+    useBlockStore.getState().syncList();
+  }, [login, connected]);
+
+  // blockedLogins — підписка на сам Set (а не на функцію isBlocked),
+  // щоб компонент коректно перерендерився при зміні списку заблокованих
+  // (нова/старий Set — різні референси, isBlocked-функція сама по собі
+  // стабільна і не викликала б ререндер).
+  const blockedLogins = useBlockStore((state) => state.blockedLogins);
+
+  // Заблокований користувач "повністю ігнорується" ЛИШЕ для того, хто
+  // його заблокував: зникає зі списку онлайн (roomUsers) і з публічного
+  // чату (messages, включно із системними подіями вхід/вихід/перехід).
+  // Це персональна фільтрація перегляду на фронтенді (а не серверне
+  // приховування) — інші учасники кімнати й далі бачать заблокованого
+  // користувача як звичайного, і історія/лічильники кімнати на бекенді
+  // не змінюються.
+  const visibleRoomUsers = useMemo(
+    () => roomUsers.filter((user) => !blockedLogins.has(user.login)),
+    [roomUsers, blockedLogins],
+  );
+
+  const visibleMessages = useMemo(
+    () =>
+      messages.filter((message) => {
+        const author = message.type === "system" ? message.login : message.author;
+        return !blockedLogins.has(author);
+      }),
+    [messages, blockedLogins],
+  );
 
   // pinned — сайдбар закріплений і видимий на десктопі (за замовчуванням — так).
   const [pinned, setPinned] = useState(true);
@@ -149,7 +187,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         login={login}
         activeRoom={activeRoom}
         roomCounts={roomCounts}
-        roomUsers={roomUsers}
+        roomUsers={visibleRoomUsers}
         onSelectRoom={handleSelectRoom}
         onNicknameClick={handleNicknameClick}
         selectedNicknames={targetNicknames}
@@ -200,14 +238,14 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             </div>
           )}
           <ChatConversation
-            messages={messages}
+            messages={visibleMessages}
             currentUser={login}
             onNicknameClick={handleNicknameClick}
             onTimeClick={handleTimeClick}
             onRoomClick={handleSelectRoom}
             selectedNicknames={targetNicknames}
             selectedTimes={targetTimes}
-            roomUsers={roomUsers}
+            roomUsers={visibleRoomUsers}
             activeRoom={activeRoom}
           />
           <ChatComposer

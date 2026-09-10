@@ -227,3 +227,24 @@ CREATE INDEX IF NOT EXISTS idx_private_messages_pair
 CREATE INDEX IF NOT EXISTS idx_private_messages_unread
     ON private_messages (recipient_id, sender_id)
     WHERE read_at IS NULL;
+
+-- Персональні блокування користувачів ("Заблокувати" в дропдавні ніка,
+-- доступно будь-якому користувачу, а не лише модерації — на відміну
+-- від bans/moderation_log вище). ОДНОСТОРОННЄ: blocker_id заблокував
+-- blocked_id означає, що ЛИШЕ для blocker_id зникає blocked_id (з
+-- публічного чату/списку користувачів — фільтрується на фронтенді) і
+-- blocked_id більше не може писати blocker_id особисті повідомлення
+-- (перевіряється на бекенді, див. services/privateMessage.service.js
+-- і services/block.service.js). Зворотного ефекту немає: blocker_id
+-- і далі видно blocked_id, доки той сам когось не заблокує.
+CREATE TABLE IF NOT EXISTS user_blocks (
+    id SERIAL PRIMARY KEY,
+    blocker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    blocked_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT user_blocks_no_self CHECK (blocker_id <> blocked_id),
+    CONSTRAINT user_blocks_unique UNIQUE (blocker_id, blocked_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocker ON user_blocks(blocker_id);
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocked ON user_blocks(blocked_id);

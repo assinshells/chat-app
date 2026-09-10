@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, MessagesSquare, Send } from "lucide-react";
+import { ArrowLeft, MessagesSquare, Send, Ban } from "lucide-react";
 
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { formatMessageTime } from "@shared/lib/message.js";
@@ -263,7 +263,22 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                 <div ref={endRef} />
               </div>
 
-              {active && (
+              {/* active.blocked — заблоковано відправлення в цьому
+                  діалозі (хтось із двох заблокував іншого, див.
+                  useDmStore._loadHistory/_handleBlockedChanged):
+                  замість форми відправлення — пояснення, чому писати
+                  не можна, незалежно від того, чи було листування
+                  раніше. Реальна заборона все одно на бекенді — це
+                  лише зрозуміле пояснення користувачу замість "не
+                  вдалося надіслати" після невдалої спроби. */}
+              {active && active.blocked && (
+                <div className="dm-modal-blocked-notice">
+                  <Ban size={16} />
+                  <span>Не можна надіслати повідомлення цьому користувачу</span>
+                </div>
+              )}
+
+              {active && !active.blocked && (
                 <>
                   {sendError && (
                     <p className="dm-modal-error">{sendError}</p>

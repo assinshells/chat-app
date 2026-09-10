@@ -1,6 +1,7 @@
 import { socketAuthGuard } from "../guards/socketAuth.guard.js";
 import { registerChatSocket } from "./chat.socket.js";
 import { registerDmSocket } from "./dm.socket.js";
+import { registerBlockSocket } from "./block.socket.js";
 import logger from "../config/logger.js";
 
 export function initSockets(io) {
@@ -11,6 +12,10 @@ export function initSockets(io) {
 
     registerChatSocket(io, socket);
     registerDmSocket(io, socket);
+    // Реєструється ПІСЛЯ registerDmSocket: спирається на те, що сокет
+    // уже вступив у власний персональний канал (socket.join(dmChannel(...))
+    // виконується всередині registerDmSocket), а не дублює це вступ сам.
+    registerBlockSocket(io, socket);
 
     socket.on("disconnect", (reason) => {
       logger.debug(`Сокет відключено: user=${socket.data.userId} reason=${reason}`);

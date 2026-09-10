@@ -1,6 +1,6 @@
 import { BaseException } from "./base.exception.js";
 import { HTTP_STATUS } from "../constants/auth.constants.js";
-import { CHAT_ERRORS, DM_ERRORS } from "../constants/chat.constants.js";
+import { CHAT_ERRORS, DM_ERRORS, BLOCK_ERRORS } from "../constants/chat.constants.js";
 
 export class MessageValidationException extends BaseException {
   constructor(message = CHAT_ERRORS.MESSAGE_EMPTY) {
@@ -9,8 +9,33 @@ export class MessageValidationException extends BaseException {
 }
 
 export class PrivateMessageValidationException extends BaseException {
-  constructor(message = DM_ERRORS.MESSAGE_EMPTY) {
-    super(message, HTTP_STATUS.BAD_REQUEST, "PRIVATE_MESSAGE_VALIDATION_FAILED");
+  constructor(message = DM_ERRORS.MESSAGE_EMPTY, code = "PRIVATE_MESSAGE_VALIDATION_FAILED") {
+    super(message, HTTP_STATUS.BAD_REQUEST, code);
+  }
+}
+
+/**
+ * PrivateMessageBlockedException — окремий (від звичайної валідації)
+ * виняток для випадку "відправлення заборонене через блокування" (див.
+ * services/privateMessage.service.js: перевіряється в обидва боки —
+ * відправник заблокував одержувача або одержувач заблокував
+ * відправника). Власний code ("PRIVATE_MESSAGE_BLOCKED"), щоб фронтенд
+ * міг відрізнити цю відмову від, наприклад, порожнього тексту.
+ */
+export class PrivateMessageBlockedException extends BaseException {
+  constructor(message = DM_ERRORS.BLOCKED) {
+    super(message, HTTP_STATUS.FORBIDDEN, "PRIVATE_MESSAGE_BLOCKED");
+  }
+}
+
+/**
+ * BlockValidationException — помилки самої дії (не)блокування
+ * (block:add/block:remove, див. services/block.service.js) —
+ * самоблокування, неіснуючий користувач, повторна (не)дія тощо.
+ */
+export class BlockValidationException extends BaseException {
+  constructor(message = BLOCK_ERRORS.USER_NOT_FOUND) {
+    super(message, HTTP_STATUS.BAD_REQUEST, "BLOCK_VALIDATION_FAILED");
   }
 }
 

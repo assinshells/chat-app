@@ -3,6 +3,7 @@ import { User } from "lucide-react";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 import { useRolesStore } from "@features/roles/model/useRolesStore.js";
 import { useModerationStore } from "@features/moderation/model/useModerationStore.js";
+import { useBlockStore } from "@features/block/model/useBlockStore.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { ROLE_MANAGER_ROLES } from "@shared/constants/role.constants.js";
 import { canModerateRoom } from "@shared/constants/moderationAction.constants.js";
@@ -12,6 +13,12 @@ import { canModerateRoom } from "@shared/constants/moderationAction.constants.js
  * (використовується і в Sidebar.jsx — список "Користувачі", і в
  * ChatConversation.jsx — автор повідомлення). Пункти меню:
  *  - написати особисте повідомлення (усім, завжди);
+ *  - "Заблокувати" / "Розблокувати" (усім, завжди — на відміну від
+ *    ролевих пунктів нижче, це персональна дія, а не модерація, див.
+ *    features/block/model/useBlockStore.js): заблокований користувач
+ *    зникає з чату/списку користувачів ЛИШЕ для того, хто натиснув
+ *    (фільтрація в ChatLayout), і більше не може писати особисті
+ *    повідомлення (перевіряється на бекенді);
  *  - "Керувати роллю" — лише якщо ВЛАСНА роль admin/superadmin
  *    (ROLE_MANAGER_ROLES);
  *  - "Кикнути" / "Бан" — якщо власна роль може модерувати саме `room`
@@ -44,11 +51,30 @@ export function DmTriggerButton({
   const openRoleManager = useRolesStore((state) => state.openFor);
   const openModeration = useModerationStore((state) => state.openFor);
 
+  const isBlocked = useBlockStore((state) => state.blockedLogins.has(login));
+  const blockUser = useBlockStore((state) => state.blockUser);
+  const unblockUser = useBlockStore((state) => state.unblockUser);
+
   const ownRole = useCurrentUserStore((state) => state.role);
   const ownModeratorRooms = useCurrentUserStore((state) => state.moderatorRooms);
 
   const canManageRoles = ROLE_MANAGER_ROLES.includes(ownRole);
   const canModerate = Boolean(room) && canModerateRoom(ownRole, ownModeratorRooms, room);
+
+  const handleToggleBlock = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isBlocked) {
+      unblockUser(login);
+      return;
+    }
+    // Проста нативна підтвердка — на відміну від кіку/бану, це
+    // персональна оборотна дія (розблокувати можна одним кліком зі
+    // списку "Заблоковані" в сайдбарі), тому окрема модалка тут зайва.
+    if (window.confirm(`Заблокувати користувача ${login}? Він зникне з чату та не зможе писати вам особисті повідомлення.`)) {
+      blockUser(login);
+    }
+  };
 
   return (
     <div className="dropdown dm-trigger-dropdown">
@@ -76,6 +102,14 @@ export function DmTriggerButton({
           }}
         >
           Написати особисте повідомлення
+        </a>
+
+        <a
+          className="dropdown-item dropdown-item-block-toggle"
+          href="#"
+          onClick={handleToggleBlock}
+        >
+          {isBlocked ? "Розблокувати" : "Заблокувати"}
         </a>
 
         {canManageRoles && (

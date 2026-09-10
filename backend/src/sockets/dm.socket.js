@@ -40,12 +40,16 @@ export function registerDmSocket(io, socket) {
     const login = typeof payload === "string" ? payload : payload?.login;
 
     try {
-      const messages = await PrivateMessageService.getConversation({
+      const { messages, blocked } = await PrivateMessageService.getConversation({
         userId: socket.data.userId,
         otherLogin: login,
       });
       if (typeof ack === "function") {
-        ack({ success: true, login, messages });
+        // blocked — заблокована відправка в цьому діалозі (в один із
+        // двох боків, див. коментар у getConversation) — фронт вирішує,
+        // чи вимкнути форму, чи взагалі не відкривати вікно (див.
+        // useDmStore.openConversation/_loadHistory).
+        ack({ success: true, login, messages, blocked });
       }
     } catch (err) {
       logger.warn(`dm:open не вдався для користувача ${socket.data.userId}: ${err.message}`);
