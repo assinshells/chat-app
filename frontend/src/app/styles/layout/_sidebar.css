@@ -276,8 +276,15 @@
 
 .app-sidebar-tab-btn {
   flex: 1 1 0;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
 
   min-height: 32px;
+  padding: 0 0.3rem;
 
   border: 0;
   border-radius: 8px;
@@ -296,6 +303,27 @@
     color 0.15s ease;
 }
 
+.app-sidebar-tab-icon {
+  flex: 0 0 auto;
+}
+
+/* Підпис показується лише біля активного табу (див. коментар при
+   MAIN_TABS у Sidebar.jsx) — для решти лишається сама іконка плюс
+   title-тултип на кнопці. min-width: 0 + overflow на самій кнопці
+   вище рятує від переповнення, якщо сайдбар звужений, а підпис
+   довгий ("Заблоковані"). */
+.app-sidebar-tab-label {
+  display: none;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-sidebar-tab-btn.is-active .app-sidebar-tab-label {
+  display: inline;
+}
+
 .app-sidebar-tab-btn:hover {
   color: var(--bs-body-color);
 }
@@ -305,6 +333,68 @@
   color: var(--bs-body-color);
 
   box-shadow: 0 1px 2px rgba(var(--app-shadow-color), var(--app-shadow-soft));
+}
+
+/* Власний тултип для табів з іконкою без видимого підпису (див.
+   коментар у Sidebar.jsx). position: relative на самій кнопці —
+   тултип позиціонується відносно неї; z-index високий, щоб гарантовано
+   лежати НАД сусідніми табами й тілом сайдбара, а не ховатись під
+   ними, як міг би нативний title. */
+.app-sidebar-tab-btn {
+  position: relative;
+}
+
+.app-sidebar-tab-tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+
+  padding: 0.25rem 0.55rem;
+
+  border-radius: 6px;
+
+  background: var(--bs-emphasis-color, #212529);
+  color: var(--bs-body-bg, #fff);
+
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.12s ease,
+    visibility 0.12s ease;
+}
+
+/* Активному табу тултип не потрібен — підпис і так видно поруч з
+   іконкою (.app-sidebar-tab-label вище). */
+.app-sidebar-tab-btn.is-active .app-sidebar-tab-tooltip {
+  display: none;
+}
+
+.app-sidebar-tab-btn:hover .app-sidebar-tab-tooltip,
+.app-sidebar-tab-btn:focus-visible .app-sidebar-tab-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Перший/останній таб: тултип прив'язується до внутрішнього краю
+   кнопки замість центру, щоб не вилазити за межу сайдбара, де
+   overflow-x: hidden (.app-sidebar-inner) обрізав би його. */
+.app-sidebar-tab-tooltip.is-align-start {
+  left: 0;
+  transform: none;
+}
+
+.app-sidebar-tab-tooltip.is-align-end {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
 .app-sidebar-tabs-body {
@@ -512,6 +602,14 @@
   background: rgba(var(--bs-primary-rgb), 0.14);
 }
 
+/* Друг (див. features/friends) — виділяється жирним шрифтом у списку
+   "Користувачі", незалежно від того, обраний він зараз як ціль
+   повідомлення (.is-selected) чи ні — обидва класи можуть діяти
+   одночасно. */
+.app-sidebar-online-name-btn.is-friend {
+  font-weight: 700;
+}
+
 /* Кнопка "Розблокувати" у вкладці "Заблоковані" (див.
    features/block/ui/BlockedUsersList.jsx) — той самий рядок
    .app-sidebar-online-item, що й у списку "Користувачі", але замість
@@ -545,6 +643,44 @@
 .app-sidebar-unblock-btn:hover {
   border-color: var(--bs-danger);
   background: rgba(var(--bs-danger-rgb), 0.1);
+}
+
+/* Кнопка "Видалити" у вкладці "Друзі" (див.
+   features/friends/ui/FriendsList.jsx) — той самий рядок, що й
+   .app-sidebar-unblock-btn вище, але нейтрального кольору (не danger):
+   видалення з друзів — легша, повністю оборотна дія, а не захист від
+   небажаного користувача. */
+.app-sidebar-unfriend-btn {
+  flex: 0 0 auto;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  padding: 0.2rem 0.5rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.app-sidebar-unfriend-btn:hover {
+  border-color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.08);
+  color: var(--bs-primary);
 }
 
 /* Пустое состояние: в выбранной гендерной группе никого нет онлайн */

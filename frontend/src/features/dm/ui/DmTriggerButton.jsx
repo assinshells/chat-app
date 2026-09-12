@@ -4,6 +4,7 @@ import { useDmStore } from "@features/dm/model/useDmStore.js";
 import { useRolesStore } from "@features/roles/model/useRolesStore.js";
 import { useModerationStore } from "@features/moderation/model/useModerationStore.js";
 import { useBlockStore } from "@features/block/model/useBlockStore.js";
+import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { ROLE_MANAGER_ROLES } from "@shared/constants/role.constants.js";
 import { canModerateRoom } from "@shared/constants/moderationAction.constants.js";
@@ -13,6 +14,14 @@ import { canModerateRoom } from "@shared/constants/moderationAction.constants.js
  * (використовується і в Sidebar.jsx — список "Користувачі", і в
  * ChatConversation.jsx — автор повідомлення). Пункти меню:
  *  - написати особисте повідомлення (усім, завжди);
+ *  - "Додати до друзів" / "Видалити з друзів" (усім, завжди —
+ *    персональна дія без підтвердження з боку іншої сторони, див.
+ *    features/friends/model/useFriendStore.js): додає користувача у
+ *    власний список друзів (вкладка "Друзі" в сайдбарі), нічого не
+ *    змінює для самого доданого. Друзі й блокування — взаємовиключні
+ *    стани (перевіряється на бекенді), тому пункт "Додати до друзів"
+ *    прихований, поки користувач заблокований — лишається лише
+ *    "Розблокувати";
  *  - "Заблокувати" / "Розблокувати" (усім, завжди — на відміну від
  *    ролевих пунктів нижче, це персональна дія, а не модерація, див.
  *    features/block/model/useBlockStore.js): заблокований користувач
@@ -55,11 +64,25 @@ export function DmTriggerButton({
   const blockUser = useBlockStore((state) => state.blockUser);
   const unblockUser = useBlockStore((state) => state.unblockUser);
 
+  const isFriend = useFriendStore((state) => state.friendLogins.has(login));
+  const addFriend = useFriendStore((state) => state.addFriend);
+  const removeFriend = useFriendStore((state) => state.removeFriend);
+
   const ownRole = useCurrentUserStore((state) => state.role);
   const ownModeratorRooms = useCurrentUserStore((state) => state.moderatorRooms);
 
   const canManageRoles = ROLE_MANAGER_ROLES.includes(ownRole);
   const canModerate = Boolean(room) && canModerateRoom(ownRole, ownModeratorRooms, room);
+
+  const handleToggleFriend = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isFriend) {
+      removeFriend(login);
+      return;
+    }
+    addFriend(login);
+  };
 
   const handleToggleBlock = (e) => {
     e.preventDefault();
@@ -103,6 +126,16 @@ export function DmTriggerButton({
         >
           Написати особисте повідомлення
         </a>
+
+        {(!isBlocked || isFriend) && (
+          <a
+            className="dropdown-item dropdown-item-friend-toggle"
+            href="#"
+            onClick={handleToggleFriend}
+          >
+            {isFriend ? "Видалити з друзів" : "Додати до друзів"}
+          </a>
+        )}
 
         <a
           className="dropdown-item dropdown-item-block-toggle"

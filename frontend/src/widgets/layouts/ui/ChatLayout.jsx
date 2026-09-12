@@ -7,6 +7,7 @@ import { Sidebar } from "@widgets/sidebar";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { useBlockStore } from "@features/block";
+import { useFriendStore } from "@features/friends";
 import { RoleManageModal } from "@features/roles";
 import {
   KickModal,
@@ -70,6 +71,15 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   useEffect(() => {
     if (!login || !connected) return;
     useBlockStore.getState().syncList();
+  }, [login, connected]);
+
+  // Список друзів (див. features/friends/model/useFriendStore.js): той
+  // самий принцип синхронізації одразу після конекту, що й
+  // useBlockStore вище — без цього вкладка "Друзі" в сайдбарі лишалася
+  // б порожньою аж до першого відкриття.
+  useEffect(() => {
+    if (!login || !connected) return;
+    useFriendStore.getState().syncList();
   }, [login, connected]);
 
   // blockedLogins — підписка на сам Set (а не на функцію isBlocked),

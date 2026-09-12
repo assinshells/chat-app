@@ -3,10 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     login VARCHAR(64) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     email VARCHAR(255) UNIQUE,
-    -- Текст системних повідомлень (увійшов/вийшов тощо) нейтральний і не
-    -- залежить від статі (див. frontend shared/lib/systemMessage.js), тому
-    -- 'unknown' — коректне значення поряд із 'male'/'female'.
-    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female', 'unknown')),
+    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female')),
     -- Колір повідомлень/ніка користувача в сайдбарі, обирається в налаштуваннях.
     -- 'black' — значення за замовчуванням, ставиться всім новим користувачам.
     -- Повний спектр (20 відтінків) — див. коментар біля users_color_check
@@ -47,12 +44,15 @@ BEGIN
         ));
 END $$;
 
--- Домігрування для баз, створених до появи гендеру 'unknown' (init.sql
--- виконується лише на порожній базі, тому наявний CHECK на старих
--- оточеннях потрібно розширити явно, а не покладатись на CREATE TABLE
--- IF NOT EXISTS вище). На відміну від попередньої версії міграції тут
--- НІЧОГО не переписуємо в самих даних — 'unknown' тепер легітимне
--- значення, тож рядки з ним лишаються як є.
+-- Домігрування для баз, де ще залишилось значення гендеру 'unknown'
+-- (воно тимчасово існувало в CHECK-обмеженні; тепер прибране з набору
+-- допустимих значень разом з усім, що на нього спиралось на
+-- фронтенді/бекенді). Наявні рядки з 'unknown' переводяться в 'male'
+-- (те саме значення, що стоїть першим у списку вибору на формі
+-- реєстрації, DEFAULT_GENDER) — обране довільно, оскільки нейтрального
+-- еквівалента для NOT NULL-поля без DEFAULT немає.
+UPDATE users SET gender = 'male' WHERE gender = 'unknown';
+
 DO $$
 BEGIN
     IF EXISTS (
@@ -61,7 +61,7 @@ BEGIN
         ALTER TABLE users DROP CONSTRAINT users_gender_check;
     END IF;
     ALTER TABLE users ADD CONSTRAINT users_gender_check
-        CHECK (gender IN ('male', 'female', 'unknown'));
+        CHECK (gender IN ('male', 'female'));
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);
@@ -248,3 +248,23 @@ CREATE TABLE IF NOT EXISTS user_blocks (
 
 CREATE INDEX IF NOT EXISTS idx_user_blocks_blocker ON user_blocks(blocker_id);
 CREATE INDEX IF NOT EXISTS idx_user_blocks_blocked ON user_blocks(blocked_id);
+
+-- Друзі ("Додати до друзів" у дропдавні ніка, доступно будь-якому
+-- користувачу). За тим самим принципом, що й user_blocks вище:
+-- ОДНОСТОРОННІЙ особистий список (owner_id додав friend_id до своїх
+-- друзів) без окремого етапу підтвердження — на відміну від
+-- класичної моделі "запит -> прийняття", список друзів тут ближчий
+-- до персональних закладок/обраного: додавання нікого ні до чого не
+-- зобов'язує і не сповіщає іншу сторону, а видно лише самому
+-- власнику списку (сайдбар, вкладка "Друзі").
+CREATE TABLE IF NOT EXISTS user_friends (
+    id SERIAL PRIMARY KEY,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    friend_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT user_friends_no_self CHECK (owner_id <> friend_id),
+    CONSTRAINT user_friends_unique UNIQUE (owner_id, friend_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_friends_owner ON user_friends(owner_id);
+CREATE INDEX IF NOT EXISTS idx_user_friends_friend ON user_friends(friend_id);

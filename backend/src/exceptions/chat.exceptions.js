@@ -1,6 +1,6 @@
 import { BaseException } from "./base.exception.js";
 import { HTTP_STATUS } from "../constants/auth.constants.js";
-import { CHAT_ERRORS, DM_ERRORS, BLOCK_ERRORS } from "../constants/chat.constants.js";
+import { CHAT_ERRORS, DM_ERRORS, BLOCK_ERRORS, FRIEND_ERRORS } from "../constants/chat.constants.js";
 
 export class MessageValidationException extends BaseException {
   constructor(message = CHAT_ERRORS.MESSAGE_EMPTY) {
@@ -36,6 +36,17 @@ export class PrivateMessageBlockedException extends BaseException {
 export class BlockValidationException extends BaseException {
   constructor(message = BLOCK_ERRORS.USER_NOT_FOUND) {
     super(message, HTTP_STATUS.BAD_REQUEST, "BLOCK_VALIDATION_FAILED");
+  }
+}
+
+/**
+ * FriendValidationException — помилки самої дії (не)додавання до друзів
+ * (friend:add/friend:remove, див. services/friend.service.js) —
+ * додавання самого себе, неіснуючий користувач, повторна (не)дія тощо.
+ */
+export class FriendValidationException extends BaseException {
+  constructor(message = FRIEND_ERRORS.USER_NOT_FOUND) {
+    super(message, HTTP_STATUS.BAD_REQUEST, "FRIEND_VALIDATION_FAILED");
   }
 }
 

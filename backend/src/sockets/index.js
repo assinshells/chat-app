@@ -2,6 +2,7 @@ import { socketAuthGuard } from "../guards/socketAuth.guard.js";
 import { registerChatSocket } from "./chat.socket.js";
 import { registerDmSocket } from "./dm.socket.js";
 import { registerBlockSocket } from "./block.socket.js";
+import { registerFriendSocket } from "./friend.socket.js";
 import logger from "../config/logger.js";
 
 export function initSockets(io) {
@@ -16,6 +17,9 @@ export function initSockets(io) {
     // уже вступив у власний персональний канал (socket.join(dmChannel(...))
     // виконується всередині registerDmSocket), а не дублює це вступ сам.
     registerBlockSocket(io, socket);
+    // Той самий принцип, той самий персональний канал — див.
+    // friend.socket.js.
+    registerFriendSocket(io, socket);
 
     socket.on("disconnect", (reason) => {
       logger.debug(`Сокет відключено: user=${socket.data.userId} reason=${reason}`);

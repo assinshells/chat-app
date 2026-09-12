@@ -47,6 +47,21 @@ export const BLOCK_ERRORS = Object.freeze({
   NOT_BLOCKED: "Цей користувач не заблокований",
 });
 
+// Помилки списку друзів ("Додати до друзів" в дропдавні ніка, див.
+// services/friend.service.js). Окремо від BLOCK_ERRORS — інша сутність
+// зі своїм набором відмов, хоч і той самий принцип односторонньої
+// персональної дії.
+export const FRIEND_ERRORS = Object.freeze({
+  USER_NOT_FOUND: "Користувача не знайдено",
+  CANNOT_FRIEND_SELF: "Не можна додати самого себе до друзів",
+  ALREADY_FRIEND: "Цей користувач уже у друзях",
+  NOT_FRIEND: "Цього користувача немає у друзях",
+  // Заблокований і доданий у друзі одночасно — суперечливий стан
+  // (див. FriendService.addFriend і BlockService.blockUser нижче,
+  // де блокування, навпаки, автоматично прибирає з друзів).
+  CANNOT_FRIEND_BLOCKED: "Не можна додати до друзів заблокованого користувача",
+});
+
 export const DM_LIMITS = Object.freeze({
   MAX_MESSAGE_LENGTH: 300,
   HISTORY_DEFAULT_LIMIT: 50,
@@ -167,6 +182,17 @@ export const SOCKET_EVENTS = Object.freeze({
   // вкладки того ж акаунта повинні одразу побачити оновлений список
   // заблокованих — наприклад, у сайдбарі відкритому в іншій вкладці).
   BLOCK_UPDATED: "block:updated",
+
+  // Список друзів — той самий персональний канал dmChannel(userId),
+  // той самий принцип, що й BLOCK_* вище: "Додати до друзів" у
+  // дропдавні ніка доступне будь-якому користувачу, дія одностороння
+  // і нікого, крім самого власника списку, не сповіщає.
+  FRIEND_LIST: "friend:list",
+  FRIEND_ADD: "friend:add",
+  FRIEND_REMOVE: "friend:remove",
+  // Розсилається на всі вкладки/пристрої власника списку — та сама
+  // причина, що й у BLOCK_UPDATED.
+  FRIEND_UPDATED: "friend:updated",
 
   // Модерація (кік/бан) — надсилаються АДРЕСНО жертві дії (див.
   // sockets/moderationEnforcement.js), а не всій кімнаті: інші учасники

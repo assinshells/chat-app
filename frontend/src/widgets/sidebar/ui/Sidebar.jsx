@@ -1,8 +1,10 @@
 import { useMemo, useRef, useState } from "react";
-import { PanelLeft, X } from "lucide-react";
+import { PanelLeft, X, MessageSquare, Users, Star, Ban } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal, SafetyWarningModal } from "@features/info";
 import { BlockedUsersList } from "@features/block";
+import { FriendsList } from "@features/friends";
+import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -17,13 +19,17 @@ const SAFETY_WARNING_MODAL_ID = "sidebarSafetyWarningModal";
 const USER_GROUPS = [
   { id: "male", label: "Чоловіки" },
   { id: "female", label: "Жінки" },
-  { id: "unknown", label: "Невідомі" },
 ];
 
+// Іконки замість повного тексту (не влазять 4 підписи в один рядок,
+// див. обговорення оптимізації сайдбара) — підпис лишається лише для
+// title-тултипа і для тексту біля АКТИВНОГО табу (див.
+// .app-sidebar-tab-label в _sidebar.css), решта показує саму іконку.
 const MAIN_TABS = [
-  { id: "rooms", label: "Кімнати" },
-  { id: "users", label: "Користувачі" },
-  { id: "blocked", label: "Заблоковані" },
+  { id: "rooms", label: "Кімнати", icon: MessageSquare },
+  { id: "users", label: "Користувачі", icon: Users },
+  { id: "friends", label: "Друзі", icon: Star },
+  { id: "blocked", label: "Заблоковані", icon: Ban },
 ];
 
 /**
@@ -76,13 +82,19 @@ export function Sidebar({
   // getEffectiveColorHex у ChatConversation.jsx — та сама логіка тут).
   const isDarkTheme = useIsDarkTheme();
 
+  // Друзі виділяються жирним у списку "Користувачі" (див.
+  // .app-sidebar-online-name-btn.is-friend у _sidebar.css) — підписка
+  // саме на friendLogins (Set), а не на isFriend-функцію, щоб список
+  // коректно перерендерився при зміні (нова/старий Set — різні
+  // референси, сама функція стабільна і ререндер не викликала б).
+  const friendLogins = useFriendStore((state) => state.friendLogins);
+
   // Групуємо учасників активної кімнати за статтю один раз за рендер,
   // а не на кожен чих — список учасників кімнати може бути довгим.
-  // gender може бути 'male' | 'female' | 'unknown' (див. GENDER_VALUES
-  // на бекенді) — усі три кошики завжди присутні, щоб користувачі з
-  // 'unknown' не губилися мовчки.
+  // gender може бути лише 'male' | 'female' (див. GENDER_VALUES на
+  // бекенді).
   const usersByGroup = useMemo(() => {
-    const grouped = { male: [], female: [], unknown: [] };
+    const grouped = { male: [], female: [] };
 
     for (const user of roomUsers) {
       if (grouped[user.gender]) grouped[user.gender].push(user);
@@ -162,16 +174,42 @@ export function Sidebar({
         <div className="app-sidebar-tabs">
 
           <div className="app-sidebar-tabs-nav">
-            {MAIN_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`app-sidebar-tab-btn ${activeTab === tab.id ? "is-active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {MAIN_TABS.map((tab, index) => {
+              const Icon = tab.icon;
+              // .app-sidebar-inner (батьківський скрол-контейнер) має
+              // overflow-x: hidden — тултип по центру першого/останнього
+              // табу міг би вилізти за межу і обрізатись, тому крайні
+              // таби прив'язують тултип до внутрішнього краю замість
+              // центру (див. _sidebar.css).
+              const edgeClass =
+                index === 0
+                  ? "is-align-start"
+                  : index === MAIN_TABS.length - 1
+                    ? "is-align-end"
+                    : "";
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`app-sidebar-tab-btn ${activeTab === tab.id ? "is-active" : ""}`}
+                  aria-label={tab.label}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <Icon size={16} className="app-sidebar-tab-icon" />
+                  <span className="app-sidebar-tab-label">{tab.label}</span>
+                  {/* Власний тултип замість нативного title: title
+                      з'являється із затримкою, стилізується браузером
+                      по-різному і його рендер поверх сторінки не
+                      гарантований (у деяких браузерах перекривається
+                      іншими елементами з власним stacking context) —
+                      цей же завжди належний DOM-елемент з явним
+                      z-index (див. _sidebar.css). Не показуємо для
+                      активного табу — там підпис і так видно поруч
+                      з іконкою. */}
+                  <span className={`app-sidebar-tab-tooltip ${edgeClass}`}>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div ref={tabsBodyRef} className="app-sidebar-tabs-body app-scrollbar">
@@ -222,6 +260,7 @@ export function Sidebar({
                     usersByGroup[activeUserGroup].map((user) => {
                       const isOwn = user.login === login;
                       const isSelected = selectedNicknames.includes(user.login);
+                      const isFriendUser = friendLogins.has(user.login);
 
                       return (
                         <div key={user.id} className="app-sidebar-online-item">
@@ -230,7 +269,8 @@ export function Sidebar({
                               Чужий — клікабельний, додає адресата у форму
                               відправлення повідомлення (див. ChatComposer), і фарбується
                               в колір, який цей користувач обрав у
-                              налаштуваннях (за замовчуванням — чорний). */}
+                              налаштуваннях (за замовчуванням — чорний). Друг (див.
+                              features/friends) додатково виділяється жирним шрифтом. */}
                           {isOwn ? (
                             <span className="app-sidebar-online-name nickname-own">
                               {user.login}
@@ -246,8 +286,12 @@ export function Sidebar({
                                 type="button"
                                 className={`app-sidebar-online-name app-sidebar-online-name-btn ${
                                   isSelected ? "is-selected" : ""
-                                }`}
-                                title="Додати користувача у форму повідомлення"
+                                } ${isFriendUser ? "is-friend" : ""}`}
+                                title={
+                                  isFriendUser
+                                    ? "Друг · Додати користувача у форму повідомлення"
+                                    : "Додати користувача у форму повідомлення"
+                                }
                                 style={{ "--user-color": getEffectiveColorHex(user.color, isDarkTheme) }}
                                 onClick={() => onNicknameClick?.(user.login)}
                               >
@@ -262,6 +306,8 @@ export function Sidebar({
                 </div>
               </div>
             )}
+
+            {activeTab === "friends" && <FriendsList />}
 
             {activeTab === "blocked" && <BlockedUsersList />}
           </div>

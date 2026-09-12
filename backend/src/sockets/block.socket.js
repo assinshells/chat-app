@@ -1,4 +1,5 @@
 import { BlockService } from "../services/block.service.js";
+import { FriendService } from "../services/friend.service.js";
 import { SOCKET_EVENTS, dmChannel } from "../constants/chat.constants.js";
 import logger from "../config/logger.js";
 
@@ -47,6 +48,13 @@ export function registerBlockSocket(io, socket) {
       // Усі вкладки/пристрої САМОГО блокувальника — щоб інша відкрита
       // вкладка одразу побачила оновлений список заблокованих у сайдбарі.
       io.to(dmChannel(socket.data.userId)).emit(SOCKET_EVENTS.BLOCK_UPDATED, { blocked });
+
+      // BlockService.blockUser міг тихо прибрати ціль зі списку друзів
+      // (див. коментар там) — без цього вкладка "Друзі" в іншій відкритій
+      // вкладці того самого акаунта лишилась би зі застарілим записом
+      // аж до наступної ручної синхронізації.
+      const friends = await FriendService.listFriends({ ownerId: socket.data.userId });
+      io.to(dmChannel(socket.data.userId)).emit(SOCKET_EVENTS.FRIEND_UPDATED, { friends });
 
       // Персональний канал ЗАБЛОКОВАНОГО — якщо в нього прямо зараз
       // відкрито діалог із блокувальником, DirectMessagesModal одразу
