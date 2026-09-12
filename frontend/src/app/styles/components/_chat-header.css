@@ -122,3 +122,57 @@
 .chat-header-btn i {
   font-size: 1.15rem;
 }
+
+/* =========================================================
+   HEADER MENU (dropdown)
+   ========================================================= */
+
+.chat-header-menu {
+  position: relative;
+}
+
+.chat-header-dropdown-menu {
+  min-width: 180px;
+
+  padding: 0.4rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+
+  background: var(--bs-body-bg);
+
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.chat-header-dropdown-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.6rem;
+
+  padding: 0.5rem 0.65rem;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+
+  font-size: 0.9rem;
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.chat-header-dropdown-item:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.chat-header-dropdown-divider {
+  margin: 0.35rem 0;
+
+  opacity: 1;
+  border-top: 1px solid var(--bs-border-color);
+}

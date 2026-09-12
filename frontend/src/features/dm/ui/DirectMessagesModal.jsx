@@ -134,6 +134,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
       tabIndex="-1"
       aria-labelledby={`${modalId}Label`}
       aria-hidden="true"
+      data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered modal-lg">
         <div className="modal-content dm-modal">

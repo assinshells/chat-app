@@ -19,6 +19,7 @@ export function RulesModal({ modalId = "rulesModal" }) {
       tabIndex="-1"
       aria-labelledby={`${modalId}Label`}
       aria-hidden="true"
+      data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content settings-modal">

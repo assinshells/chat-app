@@ -1,4 +1,4 @@
-import { LogOut, Mail, PanelLeft, Settings } from "lucide-react";
+import { LogOut, Mail, Menu, PanelLeft, Settings } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
@@ -92,25 +92,45 @@ export function ChatHeader({
             )}
           </button>
 
-          <button
-            type="button"
-            className="chat-header-btn"
-            title="Налаштування"
-            data-bs-toggle="modal"
-            data-bs-target={`#${SETTINGS_MODAL_ID}`}
-          >
-            <Settings size={18} />
-          </button>
+          <div className="chat-header-menu dropdown">
+            <button
+              type="button"
+              className="chat-header-btn"
+              title="Меню"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <Menu size={18} />
+            </button>
 
-          <button
-            type="button"
-            className="chat-header-btn"
-            title="Вийти"
-            data-bs-toggle="modal"
-            data-bs-target={`#${LOGOUT_MODAL_ID}`}
-          >
-            <LogOut size={18} />
-          </button>
+            <ul className="dropdown-menu dropdown-menu-end chat-header-dropdown-menu">
+              <li>
+                <button
+                  type="button"
+                  className="dropdown-item chat-header-dropdown-item"
+                  data-bs-toggle="modal"
+                  data-bs-target={`#${SETTINGS_MODAL_ID}`}
+                >
+                  <Settings size={16} />
+                  <span>Налаштування</span>
+                </button>
+              </li>
+              <li>
+                <hr className="dropdown-divider chat-header-dropdown-divider" />
+              </li>
+              <li>
+                <button
+                  type="button"
+                  className="dropdown-item chat-header-dropdown-item text-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target={`#${LOGOUT_MODAL_ID}`}
+                >
+                  <LogOut size={16} />
+                  <span>Вийти</span>
+                </button>
+              </li>
+            </ul>
+          </div>
 
         </div>
       </div>
