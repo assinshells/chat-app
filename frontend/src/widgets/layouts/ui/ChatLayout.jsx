@@ -4,6 +4,7 @@ import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { Sidebar } from "@widgets/sidebar";
+import { SideMenu } from "@widgets/side-menu";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { useBlockStore } from "@features/block";
@@ -110,13 +111,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     [messages, blockedLogins],
   );
 
-  // pinned — сайдбар закріплений і видимий на десктопі (за замовчуванням — так).
-  const [pinned, setPinned] = useState(true);
-  // hovering — тимчасовий показ згорнутого сайдбара при наведенні на іконку в шапці.
-  const [hovering, setHovering] = useState(false);
-  // mobileOpen — висувний drawer на мобільних пристроях (за замовчуванням згорнутий).
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   // targetNicknames / targetTimes — "цілі" повідомлення, зібрані кліками
   // по ніку/часу в ChatConversation, до MAX_TARGETS кожного. Живуть
   // тут, а не в ChatComposer, тому що заповнюються з сусіднього
@@ -124,16 +118,10 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
 
-  const sidebarCollapsed = !pinned;
-  const previewOpen = sidebarCollapsed && hovering;
-
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
   const handleSelectRoom = (roomId) => {
     switchRoom(roomId);
-    // На мобільному вибір кімнати в drawer'і повинен одразу його закривати —
-    // інакше список кімнат перекриває чат, що відкрився.
-    setMobileOpen(false);
     // Ніки/час обиралися з повідомлень поточної кімнати — при переході
     // в іншу кімнату вони втрачають сенс.
     setTargetNicknames([]);
@@ -185,184 +173,10 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   }
 
   return (
-    <div className="layout-wrapper d-lg-flex">
-      <div class="side-menu flex-lg-column me-lg-1 ms-lg-0">
-        <div class="navbar-brand-box">
-          <a href="index.html" class="logo logo-dark">
-            <span class="logo-sm">
-              <img src="assets/images/logo.svg" alt="" height="30" />
-            </span>
-          </a>
-
-          <a href="index.html" class="logo logo-light">
-            <span class="logo-sm">
-              <img src="assets/images/logo.svg" alt="" height="30" />
-            </span>
-          </a>
-        </div>
-        <div class="flex-lg-column my-auto">
-          <ul
-            class="nav nav-pills side-menu-nav justify-content-center"
-            role="tablist"
-          >
-            <li
-              class="nav-item"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              title="Profile"
-            >
-              <a
-                class="nav-link"
-                id="pills-user-tab"
-                data-bs-toggle="pill"
-                href="#pills-user"
-                role="tab"
-              >
-                <i class="ri-user-2-line"></i>
-              </a>
-            </li>
-            <li
-              class="nav-item"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              title="Chats"
-            >
-              <a
-                class="nav-link active"
-                id="pills-chat-tab"
-                data-bs-toggle="pill"
-                href="#pills-chat"
-                role="tab"
-              >
-                <i class="ri-message-3-line"></i>
-              </a>
-            </li>
-            <li
-              class="nav-item"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              title="Groups"
-            >
-              <a
-                class="nav-link"
-                id="pills-groups-tab"
-                data-bs-toggle="pill"
-                href="#pills-groups"
-                role="tab"
-              >
-                <i class="ri-group-line"></i>
-              </a>
-            </li>
-            <li
-              class="nav-item"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              title="Contacts"
-            >
-              <a
-                class="nav-link"
-                id="pills-contacts-tab"
-                data-bs-toggle="pill"
-                href="#pills-contacts"
-                role="tab"
-              >
-                <i class="ri-contacts-line"></i>
-              </a>
-            </li>
-            <li
-              class="nav-item"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              title="Settings"
-            >
-              <a
-                class="nav-link"
-                id="pills-setting-tab"
-                data-bs-toggle="pill"
-                href="#pills-setting"
-                role="tab"
-              >
-                <i class="ri-settings-2-line"></i>
-              </a>
-            </li>
-            <li class="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <img
-                  src="assets/images/users/avatar-1.jpg"
-                  alt=""
-                  class="profile-user rounded-circle"
-                />
-              </a>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">
-                  Profile <i class="ri-profile-line float-end text-muted"></i>
-                </a>
-                <a class="dropdown-item" href="#">
-                  Setting{" "}
-                  <i class="ri-settings-3-line float-end text-muted"></i>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">
-                  Log out{" "}
-                  <i class="ri-logout-circle-r-line float-end text-muted"></i>
-                </a>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="flex-lg-column d-none d-lg-block">
-          <ul class="nav side-menu-nav justify-content-center">
-            <li class="nav-item btn-group dropup profile-user-dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <img
-                  src="assets/images/users/avatar-1.jpg"
-                  alt=""
-                  class="profile-user rounded-circle"
-                />
-              </a>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">
-                  Profile <i class="ri-profile-line float-end text-muted"></i>
-                </a>
-                <a class="dropdown-item" href="#">
-                  Setting{" "}
-                  <i class="ri-settings-3-line float-end text-muted"></i>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="auth-login.html">
-                  Log out{" "}
-                  <i class="ri-logout-circle-r-line float-end text-muted"></i>
-                </a>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+    <div className="layout-wrapper d-flex">
+      <SideMenu />
 
       <Sidebar
-        pinned={pinned}
-        previewOpen={previewOpen}
-        mobileOpen={mobileOpen}
-        onPin={() => setPinned(true)}
-        onCollapse={() => setPinned(false)}
-        onHoverEnter={() => setHovering(true)}
-        onHoverLeave={() => setHovering(false)}
-        onCloseMobile={() => setMobileOpen(false)}
         login={login}
         activeRoom={activeRoom}
         roomCounts={roomCounts}
@@ -372,22 +186,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         selectedNicknames={targetNicknames}
       />
 
-      {mobileOpen && (
-        <div
-          className="sidebar-backdrop d-lg-none"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
       <div className="user-chat w-100">
         <div className="chat-main">
           <ChatHeader
             title={activeRoomName}
             online={connected}
-            sidebarCollapsed={sidebarCollapsed}
-            onOpenSidebar={() => setPinned(true)}
-            onHoverSidebarIcon={() => setHovering(true)}
-            onOpenMobileSidebar={() => setMobileOpen(true)}
             onLogout={onLogout}
           />
           <ConfinementBanner confinement={confinement} />

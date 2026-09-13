@@ -1,15 +1,16 @@
 /* =========================================================
-   SIDEBAR — mobile-first base (свёрнутый drawer, выезжает по клику)
+   SIDEBAR — статична панель, завжди в потоці документа й видима,
+   однаково на мобільному й десктопі (без закріплення/згортання,
+   прев'ю по наведенню чи висувного drawer'а з підкладкою — ця
+   логіка була раніше, прибрано за запитом).
    ========================================================= */
 
 .app-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
+  position: relative;
+
+  flex: 0 0 auto;
 
   width: 280px;
-  max-width: 84vw;
 
   display: flex;
   flex-direction: column;
@@ -17,37 +18,7 @@
   background: var(--bs-body-bg);
   border-right: 1px solid var(--bs-border-color);
 
-  transform: translateX(-100%);
-
-  transition: transform 0.25s ease;
-
-  z-index: 1050;
-}
-
-.app-sidebar.is-mobile-open {
-  transform: translateX(0);
-
-  box-shadow: 0 0 40px rgba(var(--app-shadow-color), var(--app-shadow-strong));
-}
-
-.sidebar-backdrop {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(var(--app-overlay-color), var(--app-overlay-strength));
-
-  z-index: 1040;
-
-  animation: sidebar-backdrop-fade 0.2s ease;
-}
-
-@keyframes sidebar-backdrop-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  z-index: 5;
 }
 
 .app-sidebar-inner {
@@ -67,128 +38,18 @@
 }
 
 /* =========================================================
-   SIDEBAR — desktop (>= 992px): закреплена / свёрнута / превью
-   ========================================================= */
-
-@media (min-width: 992px) {
-  /* База для десктопа: и «свёрнут», и «превью» — всегда position: fixed,
-     то есть полностью вне потока. Ширина (0 → 280px и обратно) анимируется
-     свободно и никогда не влияет на layout .user-chat — контент чата не
-     двигается и не дёргается, пока сайдбар не закреплён. */
-  .app-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-
-    width: 0;
-    max-width: none;
-
-    flex: 0 0 auto;
-
-    transform: none;
-
-    overflow: hidden;
-
-    box-shadow: none;
-
-    transition:
-      width 0.2s ease,
-      box-shadow 0.2s ease;
-
-    z-index: 1030;
-  }
-
-  /* Превью: временный показ по наведению — та же fixed-позиция, просто
-     раскрывается по ширине и получает тень оверлея. */
-  .app-sidebar.is-preview {
-    width: 280px;
-
-    box-shadow: 0 12px 35px rgba(var(--app-shadow-color), var(--app-shadow-strong));
-  }
-
-  /* Закреплено: единственное состояние, которое реально в потоке и толкает
-     контент. Переключение pinned <-> preview/collapsed происходит по клику
-     мгновенно (без transition на position), поэтому реальный сдвиг контента
-     случается один раз, в момент клика, а не «размазан» по анимации ширины. */
-  .app-sidebar.is-pinned {
-    position: relative;
-    top: auto;
-    bottom: auto;
-    left: auto;
-
-    width: 280px;
-
-    box-shadow: none;
-
-    z-index: 5;
-  }
-
-  /* У закріпленому стані кнопка сворачивання живе звичайним чином у
-     app-sidebar-top, поруч із назвою сайту. У прев'ю (тимчасовий показ
-     по наведенню, поки сайдбар не закріплено) вона, як і раніше,
-     "перепрыгивает" у лівий верхній кут — врівень з кнопкою-тригером
-     у шапці чата, щоб курсор міг без розриву перейти від іконки в
-     шапці до кнопки всередині сайдбара.
-     Позиціонується відносно .app-sidebar-top (а не всього .app-sidebar)
-     і центрується по вертикалі через top:50%/translateY — так кнопка
-     завжди рівно по центру рядка з назвою сайту, незалежно від
-     фактичної висоти цього рядка, а не за підібраним "на око" пікселем,
-     який "плив" відносно назви сайту при зміні висоти рядка. */
-  .app-sidebar.is-preview .app-sidebar-collapse-btn {
-    position: absolute;
-    top: 50%;
-    left: 12px;
-
-    transform: translateY(-50%);
-
-    z-index: 5;
-  }
-
-  /* У прев'ю той самий кут займає кнопка сворачивання, що випливла —
-     назву сайту не ховаємо, а зсуваємо правіше кнопки, щоб вони не
-     накладалися одна на одну. */
-  .app-sidebar.is-preview .app-sidebar-top {
-    padding-left: 3.5rem;
-  }
-
-  .sidebar-backdrop {
-    display: none;
-  }
-}
-
-/* =========================================================
-   SIDEBAR TOP: название сайта + кнопка сворачивания/закрепления
-   (десктоп) + кнопка закрытия drawer'а (мобильный)
+   SIDEBAR TOP: назва сайту
    ========================================================= */
 
 .app-sidebar-top {
-  position: relative;
-
   flex: 0 0 auto;
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
 
   min-height: 44px;
-  /* Відступи зверху й знизу мають бути ОДНАКОВІ: назва сайту
-     центрується через align-items відносно content-box (за
-     вирахуванням падінгів), а кнопка згортання в прев'ю (див. нижче,
-     .app-sidebar.is-preview .app-sidebar-collapse-btn) центрується
-     через top:50% відносно повної висоти блоку, включно з падінгами.
-     Якщо відступи зверху й знизу різні — ці два "центри" не
-     збігаються, і елементи візуально роз'їжджаються по вертикалі. */
+
   padding: 0.5rem 0.25rem 0.5rem 0.65rem;
-}
-
-.app-sidebar-top-actions {
-  flex: 0 0 auto;
-
-  display: flex;
-  align-items: center;
-
-  gap: 0.15rem;
 }
 
 .app-sidebar-site-name {
@@ -206,41 +67,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.app-sidebar-btn {
-  width: 34px;
-  height: 34px;
-
-  flex: 0 0 34px;
-
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 0;
-  border-radius: 9px;
-
-  background: transparent;
-  color: var(--bs-secondary-color);
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.app-sidebar-btn:hover {
-  color: var(--bs-body-color);
-  background: var(--bs-secondary-bg);
-}
-
-.app-sidebar-btn:focus {
-  outline: none;
-  box-shadow: none;
 }
 
 /* =========================================================
@@ -736,7 +562,7 @@
 }
 
 /* =========================================================
-   HEADER: зона с триггером сайдбара
+   HEADER: розташування вмісту зліва в шапці
    ========================================================= */
 
 .chat-header-start {
@@ -746,8 +572,4 @@
   align-items: center;
 
   gap: 0.4rem;
-}
-
-.sidebar-trigger {
-  flex: 0 0 38px;
 }

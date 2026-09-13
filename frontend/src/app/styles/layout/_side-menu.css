@@ -1,0 +1,188 @@
+/* =========================================================
+   SIDE MENU — вузька іконочна колонка зліва (widgets/side-menu).
+   Токени --bs-sidebar-* заведено в themes/_tokens.css і мапляться
+   на стандартні змінні Bootstrap, тому колір сам перемикається
+   разом із [data-bs-theme] без окремих правил під темну тему.
+   ========================================================= */
+
+.side-menu {
+  min-width: 75px;
+  max-width: 75px;
+  height: 100vh;
+  min-height: 570px;
+
+  background-color: var(--bs-sidebar-bg);
+
+  display: flex;
+
+  z-index: 9;
+
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
+}
+
+@media (max-width: 991.98px) {
+  .side-menu {
+    position: fixed;
+    bottom: 0;
+
+    height: 60px;
+    min-width: 100%;
+    min-height: auto;
+
+    display: block;
+
+    border-top: 1px solid var(--bs-border-color);
+  }
+}
+
+.side-menu .navbar-brand-box {
+  text-align: center;
+}
+
+@media (max-width: 991.98px) {
+  .side-menu .navbar-brand-box {
+    display: none;
+  }
+}
+
+.side-menu .navbar-brand-box .logo {
+  line-height: 70px;
+}
+
+.side-menu .navbar-brand-box .logo-dark {
+  display: block;
+}
+
+.side-menu .navbar-brand-box .logo-light {
+  display: none;
+}
+
+.side-menu-nav .nav-item {
+  margin: 7px 0;
+}
+
+@media (max-width: 991.98px) {
+  .side-menu-nav .nav-item {
+    flex-basis: 0;
+    flex-grow: 1;
+
+    margin: 5px 0;
+  }
+}
+
+.side-menu-nav .nav-item .nav-link {
+  position: relative;
+
+  text-align: center;
+
+  font-size: 24px;
+  color: var(--bs-sidebar-menu-item-color);
+
+  width: 56px;
+  height: 56px;
+  line-height: 56px;
+  margin: 0 auto;
+
+  border-radius: 8px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 991.98px) {
+  .side-menu-nav .nav-item .nav-link {
+    font-size: 20px;
+
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+  }
+}
+
+.side-menu-nav .nav-item .nav-link.active {
+  background-color: var(--bs-sidebar-menu-item-active-bg);
+  color: #7269ef;
+}
+
+.side-menu-nav .nav-item.show > .nav-link {
+  background-color: var(--bs-sidebar-menu-item-active-bg);
+  color: #7269ef;
+}
+
+.side-menu-nav .profile-user {
+  height: 36px;
+  width: 36px;
+
+  background-color: var(--bs-border-color);
+
+  padding: 3px;
+}
+
+/* =========================================================
+   TOOLTIPS — власний елемент замість нативного title.
+   Нативний title перекривався сусідніми іконками у вузькій
+   75px-колонці (десктоп) і в тісному 60px-рядку (мобільний),
+   з'являвся із затримкою й рендерився браузером непередбачувано.
+   Той самий принцип, що й .app-sidebar-tab-tooltip у _sidebar.css.
+
+   Десктоп (колонка) — тултип праворуч від іконки, по вертикальному
+   центру. Мобільний (рядок знизу) — над іконкою, по центру, з
+   прив'язкою до краю для крайніх пунктів, щоб не вилазити за межу
+   екрана.
+   ========================================================= */
+
+.side-menu-tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  transform: translateY(-50%);
+  z-index: 30;
+
+  padding: 0.15rem 0.5rem;
+
+  border-radius: 6px;
+
+  background: var(--bs-emphasis-color, #212529);
+  color: var(--bs-body-bg, #fff);
+
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.12s ease,
+    visibility 0.12s ease;
+}
+
+.side-menu-nav .nav-link:hover .side-menu-tooltip,
+.side-menu-nav .nav-link:focus-visible .side-menu-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 991.98px) {
+  .side-menu-tooltip {
+    top: auto;
+    left: 50%;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+  }
+
+  .side-menu-tooltip.is-align-start {
+    left: 0;
+    transform: none;
+  }
+
+  .side-menu-tooltip.is-align-end {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+}

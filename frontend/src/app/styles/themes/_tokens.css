@@ -11,4 +11,12 @@
      завжди білий незалежно від теми, бо самі плашки (--bs-primary,
      --bs-danger) достатньо насичені і в світлій, і в темній темі. */
   --bs-white: #fff;
+
+  /* Токени вузької іконочної колонки (widgets/side-menu). Мапляться
+     на "рідні" змінні Bootstrap 5.3, які й так автоматично
+     перемикаються разом із [data-bs-theme] (див. shared/lib/theme.js) —
+     тому окремих значень під темну тему тут заводити не треба. */
+  --bs-sidebar-bg: var(--bs-body-bg);
+  --bs-sidebar-menu-item-color: var(--bs-secondary-color);
+  --bs-sidebar-menu-item-active-bg: var(--bs-tertiary-bg);
 }

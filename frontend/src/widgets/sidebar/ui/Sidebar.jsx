@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
-import { PanelLeft, X, MessageSquare, Users, Star, Ban } from "lucide-react";
+import { MessageSquare, Users, Star, Ban } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal } from "@features/info";
 import { BlockedUsersList } from "@features/block";
@@ -34,32 +34,16 @@ const MAIN_TABS = [
 /**
  * Бічна панель у дусі Claude / ChatGPT.
  *
- * Десктоп:
- *  - за замовчуванням закріплена (pinned) і видима, штовхає контент праворуч;
- *  - кнопка згортання приховує панель (pinned = false);
- *  - коли панель згорнута, у шапці з'являється іконка — при наведенні
- *    на неї панель тимчасово показується поверх контенту (previewOpen),
- *    а при кліку — закріплюється назад (pinned = true).
- *
- * Мобільні пристрої:
- *  - панель за замовчуванням згорнута;
- *  - відкривається висувним зліва поверх контенту drawer'ом (mobileOpen)
- *    за натисканням на іконку в шапці, закривається за натисканням на
- *    підкладку або на хрестик всередині самої панелі.
+ * Статична: завжди видима, у потоці документа, однакова на десктопі
+ * й мобільному — без закріплення/згортання, прев'ю по наведенню чи
+ * висувного drawer'а з підкладкою (раніше тут була ця логіка, див.
+ * git-історію — прибрано за запитом).
  *
  * Кімнати і онлайн-користувачі — живі дані з бекенда (Socket.IO),
  * див. features/chat/model/useChatSocket.js: activeRoom/roomCounts/roomUsers
  * приходять через ChatLayout, тут лише рендер і перемикання.
  */
 export function Sidebar({
-  pinned,
-  previewOpen,
-  mobileOpen,
-  onPin,
-  onCollapse,
-  onHoverEnter,
-  onHoverLeave,
-  onCloseMobile,
   login,
   activeRoom,
   roomCounts,
@@ -99,75 +83,25 @@ export function Sidebar({
     return grouped;
   }, [roomUsers]);
 
-  // На десктопі стан сайдбара строго один із трьох і визначає CSS-клас:
-  //  - is-pinned  — закріплений, у потоці (штовхає контент), без анімації
-  //                 через проміжний стан — перемикається миттєво по кліку;
-  //  - is-preview — тимчасовий показ при наведенні, завжди position: fixed
-  //                 (поза потоком), тому НІКОЛИ не штовхає і не смикає
-  //                 контент чату, навіть під час transition ширини;
-  //  - (немає класу) — згорнутий, теж position: fixed, просто width: 0.
-  const desktopStateClass = pinned
-    ? "is-pinned"
-    : previewOpen
-      ? "is-preview"
-      : "";
-
-  const className = [
-    "app-sidebar",
-    desktopStateClass,
-    mobileOpen ? "is-mobile-open" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
-    <aside
-      className={className}
-      onMouseEnter={() => {
-        if (!pinned) onHoverEnter();
-      }}
-      onMouseLeave={() => {
-        if (!pinned) onHoverLeave();
-      }}
-    >
+    <aside className="app-sidebar">
       <div className="app-sidebar-inner">
 
-        {/* Верх панелі: назва сайту (десктоп і мобільний, без логотипа),
-            кнопка згортання/закріплення (лише десктоп — раніше жила в
-            футері поруч із ніком, тепер у закріпленому стані живе тут,
-            поруч із назвою сайту; у прев'ю CSS, як і раніше, переносить
-            її в лівий верхній кут, врівень з кнопкою-тригером у шапці
-            чата, див. .app-sidebar.is-preview .app-sidebar-collapse-btn
-            у _sidebar.css) і кнопка закриття drawer'а (лише мобільний). */}
+        {/* Верх панелі: лише назва сайту (десктоп і мобільний, без
+            логотипа) — раніше тут ще жили кнопка згортання/закріплення
+            і кнопка закриття drawer'а, обидві прибрано разом із
+            логікою закріплення/прев'ю/drawer'а (панель тепер завжди
+            статична й видима). */}
         <div className="app-sidebar-top">
           <span className="app-sidebar-site-name">
             {APP_NAME}
           </span>
-
-          <div className="app-sidebar-top-actions">
-            <button
-              type="button"
-              className="app-sidebar-btn app-sidebar-collapse-btn d-none d-lg-flex"
-              title={pinned ? "Згорнути бічну панель" : "Закріпити бічну панель"}
-              onClick={pinned ? onCollapse : onPin}
-            >
-              <PanelLeft size={16} />
-            </button>
-
-            <button
-              type="button"
-              className="app-sidebar-btn d-lg-none"
-              title="Закрити меню"
-              onClick={onCloseMobile}
-            >
-              <X size={18} />
-            </button>
-          </div>
         </div>
 
         {/* Таби: «Кімнати» / «Користувачі». Займають усе місце від верху
             панелі (або від мобільного хедера) до футера. */}
         <div className="app-sidebar-tabs">
+
 
           <div className="app-sidebar-tabs-nav">
             {MAIN_TABS.map((tab, index) => {
