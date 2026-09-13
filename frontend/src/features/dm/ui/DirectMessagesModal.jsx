@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import SimpleBar from "simplebar-react";
 import { ArrowLeft, MessagesSquare, Send, Ban } from "lucide-react";
 
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -146,7 +147,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
           <div className={`dm-modal-body dm-modal-mobile-${mobileView}`}>
             {/* Вертикальні вкладки діалогів */}
-            <div className="dm-modal-tabs">
+            <SimpleBar className="dm-modal-tabs app-scrollbar no-horizontal">
               {order.length === 0 ? (
                 <div className="dm-modal-empty-tabs">
                   {listLoading ? "Завантаження…" : "Немає розпочатих діалогів"}
@@ -187,7 +188,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                   );
                 })
               )}
-            </div>
+            </SimpleBar>
 
             {/* Саме вікно повідомлень обраного діалогу. Контейнер
                 .dm-modal-messages рендериться ЗАВЖДИ (а не лише коли
@@ -217,42 +218,46 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
               )}
 
               <div className="dm-modal-messages">
-                {!active ? (
-                  <div className="dm-modal-placeholder">
-                    <MessagesSquare size={36} strokeWidth={1.5} />
-                    <p className="dm-modal-placeholder-title">Немає обраного діалогу</p>
-                    <p className="dm-modal-placeholder-text">
-                      Виберіть діалог зліва або натисніть «Написати особисте
-                      повідомлення» біля ніка користувача в сайдбарі чи в чаті
-                    </p>
+                <SimpleBar className="app-scrollbar no-horizontal" style={{ height: "100%" }}>
+                  <div className="dm-modal-messages-list">
+                    {!active ? (
+                      <div className="dm-modal-placeholder">
+                        <MessagesSquare size={36} strokeWidth={1.5} />
+                        <p className="dm-modal-placeholder-title">Немає обраного діалогу</p>
+                        <p className="dm-modal-placeholder-text">
+                          Виберіть діалог зліва або натисніть «Написати особисте
+                          повідомлення» біля ніка користувача в сайдбарі чи в чаті
+                        </p>
+                      </div>
+                    ) : active.loading ? (
+                      <div className="dm-modal-empty-messages">Завантаження…</div>
+                    ) : active.messages.length === 0 ? (
+                      <div className="dm-modal-empty-messages">
+                        Повідомлень ще немає. Напишіть перше!
+                      </div>
+                    ) : (
+                      active.messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`dm-modal-message ${
+                            message.sender === currentUser ? "is-own" : "is-other"
+                          }`}
+                        >
+                          <span className="dm-modal-message-time">
+                            {formatMessageTime(message.timestamp)}
+                          </span>
+                          <span className="dm-modal-message-text">
+                            {message.text}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                    {/* Якір для автопрокрутки (див. ефект вище) — порожній,
+                        рендериться завжди, у т.ч. при порожньому/завантажуваному
+                        діалозі, щоб ref не втрачався при зміні стану. */}
+                    <div ref={endRef} />
                   </div>
-                ) : active.loading ? (
-                  <div className="dm-modal-empty-messages">Завантаження…</div>
-                ) : active.messages.length === 0 ? (
-                  <div className="dm-modal-empty-messages">
-                    Повідомлень ще немає. Напишіть перше!
-                  </div>
-                ) : (
-                  active.messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`dm-modal-message ${
-                        message.sender === currentUser ? "is-own" : "is-other"
-                      }`}
-                    >
-                      <span className="dm-modal-message-time">
-                        {formatMessageTime(message.timestamp)}
-                      </span>
-                      <span className="dm-modal-message-text">
-                        {message.text}
-                      </span>
-                    </div>
-                  ))
-                )}
-                {/* Якір для автопрокрутки (див. ефект вище) — порожній,
-                    рендериться завжди, у т.ч. при порожньому/завантажуваному
-                    діалозі, щоб ref не втрачався при зміні стану. */}
-                <div ref={endRef} />
+                </SimpleBar>
               </div>
 
               {/* active.blocked — заблоковано відправлення в цьому

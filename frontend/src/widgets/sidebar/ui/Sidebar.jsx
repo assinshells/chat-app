@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import SimpleBar from "simplebar-react";
 import { PanelLeft, X, MessageSquare, Users, Star, Ban } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal, SafetyWarningModal } from "@features/info";
@@ -208,7 +209,7 @@ export function Sidebar({
             })}
           </div>
 
-          <div className="app-sidebar-tabs-body">
+          <SimpleBar className="app-sidebar-tabs-body app-scrollbar no-horizontal">
 
             {activeTab === "rooms" && (
               <div className="app-sidebar-list">
@@ -306,7 +307,7 @@ export function Sidebar({
             {activeTab === "friends" && <FriendsList />}
 
             {activeTab === "blocked" && <BlockedUsersList />}
-          </div>
+          </SimpleBar>
         </div>
 
         {/* Футер панелі: замість ніка (він і так завжди видно в шапці

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import SimpleBar from "simplebar-react";
 
 import { formatMessageTime } from "@shared/lib/message.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -156,7 +157,10 @@ export function ChatConversation({
   }, [messages.length]);
 
   return (
-    <main className="chat-conversation">
+    <SimpleBar
+      className="chat-conversation app-scrollbar no-horizontal"
+      tabIndex={-1}
+    >
       <div className="chat-messages">
 
         {messages.length === 0 ? (
@@ -264,6 +268,6 @@ export function ChatConversation({
         )}
 
       </div>
-    </main>
+    </SimpleBar>
   );
 }

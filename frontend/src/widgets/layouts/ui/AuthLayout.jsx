@@ -2,8 +2,8 @@ import SimpleBar from "simplebar-react";
 
 export function AuthLayout({ title, subtitle, children }) {
   return (
-    <SimpleBar className="app-scrollbar">
-      <div className="auth-layout my-5 pt-sm-5">
+    <SimpleBar className="app-scrollbar auth-scrollbar no-horizontal">
+      <div className="auth-layout my-4 pt-sm-4">
         <div className="container">
           <div className="row justify-content-center">
             <main className="col-12">

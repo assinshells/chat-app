@@ -94,8 +94,6 @@
 .dm-modal-tabs {
   flex: 0 0 220px;
 
-  overflow-y: auto;
-
   border-right: 1px solid var(--bs-border-color);
 }
 
@@ -277,8 +275,10 @@
 .dm-modal-messages {
   flex: 1 1 auto;
   min-height: 0;
+}
 
-  overflow-y: auto;
+.dm-modal-messages-list {
+  min-height: 100%;
 
   padding: 0.85rem 1rem;
 

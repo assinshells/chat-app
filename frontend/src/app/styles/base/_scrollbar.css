@@ -1,4 +1,13 @@
-.app-scrollbar {
+/* .app-scrollbar — общая тема SimpleBar (тонкий скролбар, появляється
+   при ховере/скролі). Тільки візуальні правила: сама висота/розміри
+   контейнера залежать від місця використання і задаються класом
+   конкретного компонента (.chat-conversation, .app-sidebar-tabs-body,
+   .dm-modal-tabs, .dm-modal-messages, .auth-scrollbar тощо) — не тут,
+   інакше один спільний height зламав би всі інші використання. */
+
+/* Повносторінковий скрол (лише AuthLayout — там SimpleBar обгортає
+   всю сторінку логіну/реєстрації). */
+.auth-scrollbar {
   height: 100vh;
 }
 
@@ -36,4 +45,18 @@
 .app-scrollbar .simplebar-track.simplebar-horizontal {
   height: 5px;
   bottom: 2px;
+}
+
+/* Плавна прокрутка — раніше це був scroll-behavior: smooth на самому
+   елементі (.chat-conversation тощо), але реальний overflow-вузол
+   тепер усередині SimpleBar (.simplebar-content-wrapper), тому
+   scroll-behavior треба вішати саме на нього. */
+.app-scrollbar .simplebar-content-wrapper {
+  scroll-behavior: smooth;
+}
+
+/* Списки, які не повинні мати горизонтальної прокрутки (повідомлення,
+   сайдбар тощо) — прибираємо трек, залишаючи лише вертикальний. */
+.app-scrollbar.no-horizontal .simplebar-track.simplebar-horizontal {
+  display: none;
 }
