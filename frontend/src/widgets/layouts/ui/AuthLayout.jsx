@@ -1,14 +1,14 @@
+import SimpleBar from "simplebar-react";
+
 export function AuthLayout({ title, subtitle, children }) {
   return (
-    <div className="auth-layout my-4 pt-sm-4">
+    <SimpleBar className="app-scrollbar">
+      <div className="auth-layout my-5 pt-sm-5">
         <div className="container">
           <div className="row justify-content-center">
             <main className="col-12">
               <div className="main-content">
-                <div
-                  className="w-100 mx-auto"
-                  style={{ maxWidth: "24.5rem" }}
-                >
+                <div className="w-100 mx-auto" style={{ maxWidth: "24.5rem" }}>
                   <div className="mb-5">
                     <header>
                       <h4 className="text-center mb-4">
@@ -31,5 +31,6 @@ export function AuthLayout({ title, subtitle, children }) {
           </div>
         </div>
       </div>
+    </SimpleBar>
   );
 }
