@@ -1,14 +1,6 @@
-import { useRef } from "react";
-
-import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
-
 export function AuthLayout({ title, subtitle, children }) {
-  const rootRef = useRef(null);
-  useAutoHideScrollbar(rootRef, { window: true });
-
   return (
-    <div ref={rootRef} className="auth-layout app-scrollbar">
-      <div className="py-4">
+    <div className="auth-layout my-4 pt-sm-4">
         <div className="container">
           <div className="row justify-content-center">
             <main className="col-12">
@@ -19,7 +11,7 @@ export function AuthLayout({ title, subtitle, children }) {
                 >
                   <div className="mb-5">
                     <header>
-                      <h4 className="mb-0">
+                      <h4 className="text-center mb-4">
                         <span className="text-muted text-break">{title}</span>
                       </h4>
                       {subtitle && (
@@ -39,6 +31,5 @@ export function AuthLayout({ title, subtitle, children }) {
           </div>
         </div>
       </div>
-    </div>
   );
 }

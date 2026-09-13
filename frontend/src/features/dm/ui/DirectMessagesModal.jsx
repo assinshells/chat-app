@@ -4,7 +4,6 @@ import { ArrowLeft, MessagesSquare, Send, Ban } from "lucide-react";
 
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { formatMessageTime } from "@shared/lib/message.js";
-import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 
@@ -27,9 +26,8 @@ const MAX_MESSAGE_LENGTH = 300;
  *  - іконка в шапці — відкриває "інбокс" як є, без вибору конкретного
  *    адресата, завжди з актуальним списком діалогів (useDmStore.openInbox).
  *
- * Розкладка: зліва вертикальні вкладки діалогів зі своїм скролбаром
- * (app-scrollbar, як і всюди в застосунку), справа — саме вікно
- * листування з обраним співрозмовником.
+ * Розкладка: зліва вертикальні вкладки діалогів зі своїм скролом,
+ * справа — саме вікно листування з обраним співрозмовником.
  *
  * На мобільному (див. @media в app/styles/components/_responsive.css)
  * панелі показуються по одній —
@@ -60,11 +58,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
   const [draft, setDraft] = useState("");
 
   const modalRef = useRef(null);
-  const tabsRef = useRef(null);
-  const messagesRef = useRef(null);
   const endRef = useRef(null);
-  useAutoHideScrollbar(tabsRef);
-  useAutoHideScrollbar(messagesRef);
 
   // Тема — щоб колір співрозмовника (список бесід і заголовок активної)
   // рендерився правильним відтінком (див. getEffectiveColorHex у
@@ -151,8 +145,8 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
           </div>
 
           <div className={`dm-modal-body dm-modal-mobile-${mobileView}`}>
-            {/* Вертикальні вкладки діалогів + скролбар */}
-            <div ref={tabsRef} className="dm-modal-tabs app-scrollbar">
+            {/* Вертикальні вкладки діалогів */}
+            <div className="dm-modal-tabs">
               {order.length === 0 ? (
                 <div className="dm-modal-empty-tabs">
                   {listLoading ? "Завантаження…" : "Немає розпочатих діалогів"}
@@ -197,11 +191,8 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
             {/* Саме вікно повідомлень обраного діалогу. Контейнер
                 .dm-modal-messages рендериться ЗАВЖДИ (а не лише коли
-                є активний діалог) — так ref для useAutoHideScrollbar
-                прив'язується одразу при першому монтуванні модалки, а
-                не втрачається при перемиканні між "немає діалогу"/"діалог
-                відкрито" (ефект у хуку не перепідписується на зміну
-                .current, лише на зміну самого об'єкта ref). */}
+                є активний діалог), щоб не втрачати стан скролу при
+                перемиканні між "немає діалогу"/"діалог відкрито". */}
             <div className="dm-modal-conversation">
               {active && (
                 <div className="dm-modal-conversation-header">
@@ -225,7 +216,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                 </div>
               )}
 
-              <div ref={messagesRef} className="dm-modal-messages app-scrollbar">
+              <div className="dm-modal-messages">
                 {!active ? (
                   <div className="dm-modal-placeholder">
                     <MessagesSquare size={36} strokeWidth={1.5} />

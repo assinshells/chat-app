@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 
 import { formatMessageTime } from "@shared/lib/message.js";
-import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { hasRoomLink } from "@shared/lib/systemMessage.js";
@@ -138,9 +137,6 @@ export function ChatConversation({
   activeRoom,
 }) {
   const endRef = useRef(null);
-  const scrollRef = useRef(null);
-
-  useAutoHideScrollbar(scrollRef);
 
   // Тема — щоб colors.color (нік/текст, обраний автором на реєстрації)
   // рендерився правильним відтінком (hex/hexDark, див.
@@ -160,7 +156,7 @@ export function ChatConversation({
   }, [messages.length]);
 
   return (
-    <main ref={scrollRef} className="chat-conversation app-scrollbar">
+    <main className="chat-conversation">
       <div className="chat-messages">
 
         {messages.length === 0 ? (

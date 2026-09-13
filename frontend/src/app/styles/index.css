@@ -2,7 +2,7 @@
    ENTRY POINT — порядок імпортів навмисно повторює каскад:
    1. TOKENS/THEMES — CSS-змінні (шрифт, тіні/оверлей під тему тощо),
       мають бути визначені ДО будь-яких правил, що їх використовують.
-   2. BASE — reset, скролбар, body/#root: найзагальніші правила.
+   2. BASE — reset, body/#root: найзагальніші правила.
    3. LAYOUT — великі структурні блоки застосунку (обгортка, sidebar).
    4. COMPONENTS — конкретні віджети (шапка, стрічка повідомлень,
       композер, форми, попапи тощо).
@@ -19,7 +19,6 @@
 @import "./themes/_dark.css";
 
 @import "./base/_reset.css";
-@import "./base/_scrollbar.css";
 @import "./base/_body.css";
 
 @import "./layout/_shell.css";

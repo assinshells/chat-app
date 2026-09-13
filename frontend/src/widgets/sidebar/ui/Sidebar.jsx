@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { PanelLeft, X, MessageSquare, Users, Star, Ban } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal, SafetyWarningModal } from "@features/info";
@@ -9,7 +9,6 @@ import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
-import { useAutoHideScrollbar } from "@shared/lib/useAutoHideScrollbar.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 const RULES_MODAL_ID = "sidebarRulesModal";
@@ -74,9 +73,6 @@ export function Sidebar({
   // Всередині «Користувачі» — ще один рівень табів-фільтрів за статтю.
   const [activeUserGroup, setActiveUserGroup] = useState("male");
 
-  const tabsBodyRef = useRef(null);
-  useAutoHideScrollbar(tabsBodyRef);
-
   // Тема — щоб --user-color (нік учасника в списку "Користувачі")
   // рендерився правильним відтінком під поточну тему (див.
   // getEffectiveColorHex у ChatConversation.jsx — та сама логіка тут).
@@ -134,7 +130,7 @@ export function Sidebar({
         if (!pinned) onHoverLeave();
       }}
     >
-      <div className="app-sidebar-inner app-scrollbar">
+      <div className="app-sidebar-inner">
 
         {/* Верх панелі: назва сайту (десктоп і мобільний, без логотипа),
             кнопка згортання/закріплення (лише десктоп — раніше жила в
@@ -212,7 +208,7 @@ export function Sidebar({
             })}
           </div>
 
-          <div ref={tabsBodyRef} className="app-sidebar-tabs-body app-scrollbar">
+          <div className="app-sidebar-tabs-body">
 
             {activeTab === "rooms" && (
               <div className="app-sidebar-list">
