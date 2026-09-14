@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import SimpleBar from "simplebar-react";
 import { MessageSquare, Users, Star, Ban } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal } from "@features/info";
@@ -11,7 +10,6 @@ import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
-import { useBootstrapTooltips } from "@shared/lib/useBootstrapTooltips.js";
 
 const RULES_MODAL_ID = "sidebarRulesModal";
 const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
@@ -70,19 +68,10 @@ export function Sidebar({
   // референси, сама функція стабільна і ререндер не викликала б).
   const friendLogins = useFriendStore((state) => state.friendLogins);
 
-  // Тултипи на іконках табів — нативний Bootstrap Tooltip замість
-  // раніше власного .app-sidebar-tab-tooltip: не потребує ручного
-  // з'ясування, до якого краю притулити (Popper сам не дає тултипу
-  // вилізти за межі viewport'а, навіть попри overflow-x: hidden на
-  // .app-sidebar-inner — тултип рендериться в document.body, а не
-  // всередині сайдбара). Перевстановлюємо при зміні activeTab, бо
-  // data-app-tooltip є лише в неактивних табів (див. нижче).
-  const tabsNavRef = useBootstrapTooltips([activeTab]);
-
-  // Групуємо учасників активної кімнати за статтю один раз за рендер,
-  // а не на кожен чих — список учасників кімнати може бути довгим.
-  // gender може бути лише 'male' | 'female' (див. GENDER_VALUES на
-  // бекенді).
+  // Група учасників активної кімнати за статтю рахується один раз за
+  // рендер, а не на кожен чих — список учасників кімнати може бути
+  // довгим. gender може бути лише 'male' | 'female' (див. GENDER_VALUES
+  // на бекенді).
   const usersByGroup = useMemo(() => {
     const grouped = { male: [], female: [] };
 
@@ -113,7 +102,7 @@ export function Sidebar({
         <div className="app-sidebar-tabs">
 
 
-          <div className="app-sidebar-tabs-nav" ref={tabsNavRef}>
+          <div className="app-sidebar-tabs-nav">
             {MAIN_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -127,12 +116,8 @@ export function Sidebar({
                   onClick={() => setActiveTab(tab.id)}
                   // Тултип не потрібен для активного табу — підпис і
                   // так видно поруч з іконкою (.app-sidebar-tab-label
-                  // нижче), тому data-app-tooltip навмисно відсутній.
-                  {...(!isActive && {
-                    "data-app-tooltip": true,
-                    "data-bs-placement": "auto",
-                    title: tab.label,
-                  })}
+                  // нижче). Для решти — нативний title, без JS.
+                  {...(!isActive && { title: tab.label })}
                 >
                   <Icon size={16} className="app-sidebar-tab-icon" />
                   <span className="app-sidebar-tab-label">{tab.label}</span>
@@ -141,7 +126,7 @@ export function Sidebar({
             })}
           </div>
 
-          <SimpleBar className="app-sidebar-tabs-body app-scrollbar no-horizontal">
+          <div className="app-sidebar-tabs-body app-scrollbar no-horizontal">
 
             {activeTab === "rooms" && (
               <div className="app-sidebar-list">
@@ -239,7 +224,7 @@ export function Sidebar({
             {activeTab === "friends" && <FriendsList />}
 
             {activeTab === "blocked" && <BlockedUsersList />}
-          </SimpleBar>
+          </div>
         </div>
 
         {/* Футер панелі: замість ніка (він і так завжди видно в шапці

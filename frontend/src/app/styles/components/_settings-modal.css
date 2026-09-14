@@ -184,16 +184,14 @@
    ========================================================= */
 
 /* .rules-modal-body — той самий елемент, що й .modal-body (класи
-   комбіновані прямо на SimpleBar у RulesModal.jsx). Bootstrap
+   комбіновані прямо на скрол-контейнері у RulesModal.jsx). Bootstrap
    (.modal-dialog-scrollable .modal-body) сам вішає overflow-y: auto
-   і обмежує висоту .modal-content вʼюпортом — тут це overflow
-   явно перебивається на hidden, щоб фактичний скрол робив лише
-   внутрішній .simplebar-content-wrapper (тема схована/стилізована в
-   app/styles/base/_scrollbar.css), а не браузерний скрол усієї
-   модалки поверх нього. min-height: 0 — щоб flex-контейнер міг
-   стиснутися нижче контенту замість розтягування .modal-content. */
+   і обмежує висоту .modal-content вʼюпортом — тут overflow-y все
+   одно перевизначається явним значенням у .app-scrollbar (auto),
+   а по горизонталі ховається через .no-horizontal. min-height: 0 —
+   щоб flex-контейнер міг стиснутися нижче контенту замість
+   розтягування .modal-content. */
 .rules-modal-body {
-  overflow: hidden !important;
   min-height: 0;
   font-size: 0.9rem;
 }

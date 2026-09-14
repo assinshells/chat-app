@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { X, User as UserIcon } from "lucide-react";
 
 import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
@@ -17,6 +18,8 @@ import {
   RoomBanNoticeBanner,
 } from "@features/moderation";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
+import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
+import { getRoleLabel, ROLE_VALUES } from "@shared/constants/role.constants.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
@@ -117,6 +120,31 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
 
+  // Показ/приховування панелі профілю користувача (справа) — кнопка
+  // "user-profile-show" у шапці (ChatHeader) відкриває, хрестик
+  // усередині панелі закриває. Проста булева стейт-машина: панель
+  // рендериться завжди, видимість перемикається класом .is-open
+  // (transform у app/styles/layout/_user-profile-sidebar.css), щоб
+  // анімація відкриття/закриття працювала плавно.
+  const [isProfileSidebarOpen, setProfileSidebarOpen] = useState(false);
+  const openProfileSidebar = () => setProfileSidebarOpen(true);
+  const closeProfileSidebar = () => setProfileSidebarOpen(false);
+
+  useEffect(() => {
+    if (!isProfileSidebarOpen) return undefined;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") closeProfileSidebar();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isProfileSidebarOpen]);
+
+  // Роль поточного користувача — єдине джерело правди на фронті (див.
+  // коментар у currentUserStore.js), показуємо в панелі профілю.
+  const currentUserRole = useCurrentUserStore((state) => state.role);
+
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
   const handleSelectRoom = (roomId) => {
@@ -189,6 +217,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             title={activeRoomName}
             online={connected}
             onLogout={onLogout}
+            onOpenProfile={openProfileSidebar}
           />
           <ConfinementBanner confinement={confinement} />
           <RoomBanNoticeBanner notice={roomBanNotice} />
@@ -248,16 +277,67 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
           />
         </div>
       </div>
-      <div className="user-profile-sidebar" style="display: block;">
-        <div className="px-3 px-lg-4 pt-3 pt-lg-4">
-          <div className="user-chat-nav text-end">
-            <button type="button" className="btn nav-btn" id="user-profile-hide">
-              <i className="ri-close-line">Close</i>
-            </button>
+      {/* Підкладка — клік поза панеллю закриває її (той самий патерн, що
+          й Bootstrap-модалки: data-bs-backdrop="static" тут не потрібен,
+          профіль не блокує критичних дій, тому закриття по кліку зовні
+          доречне). Рендериться лише коли панель відкрита. */}
+      {isProfileSidebarOpen && (
+        <div
+          className="user-profile-sidebar-backdrop"
+          onClick={closeProfileSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Панель профілю користувача (справа) — показ/приховування через
+          isProfileSidebarOpen (клас .is-open, див.
+          app/styles/layout/_user-profile-sidebar.css). Рендериться
+          завжди, щоб анімація закриття встигала відіграти, а не
+          зникала миттєво разом з розмонтуванням. */}
+      <aside
+        className={`user-profile-sidebar ${isProfileSidebarOpen ? "is-open" : ""}`}
+        aria-hidden={!isProfileSidebarOpen}
+      >
+        <div className="user-profile-sidebar-header">
+          <span className="user-profile-sidebar-title">Профіль</span>
+          <button
+            type="button"
+            className="user-profile-sidebar-close"
+            id="user-profile-hide"
+            title="Закрити"
+            aria-label="Закрити профіль"
+            onClick={closeProfileSidebar}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="user-profile-sidebar-content">
+          <div className="user-profile-avatar" aria-hidden="true">
+            <UserIcon size={28} />
+          </div>
+
+          <p className="user-profile-login">{login}</p>
+
+          {currentUserRole && currentUserRole !== ROLE_VALUES.USER && (
+            <span className="user-profile-role-badge">
+              {getRoleLabel(currentUserRole)}
+            </span>
+          )}
+
+          <div className="user-profile-info-row">
+            <span className="user-profile-info-label">Кімната</span>
+            <span className="user-profile-info-value">{activeRoomName ?? "—"}</span>
+          </div>
+
+          <div className="user-profile-info-row">
+            <span className="user-profile-info-label">Статус</span>
+            <span className={`user-profile-info-value ${connected ? "is-online" : "is-offline"}`}>
+              {connected ? "Онлайн" : "Підключення…"}
+            </span>
           </div>
         </div>
-profile-sidebar-content
-      </div>
+      </aside>
       <DirectMessagesModal />
       <RoleManageModal />
       <KickModal />

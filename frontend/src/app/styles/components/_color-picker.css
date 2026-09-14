@@ -5,10 +5,9 @@
    візуально прихований (але лишається в DOM/доступний з
    клавіатури — див. .color-radio-input нижче), вибір видно по
    кільцю-обведенню навколо кружка. При наведенні з'являється
-   нативний Bootstrap Tooltip з назвою кольору (ініціалізується в
-   RegisterForm.jsx через useBootstrapTooltips, data-app-tooltip +
-   title на .color-radio-option), а під усією палітрою — назва
-   поточно обраного кольору (див. .color-radio-selected-name,
+   нативний браузерний тултип з назвою кольору (title на
+   .color-radio-option, без додаткового JS), а під усією палітрою —
+   назва поточно обраного кольору (див. .color-radio-selected-name,
    текст рендериться в RegisterForm.jsx через getColorLabel(color),
    не в CSS).
    Використовується у формі реєстрації (RegisterForm.jsx).

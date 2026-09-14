@@ -46,10 +46,6 @@
     max-width: 85%;
   }
 
-  .message-assistant .message-content {
-    max-width: 100%;
-  }
-
   .chat-input-section {
     padding: 0.5rem 0.75rem 0.75rem;
   }

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import SimpleBar from "simplebar-react";
 import { ArrowLeft, MessagesSquare, Send, Ban } from "lucide-react";
 
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -147,7 +146,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
 
           <div className={`dm-modal-body dm-modal-mobile-${mobileView}`}>
             {/* Вертикальні вкладки діалогів */}
-            <SimpleBar className="dm-modal-tabs app-scrollbar no-horizontal">
+            <div className="dm-modal-tabs app-scrollbar no-horizontal">
               {order.length === 0 ? (
                 <div className="dm-modal-empty-tabs">
                   {listLoading ? "Завантаження…" : "Немає розпочатих діалогів"}
@@ -188,7 +187,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                   );
                 })
               )}
-            </SimpleBar>
+            </div>
 
             {/* Саме вікно повідомлень обраного діалогу. Контейнер
                 .dm-modal-messages рендериться ЗАВЖДИ (а не лише коли
@@ -218,7 +217,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
               )}
 
               <div className="dm-modal-messages">
-                <SimpleBar className="app-scrollbar no-horizontal" style={{ height: "100%" }}>
+                <div className="app-scrollbar no-horizontal" style={{ height: "100%" }}>
                   <div className="dm-modal-messages-list">
                     {!active ? (
                       <div className="dm-modal-placeholder">
@@ -257,7 +256,7 @@ export function DirectMessagesModal({ modalId = "dmModal" }) {
                         діалозі, щоб ref не втрачався при зміні стану. */}
                     <div ref={endRef} />
                   </div>
-                </SimpleBar>
+                </div>
               </div>
 
               {/* active.blocked — заблоковано відправлення в цьому

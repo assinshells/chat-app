@@ -23,17 +23,15 @@
 @import "./base/_scrollbar.css";
 
 @import "./layout/_shell.css";
-@import "./layout/_side-menu.css";
 @import "./layout/_sidebar.css";
+@import "./layout/_user-profile-sidebar.css";
 
 @import "./components/_chat-header.css";
-@import "./components/_dropdown.css";
 @import "./components/_chat-conversation.css";
 @import "./components/_messages.css";
 @import "./components/_chat-composer.css";
 @import "./components/_forms.css";
 @import "./components/_emoji-picker.css";
-@import "./components/_user-actions-menu.css";
 @import "./components/_direct-messages.css";
 @import "./components/_color-picker.css";
 @import "./components/_settings-modal.css";

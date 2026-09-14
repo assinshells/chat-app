@@ -1,0 +1,174 @@
+/* =========================================================
+   USER PROFILE SIDEBAR — вузька панель з інформацією про
+   поточного користувача, справа. На відміну від .app-sidebar
+   (завжди видима), ця панель за замовчуванням прихована й
+   виїжджає праворуч наліво: показ/приховування перемикає
+   isProfileSidebarOpen у ChatLayout.jsx (кнопка "user-profile-show"
+   у шапці відкриває, хрестик усередині панелі — закриває).
+   ========================================================= */
+
+.user-profile-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  z-index: 1040;
+}
+
+.user-profile-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 300px;
+  max-width: 85vw;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bs-body-bg);
+  border-left: 1px solid var(--bs-border-color);
+  box-shadow: -12px 0 30px rgba(var(--app-shadow-color), var(--app-shadow-strong));
+
+  transform: translateX(100%);
+  transition: transform 0.2s ease;
+
+  z-index: 1045;
+}
+
+.user-profile-sidebar.is-open {
+  transform: translateX(0);
+}
+
+.user-profile-sidebar-header {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0.85rem 1rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.user-profile-sidebar-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.user-profile-sidebar-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+
+  color: var(--bs-secondary-color);
+
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.user-profile-sidebar-close:hover {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+}
+
+.user-profile-sidebar-content {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 0.6rem;
+
+  padding: 1.5rem 1rem;
+
+  overflow-y: auto;
+}
+
+.user-profile-avatar {
+  width: 64px;
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+
+  margin-bottom: 0.25rem;
+}
+
+.user-profile-login {
+  margin: 0;
+
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--bs-body-color);
+
+  word-break: break-word;
+  text-align: center;
+}
+
+.user-profile-role-badge {
+  padding: 0.2rem 0.65rem;
+
+  border-radius: 999px;
+
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-primary);
+
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.user-profile-info-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.8rem;
+
+  background: var(--bs-tertiary-bg);
+  border-radius: 10px;
+}
+
+.user-profile-info-label {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+}
+
+.user-profile-info-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.user-profile-info-value.is-online {
+  color: var(--bs-success, #2fb344);
+}
+
+.user-profile-info-value.is-offline {
+  color: var(--bs-secondary-color);
+}

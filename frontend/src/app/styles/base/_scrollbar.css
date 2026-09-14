@@ -1,27 +1,34 @@
-/* .app-scrollbar — общая тема SimpleBar (сам скролбар полностью
-   скрыт, видна только прокручиваемая область). Тільки візуальні
-   правила: сама висота/розміри контейнера залежать від місця
-   використання і задаються класом конкретного компонента
+/* .app-scrollbar — единый скролл-контейнер приложения: сам браузерний
+   скролбар повністю прихований, видна лише прокручувана область.
+   Тільки візуальні правила: сама висота/розміри контейнера залежать
+   від місця використання і задаються класом конкретного компонента
    (.chat-conversation, .app-sidebar-tabs-body, .dm-modal-tabs,
    .dm-modal-messages, .auth-scrollbar тощо) — не тут, інакше один
    спільний height зламав би всі інші використання. */
 
-/* Повносторінковий скрол (лише AuthLayout — там SimpleBar обгортає
-   всю сторінку логіну/реєстрації). */
-.auth-scrollbar {
-  height: 100vh;
+.app-scrollbar {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  /* Ховаємо сам скролбар (Firefox / старий Edge), скрол лишається
+     робочим — просто без візуального повзунка/треку. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Скролбар повністю прихований — самого скролу це не стосується,
-   ховаємо лише візуальний трек/повзунок SimpleBar. */
-.app-scrollbar .simplebar-track {
+/* Ховаємо скролбар у Chrome/Safari/новому Edge (WebKit). */
+.app-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-/* Плавна прокрутка — раніше це був scroll-behavior: smooth на самому
-   елементі (.chat-conversation тощо), але реальний overflow-вузол
-   тепер усередині SimpleBar (.simplebar-content-wrapper), тому
-   scroll-behavior треба вішати саме на нього. */
-.app-scrollbar .simplebar-content-wrapper {
-  scroll-behavior: smooth;
+/* Горизонтальний скрол не потрібен жодному з використань — прибираємо
+   випадкове горизонтальне розтягування вмісту. */
+.app-scrollbar.no-horizontal {
+  overflow-x: hidden;
+}
+
+/* Повносторінковий скрол (лише AuthLayout — обгортає всю сторінку
+   логіну/реєстрації). */
+.auth-scrollbar {
+  height: 100vh;
 }

@@ -1,5 +1,4 @@
 import { createPortal } from "react-dom";
-import SimpleBar from "simplebar-react";
 
 /**
  * RulesModal — статична модалка з правилами чату.
@@ -10,14 +9,12 @@ import SimpleBar from "simplebar-react";
  * transform/overflow:hidden.
  *
  * Повний текст правил (узгоджена редакція). Діалог зроблено ширшим
- * (modal-lg). Прокрутка — через SimpleBar (та сама тема скролбара,
- * що й у сайдбарі, див. Sidebar.jsx / app/styles/base/_scrollbar.css),
- * але саму модалку все одно тримаємо на modal-dialog-scrollable:
- * це обмежує висоту .modal-content висотою вʼюпорту (замість того,
- * щоб браузер сам скролив увесь .modal), а SimpleBar вішається прямо
- * на .modal-body (яка бере на себе flex: 1 1 auto від Bootstrap і
- * заповнює простір між шапкою й футером) і бере overflow під свій
- * контроль — див. .rules-modal-body в _settings-modal.css.
+ * (modal-lg). Прокрутка — власним overflow-y на .rules-modal-body
+ * (та сама тема скролбара, що й у сайдбарі, див. Sidebar.jsx /
+ * app/styles/base/_scrollbar.css), а modal-dialog-scrollable
+ * обмежує висоту .modal-content висотою вʼюпорту (замість того,
+ * щоб браузер сам скролив увесь .modal) — див. .rules-modal-body в
+ * _settings-modal.css.
  */
 export function RulesModal({ modalId = "rulesModal" }) {
   return createPortal(
@@ -43,7 +40,7 @@ export function RulesModal({ modalId = "rulesModal" }) {
             />
           </div>
 
-          <SimpleBar className="modal-body rules-modal-body app-scrollbar no-horizontal" forceVisible="y">
+          <div className="modal-body rules-modal-body app-scrollbar no-horizontal">
             <section className="rules-modal-section">
               <h6>1. Загальні положення</h6>
               <p>Чат призначений для повнолітніх користувачів віком 18+.</p>
@@ -433,7 +430,7 @@ export function RulesModal({ modalId = "rulesModal" }) {
                 роботі чату.
               </p>
             </section>
-          </SimpleBar>
+          </div>
 
           <div className="modal-footer">
             <button

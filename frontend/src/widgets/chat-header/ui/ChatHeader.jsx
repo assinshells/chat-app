@@ -8,7 +8,7 @@ import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.
 const SETTINGS_MODAL_ID = "settingsModal";
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
-export function ChatHeader({ title, online, onLogout, dmModalId = "dmModal" }) {
+export function ChatHeader({ title, online, onLogout, onOpenProfile, dmModalId = "dmModal" }) {
   const openInbox = useDmStore((state) => state.openInbox);
   const unreadTotal = useDmStore((state) =>
     Object.values(state.conversations).reduce(
@@ -37,7 +37,13 @@ export function ChatHeader({ title, online, onLogout, dmModalId = "dmModal" }) {
 
         {/* Actions */}
         <div className="chat-header-actions">
-          <button type="button" className="btn nav-btn user-profile-show">
+          <button
+            type="button"
+            className="chat-header-btn user-profile-show"
+            title="Профіль"
+            aria-label="Показати профіль"
+            onClick={onOpenProfile}
+          >
             <User size={18} />
           </button>
 
