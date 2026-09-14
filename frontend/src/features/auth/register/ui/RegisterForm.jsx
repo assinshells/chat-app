@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Tooltip } from "bootstrap";
 import { useRegisterStore } from "@features/auth/register/model/useRegisterStore.js";
 import { GENDER_OPTIONS, DEFAULT_GENDER } from "@shared/constants/auth.constants.js";
 import {
@@ -8,6 +9,7 @@ import {
   getDefaultColorForTheme,
 } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
+import { useBootstrapTooltips } from "@shared/lib/useBootstrapTooltips.js";
 import { RulesModal } from "@features/info/ui/RulesModal.jsx";
 
 // Окремий id, щоб не конфліктувати з модалкою правил у сайдбарі
@@ -50,6 +52,13 @@ export function RegisterForm({ onSuccess, onBack }) {
     : getDefaultColorForTheme(isDarkTheme);
 
   const { loading, error, register, clearError } = useRegisterStore();
+
+  // Тултип з назвою кольору при наведенні на свотч — нативний
+  // Bootstrap Tooltip замість чистого CSS ::after/::before (див.
+  // колишній коментар у _color-picker.css). Перевстановлюємо при
+  // зміні isDarkTheme: visibleColorOptions (а отже й самі
+  // DOM-елементи свотчів) перераховуються під нову тему.
+  const colorOptionsRef = useBootstrapTooltips([isDarkTheme]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -122,13 +131,15 @@ export function RegisterForm({ onSuccess, onBack }) {
         </div>
 
         <div className="mb-4">
-          <div className="color-radio-options">
+          <div className="color-radio-options" ref={colorOptionsRef}>
             {visibleColorOptions.map((option) => (
               <label
                 key={option.value}
                 className="color-radio-option"
                 style={{ "--swatch-color": option.hex, "--swatch-color-dark": option.hexDark ?? option.hex }}
-                data-tooltip={option.label}
+                data-app-tooltip
+                data-bs-placement="top"
+                title={option.label}
               >
                 <span className="color-radio-swatch" aria-hidden="true" />
                 <input
@@ -138,6 +149,8 @@ export function RegisterForm({ onSuccess, onBack }) {
                   value={option.value}
                   checked={effectiveColor === option.value}
                   onChange={(e) => setColor(e.target.value)}
+                  onFocus={(e) => Tooltip.getInstance(e.target.closest("label"))?.show()}
+                  onBlur={(e) => Tooltip.getInstance(e.target.closest("label"))?.hide()}
                   required
                   aria-label={option.label}
                 />

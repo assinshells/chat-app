@@ -11,6 +11,7 @@ import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
+import { useBootstrapTooltips } from "@shared/lib/useBootstrapTooltips.js";
 
 const RULES_MODAL_ID = "sidebarRulesModal";
 const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
@@ -69,6 +70,15 @@ export function Sidebar({
   // референси, сама функція стабільна і ререндер не викликала б).
   const friendLogins = useFriendStore((state) => state.friendLogins);
 
+  // Тултипи на іконках табів — нативний Bootstrap Tooltip замість
+  // раніше власного .app-sidebar-tab-tooltip: не потребує ручного
+  // з'ясування, до якого краю притулити (Popper сам не дає тултипу
+  // вилізти за межі viewport'а, навіть попри overflow-x: hidden на
+  // .app-sidebar-inner — тултип рендериться в document.body, а не
+  // всередині сайдбара). Перевстановлюємо при зміні activeTab, бо
+  // data-app-tooltip є лише в неактивних табів (див. нижче).
+  const tabsNavRef = useBootstrapTooltips([activeTab]);
+
   // Групуємо учасників активної кімнати за статтю один раз за рендер,
   // а не на кожен чих — список учасників кімнати може бути довгим.
   // gender може бути лише 'male' | 'female' (див. GENDER_VALUES на
@@ -103,40 +113,29 @@ export function Sidebar({
         <div className="app-sidebar-tabs">
 
 
-          <div className="app-sidebar-tabs-nav">
-            {MAIN_TABS.map((tab, index) => {
+          <div className="app-sidebar-tabs-nav" ref={tabsNavRef}>
+            {MAIN_TABS.map((tab) => {
               const Icon = tab.icon;
-              // .app-sidebar-inner (батьківський скрол-контейнер) має
-              // overflow-x: hidden — тултип по центру першого/останнього
-              // табу міг би вилізти за межу і обрізатись, тому крайні
-              // таби прив'язують тултип до внутрішнього краю замість
-              // центру (див. _sidebar.css).
-              const edgeClass =
-                index === 0
-                  ? "is-align-start"
-                  : index === MAIN_TABS.length - 1
-                    ? "is-align-end"
-                    : "";
+              const isActive = activeTab === tab.id;
+
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  className={`app-sidebar-tab-btn ${activeTab === tab.id ? "is-active" : ""}`}
+                  className={`app-sidebar-tab-btn ${isActive ? "is-active" : ""}`}
                   aria-label={tab.label}
                   onClick={() => setActiveTab(tab.id)}
+                  // Тултип не потрібен для активного табу — підпис і
+                  // так видно поруч з іконкою (.app-sidebar-tab-label
+                  // нижче), тому data-app-tooltip навмисно відсутній.
+                  {...(!isActive && {
+                    "data-app-tooltip": true,
+                    "data-bs-placement": "auto",
+                    title: tab.label,
+                  })}
                 >
                   <Icon size={16} className="app-sidebar-tab-icon" />
                   <span className="app-sidebar-tab-label">{tab.label}</span>
-                  {/* Власний тултип замість нативного title: title
-                      з'являється із затримкою, стилізується браузером
-                      по-різному і його рендер поверх сторінки не
-                      гарантований (у деяких браузерах перекривається
-                      іншими елементами з власним stacking context) —
-                      цей же завжди належний DOM-елемент з явним
-                      z-index (див. _sidebar.css). Не показуємо для
-                      активного табу — там підпис і так видно поруч
-                      з іконкою. */}
-                  <span className={`app-sidebar-tab-tooltip ${edgeClass}`}>{tab.label}</span>
                 </button>
               );
             })}
