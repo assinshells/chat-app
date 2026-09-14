@@ -1,4 +1,4 @@
-import { LogOut, Mail, Menu, Settings } from "lucide-react";
+import { LogOut, Mail, Menu, Settings, User } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
@@ -8,12 +8,7 @@ import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.
 const SETTINGS_MODAL_ID = "settingsModal";
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
-export function ChatHeader({
-  title,
-  online,
-  onLogout,
-  dmModalId = "dmModal",
-}) {
+export function ChatHeader({ title, online, onLogout, dmModalId = "dmModal" }) {
   const openInbox = useDmStore((state) => state.openInbox);
   const unreadTotal = useDmStore((state) =>
     Object.values(state.conversations).reduce(
@@ -24,16 +19,12 @@ export function ChatHeader({
   return (
     <header className="chat-header">
       <div className="chat-header-inner">
-
         <div className="chat-header-start">
-
           {/* Назва поточної кімнати (з фолбеком на ім'я застосунку,
               поки кімната ще не резолвилась). Логотип прибрано. */}
           <div className="chat-brand">
             <div className="chat-brand-info">
-              <h5 className="chat-brand-title">
-                {title || APP_NAME}
-              </h5>
+              <h5 className="chat-brand-title">{title || APP_NAME}</h5>
 
               <span
                 className={`chat-brand-status ${online ? "is-online" : "is-offline"}`}
@@ -44,9 +35,11 @@ export function ChatHeader({
           </div>
         </div>
 
-
         {/* Actions */}
         <div className="chat-header-actions">
+          <button type="button" className="btn nav-btn user-profile-show">
+            <User size={18} />
+          </button>
 
           <button
             type="button"
@@ -103,7 +96,6 @@ export function ChatHeader({
               </li>
             </ul>
           </div>
-
         </div>
       </div>
 
