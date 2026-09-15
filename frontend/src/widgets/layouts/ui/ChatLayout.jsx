@@ -223,8 +223,226 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper d-lg-flex">
+      <div className="side-menu flex-lg-column me-lg-1 ms-lg-0">
+        <div className="navbar-brand-box">
+          <a href="index.html" className="logo logo-dark">
+            <span className="logo-sm">
+              <img src="assets/images/logo.svg" alt="" height="30" />
+            </span>
+          </a>
 
-      
+          <a href="index.html" className="logo logo-light">
+            <span className="logo-sm">
+              <img src="assets/images/logo.svg" alt="" height="30" />
+            </span>
+          </a>
+        </div>
+
+        <div className="flex-lg-column my-auto">
+          <ul
+            className="nav nav-pills side-menu-nav justify-content-center"
+            role="tablist"
+          >
+            <li
+              className="nav-item"
+              
+              
+              title="Profile"
+            >
+              <a
+                className="nav-link"
+                id="pills-user-tab"
+                data-bs-toggle="pill"
+                href="#pills-user"
+                role="tab"
+              >
+                <i className="ri-user-2-line"></i>
+              </a>
+            </li>
+            <li
+              className="nav-item"
+              
+              
+              title="Chats"
+            >
+              <a
+                className="nav-link active"
+                id="pills-chat-tab"
+                data-bs-toggle="pill"
+                href="#pills-chat"
+                role="tab"
+              >
+                <i className="ri-message-3-line"></i>
+              </a>
+            </li>
+            <li
+              className="nav-item"
+              
+              
+              title="Groups"
+            >
+              <a
+                className="nav-link"
+                id="pills-groups-tab"
+                data-bs-toggle="pill"
+                href="#pills-groups"
+                role="tab"
+              >
+                <i className="ri-group-line"></i>
+              </a>
+            </li>
+            <li
+              className="nav-item"
+              
+              
+              title="Contacts"
+            >
+              <a
+                className="nav-link"
+                id="pills-contacts-tab"
+                data-bs-toggle="pill"
+                href="#pills-contacts"
+                role="tab"
+              >
+                <i className="ri-contacts-line"></i>
+              </a>
+            </li>
+            <li
+              className="nav-item"
+              
+              
+              title="Settings"
+            >
+              <a
+                className="nav-link"
+                id="pills-setting-tab"
+                data-bs-toggle="pill"
+                href="#pills-setting"
+                role="tab"
+              >
+                <i className="ri-settings-2-line"></i>
+              </a>
+            </li>
+            <li className="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <img
+                  src="assets/images/users/avatar-1.jpg"
+                  alt=""
+                  className="profile-user rounded-circle"
+                />
+              </a>
+              <div className="dropdown-menu">
+                <a className="dropdown-item" href="#">
+                  Profile{" "}
+                  <i className="ri-profile-line float-end text-muted"></i>
+                </a>
+                <a className="dropdown-item" href="#">
+                  Setting{" "}
+                  <i className="ri-settings-3-line float-end text-muted"></i>
+                </a>
+                <div className="dropdown-divider"></div>
+                <a className="dropdown-item" href="#">
+                  Log out{" "}
+                  <i className="ri-logout-circle-r-line float-end text-muted"></i>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div className="flex-lg-column d-none d-lg-block">
+          <ul className="nav side-menu-nav justify-content-center">
+            <li className="nav-item btn-group dropup profile-user-dropdown">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <img
+                  src="assets/images/users/avatar-1.jpg"
+                  alt=""
+                  className="profile-user rounded-circle"
+                />
+              </a>
+              <div className="dropdown-menu">
+                <a className="dropdown-item" href="#">
+                  Profile{" "}
+                  <i className="ri-profile-line float-end text-muted"></i>
+                </a>
+                <a className="dropdown-item" href="#">
+                  Setting{" "}
+                  <i className="ri-settings-3-line float-end text-muted"></i>
+                </a>
+                <div className="dropdown-divider"></div>
+                <a className="dropdown-item" href="auth-login.html">
+                  Log out{" "}
+                  <i className="ri-logout-circle-r-line float-end text-muted"></i>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="chat-leftsidebar me-lg-1 ms-lg-0">
+        <div className="tab-content">
+          <div
+            className="tab-pane"
+            id="pills-user"
+            role="tabpanel"
+            aria-labelledby="pills-user-tab"
+          >
+            Profile tab-pane
+          </div>
+
+          <div
+            className="tab-pane fade show active"
+            id="pills-chat"
+            role="tabpanel"
+            aria-labelledby="pills-chat-tab"
+          >
+            chats tab-pane
+          </div>
+
+          <div
+            className="tab-pane"
+            id="pills-groups"
+            role="tabpanel"
+            aria-labelledby="pills-groups-tab"
+          >
+            groups tab-pane
+          </div>
+
+          <div
+            className="tab-pane"
+            id="pills-contacts"
+            role="tabpanel"
+            aria-labelledby="pills-contacts-tab"
+          >
+            contacts tab-pane
+          </div>
+
+          <div
+            className="tab-pane"
+            id="pills-setting"
+            role="tabpanel"
+            aria-labelledby="pills-setting-tab"
+          >
+            settings tab-pane
+          </div>
+        </div>
+      </div>
+
       {/* Підкладка для лівого сайдбара — актуальна на вузьких екранах,
           де сайдбар стає висувним поверх контенту (див. медіа-запит
           у _responsive.css); на широких — сайдбар просто в потоці
@@ -319,65 +537,69 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
           й Bootstrap-модалки: data-bs-backdrop="static" тут не потрібен,
           профіль не блокує критичних дій, тому закриття по кліку зовні
           доречне). Рендериться лише коли панель відкрита. */}
-      {isProfileSidebarOpen && (
-        <div
-          className="user-profile-sidebar-backdrop"
-          onClick={closeProfileSidebar}
-          aria-hidden="true"
-        />
-      )}
+        {isProfileSidebarOpen && (
+          <div
+            className="user-profile-sidebar-backdrop"
+            onClick={closeProfileSidebar}
+            aria-hidden="true"
+          />
+        )}
 
-      {/* Панель профілю користувача (справа) — показ/приховування через
+        {/* Панель профілю користувача (справа) — показ/приховування через
           isProfileSidebarOpen (клас .is-open, див.
           app/styles/layout/_user-profile-sidebar.css). Рендериться
           завжди, щоб анімація закриття встигала відіграти, а не
           зникала миттєво разом з розмонтуванням. */}
-      <aside
-        className={`user-profile-sidebar ${isProfileSidebarOpen ? "is-open" : ""}`}
-        aria-hidden={!isProfileSidebarOpen}
-      >
-        <div className="user-profile-sidebar-header">
-          <span className="user-profile-sidebar-title">Профіль</span>
-          <button
-            type="button"
-            className="user-profile-sidebar-close"
-            id="user-profile-hide"
-            title="Закрити"
-            aria-label="Закрити профіль"
-            onClick={closeProfileSidebar}
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="user-profile-sidebar-content">
-          <div className="user-profile-avatar" aria-hidden="true">
-            <UserIcon size={28} />
+        <aside
+          className={`user-profile-sidebar ${isProfileSidebarOpen ? "is-open" : ""}`}
+          aria-hidden={!isProfileSidebarOpen}
+        >
+          <div className="user-profile-sidebar-header">
+            <span className="user-profile-sidebar-title">Профіль</span>
+            <button
+              type="button"
+              className="user-profile-sidebar-close"
+              id="user-profile-hide"
+              title="Закрити"
+              aria-label="Закрити профіль"
+              onClick={closeProfileSidebar}
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          <p className="user-profile-login">{login}</p>
+          <div className="user-profile-sidebar-content">
+            <div className="user-profile-avatar" aria-hidden="true">
+              <UserIcon size={28} />
+            </div>
 
-          {currentUserRole && currentUserRole !== ROLE_VALUES.USER && (
-            <span className="user-profile-role-badge">
-              {getRoleLabel(currentUserRole)}
-            </span>
-          )}
+            <p className="user-profile-login">{login}</p>
 
-          <div className="user-profile-info-row">
-            <span className="user-profile-info-label">Кімната</span>
-            <span className="user-profile-info-value">{activeRoomName ?? "—"}</span>
+            {currentUserRole && currentUserRole !== ROLE_VALUES.USER && (
+              <span className="user-profile-role-badge">
+                {getRoleLabel(currentUserRole)}
+              </span>
+            )}
+
+            <div className="user-profile-info-row">
+              <span className="user-profile-info-label">Кімната</span>
+              <span className="user-profile-info-value">
+                {activeRoomName ?? "—"}
+              </span>
+            </div>
+
+            <div className="user-profile-info-row">
+              <span className="user-profile-info-label">Статус</span>
+              <span
+                className={`user-profile-info-value ${connected ? "is-online" : "is-offline"}`}
+              >
+                {connected ? "Онлайн" : "Підключення…"}
+              </span>
+            </div>
           </div>
-
-          <div className="user-profile-info-row">
-            <span className="user-profile-info-label">Статус</span>
-            <span className={`user-profile-info-value ${connected ? "is-online" : "is-offline"}`}>
-              {connected ? "Онлайн" : "Підключення…"}
-            </span>
-          </div>
-        </div>
-      </aside>
+        </aside>
       </div>
-      
+
       <DirectMessagesModal />
       <RoleManageModal />
       <KickModal />
