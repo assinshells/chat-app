@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { MessageSquare, Users, Star, Ban } from "lucide-react";
+import { MessageSquare, Users, Star, Ban, X } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { RulesModal, FeedbackModal } from "@features/info";
 import { BlockedUsersList } from "@features/block";
@@ -33,10 +33,14 @@ const MAIN_TABS = [
 /**
  * Бічна панель у дусі Claude / ChatGPT.
  *
- * Статична: завжди видима, у потоці документа, однакова на десктопі
- * й мобільному — без закріплення/згортання, прев'ю по наведенню чи
- * висувного drawer'а з підкладкою (раніше тут була ця логіка, див.
- * git-історію — прибрано за запитом).
+ * Показ/приховування керується ззовні через isOpen/onClose (див.
+ * isSidebarOpen у ChatLayout.jsx, перемикається кнопкою
+ * "app-sidebar-toggle" у шапці чату): на широких екранах приховування
+ * прибирає панель із потоку документа (не займає місце), на вузьких —
+ * панель стає висувним drawer'ом з підкладкою поверх контенту (див.
+ * медіа-запит у app/styles/components/_responsive.css). Хрестик
+ * усередині шапки панелі (app-sidebar-top) закриває її незалежно від
+ * ширини екрана.
  *
  * Кімнати і онлайн-користувачі — живі дані з бекенда (Socket.IO),
  * див. features/chat/model/useChatSocket.js: activeRoom/roomCounts/roomUsers
@@ -50,6 +54,8 @@ export function Sidebar({
   onSelectRoom,
   onNicknameClick,
   selectedNicknames = [],
+  isOpen = true,
+  onClose,
 }) {
   // Верхній рівень табів: список кімнат / список користувачів.
   const [activeTab, setActiveTab] = useState("rooms");
@@ -83,18 +89,30 @@ export function Sidebar({
   }, [roomUsers]);
 
   return (
-    <aside className="app-sidebar">
+    <aside
+      className={`app-sidebar ${isOpen ? "is-open" : "is-closed"}`}
+      aria-hidden={!isOpen}
+    >
       <div className="app-sidebar-inner">
 
-        {/* Верх панелі: лише назва сайту (десктоп і мобільний, без
-            логотипа) — раніше тут ще жили кнопка згортання/закріплення
-            і кнопка закриття drawer'а, обидві прибрано разом із
-            логікою закріплення/прев'ю/drawer'а (панель тепер завжди
-            статична й видима). */}
+        {/* Верх панелі: назва сайту й кнопка закриття, працює однаково
+            на десктопі й мобільному (стилі — .app-sidebar-close в
+            _sidebar.css; кнопка перемикання того самого сайдбара живе
+            в шапці чату, див. ChatHeader.jsx). */}
         <div className="app-sidebar-top">
           <span className="app-sidebar-site-name">
             {APP_NAME}
           </span>
+
+          <button
+            type="button"
+            className="app-sidebar-close"
+            title="Закрити"
+            aria-label="Закрити бічну панель"
+            onClick={onClose}
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Таби: «Кімнати» / «Користувачі». Займають усе місце від верху
@@ -230,8 +248,7 @@ export function Sidebar({
         {/* Футер панелі: замість ніка (він і так завжди видно в шапці
             чата, див. ChatHeader) — посилання на допоміжні модалки,
             завжди доступні незалежно від того, в якій кімнаті/вкладці
-            зараз користувач. Кнопку згортання перенесено нагору, див.
-            app-sidebar-top вище. */}
+            зараз користувач. */}
         <div className="app-sidebar-footer">
           <a
             href="#"

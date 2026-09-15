@@ -1,8 +1,10 @@
 /* =========================================================
-   SIDEBAR — статична панель, завжди в потоці документа й видима,
-   однаково на мобільному й десктопі (без закріплення/згортання,
-   прев'ю по наведенню чи висувного drawer'а з підкладкою — ця
-   логіка була раніше, прибрано за запитом).
+   SIDEBAR — показ/приховування керується класом .is-open/.is-closed
+   (див. isSidebarOpen у ChatLayout.jsx). На широких екранах
+   приховування стискає ширину до 0 (панель зникає з потоку
+   документа, контент чату займає звільнене місце); на вузьких —
+   стає висувним drawer'ом з підкладкою поверх контенту (див.
+   .app-sidebar у _responsive.css, підключається останнім).
    ========================================================= */
 
 .app-sidebar {
@@ -15,10 +17,20 @@
   display: flex;
   flex-direction: column;
 
+  overflow: hidden;
+
   background: var(--bs-body-bg);
   border-right: 1px solid var(--bs-border-color);
 
+  transition: width 0.2s ease, border-color 0.2s ease;
+
   z-index: 5;
+}
+
+.app-sidebar.is-closed {
+  width: 0;
+
+  border-right-color: transparent;
 }
 
 .app-sidebar-inner {
@@ -38,7 +50,7 @@
 }
 
 /* =========================================================
-   SIDEBAR TOP: назва сайту
+   SIDEBAR TOP: назва сайту + кнопка закриття
    ========================================================= */
 
 .app-sidebar-top {
@@ -46,6 +58,7 @@
 
   display: flex;
   align-items: center;
+  justify-content: space-between;
 
   min-height: 44px;
 
@@ -67,6 +80,36 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Хрестик закриття всередині шапки сайдбара — той самий візуальний
+   патерн, що й .user-profile-sidebar-close (панель профілю справа),
+   аби обидві висувні панелі закривались однаково. */
+.app-sidebar-close {
+  flex: 0 0 auto;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+
+  color: var(--bs-secondary-color);
+
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.app-sidebar-close:hover {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
 }
 
 /* =========================================================

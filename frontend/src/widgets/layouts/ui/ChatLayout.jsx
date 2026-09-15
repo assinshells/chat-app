@@ -120,6 +120,23 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
 
+  // Показ/приховування лівого сайдбара (кімнати/користувачі/друзі/
+  // заблоковані) — кнопка "app-sidebar-toggle" у шапці (ChatHeader)
+  // перемикає, хрестик усередині сайдбара (Sidebar.jsx) закриває.
+  // Стартовий стан визначається один раз при монтуванні через
+  // matchMedia (768px — той самий брейкпоінт, що й у
+  // _responsive.css): на десктопі відкритий одразу (як і було раніше
+  // у статичній версії), на вузьких екранах — закритий, щоб не
+  // перекривати весь чат одразу після завантаження. Далі це вже
+  // звичайний булевий стейт, ніякого resize-слухача немає — зміна
+  // орієнтації/ширини вікна під час сесії на нього не впливає.
+  const [isSidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.matchMedia("(min-width: 768px)").matches;
+  });
+  const closeSidebar = () => setSidebarOpen(false);
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
+
   // Показ/приховування панелі профілю користувача (справа) — кнопка
   // "user-profile-show" у шапці (ChatHeader) відкриває, хрестик
   // усередині панелі закриває. Проста булева стейт-машина: панель
@@ -130,16 +147,21 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const openProfileSidebar = () => setProfileSidebarOpen(true);
   const closeProfileSidebar = () => setProfileSidebarOpen(false);
 
+  // Escape закриває будь-яку з двох висувних панелей — яка зараз
+  // відкрита (може бути відкрита лише одна одразу, могли б бути й
+  // обидві, тому перевіряємо обидва прапорці незалежно).
   useEffect(() => {
-    if (!isProfileSidebarOpen) return undefined;
+    if (!isProfileSidebarOpen && !isSidebarOpen) return undefined;
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") closeProfileSidebar();
+      if (e.key !== "Escape") return;
+      if (isProfileSidebarOpen) closeProfileSidebar();
+      if (isSidebarOpen) closeSidebar();
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isProfileSidebarOpen]);
+  }, [isProfileSidebarOpen, isSidebarOpen]);
 
   // Роль поточного користувача — єдине джерело правди на фронті (див.
   // коментар у currentUserStore.js), показуємо в панелі профілю.
@@ -201,6 +223,18 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper d-flex">
+      {/* Підкладка для лівого сайдбара — актуальна на вузьких екранах,
+          де сайдбар стає висувним поверх контенту (див. медіа-запит
+          у _responsive.css); на широких — сайдбар просто в потоці
+          документа, і підкладка там не рендериться. */}
+      {isSidebarOpen && (
+        <div
+          className="app-sidebar-backdrop"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
       <Sidebar
         login={login}
         activeRoom={activeRoom}
@@ -209,6 +243,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onSelectRoom={handleSelectRoom}
         onNicknameClick={handleNicknameClick}
         selectedNicknames={targetNicknames}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
       />
 
       <div className="user-chat w-100">
@@ -218,6 +254,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             online={connected}
             onLogout={onLogout}
             onOpenProfile={openProfileSidebar}
+            onToggleSidebar={toggleSidebar}
           />
           <ConfinementBanner confinement={confinement} />
           <RoomBanNoticeBanner notice={roomBanNotice} />
