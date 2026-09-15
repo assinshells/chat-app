@@ -19,8 +19,10 @@
 
 .chat-header-inner {
   width: 100%;
+  max-width: 640px;
   min-height: 68px;
 
+  margin: 0 auto;
   padding: 0.75rem 1.5rem;
 
   display: flex;

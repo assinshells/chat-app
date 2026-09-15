@@ -222,7 +222,9 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   }
 
   return (
-    <div className="layout-wrapper d-flex">
+    <div className="layout-wrapper d-lg-flex">
+
+      
       {/* Підкладка для лівого сайдбара — актуальна на вузьких екранах,
           де сайдбар стає висувним поверх контенту (див. медіа-запит
           у _responsive.css); на широких — сайдбар просто в потоці
@@ -247,7 +249,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onClose={closeSidebar}
       />
 
-      <div className="user-chat w-100">
+      <div className="user-chat w-100 overflow-hidden">
         <div className="chat-main">
           <ChatHeader
             title={activeRoomName}
@@ -313,8 +315,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             }
           />
         </div>
-      </div>
-      {/* Підкладка — клік поза панеллю закриває її (той самий патерн, що
+        {/* Підкладка — клік поза панеллю закриває її (той самий патерн, що
           й Bootstrap-модалки: data-bs-backdrop="static" тут не потрібен,
           профіль не блокує критичних дій, тому закриття по кліку зовні
           доречне). Рендериться лише коли панель відкрита. */}
@@ -375,6 +376,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
           </div>
         </div>
       </aside>
+      </div>
+      
       <DirectMessagesModal />
       <RoleManageModal />
       <KickModal />
