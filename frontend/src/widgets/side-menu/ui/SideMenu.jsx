@@ -13,8 +13,8 @@ const FEEDBACK_MODAL_ID = "sideMenuFeedbackModal";
 // компоненти НЕ знають одне про одного напряму.
 const MENU_TABS = [
   { id: "user", title: "Профіль", icon: User },
-  { id: "chat", title: "Чати", icon: MessageSquare, active: true },
-  { id: "users", title: "Користувачі", icon: Users },
+  { id: "chat", title: "Чати", icon: MessageSquare},
+  { id: "users", title: "Користувачі", icon: Users, active: true },
   { id: "contacts", title: "Контакти", icon: Contact },
   { id: "setting", title: "Налаштування", icon: Settings },
 ];
