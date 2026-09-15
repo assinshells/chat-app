@@ -2,8 +2,8 @@
    скролбар повністю прихований, видна лише прокручувана область.
    Тільки візуальні правила: сама висота/розміри контейнера залежать
    від місця використання і задаються класом конкретного компонента
-   (.chat-conversation, .app-sidebar-tabs-body, .dm-modal-tabs,
-   .dm-modal-messages, .auth-scrollbar тощо) — не тут, інакше один
+   (.chat-conversation, .dm-modal-tabs, .dm-modal-messages,
+   .auth-scrollbar тощо) — не тут, інакше один
    спільний height зламав би всі інші використання. */
 
 .app-scrollbar {

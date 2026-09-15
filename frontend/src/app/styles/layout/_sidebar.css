@@ -1,212 +1,11 @@
 /* =========================================================
-   SIDEBAR — показ/приховування керується класом .is-open/.is-closed
-   (див. isSidebarOpen у ChatLayout.jsx). На широких екранах
-   приховування стискає ширину до 0 (панель зникає з потоку
-   документа, контент чату займає звільнене місце); на вузьких —
-   стає висувним drawer'ом з підкладкою поверх контенту (див.
-   .app-sidebar у _responsive.css, підключається останнім).
+   Вміст двох винесених лівих сайдбарів (@widgets/side-menu +
+   @widgets/chat-leftsidebar): список кімнат, список онлайн-
+   користувачів із фільтром за статтю, друзі/заблоковані. Третій
+   (порожній) сайдбар-контейнер (.app-sidebar тощо) видалено разом
+   з @widgets/sidebar — ці класи лишились, бо їх вміст переїхав у
+   ChatLeftSidebar / FriendsList / BlockedUsersList.
    ========================================================= */
-
-.app-sidebar {
-  position: relative;
-
-  flex: 0 0 auto;
-
-  width: 280px;
-
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-
-  background: var(--bs-body-bg);
-  border-right: 1px solid var(--bs-border-color);
-
-  transition: width 0.2s ease, border-color 0.2s ease;
-
-  z-index: 5;
-}
-
-.app-sidebar.is-closed {
-  width: 0;
-
-  border-right-color: transparent;
-}
-
-.app-sidebar-inner {
-  width: 280px;
-  height: 100%;
-
-  flex: 0 0 auto;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 0.35rem;
-
-  padding: 0.75rem;
-
-  overflow: hidden;
-}
-
-/* =========================================================
-   SIDEBAR TOP: назва сайту + кнопка закриття
-   ========================================================= */
-
-.app-sidebar-top {
-  flex: 0 0 auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  min-height: 44px;
-
-  padding: 0.5rem 0.25rem 0.5rem 0.65rem;
-}
-
-.app-sidebar-site-name {
-  min-width: 0;
-  height: 34px;
-
-  display: flex;
-  align-items: center;
-
-  font-size: 0.9rem;
-  font-weight: 600;
-
-  color: var(--bs-body-color);
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Хрестик закриття всередині шапки сайдбара — той самий візуальний
-   патерн, що й .user-profile-sidebar-close (панель профілю справа),
-   аби обидві висувні панелі закривались однаково. */
-.app-sidebar-close {
-  flex: 0 0 auto;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 32px;
-  height: 32px;
-
-  padding: 0;
-
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-
-  color: var(--bs-secondary-color);
-
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.app-sidebar-close:hover {
-  background: var(--bs-tertiary-bg);
-  color: var(--bs-body-color);
-}
-
-/* =========================================================
-   TABS: «Кімнати» / «Користувачі» — занимают всё место
-   от верха панели до футера
-   ========================================================= */
-
-.app-sidebar-tabs {
-  flex: 1 1 auto;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  padding-top: 0.25rem;
-}
-
-.app-sidebar-tabs-nav {
-  flex: 0 0 auto;
-
-  display: flex;
-
-  gap: 0.25rem;
-
-  padding: 0.2rem;
-  margin-bottom: 0.35rem;
-
-  border-radius: 10px;
-
-  background: var(--bs-secondary-bg);
-}
-
-.app-sidebar-tab-btn {
-  flex: 1 1 0;
-  min-width: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-
-  min-height: 32px;
-  padding: 0 0.3rem;
-
-  border: 0;
-  border-radius: 8px;
-
-  background: transparent;
-
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  color: var(--bs-secondary-color);
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.app-sidebar-tab-icon {
-  flex: 0 0 auto;
-}
-
-/* Підпис показується лише біля активного табу (див. коментар при
-   MAIN_TABS у Sidebar.jsx) — для решти лишається сама іконка плюс
-   title-тултип на кнопці. min-width: 0 + overflow на самій кнопці
-   вище рятує від переповнення, якщо сайдбар звужений, а підпис
-   довгий ("Заблоковані"). */
-.app-sidebar-tab-label {
-  display: none;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-sidebar-tab-btn.is-active .app-sidebar-tab-label {
-  display: inline;
-}
-
-.app-sidebar-tab-btn:hover {
-  color: var(--bs-body-color);
-}
-
-.app-sidebar-tab-btn.is-active {
-  background: var(--bs-body-bg);
-  color: var(--bs-body-color);
-
-  box-shadow: 0 1px 2px rgba(var(--app-shadow-color), var(--app-shadow-soft));
-}
-
-.app-sidebar-tabs-body {
-  flex: 1 1 auto;
-  min-height: 0;
-}
 
 .app-sidebar-users {
   display: flex;
@@ -407,7 +206,7 @@
 }
 
 /* Друг (див. features/friends) — виділяється жирним шрифтом у списку
-   "Користувачі", незалежно від того, обраний він зараз як ціль
+   "Онлайн", незалежно від того, обраний він зараз як ціль
    повідомлення (.is-selected) чи ні — обидва класи можуть діяти
    одночасно. */
 .app-sidebar-online-name-btn.is-friend {
@@ -416,7 +215,7 @@
 
 /* Кнопка "Розблокувати" у вкладці "Заблоковані" (див.
    features/block/ui/BlockedUsersList.jsx) — той самий рядок
-   .app-sidebar-online-item, що й у списку "Користувачі", але замість
+   .app-sidebar-online-item, що й у списку "Онлайн", але замість
    кнопки-меню (три крапки) — явна текстова кнопка дії. */
 .app-sidebar-unblock-btn {
   flex: 0 0 auto;
@@ -495,51 +294,6 @@
   text-align: center;
 
   color: var(--bs-secondary-color);
-}
-
-/* =========================================================
-   FOOTER: посилання на допоміжні модалки (правила / фідбек)
-   ========================================================= */
-
-.app-sidebar-footer {
-  flex: 0 0 auto;
-
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-
-  row-gap: 0.3rem;
-  column-gap: 0.75rem;
-
-  padding-top: 0.5rem;
-
-  border-top: 1px solid var(--bs-border-color);
-}
-
-/* Посилання на допоміжні модалки (правила / попередження про безпеку /
-   зворотний зв'язок). Замінили нік користувача — сам нік і так завжди
-   видно в шапці чата (див. ChatHeader), дублювати його тут більше не
-   потрібно. Це саме текстові посилання (не кнопки-плашки): підкреслення
-   з'являється при наведенні, як у звичайних лінків, а не фон-заливка. */
-.app-sidebar-footer-link {
-  padding: 0.1rem 0;
-
-  font-size: 0.78rem;
-  font-weight: 500;
-  text-align: left;
-  text-decoration: none;
-
-  color: var(--bs-secondary-color);
-
-  cursor: pointer;
-
-  transition: color 0.15s ease;
-}
-
-.app-sidebar-footer-link:hover {
-  color: var(--bs-body-color);
-  text-decoration: underline;
 }
 
 /* =========================================================

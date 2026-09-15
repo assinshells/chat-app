@@ -1,4 +1,4 @@
-import { LogOut, Mail, Menu, PanelLeft, Settings, User } from "lucide-react";
+import { LogOut, Mail, Menu, Settings, User } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
@@ -8,7 +8,7 @@ import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.
 const SETTINGS_MODAL_ID = "settingsModal";
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
-export function ChatHeader({ title, online, onLogout, onOpenProfile, onToggleSidebar, dmModalId = "dmModal" }) {
+export function ChatHeader({ title, online, onLogout, onOpenProfile, dmModalId = "dmModal" }) {
   const openInbox = useDmStore((state) => state.openInbox);
   const unreadTotal = useDmStore((state) =>
     Object.values(state.conversations).reduce(
@@ -20,20 +20,6 @@ export function ChatHeader({ title, online, onLogout, onOpenProfile, onToggleSid
     <header className="chat-header">
       <div className="chat-header-inner">
         <div className="chat-header-start">
-          {/* Показ/приховування лівого сайдбара (кімнати/користувачі/
-              друзі/заблоковані) — той самий патерн, що й
-              user-profile-show справа, тільки керує іншою панеллю
-              (див. isSidebarOpen у ChatLayout.jsx). */}
-          <button
-            type="button"
-            className="chat-header-btn app-sidebar-toggle"
-            title="Показати/приховати список"
-            aria-label="Показати або приховати бічну панель"
-            onClick={onToggleSidebar}
-          >
-            <PanelLeft size={18} />
-          </button>
-
           {/* Назва поточної кімнати (з фолбеком на ім'я застосунку,
               поки кімната ще не резолвилась). Логотип прибрано. */}
           <div className="chat-brand">

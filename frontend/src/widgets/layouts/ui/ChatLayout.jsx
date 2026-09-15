@@ -4,7 +4,8 @@ import { X, User as UserIcon } from "lucide-react";
 import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
-import { Sidebar } from "@widgets/sidebar";
+import { SideMenu } from "@widgets/side-menu";
+import { ChatLeftSidebar } from "@widgets/chat-leftsidebar";
 import { useChatSocket } from "@features/chat";
 import { DirectMessagesModal, useDmStore } from "@features/dm";
 import { useBlockStore } from "@features/block";
@@ -120,23 +121,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
 
-  // Показ/приховування лівого сайдбара (кімнати/користувачі/друзі/
-  // заблоковані) — кнопка "app-sidebar-toggle" у шапці (ChatHeader)
-  // перемикає, хрестик усередині сайдбара (Sidebar.jsx) закриває.
-  // Стартовий стан визначається один раз при монтуванні через
-  // matchMedia (768px — той самий брейкпоінт, що й у
-  // _responsive.css): на десктопі відкритий одразу (як і було раніше
-  // у статичній версії), на вузьких екранах — закритий, щоб не
-  // перекривати весь чат одразу після завантаження. Далі це вже
-  // звичайний булевий стейт, ніякого resize-слухача немає — зміна
-  // орієнтації/ширини вікна під час сесії на нього не впливає.
-  const [isSidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.matchMedia("(min-width: 768px)").matches;
-  });
-  const closeSidebar = () => setSidebarOpen(false);
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
-
   // Показ/приховування панелі профілю користувача (справа) — кнопка
   // "user-profile-show" у шапці (ChatHeader) відкриває, хрестик
   // усередині панелі закриває. Проста булева стейт-машина: панель
@@ -147,21 +131,17 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const openProfileSidebar = () => setProfileSidebarOpen(true);
   const closeProfileSidebar = () => setProfileSidebarOpen(false);
 
-  // Escape закриває будь-яку з двох висувних панелей — яка зараз
-  // відкрита (може бути відкрита лише одна одразу, могли б бути й
-  // обидві, тому перевіряємо обидва прапорці незалежно).
+  // Escape закриває панель профілю, якщо вона зараз відкрита.
   useEffect(() => {
-    if (!isProfileSidebarOpen && !isSidebarOpen) return undefined;
+    if (!isProfileSidebarOpen) return undefined;
 
     const handleKeyDown = (e) => {
-      if (e.key !== "Escape") return;
-      if (isProfileSidebarOpen) closeProfileSidebar();
-      if (isSidebarOpen) closeSidebar();
+      if (e.key === "Escape") closeProfileSidebar();
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isProfileSidebarOpen, isSidebarOpen]);
+  }, [isProfileSidebarOpen]);
 
   // Роль поточного користувача — єдине джерело правди на фронті (див.
   // коментар у currentUserStore.js), показуємо в панелі профілю.
@@ -223,239 +203,16 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper d-lg-flex">
-      <div className="side-menu flex-lg-column me-lg-1 ms-lg-0">
-        <div className="navbar-brand-box">
-          <a href="index.html" className="logo logo-dark">
-            <span className="logo-sm">
-              <img src="assets/images/logo.svg" alt="" height="30" />
-            </span>
-          </a>
-
-          <a href="index.html" className="logo logo-light">
-            <span className="logo-sm">
-              <img src="assets/images/logo.svg" alt="" height="30" />
-            </span>
-          </a>
-        </div>
-
-        <div className="flex-lg-column my-auto">
-          <ul
-            className="nav nav-pills side-menu-nav justify-content-center"
-            role="tablist"
-          >
-            <li
-              className="nav-item"
-              
-              
-              title="Profile"
-            >
-              <a
-                className="nav-link"
-                id="pills-user-tab"
-                data-bs-toggle="pill"
-                href="#pills-user"
-                role="tab"
-              >
-                <i className="ri-user-2-line"></i>
-              </a>
-            </li>
-            <li
-              className="nav-item"
-              
-              
-              title="Chats"
-            >
-              <a
-                className="nav-link active"
-                id="pills-chat-tab"
-                data-bs-toggle="pill"
-                href="#pills-chat"
-                role="tab"
-              >
-                <i className="ri-message-3-line"></i>
-              </a>
-            </li>
-            <li
-              className="nav-item"
-              
-              
-              title="Groups"
-            >
-              <a
-                className="nav-link"
-                id="pills-groups-tab"
-                data-bs-toggle="pill"
-                href="#pills-groups"
-                role="tab"
-              >
-                <i className="ri-group-line"></i>
-              </a>
-            </li>
-            <li
-              className="nav-item"
-              
-              
-              title="Contacts"
-            >
-              <a
-                className="nav-link"
-                id="pills-contacts-tab"
-                data-bs-toggle="pill"
-                href="#pills-contacts"
-                role="tab"
-              >
-                <i className="ri-contacts-line"></i>
-              </a>
-            </li>
-            <li
-              className="nav-item"
-              
-              
-              title="Settings"
-            >
-              <a
-                className="nav-link"
-                id="pills-setting-tab"
-                data-bs-toggle="pill"
-                href="#pills-setting"
-                role="tab"
-              >
-                <i className="ri-settings-2-line"></i>
-              </a>
-            </li>
-            <li className="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <img
-                  src="assets/images/users/avatar-1.jpg"
-                  alt=""
-                  className="profile-user rounded-circle"
-                />
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Profile{" "}
-                  <i className="ri-profile-line float-end text-muted"></i>
-                </a>
-                <a className="dropdown-item" href="#">
-                  Setting{" "}
-                  <i className="ri-settings-3-line float-end text-muted"></i>
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Log out{" "}
-                  <i className="ri-logout-circle-r-line float-end text-muted"></i>
-                </a>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div className="flex-lg-column d-none d-lg-block">
-          <ul className="nav side-menu-nav justify-content-center">
-            <li className="nav-item btn-group dropup profile-user-dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <img
-                  src="assets/images/users/avatar-1.jpg"
-                  alt=""
-                  className="profile-user rounded-circle"
-                />
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Profile{" "}
-                  <i className="ri-profile-line float-end text-muted"></i>
-                </a>
-                <a className="dropdown-item" href="#">
-                  Setting{" "}
-                  <i className="ri-settings-3-line float-end text-muted"></i>
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="auth-login.html">
-                  Log out{" "}
-                  <i className="ri-logout-circle-r-line float-end text-muted"></i>
-                </a>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="chat-leftsidebar me-lg-1 ms-lg-0">
-        <div className="tab-content">
-          <div
-            className="tab-pane"
-            id="pills-user"
-            role="tabpanel"
-            aria-labelledby="pills-user-tab"
-          >
-            Profile tab-pane
-          </div>
-
-          <div
-            className="tab-pane fade show active"
-            id="pills-chat"
-            role="tabpanel"
-            aria-labelledby="pills-chat-tab"
-          >
-            chats tab-pane
-          </div>
-
-          <div
-            className="tab-pane"
-            id="pills-groups"
-            role="tabpanel"
-            aria-labelledby="pills-groups-tab"
-          >
-            groups tab-pane
-          </div>
-
-          <div
-            className="tab-pane"
-            id="pills-contacts"
-            role="tabpanel"
-            aria-labelledby="pills-contacts-tab"
-          >
-            contacts tab-pane
-          </div>
-
-          <div
-            className="tab-pane"
-            id="pills-setting"
-            role="tabpanel"
-            aria-labelledby="pills-setting-tab"
-          >
-            settings tab-pane
-          </div>
-        </div>
-      </div>
-
-      {/* Підкладка для лівого сайдбара — актуальна на вузьких екранах,
-          де сайдбар стає висувним поверх контенту (див. медіа-запит
-          у _responsive.css); на широких — сайдбар просто в потоці
-          документа, і підкладка там не рендериться. */}
-      {isSidebarOpen && (
-        <div
-          className="app-sidebar-backdrop"
-          onClick={closeSidebar}
-          aria-hidden="true"
-        />
-      )}
-
-      <Sidebar
+      {/* Два ліві сайдбари: іконкова "рейка" (@widgets/side-menu, тут
+          же — правила/фідбек у дропдауні профілю) і панель-вміст її
+          вкладок (@widgets/chat-leftsidebar: кімнати, і користувачі —
+          з підвкладками "Онлайн" (фільтр за статтю)/"Друзі"/
+          "Заблоковані"). Пов'язані між собою лише спільними Bootstrap
+          pill/pane id, React-стану в ChatLayout для цього не потрібно.
+          Третій (порожній) сайдбар прибрано — весь його функціонал
+          переїхав у ці два. */}
+      <SideMenu login={login} onLogout={onLogout} />
+      <ChatLeftSidebar
         login={login}
         activeRoom={activeRoom}
         roomCounts={roomCounts}
@@ -463,8 +220,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onSelectRoom={handleSelectRoom}
         onNicknameClick={handleNicknameClick}
         selectedNicknames={targetNicknames}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
       />
 
       <div className="user-chat w-100 overflow-hidden">
@@ -474,7 +229,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             online={connected}
             onLogout={onLogout}
             onOpenProfile={openProfileSidebar}
-            onToggleSidebar={toggleSidebar}
           />
           <ConfinementBanner confinement={confinement} />
           <RoomBanNoticeBanner notice={roomBanNotice} />

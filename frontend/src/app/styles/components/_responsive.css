@@ -64,61 +64,7 @@
     font-size: 0.7rem;
   }
 
-  /* Лівий сайдбар на вузьких екранах — висувний drawer поверх контенту,
-     а не панель у потоці документа (там немає зайвого місця на 280px
-     поруч із чатом): position: fixed перебиває .is-closed { width: 0 }
-     з _sidebar.css, показ/приховування тепер керується transform, а не
-     шириною. */
-  .app-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-
-    width: 280px;
-    max-width: 85vw;
-
-    border-right: 1px solid var(--bs-border-color);
-
-    box-shadow: 12px 0 30px rgba(var(--app-shadow-color), var(--app-shadow-strong));
-
-    transform: translateX(-100%);
-    transition: transform 0.2s ease;
-
-    z-index: 1045;
-  }
-
-  .app-sidebar.is-open {
-    transform: translateX(0);
-  }
-
-  /* Підкладка позаду drawer'а — рендериться в ChatLayout.jsx лише
-     коли isSidebarOpen, тому саму видимість тут вмикати не потрібно,
-     досить position/z-index (на десктопі елемент теж у DOM, але без
-     цього медіа-запиту лишається position: static і жодного впливу
-     на клікабельність не чинить). */
-  .app-sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-
-    background: rgba(0, 0, 0, 0.35);
-
-    z-index: 1040;
-  }
 }
-
-/* =========================================================
-   DESKTOP: підкладка лівого сайдбара не потрібна — сайдбар там сам
-   у потоці документа (без position: fixed), рендериться в DOM лише
-   заради єдиної логіки в ChatLayout.jsx, але не повинен перехоплювати
-   кліки чи бути видимим.
-   ========================================================= */
-@media (min-width: 768px) {
-  .app-sidebar-backdrop {
-    display: none;
-  }
-}
-
 
 /* =========================================================
    VERY SMALL SCREENS
