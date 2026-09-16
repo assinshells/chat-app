@@ -1,39 +1,44 @@
-import { User, MessageSquare, Users, Contact, Settings, LogOut, Menu, BookOpen, MessageCircle } from "lucide-react";
+import { LogOut, Menu, BookOpen, MessageCircle } from "lucide-react";
 
 import { RulesModal, FeedbackModal } from "@features/info";
+import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
+import { useDmStore } from "@features/dm";
 import { APP_NAME } from "@shared/constants/auth.constants.js";
+import { SIDE_TABS, SIDE_TAB_BADGES } from "@shared/constants/sideTabs.constants.js";
 
 const RULES_MODAL_ID = "sideMenuRulesModal";
 const FEEDBACK_MODAL_ID = "sideMenuFeedbackModal";
-
-// Вкладки іконкової "рейки". Перемикання — виключно через Bootstrap
-// pill-tabs (data-bs-toggle="pill"), без додаткового React-стану:
-// відповідні панелі лежать у другому винесеному сайдбарі
-// (@widgets/chat-leftsidebar) і зв'язані тими самими id (#pills-<id>) —
-// компоненти НЕ знають одне про одного напряму.
-const MENU_TABS = [
-  { id: "user", title: "Профіль", icon: User },
-  { id: "chat", title: "Чати", icon: MessageSquare},
-  { id: "users", title: "Користувачі", icon: Users, active: true },
-  { id: "contacts", title: "Контакти", icon: Contact },
-  { id: "setting", title: "Налаштування", icon: Settings },
-];
+const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 /**
  * Вузька іконкова "рейка" зліва — перший з двох лівих сайдбарів,
  * винесений з ChatLayout.jsx (раніше лежав там статичною розміткою
  * зі шрифтовими іконками Remix і посиланнями на неіснуючі assets/*).
  *
- * Реального стану не тримає: активна вкладка і перемикання панелей —
- * робота вбудованого Bootstrap JS (bootstrap.bundle.min.js, вже
- * підключений у main.jsx), тому компонент лишається "тупим" і легким.
+ * Перелік вкладок — спільний зі списком панелей у
+ * @widgets/chat-leftsidebar (див. SIDE_TABS): зв'язок між ними
+ * тримається на збігу id, тому список навмисно один на двох.
  *
- * У дропдауні профілю, крім виходу, лежать посилання на допоміжні
- * модалки "Правила" й "Зворотний зв'язок" — перенесені сюди з
- * видаленого третього (порожнього) сайдбара разом із самими
- * модалками (раніше в @widgets/sidebar).
+ * Власного стану перемикання вкладок не тримає: активна вкладка і
+ * показ панелей — робота вбудованого Bootstrap JS
+ * (bootstrap.bundle.min.js, вже підключений у main.jsx). Єдина
+ * підписка на стор — лічильник непрочитаних особистих повідомлень
+ * (бейдж на вкладці "Приватні повідомлення"): раніше той самий
+ * лічильник рахувався ще й у шапці, поруч з іконкою "Пошта" —
+ * тепер точка одна.
+ *
+ * У дропдауні профілю — вихід з акаунту (з підтвердженням; з шапки
+ * прибраний) і посилання на допоміжні
+ * модалки "Правила" й "Зворотний зв'язок".
  */
 export function SideMenu({ login, onLogout }) {
+  const dmUnread = useDmStore((state) =>
+    Object.values(state.conversations).reduce(
+      (sum, convo) => sum + (convo.unreadCount || 0),
+      0,
+    ),
+  );
+
   return (
     <div className="side-menu flex-lg-column me-lg-1 ms-lg-0">
       <div className="navbar-brand-box d-flex align-items-center justify-content-center">
@@ -45,10 +50,10 @@ export function SideMenu({ login, onLogout }) {
           className="nav nav-pills side-menu-nav justify-content-center"
           role="tablist"
         >
-          {MENU_TABS.map(({ id, title, icon: Icon, active }) => (
+          {SIDE_TABS.map(({ id, title, icon: Icon, defaultActive, badge }) => (
             <li className="nav-item" key={id} title={title}>
               <a
-                className={`nav-link ${active ? "active" : ""}`}
+                className={`nav-link ${defaultActive ? "active" : ""}`}
                 id={`pills-${id}-tab`}
                 data-bs-toggle="pill"
                 href={`#pills-${id}`}
@@ -56,6 +61,11 @@ export function SideMenu({ login, onLogout }) {
                 aria-label={title}
               >
                 <Icon size={18} />
+                {badge === SIDE_TAB_BADGES.DM_UNREAD && dmUnread > 0 && (
+                  <span className="side-menu-badge">
+                    {dmUnread > 99 ? "99+" : dmUnread}
+                  </span>
+                )}
               </a>
             </li>
           ))}
@@ -100,10 +110,15 @@ export function SideMenu({ login, onLogout }) {
                 <MessageCircle size={14} className="float-end text-muted" />
               </button>
               <div className="dropdown-divider"></div>
+              {/* Вихід — єдина точка в застосунку (з шапки прибрано):
+                  дію тут і там дублювати нема сенсу, а дропдаун профілю
+                  для неї природніше місце. Підтвердження — та сама
+                  LogoutConfirmModal, що раніше рендерилась у шапці. */}
               <button
                 type="button"
                 className="dropdown-item"
-                onClick={onLogout}
+                data-bs-toggle="modal"
+                data-bs-target={`#${LOGOUT_MODAL_ID}`}
               >
                 Вийти <LogOut size={14} className="float-end text-muted" />
               </button>
@@ -114,6 +129,7 @@ export function SideMenu({ login, onLogout }) {
 
       <RulesModal modalId={RULES_MODAL_ID} />
       <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
+      <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
     </div>
   );
 }

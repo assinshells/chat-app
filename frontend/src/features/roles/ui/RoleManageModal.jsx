@@ -14,7 +14,7 @@ import { useRolesStore } from "@features/roles/model/useRolesStore.js";
 /**
  * RoleManageModal — єдина на застосунок модалка керування роллю,
  * рендериться один раз у ChatLayout (портал у document.body — те саме
- * міркування, що й у SettingsModal.jsx щодо position: fixed).
+ * міркування, що й у LogoutConfirmModal.jsx щодо position: fixed).
  * Відкривається з пункту "Керувати роллю" в меню біля чужого ніка
  * (DmTriggerButton), стан — у useRolesStore.
  *
@@ -73,7 +73,7 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
       data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content settings-modal">
+        <div className="modal-content app-modal">
           <div className="modal-header">
             <h5 className="modal-title" id={`${modalId}Label`}>
               Керування роллю

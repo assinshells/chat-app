@@ -1,0 +1,57 @@
+/* =========================================================
+   DM TRIGGER — кнопка "три вертикальні точки" біля чужого ніка
+   (ChatLeftSidebar.jsx: список "Користувачі"; ChatConversation.jsx:
+   автор повідомлення). Меню дій: написати особисте повідомлення,
+   друзі/блокування, модерація.
+
+   Раніше ці правила лежали в одному файлі з модалкою особистих
+   повідомлень (_direct-messages.css); модалку замінила панель в
+   основній області (_private-chat.css), тому від файлу лишилась
+   лише сама кнопка-меню.
+   ========================================================= */
+
+.dm-trigger-dropdown {
+  display: inline-flex;
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+.dm-trigger-btn {
+  width: 1.4em;
+  height: 1.4em;
+
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: inherit;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.dm-trigger-btn:hover,
+.dm-trigger-btn[aria-expanded="true"] {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.dm-trigger-menu {
+  font-size: 0.85rem;
+}
+
+/* Пункт "Заблокувати"/"Розблокувати" у дропдавні ніка — акцент
+   небезпечної дії, як і в модерації. */
+.dropdown-item-block-toggle {
+  color: var(--bs-danger);
+}

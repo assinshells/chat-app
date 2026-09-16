@@ -71,7 +71,7 @@ export function KickModal({ modalId = "kickModerationModal" }) {
       data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content settings-modal">
+        <div className="modal-content app-modal">
           <div className="modal-header">
             <h5 className="modal-title" id={`${modalId}Label`}>
               Кикнути

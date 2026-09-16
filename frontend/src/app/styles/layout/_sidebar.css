@@ -308,3 +308,176 @@
 
   gap: 0.4rem;
 }
+
+/* =========================================================
+   SIDE MENU: бейдж непрочитаних на вкладці "Приватні
+   повідомлення" (@widgets/side-menu). Позиціонується відносно
+   самого пункту рейки, тому .nav-link отримує position: relative —
+   інших правил для .side-menu-nav у проєкті немає, розкладка
+   тримається на утилітах Bootstrap.
+   ========================================================= */
+
+.side-menu-nav .nav-link {
+  position: relative;
+}
+
+.side-menu-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: var(--bs-danger);
+  color: var(--bs-white);
+
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* =========================================================
+   Таб "Приватні повідомлення" у @widgets/chat-leftsidebar:
+   список діалогів. Візуально — ті самі рядки, що й вкладки
+   діалогів у модалці особистих повідомлень (.dm-modal-tab,
+   див. components/_direct-messages.css), але вписані в сайдбар:
+   свої відступи/радіуси, як у .app-sidebar-room-item.
+   ========================================================= */
+
+.app-sidebar-dialog-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+
+  width: 100%;
+
+  padding: 0.45rem 0.65rem;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.app-sidebar-dialog-item:hover {
+  background: var(--bs-secondary-bg);
+}
+
+/* Діалог, розгорнутий зараз в основній області чату (див.
+   PrivateChat) — постійна підсвітка, як в активної кімнати. */
+.app-sidebar-dialog-item.is-active {
+  background: rgba(var(--bs-primary-rgb), 0.12);
+}
+
+.app-sidebar-dialog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+
+  width: 100%;
+}
+
+.app-sidebar-dialog-name {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.app-sidebar-dialog-badge {
+  flex: 0 0 auto;
+
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: var(--bs-danger);
+  color: var(--bs-white);
+
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-sidebar-dialog-preview {
+  width: 100%;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.76rem;
+  color: var(--bs-secondary-color);
+}
+
+/* =========================================================
+   Таб "Налаштування" у @widgets/chat-leftsidebar: вибір теми.
+   Перенесено з видаленої модалки налаштувань (.settings-theme-*):
+   ті самі картки-варіанти, але вужчі під колонку сайдбара — тому
+   в один стовпчик, а не в ряд.
+   ========================================================= */
+
+.app-sidebar-theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.app-sidebar-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  padding: 0.6rem 0.75rem;
+
+  background: var(--bs-tertiary-bg);
+  border: 2px solid transparent;
+  border-radius: 10px;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.app-sidebar-theme-btn:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.app-sidebar-theme-btn.is-active {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}

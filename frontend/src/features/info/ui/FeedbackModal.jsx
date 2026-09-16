@@ -6,14 +6,14 @@ const MAX_FEEDBACK_LENGTH = 300;
 /**
  * FeedbackModal — модалка зворотного зв'язку, відкривається за
  * посиланням у футері сайдбара (див. Sidebar.jsx), той самий патерн
- * порталу/Bootstrap-модалки, що й RulesModal/SettingsModal.
+ * порталу/Bootstrap-модалки, що й RulesModal.
  *
  * ВАЖЛИВО: бекенд для прийому звернень поки не реалізований — форма
  * зараз лише локальна заглушка (не робить жодного мережевого запиту),
  * щоб інтерфейс можна було показати користувачу вже зараз. Коли з'явиться
  * ендпоінт (наприклад, POST /api/feedback), достатньо замінити
  * setTimeout нижче на реальний виклик і прокинути статус
- * завантаження/помилки так само, як це зроблено в SettingsModal.
+ * завантаження/помилки локальним станом форми.
  */
 export function FeedbackModal({ modalId = "feedbackModal" }) {
   const [text, setText] = useState("");
@@ -59,7 +59,7 @@ export function FeedbackModal({ modalId = "feedbackModal" }) {
       data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content settings-modal">
+        <div className="modal-content app-modal">
           <div className="modal-header">
             <h5 className="modal-title" id={`${modalId}Label`}>
               Зворотний зв&apos;язок

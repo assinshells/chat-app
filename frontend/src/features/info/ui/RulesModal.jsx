@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 /**
  * RulesModal — статична модалка з правилами чату.
  * Відкривається за посиланням "Правила" у футері сайдбара (див.
- * Sidebar.jsx), той самий патерн, що й SettingsModal/LogoutConfirmModal:
+ * SideMenu.jsx), той самий патерн, що й LogoutConfirmModal:
  * Bootstrap-модалка (data-bs-toggle/data-bs-target), рендер через портал
  * у document.body, щоб не потрапити в піддерево сайдбара з
  * transform/overflow:hidden.
@@ -14,7 +14,7 @@ import { createPortal } from "react-dom";
  * app/styles/base/_scrollbar.css), а modal-dialog-scrollable
  * обмежує висоту .modal-content висотою вʼюпорту (замість того,
  * щоб браузер сам скролив увесь .modal) — див. .rules-modal-body в
- * _settings-modal.css.
+ * _modals.css.
  */
 export function RulesModal({ modalId = "rulesModal" }) {
   return createPortal(
@@ -27,7 +27,7 @@ export function RulesModal({ modalId = "rulesModal" }) {
       data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div className="modal-content settings-modal">
+        <div className="modal-content app-modal">
           <div className="modal-header">
             <h5 className="modal-title" id={`${modalId}Label`}>
               Правила користування чатом

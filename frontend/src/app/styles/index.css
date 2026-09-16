@@ -32,8 +32,9 @@
 @import "./components/_chat-composer.css";
 @import "./components/_forms.css";
 @import "./components/_emoji-picker.css";
-@import "./components/_direct-messages.css";
+@import "./components/_dm-trigger.css";
+@import "./components/_private-chat.css";
 @import "./components/_color-picker.css";
-@import "./components/_settings-modal.css";
+@import "./components/_modals.css";
 
 @import "./components/_responsive.css";

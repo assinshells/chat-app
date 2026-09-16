@@ -8,12 +8,18 @@ import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { ROLE_MANAGER_ROLES } from "@shared/constants/role.constants.js";
 import { canModerateRoom } from "@shared/constants/moderationAction.constants.js";
+// Пункт "Написати особисте повідомлення" не лише розгортає діалог в
+// основній області, а й перемикає ліву рейку на таб приватних
+// повідомлень — інакше виглядало б, ніби сайдбар "відстав".
+import { PRIVATE_TAB_BUTTON_ID } from "@shared/constants/sideTabs.constants.js";
 
 /**
  * DmTriggerButton — кнопка "три вертикальні крапки" поруч з чужим ніком
- * (використовується і в Sidebar.jsx — список "Користувачі", і в
+ * (використовується і в ChatLeftSidebar.jsx — список "Користувачі", і в
  * ChatConversation.jsx — автор повідомлення). Пункти меню:
- *  - написати особисте повідомлення (усім, завжди);
+ *  - написати особисте повідомлення (усім, завжди): відкриває діалог
+ *    в основній області чату (@widgets/private-chat), окремої модалки
+ *    особистих повідомлень більше немає;
  *  - "Додати до друзів" / "Видалити з друзів" (усім, завжди —
  *    персональна дія без підтвердження з боку іншої сторони, див.
  *    features/friends/model/useFriendStore.js): додає користувача у
@@ -51,7 +57,6 @@ export function DmTriggerButton({
   login,
   color,
   room,
-  modalId = "dmModal",
   roleModalId = "roleManageModal",
   kickModalId = "kickModerationModal",
   banModalId = "banModerationModal",
@@ -73,6 +78,15 @@ export function DmTriggerButton({
 
   const canManageRoles = ROLE_MANAGER_ROLES.includes(ownRole);
   const canModerate = Boolean(room) && canModerateRoom(ownRole, ownModeratorRooms, room);
+
+  // Bootstrap-таби рейки перемикаються лише кліком по самому pill —
+  // програмно робимо рівно те саме, без імпорту Bootstrap JS API.
+  const handleOpenConversation = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openConversation(login, color);
+    document.getElementById(PRIVATE_TAB_BUTTON_ID)?.click();
+  };
 
   const handleToggleFriend = (e) => {
     e.preventDefault();
@@ -116,13 +130,7 @@ export function DmTriggerButton({
         <a
           className="dropdown-item"
           href="#"
-          data-bs-toggle="modal"
-          data-bs-target={`#${modalId}`}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openConversation(login, color);
-          }}
+          onClick={handleOpenConversation}
         >
           Написати особисте повідомлення
         </a>

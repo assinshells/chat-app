@@ -9,7 +9,7 @@ import { ROLE_VALUES } from "@shared/constants/role.constants.js";
 /**
  * useRolesStore — стан єдиної на застосунок модалки керування роллю
  * (RoleManageModal, рендериться один раз у ChatLayout — так само, як
- * DirectMessagesModal/SettingsModal). openFor(login, color) викликається
+ * PrivateChat). openFor(login, color) викликається
  * з пункту меню "Керувати роллю" біля чужого ніка (DmTriggerButton),
  * за аналогією з useDmStore.openConversation.
  *

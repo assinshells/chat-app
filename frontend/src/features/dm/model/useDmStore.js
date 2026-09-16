@@ -43,45 +43,32 @@ function emitWithAck(event, payload) {
 }
 
 /**
- * useDmStore — стан модалки особистих повідомлень, з реальною
- * доставкою через персональний сокет-канал користувача (див. backend
- * sockets/dm.socket.js): dm:open — історія з конкретним співрозмовником,
- * dm:list — зведення по всіх діалогах, dm:send — відправлення. Вхідні
- * повідомлення (dm:new) слухаються один раз на рівні модуля (див. низ
- * файлу) — це персональний канал, приходить незалежно від того, яка
- * кімната чату зараз відкрита і чи відкрита взагалі модалка.
+ * useDmStore — стан особистих повідомлень, з реальною доставкою через
+ * персональний сокет-канал користувача (див. backend sockets/dm.socket.js):
+ * dm:open — історія з конкретним співрозмовником, dm:list — зведення по
+ * всіх діалогах, dm:send — відправлення. Вхідні повідомлення (dm:new)
+ * слухаються один раз на рівні модуля (див. низ файлу) — це персональний
+ * канал, він приходить незалежно від того, яка кімната зараз відкрита і
+ * чи дивиться користувач узагалі на приватні діалоги.
  *
  * conversations — map login -> { login, color, messages, lastMessage,
- *   loading, loaded, unreadCount }. order — логіни, останній активний
- *   діалог першим. modalOpen — чи реально зараз видно DirectMessagesModal
- *   на екрані (див. shown.bs.modal/hidden.bs.modal у самому компоненті) —
- *   потрібно, щоб не рахувати непрочитаним те, що людина бачить наживо.
+ *   loading, loaded, unreadCount, blocked }. order — логіни, останній
+ *   активний діалог першим (джерело списку в табі "Приватні
+ *   повідомлення", див. ChatLeftSidebar).
  *
- * mobileView — 'list' | 'conversation', має значення ЛИШЕ на вузьких
- * екранах (див. CSS-медіазапит в app/styles/components/_responsive.css:
- * на десктопі список діалогів
- * і листування показуються одночасно поруч, цей прапорець там ні на
- * що не впливає). На мобільному ж екран один, і точка входу визначає,
- * що показати одразу:
- *  - відкриття з шапки (openInbox) — список діалогів ('list');
- *  - "Написати особисте повідомлення" біля конкретного ніка
- *    (openConversation) — одразу листування з цією людиною
- *    ('conversation'), без потреби шукати її в списку;
- *  - вибір діалогу зі списку руками (selectConversation) — теж
- *    перемикає на листування;
- *  - кнопка "Назад" у шапці листування (див. DirectMessagesModal.jsx) —
- *    єдиний спосіб повернутися до 'list', не закриваючи модалку.
+ * panelLogin — діалог, розгорнутий зараз в ОСНОВНІЙ області чату замість
+ *   стрічки кімнати (@widgets/private-chat). Єдина точка показу
+ *   листування: окремої модалки більше немає, тому немає й
+ *   activeLogin/modalOpen/mobileView, які були потрібні лише їй.
  */
 export const useDmStore = create((set, get) => ({
   currentUser: null,
   conversations: {},
   order: [],
-  activeLogin: null,
+  panelLogin: null,
   listLoading: false,
   listLoaded: false,
   sendError: null,
-  modalOpen: false,
-  mobileView: "list",
 
   /**
    * setCurrentUser — викликається з ChatLayout (див. проп login): потрібно
@@ -92,11 +79,10 @@ export const useDmStore = create((set, get) => ({
    * mount/unmount ChatLayout), тому просто перезаписати currentUser
    * НЕДОСТАТНЬО: якщо в цій самій вкладці відбувся logout -> login
    * (навіть під ІНШИМ акаунтом, без перезавантаження сторінки),
-   * conversations/order/activeLogin від попередньої сесії лишалися б
-   * висіти в сторі і змішувалися б із діалогами нового користувача —
-   * саме це виглядало як "діалоги/лічильники плутаються між собою".
-   * Тому при РЕАЛЬНІЙ зміні логіна (не при першому виклику з null)
-   * стан особистих повідомлень повністю скидається.
+   * conversations/order від попередньої сесії лишалися б висіти в сторі
+   * і змішувалися б із діалогами нового користувача — саме це виглядало
+   * як "діалоги/лічильники плутаються між собою". Тому при РЕАЛЬНІЙ
+   * зміні логіна (не при першому виклику з null) стан повністю скидається.
    */
   setCurrentUser: (login) => {
     const { currentUser } = get();
@@ -107,36 +93,25 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
-   * reset — повне очищення стану модалки особистих повідомлень.
-   * Викликається явно при logout (див. useLogoutStore) і захисно при
-   * зміні currentUser (див. setCurrentUser вище) — два незалежні
-   * запобіжники від одного й того самого класу бага (витік стану між
-   * сесіями в тій самій вкладці).
+   * reset — повне очищення стану особистих повідомлень. Викликається
+   * явно при logout (див. useLogoutStore) і захисно при зміні
+   * currentUser (див. setCurrentUser вище) — два незалежні запобіжники
+   * від одного й того самого класу бага (витік стану між сесіями в тій
+   * самій вкладці).
    */
   reset: () =>
     set({
       conversations: {},
       order: [],
-      activeLogin: null,
+      panelLogin: null,
       listLoading: false,
       listLoaded: false,
       sendError: null,
-      modalOpen: false,
-      mobileView: "list",
     }),
 
   /**
-   * setModalOpen — викликається з DirectMessagesModal за нативними
-   * подіями Bootstrap shown.bs.modal/hidden.bs.modal (див. компонент) —
-   * модалка рендериться завжди (портал у document.body), видимість
-   * перемикає сам Bootstrap через CSS, React про це інакше не дізнався б.
-   */
-  setModalOpen: (open) => set({ modalOpen: open }),
-
-  /**
    * markAsRead — обнуляє лічильник непрочитаних конкретного діалогу.
-   * Викликається при його реальному відкритті (openConversation/
-   * selectConversation) і при показі модалки, якщо діалог вже був активний.
+   * Викликається при його реальному відкритті (openConversation).
    */
   markAsRead: (login) => {
     const { conversations } = get();
@@ -160,18 +135,14 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
-   * showConversationList — повертає мобільний вигляд модалки до списку
-   * діалогів (кнопка "Назад" у шапці листування, див.
-   * DirectMessagesModal.jsx). На десктопі ні на що не впливає — там обидві
-   * панелі видно одночасно незалежно від mobileView.
-   */
-  showConversationList: () => set({ mobileView: "list" }),
-
-  /**
-   * openConversation — відкриває вкладку з конкретним співрозмовником і,
-   * якщо історія ще не підвантажувалась у цій сесії, запитує її
-   * через dm:open. color — колір співрозмовника (передається з місця
-   * кліку, див. DmTriggerButton), використовується, поки історія не
+   * openConversation — відкриває діалог в основній області чату
+   * (panelLogin) і, якщо історія ще не підвантажувалась у цій сесії,
+   * запитує її через dm:open.
+   *
+   * Два входи, обидва ведуть сюди: вибір діалогу в табі "Приватні
+   * повідомлення" лівого сайдбара і пункт "Написати особисте
+   * повідомлення" у меню біля ніка (DmTriggerButton). color —
+   * колір співрозмовника з місця кліку: потрібен, поки історія не
    * прийшла і/або якщо діалог зовсім новий (повідомлень ще не було в
    * жодну сторону).
    */
@@ -187,11 +158,8 @@ export const useDmStore = create((set, get) => ({
           : { login, color, messages: [], loading: true, loaded: false, unreadCount: 0 },
       },
       order: order.includes(login) ? order : [login, ...order],
-      activeLogin: login,
+      panelLogin: login,
       sendError: null,
-      // Явний запит листування з конкретною людиною (клік у ніка) —
-      // на мобільному одразу показуємо його, а не список діалогів.
-      mobileView: "conversation",
     });
     get().markAsRead(login);
 
@@ -201,15 +169,16 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
+   * closeConversation — повернення основної області до публічної
+   * кімнати (кнопка "Назад" у шапці приватного чату, вибір кімнати в
+   * табі "Чати"). Історію не скидає — при повторному відкритті вона вже
+   * буде в conversations.
+   */
+  closeConversation: () => set({ panelLogin: null, sendError: null }),
+
+  /**
    * _loadHistory — фактичний запит повної історії листування через
-   * dm:open і запис результату в conversations[login]. Винесено з
-   * openConversation окремо, щоб той самий код можна було використати і
-   * з openInbox (див. нижче) — там теж потрібно довантажити історію
-   * автоматично обраного за замовчуванням діалогу, але БЕЗ побічних
-   * ефектів openConversation типу зміни activeLogin/order/mobileView
-   * (openInbox сам вирішує ці поля — на мобільному, наприклад, відкриття
-   * з шапки завжди повинно показувати список, а не листування, навіть
-   * якщо якийсь діалог обрано активним "під капотом").
+   * dm:open і запис результату в conversations[login].
    */
   _loadHistory: async (login, color) => {
     const result = await emitWithAck(DM_OPEN, { login });
@@ -241,8 +210,8 @@ export const useDmStore = create((set, get) => ({
             unreadCount: 0,
             // blocked — заблокована відправка в цьому діалозі (в один
             // із двох боків, див. backend privateMessage.service.js):
-            // DirectMessagesModal показує замість форми відправлення
-            // повідомлення "Ви заблоковані" (див. коментар там же).
+            // PrivateChat показує замість форми відправлення
+            // пояснення "Не можна надіслати повідомлення".
             blocked: Boolean(result.blocked),
           },
         },
@@ -271,155 +240,60 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
-   * _mergeListSummaries — общая часть openInbox/syncList: сливает
-   * зведення з dm:list у поточні conversations/order, не втрачаючи
-   * локально накопичені messages/unreadCount (existing пріоритетний,
-   * summary — лише фолбек для щойно узнаних діалогів, див. коментар
-   * біля unreadCount нижче).
-   */
-  _mergeListSummaries: (state, summaries) => {
-    const conversations = { ...state.conversations };
-    const order = [];
-
-    for (const summary of summaries) {
-      order.push(summary.login);
-      const existing = conversations[summary.login];
-      conversations[summary.login] = {
-        login: summary.login,
-        color: summary.color,
-        messages: existing?.messages ?? [],
-        lastMessage: summary.lastMessage,
-        loading: existing?.loading ?? false,
-        loaded: existing?.loaded ?? false,
-        // existing.unreadCount пріоритетний: якщо в межах ЦІЄЇ сесії
-        // вже накопичився локальний лічильник (живі dm:new), не
-        // затираємо його застарілим серверним значенням. Якщо existing
-        // ще немає — беремо реальне значення з БД (summary.unreadCount).
-        unreadCount: existing?.unreadCount ?? summary.unreadCount ?? 0,
-        // dm:list не перевіряє блокування (це лише зведення прев'ю) —
-        // зберігаємо вже відоме локально значення, якщо є; свіже
-        // прийде при реальному відкритті діалогу (dm:open) або живою
-        // подією dm:blocked_changed.
-        blocked: existing?.blocked ?? false,
-      };
-    }
-
-    // Діалоги, вже відкриті локально в цій сесії, але яких ще немає
-    // на сервері (жодного збереженого повідомлення) — не втрачаємо.
-    for (const login of state.order) {
-      if (!order.includes(login)) order.push(login);
-    }
-
-    return { conversations, order };
-  },
-
-  /**
-   * syncList — тиха (без відкриття модалки, без вибору активної вкладки,
-   * без markAsRead) синхронізація зведення діалогів. Викликається одразу
-   * після встановлення/відновлення з'єднання (див. ChatLayout), щоб
-   * бейдж лічильника в шапці (ChatHeader: сума unreadCount по всіх
-   * conversations) показував реальну кількість одразу після входу, а не
-   * лишався порожнім, поки людина сама не натисне на іконку "Пошта" —
-   * саме так і виглядав баг "написав офлайн-користувачу, після заходу
-   * лічильник мовчить": conversations на старті сесії просто порожній,
-   * а нічого, крім кліку по кнопці інбоксу, його раніше не наповнювало.
+   * syncList — синхронізація зведення діалогів (dm:list). Викликається
+   * одразу після встановлення/відновлення з'єднання (див. ChatLayout),
+   * і цього достатньо: далі список підтримують живі dm:new. Саме через
+   * неї таб "Приватні повідомлення" і бейдж непрочитаних у рейці
+   * показують реальну картину одразу після входу, а не порожньо до
+   * першого кліку.
+   *
+   * dm:list повертає лише ЗВЕДЕННЯ (превью останнього повідомлення) —
+   * повну історію конкретного діалогу підвантажує окремо dm:open
+   * (див. openConversation/_loadHistory).
    */
   syncList: async () => {
+    set({ listLoading: true });
     const result = await emitWithAck(DM_LIST, {});
-    if (!result?.success) return;
-
-    set((state) => ({
-      ...get()._mergeListSummaries(state, result.conversations),
-      listLoaded: true,
-    }));
-  },
-
-  /**
-   * openInbox — відкриває модалку "як є" (іконка в шапці, без
-   * конкретного адресата): завжди повторно запитує свіжий список
-   * діалогів через dm:list, щоб вкладки не були застарілими, якщо
-   * прийшли нові діалоги, розпочаті з інших пристроїв/вкладок.
-   *
-   * dm:list повертає лише ЗВЕДЕННЯ по діалогах (превью останнього
-   * повідомлення), а не повний список повідомлень — його підвантажує
-   * окремо dm:open (див. openConversation/_loadHistory). Якщо при
-   * першому відкритті модалки за сесію діалог обирається активним
-   * автоматично (нижче — коли ще немає state.activeLogin), його повну
-   * історію теж треба підвантажити явно, інакше показувалась би пуста
-   * заглушка "Повідомлень ще немає. Напишіть перше!" замість реальної
-   * переписки — саме так і виглядав баг, який тут виправлено.
-   *
-   * mobileView скидається на 'list' безумовно: це вхід "хочу
-   * подивитися всі діалоги", навіть якщо до цього на мобільному було
-   * відкрито конкретне листування (через openConversation) — відкриття
-   * з шапки повинно показати список, а не продовжити з того місця,
-   * де зупинилися (див. вимогу в задачі).
-   */
-  openInbox: async () => {
-    set({ listLoading: true, mobileView: "list" });
-    const result = await emitWithAck(DM_LIST, {});
-
-    // Заповнюється нижче, лише якщо активний діалог щойно обрано
-    // автоматично (раніше activeLogin був null) — саме цей випадок і
-    // потребує довантаження повної історії.
-    let autoSelectedLogin = null;
+    if (!result?.success) {
+      set({ listLoading: false });
+      return;
+    }
 
     set((state) => {
-      if (!result?.success) return { listLoading: false };
+      const conversations = { ...state.conversations };
+      const order = [];
 
-      const { conversations, order } = get()._mergeListSummaries(state, result.conversations);
-
-      const activeLogin = state.activeLogin ?? order[0] ?? null;
-      if (!state.activeLogin && activeLogin) autoSelectedLogin = activeLogin;
-
-      return {
-        conversations,
-        order,
-        listLoading: false,
-        listLoaded: true,
-        activeLogin,
-      };
-    });
-
-    // Якщо після оновлення списку є активна вкладка (щойно обрана за
-    // замовчуванням або вже була) — вважаємо її прочитаною, модалка
-    // от-от з'явиться на екрані (див. handleShown у компоненті, який
-    // дублює те саме на випадок, якщо activeLogin зміниться вже ПІСЛЯ
-    // показу модалки).
-    const { activeLogin } = get();
-    if (activeLogin) get().markAsRead(activeLogin);
-
-    // Довантажуємо повну історію автоматично обраного діалогу (див.
-    // коментар до функції вище) — рівно тими ж кроками, що й ручний
-    // вибір вкладки (selectConversation), але не чіпаючи mobileView.
-    if (autoSelectedLogin) {
-      const convo = get().conversations[autoSelectedLogin];
-      if (convo && !convo.loaded && !convo.loading) {
-        set((state) => ({
-          conversations: {
-            ...state.conversations,
-            [autoSelectedLogin]: { ...state.conversations[autoSelectedLogin], loading: true },
-          },
-        }));
-        await get()._loadHistory(autoSelectedLogin, convo.color);
+      for (const summary of result.conversations) {
+        order.push(summary.login);
+        const existing = conversations[summary.login];
+        conversations[summary.login] = {
+          login: summary.login,
+          color: summary.color,
+          messages: existing?.messages ?? [],
+          lastMessage: summary.lastMessage,
+          loading: existing?.loading ?? false,
+          loaded: existing?.loaded ?? false,
+          // existing.unreadCount пріоритетний: якщо в межах ЦІЄЇ сесії
+          // вже накопичився локальний лічильник (живі dm:new), не
+          // затираємо його застарілим серверним значенням. Якщо existing
+          // ще немає — беремо реальне значення з БД.
+          unreadCount: existing?.unreadCount ?? summary.unreadCount ?? 0,
+          // dm:list не перевіряє блокування (це лише зведення прев'ю) —
+          // зберігаємо вже відоме локально значення, якщо є; свіже
+          // прийде при відкритті діалогу (dm:open) або живою подією
+          // dm:blocked_changed.
+          blocked: existing?.blocked ?? false,
+        };
       }
-    }
-  },
 
-  /**
-   * selectConversation — перемикання вкладки всередині вже відкритої
-   * модалки (не відкриває саму модалку). Довантажує історію, якщо ця
-   * вкладка ще не була відкрита в поточній сесії. На мобільному це і
-   * є вибір діалогу зі списку — одразу перемикаємо вигляд на листування.
-   */
-  selectConversation: (login) => {
-    set({ activeLogin: login, sendError: null, mobileView: "conversation" });
-    get().markAsRead(login);
+      // Діалоги, вже відкриті локально в цій сесії, але яких ще немає
+      // на сервері (жодного збереженого повідомлення) — не втрачаємо.
+      for (const login of state.order) {
+        if (!order.includes(login)) order.push(login);
+      }
 
-    const convo = get().conversations[login];
-    if (convo && !convo.loaded && !convo.loading) {
-      get().openConversation(login, convo.color);
-    }
+      return { conversations, order, listLoading: false, listLoaded: true };
+    });
   },
 
   /**
@@ -428,16 +302,12 @@ export const useDmStore = create((set, get) => ({
    * розсилає dm:new в особистий канал ОБОХ сторін, включно з
    * відправником (див. backend sockets/dm.socket.js), тому воно і так
    * прийде через module-level підписку нижче — єдине джерело істини,
-   * без ризику задвоєння. Повертає {success, message?} — код, що
-   * викликає (модалка), сам вирішує, що робити з помилкою (наприклад,
-   * показати її текст).
+   * без ризику задвоєння.
    */
   sendMessage: async (login, text) => {
     // Клієнтська підстраховка перед запитом (реальна заборона все одно
-    // на бекенді, див. privateMessage.service.js): якщо composer уже
-    // прихований/вимкнений через blocked (див. DirectMessagesModal),
-    // сюди в нормальному потоці взагалі не потрапляють, але діалог міг
-    // стати заблокованим ПІСЛЯ рендеру поточного кадру (жива подія
+    // на бекенді, див. privateMessage.service.js): діалог міг стати
+    // заблокованим ПІСЛЯ рендеру поточного кадру (жива подія
     // dm:blocked_changed) — не витрачаємо round-trip даремно.
     if (get().conversations[login]?.blocked) {
       set({ sendError: "Не можна надіслати повідомлення цьому користувачу" });
@@ -456,7 +326,7 @@ export const useDmStore = create((set, get) => ({
   // Викликається з module-level підписки на dm:new нижче — не
   // експортується окремо, назовні використовується лише сам факт підписки.
   _handleIncoming: (message) => {
-    const { currentUser, conversations, order, modalOpen, activeLogin } = get();
+    const { currentUser, conversations, order, panelLogin } = get();
     if (!currentUser) return;
 
     const isOwn = message.sender === currentUser;
@@ -468,18 +338,16 @@ export const useDmStore = create((set, get) => ({
     if (existing?.messages.some((m) => m.id === message.id)) return;
 
     // Не рахуємо непрочитаним: своє ж повідомлення (луна) і повідомлення
-    // в діалог, який людина прямо зараз бачить на екрані (модалка
-    // відкрита і активна саме ця вкладка).
-    const isBeingViewed = modalOpen && activeLogin === otherLogin;
+    // в діалог, розгорнутий прямо зараз в основній області чату.
+    const isBeingViewed = panelLogin === otherLogin;
     const unreadCount =
       isOwn || isBeingViewed ? existing?.unreadCount ?? 0 : (existing?.unreadCount ?? 0) + 1;
 
-    // Людина бачить це повідомлення в реальному часі (діалог відкритий і
-    // активний саме зараз) — на бекенді воно все одно лишилося б
-    // read_at IS NULL назавжди, бо dm:open вдруге не викликається для
-    // вже завантаженого діалогу (див. openConversation). Без цього рядка
-    // те саме повідомлення виглядало б непрочитаним при вході з іншого
-    // пристрою/після relogin, хоча людина його вже прочитала тут і зараз.
+    // Людина бачить це повідомлення в реальному часі — на бекенді воно
+    // все одно лишилося б read_at IS NULL назавжди, бо dm:open вдруге
+    // для вже завантаженого діалогу не викликається (див.
+    // openConversation). Без цього рядка те саме повідомлення виглядало
+    // б непрочитаним при вході з іншого пристрою/після relogin.
     if (!isOwn && isBeingViewed) emitRead(otherLogin);
 
     set({
@@ -506,7 +374,7 @@ export const useDmStore = create((set, get) => ({
 }));
 
 // Персональний канал слухається рівно один раз за життя вкладки —
-// незалежно від того, чи змонтована зараз DirectMessagesModal, щоб
+// незалежно від того, чи відкритий зараз якийсь приватний діалог, щоб
 // лічильники/превью у списку діалогів залишалися живими, навіть поки
 // модалка закрита.
 //

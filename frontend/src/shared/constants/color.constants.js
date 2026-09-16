@@ -81,7 +81,7 @@ export const getColorHexDark = (value) =>
 /**
  * getEffectiveColorHex - єдина точка входу для будь-якого інлайн-стилю
  * в JS (текст повідомлення, нік, підпис у KickModal/BanModal/
- * RoleManageModal/DirectMessagesModal/Sidebar тощо): сама вирішує,
+ * RoleManageModal/PrivateChat/ChatLeftSidebar тощо): сама вирішує,
  * hex чи hexDark повернути, за прапорцем поточної теми (useIsDarkTheme).
  *
  * Раніше "чорний" був єдиним кольором з особливим винятком (інлайн-стиль

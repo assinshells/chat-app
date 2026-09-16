@@ -27,8 +27,8 @@ const resolveTheme = (preference) => {
 };
 
 // applyTheme зберігає ОБРАНИЙ ВАРІАНТ як є (у т.ч. "system") — це
-// потрібно, щоб SettingsModal після перезавантаження сторінки міг
-// показати активною саме "Системну", а не light/dark, у які вона
+// потрібно, щоб таб "Налаштування" в сайдбарі після перезавантаження
+// сторінки міг показати активною саме "Системну", а не light/dark, у які вона
 // того разу резолвилась.
 export const applyTheme = (preference) => {
   const normalized = THEME_VALUES.includes(preference) ? preference : THEMES.SYSTEM;
@@ -71,7 +71,7 @@ const isDarkThemeApplied = () =>
  * у світлій і темній темі). Тема застосовується атрибутом data-bs-theme
  * на <html> (applyTheme вище), тому підписуємось саме на його зміну
  * через MutationObserver — це покриває і перемикання теми з
- * SettingsModal, поки компонент лишається змонтованим.
+ * таба "Налаштування" в сайдбарі, поки компонент лишається змонтованим.
  */
 export const useIsDarkTheme = () => {
   const [isDark, setIsDark] = useState(isDarkThemeApplied);

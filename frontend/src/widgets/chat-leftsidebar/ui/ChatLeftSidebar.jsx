@@ -1,17 +1,28 @@
 import { useMemo, useState } from "react";
-import { User, MessageSquare, Users, Contact, Settings } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
 
-import { DmTriggerButton } from "@features/dm";
+import { DmTriggerButton, useDmStore } from "@features/dm";
 import { FriendsList } from "@features/friends";
 import { BlockedUsersList } from "@features/block";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
-import { useIsDarkTheme } from "@shared/lib/theme.js";
+import { SIDE_TABS } from "@shared/constants/sideTabs.constants.js";
+import { applyTheme, getStoredTheme, THEMES, useIsDarkTheme } from "@shared/lib/theme.js";
 
 const GENDER_GROUPS = [
   { id: "male", label: "Чоловіки" },
   { id: "female", label: "Жінки" },
+];
+
+// Варіанти теми у табі "Налаштування". Раніше жили в окремій модалці
+// налаштувань (відкривалася з шапки) — тепер це єдина точка вибору
+// теми, а сама модалка видалена: її друга вкладка ("Акаунт") лише
+// дублювала панель профілю справа (нік/роль, див. ChatLayout).
+const THEME_OPTIONS = [
+  { id: THEMES.LIGHT, label: "Світла", icon: Sun },
+  { id: THEMES.DARK, label: "Темна", icon: Moon },
+  { id: THEMES.SYSTEM, label: "Системна", icon: Monitor },
 ];
 
 // Підвкладки табу "Користувачі": "Онлайн" — список онлайн-учасників
@@ -25,28 +36,21 @@ const USER_SUBTABS = [
   { id: "blocked", label: "Заблоковані" },
 ];
 
-// id тут навмисно збігаються з MENU_TABS у @widgets/side-menu —
-// саме через ці id Bootstrap-таби (pill+pane) знаходять одне одного
-// в DOM (href="#pills-<id>" ⇄ id="pills-<id>"), React-зв'язку між
-// двома сайдбарами немає.
-const PANELS = [
-  { id: "user", title: "Профіль", icon: User },
-  { id: "chat", title: "Чати", icon: MessageSquare},
-  { id: "users", title: "Користувачі", icon: Users, active: true },
-  { id: "contacts", title: "Контакти", icon: Contact },
-  { id: "setting", title: "Налаштування", icon: Settings },
-];
-
 /**
  * Панель-вміст для вкладок іконкової "рейки" — другий з двох лівих
  * сайдбарів, винесений з ChatLayout.jsx (раніше — статичні
  * англомовні заглушки на кшталт "chats tab-pane").
  *
  * - "Чат" — список кімнат.
+ * - "Приватні повідомлення" — список діалогів з useDmStore. Клік по
+ *   діалогу перемикає ОСНОВНУ область чату на приватне листування
+ *   (onSelectDialog -> ChatLayout -> PrivateChat); activeDialog —
+ *   логін діалогу, розгорнутого там зараз, для підсвітки рядка.
  * - "Користувачі" — підвкладки "Онлайн" (список + фільтр за статтю),
  *   "Друзі", "Заблоковані".
- * - "Профіль"/"Контакти"/"Налаштування" — заглушки, для них у
- *   застосунку ще немає окремої фічі.
+ * - "Налаштування" — вибір теми (світла/темна/системна).
+ * - "Профіль"/"Контакти" — заглушки, для них у застосунку ще немає
+ *   окремої фічі.
  */
 export function ChatLeftSidebar({
   login,
@@ -55,8 +59,20 @@ export function ChatLeftSidebar({
   roomUsers,
   onSelectRoom,
   onNicknameClick,
+  onSelectDialog,
+  activeDialog = null,
   selectedNicknames = [],
 }) {
+  // Обраний варіант теми (light/dark/system). Джерело правди —
+  // localStorage (див. shared/lib/theme.js), тут лише локальне
+  // відображення поточного вибору для підсвітки активної кнопки.
+  const [theme, setTheme] = useState(() => getStoredTheme());
+
+  const handleThemeSelect = (next) => {
+    setTheme(next);
+    applyTheme(next);
+  };
+
   // Підвкладка всередині "Користувачі": Онлайн / Друзі / Заблоковані.
   const [activeUserSubTab, setActiveUserSubTab] = useState("online");
   // Ще один рівень підвкладок всередині "Онлайн": фільтр за статтю.
@@ -73,6 +89,14 @@ export function ChatLeftSidebar({
   // коректно перерендерився при зміні (нова/старий Set — різні
   // референси, сама функція стабільна і ререндер не викликала б).
   const friendLogins = useFriendStore((state) => state.friendLogins);
+
+  // Діалоги для табу "Приватні повідомлення". Джерело — той самий
+  // useDmStore, що й у модалці особистих повідомлень: список
+  // наповнюється syncList одразу після конекту (див. ChatLayout) і
+  // живими подіями dm:new, тому окремих запитів тут не потрібно.
+  const dmConversations = useDmStore((state) => state.conversations);
+  const dmOrder = useDmStore((state) => state.order);
+  const dmListLoading = useDmStore((state) => state.listLoading);
 
   // Група учасників активної кімнати за статтю рахується один раз за
   // рендер, а не на кожен чих — список учасників кімнати може бути
@@ -91,10 +115,10 @@ export function ChatLeftSidebar({
   return (
     <div className="chat-leftsidebar me-lg-1 ms-lg-0">
       <div className="tab-content">
-        {PANELS.map(({ id, title, icon: Icon, active }) => (
+        {SIDE_TABS.map(({ id, title, icon: Icon, defaultActive }) => (
           <div
             key={id}
-            className={`tab-pane${active ? " fade show active" : ""}`}
+            className={`tab-pane${defaultActive ? " fade show active" : ""}`}
             id={`pills-${id}`}
             role="tabpanel"
             aria-labelledby={`pills-${id}-tab`}
@@ -119,6 +143,55 @@ export function ChatLeftSidebar({
                     </span>
                   </a>
                 ))}
+              </div>
+            )}
+
+            {id === "private" && (
+              <div className="app-sidebar-list app-sidebar-dialogs">
+                {dmOrder.length === 0 ? (
+                  <div className="app-sidebar-empty">
+                    {dmListLoading ? "Завантаження…" : "Немає розпочатих діалогів"}
+                  </div>
+                ) : (
+                  dmOrder.map((dialogLogin) => {
+                    const convo = dmConversations[dialogLogin];
+                    if (!convo) return null;
+
+                    const preview =
+                      convo.lastMessage?.text ??
+                      convo.messages[convo.messages.length - 1]?.text;
+
+                    return (
+                      <button
+                        key={dialogLogin}
+                        type="button"
+                        className={`app-sidebar-dialog-item ${
+                          dialogLogin === activeDialog ? "is-active" : ""
+                        }`}
+                        onClick={() => onSelectDialog?.(dialogLogin, convo.color)}
+                      >
+                        <span className="app-sidebar-dialog-row">
+                          <span
+                            className="app-sidebar-dialog-name"
+                            style={{
+                              color: getEffectiveColorHex(convo.color, isDarkTheme),
+                            }}
+                          >
+                            {dialogLogin}
+                          </span>
+                          {convo.unreadCount > 0 && (
+                            <span className="app-sidebar-dialog-badge">
+                              {convo.unreadCount > 99 ? "99+" : convo.unreadCount}
+                            </span>
+                          )}
+                        </span>
+                        <span className="app-sidebar-dialog-preview">
+                          {preview ?? "Немає повідомлень"}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             )}
 
@@ -211,7 +284,23 @@ export function ChatLeftSidebar({
               </div>
             )}
 
-            {id !== "chat" && id !== "users" && (
+            {id === "setting" && (
+              <div className="app-sidebar-theme-options">
+                {THEME_OPTIONS.map(({ id: themeId, label, icon: ThemeIcon }) => (
+                  <button
+                    key={themeId}
+                    type="button"
+                    className={`app-sidebar-theme-btn ${theme === themeId ? "is-active" : ""}`}
+                    onClick={() => handleThemeSelect(themeId)}
+                  >
+                    <ThemeIcon size={18} />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {id !== "chat" && id !== "users" && id !== "private" && id !== "setting" && (
               <div className="d-flex flex-column align-items-center justify-content-center text-center text-muted p-4">
                 <Icon size={28} className="mb-2" />
                 <span className="small">Розділ «{title}» ще не реалізовано</span>

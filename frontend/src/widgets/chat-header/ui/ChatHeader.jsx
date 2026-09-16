@@ -1,27 +1,27 @@
-import { LogOut, Mail, Menu, Settings, User } from "lucide-react";
+import { User } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
-import { useDmStore } from "@features/dm";
-import { SettingsModal } from "@features/settings";
-import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 
-const SETTINGS_MODAL_ID = "settingsModal";
-const LOGOUT_MODAL_ID = "logoutConfirmModal";
-
-export function ChatHeader({ title, online, onLogout, onOpenProfile, dmModalId = "dmModal" }) {
-  const openInbox = useDmStore((state) => state.openInbox);
-  const unreadTotal = useDmStore((state) =>
-    Object.values(state.conversations).reduce(
-      (sum, convo) => sum + (convo.unreadCount || 0),
-      0,
-    ),
-  );
+/**
+ * ChatHeader — шапка основної області: назва поточної кімнати (або
+ * співрозмовника, якщо відкрито приватний діалог), статус з'єднання і
+ * кнопка показу панелі профілю справа.
+ *
+ * Навмисно не тримає жодних модалок і жодного стану. Усе, що раніше
+ * висіло тут, переїхало туди, де для нього вже є місце, щоб не
+ * дублювати одні й ті самі дії у двох точках інтерфейсу:
+ *  - особисті повідомлення (іконка "Пошта" + модалка) — таб "Приватні
+ *    повідомлення" в рейці зліва, листування відкривається прямо в
+ *    основній області (@widgets/private-chat);
+ *  - вибір теми — таб "Налаштування" того ж сайдбара;
+ *  - вихід з акаунту (з підтвердженням) — дропдаун профілю в рейці
+ *    (@widgets/side-menu).
+ */
+export function ChatHeader({ title, online, onOpenProfile }) {
   return (
     <header className="chat-header">
       <div className="chat-header-inner">
         <div className="chat-header-start">
-          {/* Назва поточної кімнати (з фолбеком на ім'я застосунку,
-              поки кімната ще не резолвилась). Логотип прибрано. */}
           <div className="chat-brand">
             <div className="chat-brand-info">
               <h5 className="chat-brand-title">{title || APP_NAME}</h5>
@@ -35,7 +35,6 @@ export function ChatHeader({ title, online, onLogout, onOpenProfile, dmModalId =
           </div>
         </div>
 
-        {/* Actions */}
         <div className="chat-header-actions">
           <button
             type="button"
@@ -46,67 +45,8 @@ export function ChatHeader({ title, online, onLogout, onOpenProfile, dmModalId =
           >
             <User size={18} />
           </button>
-
-          <button
-            type="button"
-            className="chat-header-btn dm-header-btn"
-            title="Особисті повідомлення"
-            data-bs-toggle="modal"
-            data-bs-target={`#${dmModalId}`}
-            onClick={openInbox}
-          >
-            <Mail size={18} />
-            {unreadTotal > 0 && (
-              <span className="dm-header-badge">
-                {unreadTotal > 99 ? "99+" : unreadTotal}
-              </span>
-            )}
-          </button>
-
-          <div className="chat-header-menu dropdown">
-            <button
-              type="button"
-              className="chat-header-btn"
-              title="Меню"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <Menu size={18} />
-            </button>
-
-            <ul className="dropdown-menu dropdown-menu-end chat-header-dropdown-menu">
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item chat-header-dropdown-item"
-                  data-bs-toggle="modal"
-                  data-bs-target={`#${SETTINGS_MODAL_ID}`}
-                >
-                  <Settings size={16} />
-                  <span>Налаштування</span>
-                </button>
-              </li>
-              <li>
-                <hr className="dropdown-divider chat-header-dropdown-divider" />
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item chat-header-dropdown-item text-danger"
-                  data-bs-toggle="modal"
-                  data-bs-target={`#${LOGOUT_MODAL_ID}`}
-                >
-                  <LogOut size={16} />
-                  <span>Вийти</span>
-                </button>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
-
-      <SettingsModal modalId={SETTINGS_MODAL_ID} />
-      <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
     </header>
   );
 }

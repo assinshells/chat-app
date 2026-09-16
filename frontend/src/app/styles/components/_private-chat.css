@@ -1,0 +1,252 @@
+/* =========================================================
+   PRIVATE CHAT — приватний діалог, розгорнутий в ОСНОВНІЙ області
+   чату замість стрічки кімнати (@widgets/private-chat, вхід — таб
+   "Приватні повідомлення" в лівій рейці або пункт "Написати особисте
+   повідомлення" у меню біля ніка).
+
+   Єдиний вигляд приватного листування в застосунку: модалку
+   "Особисті повідомлення" (.dm-modal-*) прибрано, тому її стилі не
+   дублюються тут, а просто переїхали під власні імена — без
+   мобільного розділення на дві панелі (списку діалогів тут немає,
+   він живе в сайдбарі).
+   ========================================================= */
+
+.private-chat {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bs-body-bg);
+}
+
+/* =========================================================
+   HEADER — ім'я співрозмовника + повернення до кімнати
+   ========================================================= */
+
+.private-chat-header {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  padding: 0.5rem 1rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.private-chat-back-btn {
+  flex: 0 0 auto;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--bs-body-color);
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.private-chat-back-btn:hover {
+  border-color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.08);
+  color: var(--bs-primary);
+}
+
+.private-chat-header-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.private-chat-header-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.private-chat-header-subtitle {
+  font-size: 0.72rem;
+  color: var(--bs-secondary-color);
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+/* min-height: 0 обов'язковий, інакше flex-елемент не стискається
+   нижче висоти вмісту і скрол з'їжджає за межі екрана разом із
+   композером. */
+.private-chat-messages {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.private-chat-messages-list {
+  min-height: 100%;
+
+  padding: 0.85rem 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.private-chat-empty {
+  margin: auto;
+
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--bs-secondary-color);
+}
+
+.private-chat-message {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+
+  max-width: 80%;
+
+  font-size: 0.88rem;
+}
+
+.private-chat-message.is-own {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.private-chat-message.is-other {
+  align-self: flex-start;
+}
+
+.private-chat-message-time {
+  flex: 0 0 auto;
+
+  font-size: 0.72rem;
+  color: var(--bs-secondary-color);
+}
+
+.private-chat-message-text {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* =========================================================
+   COMPOSER
+   ========================================================= */
+
+.private-chat-composer {
+  display: flex;
+  gap: 0.5rem;
+
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.private-chat-input {
+  flex: 1 1 auto;
+
+  padding: 0.5rem 0.75rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: 9px;
+
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+
+  font-size: 0.88rem;
+}
+
+.private-chat-input:focus {
+  outline: none;
+  border-color: var(--bs-primary);
+}
+
+.private-chat-char-count {
+  flex: 0 0 auto;
+
+  align-self: center;
+
+  font-size: 0.7rem;
+  line-height: 1;
+
+  color: var(--bs-secondary-color);
+
+  white-space: nowrap;
+
+  user-select: none;
+}
+
+.private-chat-char-count.is-limit {
+  color: var(--bs-danger);
+}
+
+.private-chat-send-btn {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: var(--bs-primary);
+  color: var(--bs-white);
+
+  cursor: pointer;
+
+  transition: opacity 0.15s ease;
+}
+
+.private-chat-send-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.private-chat-error {
+  margin: 0;
+  padding: 0.4rem 1rem 0;
+
+  font-size: 0.78rem;
+  color: var(--bs-danger);
+}
+
+/* Замінює форму відправлення, коли листування з цим співрозмовником
+   заблоковане (в один із двох боків, див. useDmStore / convo.blocked). */
+.private-chat-blocked-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  margin: 0.5rem 1rem 1rem;
+  padding: 0.55rem 0.75rem;
+
+  border-radius: 8px;
+  border: 1px solid rgba(var(--bs-danger-rgb), 0.35);
+  background: rgba(var(--bs-danger-rgb), 0.08);
+
+  font-size: 0.82rem;
+  color: var(--bs-danger);
+}

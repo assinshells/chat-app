@@ -4,13 +4,13 @@ import { LogOut } from "lucide-react";
 /**
  * LogoutConfirmModal — Bootstrap-модалка підтвердження виходу з акаунту.
  * Відкривається через data-bs-toggle="modal" / data-bs-target={`#${modalId}`}
- * (див. Sidebar.jsx). Сам логаут виконується в onConfirm — модалка нічого
+ * (див. SideMenu.jsx — дропдаун профілю). Сам логаут виконується в onConfirm — модалка нічого
  * не знає про useLogoutStore/AuthSession, лише просить підтвердження.
  *
- * Рендериться через портал у document.body з тієї самої причини, що й
- * SettingsModal: якщо залишити її звичайним React-child всередині
- * .app-sidebar, вона потрапить у піддерево з transform/overflow:hidden і
- * буде або обрізана, або зміщена відносно згорнутого сайдбара замість екрана.
+ * Рендериться через портал у document.body: якщо залишити її звичайним
+ * React-child всередині сайдбара, вона потрапить у піддерево з
+ * transform/overflow:hidden і буде або обрізана, або зміщена відносно
+ * сайдбара замість екрана.
  */
 export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }) {
   return createPortal(
@@ -23,7 +23,7 @@ export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }
       data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content settings-modal">
+        <div className="modal-content app-modal">
           <div className="modal-header">
             <h5 className="modal-title" id={`${modalId}Label`}>
               Вийти з акаунту
