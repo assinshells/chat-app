@@ -58,19 +58,25 @@
   color: var(--bs-sidebar-menu-item-color);
   width: 56px;
   height: 56px;
-  line-height: 56px;
+  display: flex;            
+  align-items: center;
+  justify-content: center;
   margin: 0 auto;
   border-radius: 8px;
   padding: 0;
+  position: relative;       
+}
+.side-menu-nav .nav-item .nav-link svg {
+  display: block; 
 }
 @media (max-width: 991.98px) {
   .side-menu-nav .nav-item .nav-link {
     font-size: 20px;
     width: 48px;
     height: 48px;
-    line-height: 48px;
   }
-}
+  }
+
 .side-menu-nav .nav-item .nav-link.active {
   background-color: var(--bs-sidebar-menu-item-active-bg);
   color: #7269ef;
@@ -78,4 +84,9 @@
 .side-menu-nav .nav-item.show > .nav-link {
   background-color: var(--bs-sidebar-menu-item-active-bg);
   color: #7269ef;
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

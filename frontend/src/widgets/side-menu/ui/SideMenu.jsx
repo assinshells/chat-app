@@ -86,7 +86,7 @@ export function SideMenu({ login, onLogout }) {
         </ul>
       </div>
 
-      <div className="flex-lg-column">
+      <div className="flex-lg-column d-none d-lg-block">
         <ul className="nav side-menu-nav justify-content-center">
           <li className="nav-item dropdown dropup profile-user-dropdown">
             <a
@@ -100,7 +100,7 @@ export function SideMenu({ login, onLogout }) {
             >
               <Menu  />
             </a>
-            <div className="dropdown-menu dropdown-menu-end">
+            <div className="dropdown-menu">
               <span className="dropdown-item-text text-truncate d-block">
                 {login}
               </span>
@@ -111,7 +111,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-toggle="modal"
                 data-bs-target={`#${RULES_MODAL_ID}`}
               >
-                Правила <BookOpen size={14} className="float-end text-muted" />
+                Правила <BookOpen size={14} className=" text-muted" />
               </button>
               <button
                 type="button"
@@ -120,7 +120,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-target={`#${FEEDBACK_MODAL_ID}`}
               >
                 Зворотний зв&apos;язок
-                <MessageCircle size={14} className="float-end text-muted" />
+                <MessageCircle size={14} className=" text-muted" />
               </button>
               <div className="dropdown-divider"></div>
               {/* Вихід — єдина точка в застосунку (з шапки прибрано):
@@ -133,7 +133,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-toggle="modal"
                 data-bs-target={`#${LOGOUT_MODAL_ID}`}
               >
-                Вийти <LogOut size={14} className="float-end text-muted" />
+                Вийти <LogOut size={14} className=" text-muted" />
               </button>
             </div>
           </li>

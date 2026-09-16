@@ -6,6 +6,30 @@
    з @widgets/sidebar — ці класи лишились, бо їх вміст переїхав у
    ChatLeftSidebar / FriendsList / BlockedUsersList.
    ========================================================= */
+.chat-leftsidebar {
+  height: 100vh;
+  background-color: var(--bs-sidebar-sub-bg);
+}
+@media (min-width: 992px) {
+  .chat-leftsidebar {
+    min-width: 380px;
+    max-width: 380px;
+  }
+}
+.chat-leftsidebar .user-status-box {
+  background-color: var(--bs-light);
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 16px;
+  display: block;
+}
+.chat-leftsidebar .user-status-box .chat-user-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
 /*
 .app-sidebar-users {
   display: flex;
@@ -184,7 +208,7 @@
      .is-selected ниже (акцент var(--bs-primary)) продолжали
      перебивать его за счёт обычной специфичности CSS-классов, а не
      проигрывали инлайн-стилю. */
-  /*color: var(--user-color, inherit);
+/*color: var(--user-color, inherit);
 
   cursor: pointer;
 

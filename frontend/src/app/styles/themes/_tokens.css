@@ -5,9 +5,12 @@
    ========================================================= */
 
 :root {
+  --bs-light: #e6ebf5;
+  --bs-dark: #343a40;
   --bs-font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --bs-sidebar-bg: #fff;
   --bs-border-color: #f0eff5;
   --bs-sidebar-menu-item-color: #878a92;
   --bs-sidebar-menu-item-active-bg: #f7f7ff;
+  --bs-sidebar-sub-bg: #f5f7fb;
 }
