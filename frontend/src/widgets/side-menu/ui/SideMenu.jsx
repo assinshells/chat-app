@@ -1,10 +1,13 @@
 import { LogOut, Menu, BookOpen, MessageCircle } from "lucide-react";
-
+import LogoLight from "@shared/assets/logo/logo-light.svg";
+import LogoDark from "@shared/assets/logo/logo-dark.svg";
 import { RulesModal, FeedbackModal } from "@features/info";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { useDmStore } from "@features/dm";
-import { APP_NAME } from "@shared/constants/auth.constants.js";
-import { SIDE_TABS, SIDE_TAB_BADGES } from "@shared/constants/sideTabs.constants.js";
+import {
+  SIDE_TABS,
+  SIDE_TAB_BADGES,
+} from "@shared/constants/sideTabs.constants.js";
 
 const RULES_MODAL_ID = "sideMenuRulesModal";
 const FEEDBACK_MODAL_ID = "sideMenuFeedbackModal";
@@ -39,10 +42,21 @@ export function SideMenu({ login, onLogout }) {
     ),
   );
 
+  const logos = [
+    ["dark", LogoDark],
+    ["light", LogoLight],
+  ];
+
   return (
     <div className="side-menu flex-lg-column me-lg-1 ms-lg-0">
-      <div className="navbar-brand-box d-flex align-items-center justify-content-center">
-        <span className="fw-bold">{APP_NAME}</span>
+      <div className="navbar-brand-box">
+        {logos.map(([theme, logo]) => (
+          <a key={theme} href="/" className={`logo logo-${theme}`}>
+            <span className="logo-sm">
+              <img src={logo} alt="Logo" height={30} />
+            </span>
+          </a>
+        ))}
       </div>
 
       <div className="flex-lg-column my-auto">
@@ -60,7 +74,7 @@ export function SideMenu({ login, onLogout }) {
                 role="tab"
                 aria-label={title}
               >
-                <Icon size={18} />
+                <Icon  />
                 {badge === SIDE_TAB_BADGES.DM_UNREAD && dmUnread > 0 && (
                   <span className="side-menu-badge">
                     {dmUnread > 99 ? "99+" : dmUnread}
@@ -84,7 +98,7 @@ export function SideMenu({ login, onLogout }) {
               aria-expanded="false"
               title={login}
             >
-              <Menu size={20} />
+              <Menu  />
             </a>
             <div className="dropdown-menu dropdown-menu-end">
               <span className="dropdown-item-text text-truncate d-block">
@@ -97,8 +111,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-toggle="modal"
                 data-bs-target={`#${RULES_MODAL_ID}`}
               >
-                Правила{" "}
-                <BookOpen size={14} className="float-end text-muted" />
+                Правила <BookOpen size={14} className="float-end text-muted" />
               </button>
               <button
                 type="button"
@@ -106,7 +119,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-toggle="modal"
                 data-bs-target={`#${FEEDBACK_MODAL_ID}`}
               >
-                Зворотний зв&apos;язок{" "}
+                Зворотний зв&apos;язок
                 <MessageCircle size={14} className="float-end text-muted" />
               </button>
               <div className="dropdown-divider"></div>

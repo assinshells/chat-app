@@ -6,7 +6,7 @@
    з @widgets/sidebar — ці класи лишились, бо їх вміст переїхав у
    ChatLeftSidebar / FriendsList / BlockedUsersList.
    ========================================================= */
-
+/*
 .app-sidebar-users {
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
 }
 
 /* Комнаты: название + количество участников */
-.app-sidebar-room-item {
+/*.app-sidebar-room-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -99,7 +99,7 @@
 }
 
 /* Активная (выбранная) комната — постоянная подсветка, не только hover */
-.app-sidebar-room-item.is-active {
+/*.app-sidebar-room-item.is-active {
   background: var(--bs-secondary-bg);
 
   font-weight: 600;
@@ -137,7 +137,7 @@
 }
 
 /* Онлайн: имя + кнопка действий (три точки) */
-.app-sidebar-online-item {
+/*.app-sidebar-online-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -159,7 +159,7 @@
    (до 3 шт, см. ChatComposer/ChatLayout). flex: 1 1 auto + min-width: 0,
    чтобы длинный ник корректно обрезался многоточием, а не выталкивал
    соседнюю кнопку "три точки" (DmTriggerButton) за пределы строки. */
-.app-sidebar-online-name {
+/*.app-sidebar-online-name {
   flex: 1 1 auto;
   min-width: 0;
 
@@ -184,7 +184,7 @@
      .is-selected ниже (акцент var(--bs-primary)) продолжали
      перебивать его за счёт обычной специфичности CSS-классов, а не
      проигрывали инлайн-стилю. */
-  color: var(--user-color, inherit);
+  /*color: var(--user-color, inherit);
 
   cursor: pointer;
 
@@ -209,7 +209,7 @@
    "Онлайн", незалежно від того, обраний він зараз як ціль
    повідомлення (.is-selected) чи ні — обидва класи можуть діяти
    одночасно. */
-.app-sidebar-online-name-btn.is-friend {
+/*.app-sidebar-online-name-btn.is-friend {
   font-weight: 700;
 }
 
@@ -217,7 +217,7 @@
    features/block/ui/BlockedUsersList.jsx) — той самий рядок
    .app-sidebar-online-item, що й у списку "Онлайн", але замість
    кнопки-меню (три крапки) — явна текстова кнопка дії. */
-.app-sidebar-unblock-btn {
+/*.app-sidebar-unblock-btn {
   flex: 0 0 auto;
 
   display: inline-flex;
@@ -253,7 +253,7 @@
    .app-sidebar-unblock-btn вище, але нейтрального кольору (не danger):
    видалення з друзів — легша, повністю оборотна дія, а не захист від
    небажаного користувача. */
-.app-sidebar-unfriend-btn {
+/*.app-sidebar-unfriend-btn {
   flex: 0 0 auto;
 
   display: inline-flex;
@@ -287,7 +287,7 @@
 }
 
 /* Пустое состояние: в выбранной гендерной группе никого нет онлайн */
-.app-sidebar-empty {
+/*.app-sidebar-empty {
   padding: 0.65rem;
 
   font-size: 0.8rem;
@@ -300,7 +300,7 @@
    HEADER: розташування вмісту зліва в шапці
    ========================================================= */
 
-.chat-header-start {
+/*.chat-header-start {
   min-width: 0;
 
   display: flex;
@@ -317,7 +317,7 @@
    тримається на утилітах Bootstrap.
    ========================================================= */
 
-.side-menu-nav .nav-link {
+/*.side-menu-nav .nav-link {
   position: relative;
 }
 
@@ -352,7 +352,7 @@
    свої відступи/радіуси, як у .app-sidebar-room-item.
    ========================================================= */
 
-.app-sidebar-dialog-item {
+/*.app-sidebar-dialog-item {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -380,7 +380,7 @@
 
 /* Діалог, розгорнутий зараз в основній області чату (див.
    PrivateChat) — постійна підсвітка, як в активної кімнати. */
-.app-sidebar-dialog-item.is-active {
+/*.app-sidebar-dialog-item.is-active {
   background: rgba(var(--bs-primary-rgb), 0.12);
 }
 
@@ -444,7 +444,7 @@
    в один стовпчик, а не в ряд.
    ========================================================= */
 
-.app-sidebar-theme-options {
+/*.app-sidebar-theme-options {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -481,3 +481,4 @@
   border-color: var(--bs-primary);
   color: var(--bs-primary);
 }
+*/
