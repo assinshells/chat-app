@@ -13,27 +13,6 @@ const RULES_MODAL_ID = "sideMenuRulesModal";
 const FEEDBACK_MODAL_ID = "sideMenuFeedbackModal";
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
-/**
- * Вузька іконкова "рейка" зліва — перший з двох лівих сайдбарів,
- * винесений з ChatLayout.jsx (раніше лежав там статичною розміткою
- * зі шрифтовими іконками Remix і посиланнями на неіснуючі assets/*).
- *
- * Перелік вкладок — спільний зі списком панелей у
- * @widgets/chat-leftsidebar (див. SIDE_TABS): зв'язок між ними
- * тримається на збігу id, тому список навмисно один на двох.
- *
- * Власного стану перемикання вкладок не тримає: активна вкладка і
- * показ панелей — робота вбудованого Bootstrap JS
- * (bootstrap.bundle.min.js, вже підключений у main.jsx). Єдина
- * підписка на стор — лічильник непрочитаних особистих повідомлень
- * (бейдж на вкладці "Приватні повідомлення"): раніше той самий
- * лічильник рахувався ще й у шапці, поруч з іконкою "Пошта" —
- * тепер точка одна.
- *
- * У дропдауні профілю — вихід з акаунту (з підтвердженням; з шапки
- * прибраний) і посилання на допоміжні
- * модалки "Правила" й "Зворотний зв'язок".
- */
 export function SideMenu({ login, onLogout }) {
   const dmUnread = useDmStore((state) =>
     Object.values(state.conversations).reduce(
@@ -111,7 +90,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-toggle="modal"
                 data-bs-target={`#${RULES_MODAL_ID}`}
               >
-                Правила <BookOpen size={14} className=" text-muted" />
+                Правила <BookOpen size={18} className=" text-muted" />
               </button>
               <button
                 type="button"
@@ -120,7 +99,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-target={`#${FEEDBACK_MODAL_ID}`}
               >
                 Зворотний зв&apos;язок
-                <MessageCircle size={14} className=" text-muted" />
+                <MessageCircle size={18} className=" text-muted" />
               </button>
               <div className="dropdown-divider"></div>
               {/* Вихід — єдина точка в застосунку (з шапки прибрано):
@@ -133,7 +112,7 @@ export function SideMenu({ login, onLogout }) {
                 data-bs-toggle="modal"
                 data-bs-target={`#${LOGOUT_MODAL_ID}`}
               >
-                Вийти <LogOut size={14} className=" text-muted" />
+                Вийти <LogOut size={18} className=" text-muted" />
               </button>
             </div>
           </li>

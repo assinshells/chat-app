@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
-
 import { DmTriggerButton, useDmStore } from "@features/dm";
 import { FriendsList } from "@features/friends";
 import { BlockedUsersList } from "@features/block";
@@ -8,7 +7,12 @@ import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { SIDE_TABS } from "@shared/constants/sideTabs.constants.js";
-import { applyTheme, getStoredTheme, THEMES, useIsDarkTheme } from "@shared/lib/theme.js";
+import {
+  applyTheme,
+  getStoredTheme,
+  THEMES,
+  useIsDarkTheme,
+} from "@shared/lib/theme.js";
 
 const GENDER_GROUPS = [
   { id: "male", label: "Чоловіки" },
@@ -150,7 +154,9 @@ export function ChatLeftSidebar({
               <div className="app-sidebar-list app-sidebar-dialogs">
                 {dmOrder.length === 0 ? (
                   <div className="app-sidebar-empty">
-                    {dmListLoading ? "Завантаження…" : "Немає розпочатих діалогів"}
+                    {dmListLoading
+                      ? "Завантаження…"
+                      : "Немає розпочатих діалогів"}
                   </div>
                 ) : (
                   dmOrder.map((dialogLogin) => {
@@ -168,20 +174,27 @@ export function ChatLeftSidebar({
                         className={`app-sidebar-dialog-item ${
                           dialogLogin === activeDialog ? "is-active" : ""
                         }`}
-                        onClick={() => onSelectDialog?.(dialogLogin, convo.color)}
+                        onClick={() =>
+                          onSelectDialog?.(dialogLogin, convo.color)
+                        }
                       >
                         <span className="app-sidebar-dialog-row">
                           <span
                             className="app-sidebar-dialog-name"
                             style={{
-                              color: getEffectiveColorHex(convo.color, isDarkTheme),
+                              color: getEffectiveColorHex(
+                                convo.color,
+                                isDarkTheme,
+                              ),
                             }}
                           >
                             {dialogLogin}
                           </span>
                           {convo.unreadCount > 0 && (
                             <span className="app-sidebar-dialog-badge">
-                              {convo.unreadCount > 99 ? "99+" : convo.unreadCount}
+                              {convo.unreadCount > 99
+                                ? "99+"
+                                : convo.unreadCount}
                             </span>
                           )}
                         </span>
@@ -227,15 +240,22 @@ export function ChatLeftSidebar({
 
                     <div className="app-sidebar-list">
                       {usersByGender[activeGenderGroup].length === 0 ? (
-                        <div className="app-sidebar-empty">Немає користувачів онлайн</div>
+                        <div className="app-sidebar-empty">
+                          Немає користувачів онлайн
+                        </div>
                       ) : (
                         usersByGender[activeGenderGroup].map((user) => {
                           const isOwn = user.login === login;
-                          const isSelected = selectedNicknames.includes(user.login);
+                          const isSelected = selectedNicknames.includes(
+                            user.login,
+                          );
                           const isFriendUser = friendLogins.has(user.login);
 
                           return (
-                            <div key={user.id} className="app-sidebar-online-item">
+                            <div
+                              key={user.id}
+                              className="app-sidebar-online-item"
+                            >
                               {/* Свій нік — просто підсвічений червоним, не клікабельний,
                                   колір з налаштувань на нього не впливає (залишається як є).
                                   Чужий — клікабельний, додає адресата у форму
@@ -264,8 +284,15 @@ export function ChatLeftSidebar({
                                         ? "Друг · Додати користувача у форму повідомлення"
                                         : "Додати користувача у форму повідомлення"
                                     }
-                                    style={{ "--user-color": getEffectiveColorHex(user.color, isDarkTheme) }}
-                                    onClick={() => onNicknameClick?.(user.login)}
+                                    style={{
+                                      "--user-color": getEffectiveColorHex(
+                                        user.color,
+                                        isDarkTheme,
+                                      ),
+                                    }}
+                                    onClick={() =>
+                                      onNicknameClick?.(user.login)
+                                    }
                                   >
                                     {user.login}
                                   </button>
@@ -286,26 +313,33 @@ export function ChatLeftSidebar({
 
             {id === "setting" && (
               <div className="app-sidebar-theme-options">
-                {THEME_OPTIONS.map(({ id: themeId, label, icon: ThemeIcon }) => (
-                  <button
-                    key={themeId}
-                    type="button"
-                    className={`app-sidebar-theme-btn ${theme === themeId ? "is-active" : ""}`}
-                    onClick={() => handleThemeSelect(themeId)}
-                  >
-                    <ThemeIcon size={18} />
-                    <span>{label}</span>
-                  </button>
-                ))}
+                {THEME_OPTIONS.map(
+                  ({ id: themeId, label, icon: ThemeIcon }) => (
+                    <button
+                      key={themeId}
+                      type="button"
+                      className={`app-sidebar-theme-btn ${theme === themeId ? "is-active" : ""}`}
+                      onClick={() => handleThemeSelect(themeId)}
+                    >
+                      <ThemeIcon size={18} />
+                      <span>{label}</span>
+                    </button>
+                  ),
+                )}
               </div>
             )}
 
-            {id !== "chat" && id !== "users" && id !== "private" && id !== "setting" && (
-              <div className="d-flex flex-column align-items-center justify-content-center text-center text-muted p-4">
-                <Icon size={28} className="mb-2" />
-                <span className="small">Розділ «{title}» ще не реалізовано</span>
-              </div>
-            )}
+            {id !== "chat" &&
+              id !== "users" &&
+              id !== "private" &&
+              id !== "setting" && (
+                <div className="d-flex flex-column align-items-center justify-content-center text-center text-muted p-4">
+                  <Icon size={28} className="mb-2" />
+                  <span className="small">
+                    Розділ «{title}» ще не реалізовано
+                  </span>
+                </div>
+              )}
           </div>
         ))}
       </div>
