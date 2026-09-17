@@ -1,4 +1,4 @@
-import { Contact, Mail, MessageSquare, Settings, User, Users } from "lucide-react";
+import { Mail, MessageSquare, Settings, User, Users } from "lucide-react";
 
 /**
  * SIDE_TABS — єдине джерело вкладок лівої іконкової "рейки"
@@ -29,7 +29,6 @@ export const SIDE_TABS = Object.freeze([
     badge: SIDE_TAB_BADGES.DM_UNREAD,
   },
   { id: "users", title: "Користувачі", icon: Users, defaultActive: true },
-  { id: "contacts", title: "Контакти", icon: Contact },
   { id: "setting", title: "Налаштування", icon: Settings },
 ]);
 

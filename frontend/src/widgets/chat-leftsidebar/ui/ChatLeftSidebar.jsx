@@ -45,6 +45,10 @@ const USER_SUBTABS = [
  * сайдбарів, винесений з ChatLayout.jsx (раніше — статичні
  * англомовні заглушки на кшталт "chats tab-pane").
  *
+ * Кожна панель починається однаковим заголовком з title відповідного
+ * табу в SIDE_TABS (єдине джерело — той самий рядок, що й підпис
+ * пілюлі в рейці, тож нема чого дублювати чи розсинхронізовувати).
+ *
  * - "Чат" — список кімнат.
  * - "Приватні повідомлення" — список діалогів з useDmStore. Клік по
  *   діалогу перемикає ОСНОВНУ область чату на приватне листування
@@ -53,8 +57,13 @@ const USER_SUBTABS = [
  * - "Користувачі" — підвкладки "Онлайн" (список + фільтр за статтю),
  *   "Друзі", "Заблоковані".
  * - "Налаштування" — вибір теми (світла/темна/системна).
- * - "Профіль"/"Контакти" — заглушки, для них у застосунку ще немає
- *   окремої фічі.
+ * - "Профіль" — нік поточного користувача; раніше показувався
+ *   текстом у дропдауні профілю рейки (@widgets/side-menu), тепер
+ *   винесений у власну панель (пілюля цього табу лишається в рейці
+ *   на своєму звичайному місці).
+ *
+ * Таба "Контакти" в застосунку більше немає (прибрано повністю разом
+ * з пілюлею в рейці — окремої фічі під нього так і не було).
  */
 export function ChatLeftSidebar({
   login,
@@ -127,6 +136,10 @@ export function ChatLeftSidebar({
             role="tabpanel"
             aria-labelledby={`pills-${id}-tab`}
           >
+            <div className="px-4 pt-4">
+              <h4 className="mb-0">{title}</h4>
+            </div>
+
             {id === "chat" && (
               <div className="app-sidebar-list">
                 {ROOMS.map((room) => (
@@ -311,8 +324,27 @@ export function ChatLeftSidebar({
               </div>
             )}
 
+            {id === "user" && (
+              <div className="text-center p-4 border-bottom">
+                <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
+              </div>
+            )}
+
             {id === "setting" && (
-              <div className="app-sidebar-theme-options">
+              <div>
+                <div className="text-center p-4 border-bottom">
+                  <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
+                  <div className="dropdown d-inline-block mb-1">
+                                    <a className="text-muted dropdown-toggle pb-1 d-block" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Available <i className="mdi mdi-chevron-down"></i>
+                                    </a>
+          
+                                    <div className="dropdown-menu">
+                                      <a className="dropdown-item" href="#">Available</a>
+                                      <a className="dropdown-item" href="#">Busy</a>
+                                    </div>
+                                </div>
+                </div>
                 {THEME_OPTIONS.map(
                   ({ id: themeId, label, icon: ThemeIcon }) => (
                     <button
@@ -332,7 +364,8 @@ export function ChatLeftSidebar({
             {id !== "chat" &&
               id !== "users" &&
               id !== "private" &&
-              id !== "setting" && (
+              id !== "setting" &&
+              id !== "user" && (
                 <div className="d-flex flex-column align-items-center justify-content-center text-center text-muted p-4">
                   <Icon size={28} className="mb-2" />
                   <span className="small">

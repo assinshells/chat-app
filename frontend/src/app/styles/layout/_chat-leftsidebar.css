@@ -506,3 +506,61 @@
   color: var(--bs-primary);
 }
 */
+
+/* =========================================================
+   Таб "Профіль" у @widgets/chat-leftsidebar: нік поточного
+   користувача. Раніше показувався текстом у дропдауні профілю
+   рейки (@widgets/side-menu) — переїхав сюди; пілюля-перемикач
+   цього табу лишається в самій рейці.
+   ========================================================= */
+.app-sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 0.6rem;
+
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.app-sidebar-profile-avatar {
+  width: 56px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+}
+
+.app-sidebar-profile-nickname {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--bs-body-color);
+
+  word-break: break-word;
+}
+
+/* =========================================================
+   Заголовок таба — однаковий для всіх панелей у .tab-content
+   вище: title відповідного табу з SIDE_TABS (той самий рядок, що
+   й підпис пілюлі в рейці/aria-label).
+   ========================================================= */
+.app-sidebar-tab-header {
+  padding: 0.85rem 1rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-sidebar-tab-title {
+  margin: 0;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}

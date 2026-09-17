@@ -80,10 +80,6 @@ export function SideMenu({ login, onLogout }) {
               <Menu  />
             </a>
             <div className="dropdown-menu">
-              <span className="dropdown-item-text text-truncate d-block">
-                {login}
-              </span>
-              <div className="dropdown-divider"></div>
               <button
                 type="button"
                 className="dropdown-item"
