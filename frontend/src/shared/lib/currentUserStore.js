@@ -16,6 +16,7 @@ export const useCurrentUserStore = create((set) => ({
   id: null,
   login: null,
   role: null,
+  status: null,
   moderatorRooms: [],
 
   setUser: (user) =>
@@ -23,8 +24,15 @@ export const useCurrentUserStore = create((set) => ({
       id: user.id,
       login: user.login,
       role: user.role,
+      status: user.status,
       moderatorRooms: user.moderatorRooms ?? [],
     }),
 
-  clear: () => set({ id: null, login: null, role: null, moderatorRooms: [] }),
+  // Оптимістичне оновлення одразу після успішного status:update (див.
+  // useChatSocket.js) — не чекаємо наступного getMe, щоб таб "Профіль"
+  // відреагував миттєво.
+  setStatus: (status) => set({ status }),
+
+  clear: () =>
+    set({ id: null, login: null, role: null, status: null, moderatorRooms: [] }),
 }));

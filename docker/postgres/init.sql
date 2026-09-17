@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS users (
             'gold', 'lime', 'green', 'mint', 'turquoise', 'skyblue', 'blue',
             'navy', 'purple', 'black', 'white', 'gray', 'brown'
         )),
+    -- Статус доступності ("Онлайн"/"Відійшов"/"Зайнятий"/"Не турбувати"),
+    -- обирається в налаштуваннях — див. коментар біля users_status_check нижче.
+    status VARCHAR(16) NOT NULL DEFAULT 'online'
+        CHECK (status IN ('online', 'away', 'busy', 'dnd')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -62,6 +66,25 @@ BEGIN
     END IF;
     ALTER TABLE users ADD CONSTRAINT users_gender_check
         CHECK (gender IN ('male', 'female'));
+END $$;
+
+-- Статус доступності користувача (таб "Налаштування", див.
+-- backend/src/constants/auth.constants.js STATUS_VALUES). 'online' —
+-- значення за замовчуванням, ставиться всім новим користувачам, так
+-- само як 'black' для color вище. Домігрування ADD COLUMN IF NOT
+-- EXISTS — за тим самим принципом, що й для color: init.sql
+-- виконується лише на порожній базі.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(16) NOT NULL DEFAULT 'online';
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_status_check'
+    ) THEN
+        ALTER TABLE users DROP CONSTRAINT users_status_check;
+    END IF;
+    ALTER TABLE users ADD CONSTRAINT users_status_check
+        CHECK (status IN ('online', 'away', 'busy', 'dnd'));
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_users_login ON users(login);

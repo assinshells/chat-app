@@ -3,7 +3,7 @@ import { pool } from "../config/database.js";
 export const UserRepository = {
   async findByLogin(login) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, role FROM users WHERE login = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role FROM users WHERE login = $1",
       [login],
     );
     return rows[0] ?? null;
@@ -11,7 +11,7 @@ export const UserRepository = {
 
   async findByEmail(email) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, role FROM users WHERE email = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role FROM users WHERE email = $1",
       [email],
     );
     return rows[0] ?? null;
@@ -19,7 +19,7 @@ export const UserRepository = {
 
   async findById(id) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, role FROM users WHERE id = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role FROM users WHERE id = $1",
       [id],
     );
     return rows[0] ?? null;
@@ -90,6 +90,13 @@ export const UserRepository = {
     const { rows } = await pool.query(
       "UPDATE users SET color = $1 WHERE id = $2 RETURNING id, login, email, color",
       [color, id],
+    );
+    return rows[0] ?? null;
+  },
+  async updateStatus(id, status) {
+    const { rows } = await pool.query(
+      "UPDATE users SET status = $1 WHERE id = $2 RETURNING id, login, email, status",
+      [status, id],
     );
     return rows[0] ?? null;
   },

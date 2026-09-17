@@ -43,6 +43,7 @@ export const socketAuthGuard = async (socket, next) => {
     socket.data.login = user.login;
     socket.data.gender = user.gender;
     socket.data.color = user.color;
+    socket.data.status = user.status;
     socket.data.role = user.role;
     next();
   } catch {

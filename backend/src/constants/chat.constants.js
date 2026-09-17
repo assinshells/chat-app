@@ -153,6 +153,13 @@ export const SOCKET_EVENTS = Object.freeze({
   // лише ті, хто залишився в СТАРІЙ кімнаті (звідки користувач пішов).
   SYSTEM_EVENT: "system:event",
 
+  // Зміна статусу доступності (таб "Налаштування", див.
+  // constants/auth.constants.js STATUS_VALUES) без виходу/входу в
+  // кімнату — клієнт емітить STATUS_UPDATE, сервер персистить у БД,
+  // точково оновлює presence-запис поточної кімнати і розсилає
+  // ROOM_USERS її учасникам (див. sockets/chat.socket.js).
+  STATUS_UPDATE: "status:update",
+
   // Особисті повідомлення (DM) — окремий канал доставки, не пов'язаний
   // з ROOM_JOIN/currentRoom, див. dmChannel вище і sockets/dm.socket.js.
   DM_OPEN: "dm:open",

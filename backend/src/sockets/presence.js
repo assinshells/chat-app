@@ -42,6 +42,23 @@ export const RoomPresence = {
     map.delete(socketId);
   },
 
+  /**
+   * updateStatus — точково оновлює лише поле status у вже наявному
+   * presence-записі (не чіпаючи login/gender/color), коли користувач
+   * змінює статус, не виходячи й не заходячи в кімнату (status:update,
+   * див. sockets/chat.socket.js). Повертає true, якщо запис існував і
+   * був оновлений — викликаючий код розсилає room:users лише в цьому
+   * випадку (сокет міг ще не встигнути приєднатися до жодної кімнати).
+   */
+  updateStatus(room, socketId, status) {
+    const map = roomUsers.get(room);
+    const entry = map?.get(socketId);
+    if (!entry) return false;
+
+    entry.status = status;
+    return true;
+  },
+
   listUsers(room) {
     const map = roomUsers.get(room);
     return map ? Array.from(map.values()) : [];

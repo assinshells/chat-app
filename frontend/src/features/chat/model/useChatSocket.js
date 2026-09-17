@@ -15,6 +15,7 @@ const SYSTEM_EVENT = "system:event";
 const MODERATION_KICKED = "moderation:kicked";
 const MODERATION_BANNED = "moderation:banned";
 const MODERATION_ROOM_BANNED = "moderation:room_banned";
+const STATUS_UPDATE = "status:update";
 
 /**
  * useChatSocket — тримає живе Socket.IO-з'єднання і поточну активну
@@ -482,6 +483,32 @@ export function useChatSocket({ enabled, initialRoom }) {
 
   const isComposerDisabled = Boolean(roomBan?.room === activeRoom);
 
+  /**
+   * updateStatus — емітить status:update (див. sockets/chat.socket.js):
+   * сервер персистить статус у БД і, якщо сокет зараз перебуває в
+   * якійсь кімнаті, точково оновлює presence-запис і розсилає
+   * room:users — тому власний внесок у roomUsers (рядок "себе" у
+   * списку "Онлайн") прийде тим самим шляхом, що й для інших
+   * учасників, окремо його оновлювати тут не потрібно.
+   */
+  const updateStatus = useCallback((status) => {
+    return new Promise((resolve, reject) => {
+      if (!chatSocket.connected) {
+        reject(new Error("Немає з'єднання з сервером"));
+        return;
+      }
+
+      chatSocket.emit(STATUS_UPDATE, { status }, (result) => {
+        if (result?.success) {
+          resolve(result.status);
+          return;
+        }
+
+        reject(new Error(result?.message || "Не вдалося оновити статус"));
+      });
+    });
+  }, []);
+
   return {
     activeRoom,
     switchRoom,
@@ -491,6 +518,7 @@ export function useChatSocket({ enabled, initialRoom }) {
     roomCounts,
     roomUsers,
     sendMessage,
+    updateStatus,
     cooldownMs,
     roomBan: isComposerDisabled ? roomBan : null,
     confinement,

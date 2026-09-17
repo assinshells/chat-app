@@ -96,3 +96,11 @@ export const toUpdateGenderDto = (body) => ({
 export const toUpdateColorDto = (body) => ({
   color: body.color,
 });
+
+/**
+ * @typedef {Object} UpdateStatusDto
+ * @property {string} status - одне з STATUS_OPTIONS (constants/auth.constants.js)
+ */
+export const toUpdateStatusDto = (body) => ({
+  status: body.status,
+});

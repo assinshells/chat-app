@@ -1,5 +1,5 @@
 import { ValidationException } from "../exceptions/auth.exceptions.js";
-import { GENDER_OPTIONS, COLOR_OPTIONS } from "../constants/auth.constants.js";
+import { GENDER_OPTIONS, COLOR_OPTIONS, STATUS_OPTIONS } from "../constants/auth.constants.js";
 
 // Максимальна довжина нікнейма при реєстрації. users.login у БД —
 // VARCHAR(64) (див. docker/postgres/init.sql), тобто технічно влізе й
@@ -15,6 +15,8 @@ const isValidGender = (val) =>
   typeof val === "string" && GENDER_OPTIONS.includes(val);
 const isValidColor = (val) =>
   typeof val === "string" && COLOR_OPTIONS.includes(val);
+const isValidStatus = (val) =>
+  typeof val === "string" && STATUS_OPTIONS.includes(val);
 
 export const validateLoginRequest = (body) => {
   const errors = [];
@@ -81,5 +83,12 @@ export const validateUpdateColorRequest = (body) => {
   const errors = [];
   if (!isValidColor(body.color))
     errors.push(`колір обов'язковий і має бути одним із: ${COLOR_OPTIONS.join(", ")}`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
+export const validateUpdateStatusRequest = (body) => {
+  const errors = [];
+  if (!isValidStatus(body.status))
+    errors.push(`статус обов'язковий і має бути одним із: ${STATUS_OPTIONS.join(", ")}`);
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };

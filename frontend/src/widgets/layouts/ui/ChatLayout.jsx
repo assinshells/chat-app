@@ -49,6 +49,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     banInfo,
     joinError,
     dismissJoinError,
+    updateStatus,
   } = useChatSocket({
     enabled: Boolean(login),
     initialRoom,
@@ -148,6 +149,23 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   // коментар у currentUserStore.js), показуємо в панелі профілю.
   const currentUserRole = useCurrentUserStore((state) => state.role);
 
+  // Статус доступності поточного користувача (таб "Налаштування" ->
+  // "Профіль" у лівому сайдбарі, див. ChatLeftSidebar). Джерело
+  // правди — той самий useCurrentUserStore, що й роль вище: заповнюється
+  // з GET /api/auth/me при завантаженні і оптимістично оновлюється
+  // одразу після успішного status:update (handleStatusChange нижче).
+  const currentUserStatus = useCurrentUserStore((state) => state.status);
+
+  const handleStatusChange = (status) => {
+    updateStatus(status)
+      .then(() => useCurrentUserStore.getState().setStatus(status))
+      .catch(() => {
+        // Немає з'єднання або сервер відхилив — просто лишаємо
+        // попередній статус, окремого UI для помилки тут не потрібно
+        // (той самий підхід, що й для теми/кольору в цьому файлі).
+      });
+  };
+
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
   // panelLogin — приватний діалог, розгорнутий ЗАМІСТЬ стрічки кімнати
@@ -245,6 +263,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onSelectDialog={handleSelectDialog}
         activeDialog={dmPanelLogin}
         selectedNicknames={targetNicknames}
+        currentUserStatus={currentUserStatus}
+        onStatusChange={handleStatusChange}
       />
 
       <div className="user-chat w-100 overflow-hidden">

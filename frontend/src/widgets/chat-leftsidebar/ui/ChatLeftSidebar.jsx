@@ -6,6 +6,12 @@ import { BlockedUsersList } from "@features/block";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
+import {
+  STATUS_OPTIONS,
+  DEFAULT_STATUS,
+  getStatusEmoji,
+  getStatusLabel,
+} from "@shared/constants/status.constants.js";
 import { SIDE_TABS } from "@shared/constants/sideTabs.constants.js";
 import {
   applyTheme,
@@ -55,9 +61,16 @@ const USER_SUBTABS = [
  *   (onSelectDialog -> ChatLayout -> PrivateChat); activeDialog —
  *   логін діалогу, розгорнутого там зараз, для підсвітки рядка.
  * - "Користувачі" — підвкладки "Онлайн" (список + фільтр за статтю),
- *   "Друзі", "Заблоковані".
- * - "Налаштування" — вибір теми (світла/темна/системна).
- * - "Профіль" — нік поточного користувача; раніше показувався
+ *   "Друзі", "Заблоковані". Біля кожного ніка в "Онлайн" — емодзі
+ *   статусу доступності (user.status із presence, див.
+ *   backend/src/sockets/presence.js), той самий смайл, що обирається
+ *   нижче в "Налаштуваннях".
+ * - "Налаштування" — вибір теми (світла/темна/системна) і статусу
+ *   доступності (currentUserStatus/onStatusChange — з ChatLayout,
+ *   яка тримає сокет-з'єднання; сама зміна йде подією status:update,
+ *   див. features/chat/model/useChatSocket.js).
+ * - "Профіль" — нік поточного користувача разом з емодзі й підписом
+ *   його поточного статусу; раніше показувався
  *   текстом у дропдауні профілю рейки (@widgets/side-menu), тепер
  *   винесений у власну панель (пілюля цього табу лишається в рейці
  *   на своєму звичайному місці).
@@ -75,6 +88,8 @@ export function ChatLeftSidebar({
   onSelectDialog,
   activeDialog = null,
   selectedNicknames = [],
+  currentUserStatus,
+  onStatusChange,
 }) {
   // Обраний варіант теми (light/dark/system). Джерело правди —
   // localStorage (див. shared/lib/theme.js), тут лише локальне
@@ -278,6 +293,13 @@ export function ChatLeftSidebar({
                                   features/friends) додатково виділяється жирним шрифтом. */}
                               {isOwn ? (
                                 <span className="app-sidebar-online-name nickname-own">
+                                  <span
+                                    className="app-sidebar-status-emoji"
+                                    title={getStatusLabel(user.status)}
+                                    aria-hidden="true"
+                                  >
+                                    {getStatusEmoji(user.status)}
+                                  </span>
                                   {user.login}
                                 </span>
                               ) : (
@@ -294,8 +316,8 @@ export function ChatLeftSidebar({
                                     } ${isFriendUser ? "is-friend" : ""}`}
                                     title={
                                       isFriendUser
-                                        ? "Друг · Додати користувача у форму повідомлення"
-                                        : "Додати користувача у форму повідомлення"
+                                        ? `Друг · ${getStatusLabel(user.status)} · Додати користувача у форму повідомлення`
+                                        : `${getStatusLabel(user.status)} · Додати користувача у форму повідомлення`
                                     }
                                     style={{
                                       "--user-color": getEffectiveColorHex(
@@ -307,6 +329,12 @@ export function ChatLeftSidebar({
                                       onNicknameClick?.(user.login)
                                     }
                                   >
+                                    <span
+                                      className="app-sidebar-status-emoji"
+                                      aria-hidden="true"
+                                    >
+                                      {getStatusEmoji(user.status)}
+                                    </span>
                                     {user.login}
                                   </button>
                                 </>
@@ -327,6 +355,15 @@ export function ChatLeftSidebar({
             {id === "user" && (
               <div className="text-center p-4 border-bottom">
                 <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
+                <span
+                  className="app-sidebar-status-badge"
+                  title={getStatusLabel(currentUserStatus)}
+                >
+                  <span aria-hidden="true">
+                    {getStatusEmoji(currentUserStatus)}
+                  </span>
+                  {getStatusLabel(currentUserStatus)}
+                </span>
               </div>
             )}
 
@@ -335,15 +372,99 @@ export function ChatLeftSidebar({
                 <div className="text-center p-4 border-bottom">
                   <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
                   <div className="dropdown d-inline-block mb-1">
-                                    <a className="text-muted dropdown-toggle pb-1 d-block" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Available <i className="mdi mdi-chevron-down"></i>
-                                    </a>
-          
-                                    <div className="dropdown-menu">
-                                      <a className="dropdown-item" href="#">Available</a>
-                                      <a className="dropdown-item" href="#">Busy</a>
-                                    </div>
-                                </div>
+                    <a
+                      className="text-muted dropdown-toggle pb-1 d-block"
+                      href="#"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <span aria-hidden="true">
+                        {getStatusEmoji(currentUserStatus)}
+                      </span>
+                      {getStatusLabel(currentUserStatus)}
+                      <i className="mdi mdi-chevron-down"></i>
+                    </a>
+
+                    <div className="dropdown-menu">
+                      {STATUS_OPTIONS.map(({ value, emoji, label }) => (
+                        <a
+                          key={value}
+                          className={`dropdown-item ${
+                            (currentUserStatus ?? DEFAULT_STATUS) === value
+                              ? "is-active"
+                              : ""
+                          }`}
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onStatusChange?.(value);
+                          }}
+                        >
+                          <span aria-hidden="true">{emoji}</span> {label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 user-profile-desc" data-simplebar>
+                  <div id="settingprofile" className="accordion">
+                    <div className="accordion-item card border mb-2">
+                      <div className="accordion-header" id="personalinfo1">
+                        <button
+                          className="accordion-button"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#personalinfo"
+                          aria-expanded="true"
+                          aria-controls="personalinfo"
+                        >
+                          <h5 className="font-size-14 m-0">Personal Info</h5>
+                        </button>
+                      </div>
+                      <div
+                        id="personalinfo"
+                        className="accordion-collapse collapse show"
+                        aria-labelledby="personalinfo1"
+                        data-bs-parent="#settingprofile"
+                      >
+                        <div className="accordion-body">
+                          <div className="float-end">
+                            <button
+                              type="button"
+                              className="btn btn-light btn-sm"
+                            >
+                              <i className="ri-edit-fill me-1 ms-0 align-middle"></i>{" "}
+                              Edit
+                            </button>
+                          </div>
+                          <div>
+                            <p className="text-muted mb-1">Name</p>
+                            <h5 className="font-size-14">Patricia Smith</h5>
+                          </div>
+
+                          <div className="mt-4">
+                            <p className="text-muted mb-1">Email</p>
+                            <h5 className="font-size-14">adc@123.com</h5>
+                          </div>
+
+                          <div className="mt-4">
+                            <p className="text-muted mb-1">Location</p>
+                            <h5 className="font-size-14 mb-0">
+                              California, USA
+                            </h5>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-4 pt-3 pb-1">
+                  <span className="app-sidebar-settings-group-label">Тема</span>
                 </div>
                 {THEME_OPTIONS.map(
                   ({ id: themeId, label, icon: ThemeIcon }) => (

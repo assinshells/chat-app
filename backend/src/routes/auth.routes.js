@@ -48,6 +48,12 @@ router.patch(
   csrfProtection,
   AuthController.updateColor,
 );
+router.patch(
+  "/status",
+  authGuard,
+  csrfProtection,
+  AuthController.updateStatus,
+);
 router.get("/me", authGuard, AuthController.getMe);
 
 export default router;

@@ -7,6 +7,7 @@ import {
   toResetPasswordDto,
   toUpdateGenderDto,
   toUpdateColorDto,
+  toUpdateStatusDto,
 } from "../dto/auth.dto.js";
 import {
   validateLoginRequest,
@@ -16,6 +17,7 @@ import {
   validateResetPasswordRequest,
   validateUpdateGenderRequest,
   validateUpdateColorRequest,
+  validateUpdateStatusRequest,
 } from "../validators/auth.validator.js";
 import { CookieProvider } from "../providers/cookie.provider.js";
 import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
@@ -134,6 +136,19 @@ export const AuthController = {
         color: dto.color,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, color: result.color });
+    } catch (err) {
+      next(err);
+    }
+  },
+  updateStatus: async (req, res, next) => {
+    try {
+      validateUpdateStatusRequest(req.body);
+      const dto = toUpdateStatusDto(req.body);
+      const result = await AuthService.updateStatus({
+        userId: req.userId,
+        status: dto.status,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, status: result.status });
     } catch (err) {
       next(err);
     }

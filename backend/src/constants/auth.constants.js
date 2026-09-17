@@ -79,6 +79,22 @@ export const COLOR_VALUES = Object.freeze({
 export const COLOR_OPTIONS = Object.freeze(Object.values(COLOR_VALUES));
 export const DEFAULT_COLOR = COLOR_VALUES.BLACK;
 
+// Статус доступності користувача (таб "Налаштування" -> обирається,
+// таб "Профіль" -> показується з іконкою/смайлом, список "Онлайн" ->
+// той самий смайл біля ніка). За аналогією з COLOR_VALUES вище: список
+// значень тут, підпис/емодзі для UI — на фронтенді
+// (shared/constants/status.constants.js), обидва місця змінюються разом.
+// 'online' — значення за замовчуванням, збігається з DEFAULT у БД.
+export const STATUS_VALUES = Object.freeze({
+  ONLINE: "online",
+  AWAY: "away",
+  BUSY: "busy",
+  DND: "dnd",
+});
+
+export const STATUS_OPTIONS = Object.freeze(Object.values(STATUS_VALUES));
+export const DEFAULT_STATUS = STATUS_VALUES.ONLINE;
+
 // Ролі користувачів. 'user' — значення за замовчуванням (звичайний
 // учасник чату, без прав модерації). 'moderator' модерує лише кімнати
 // зі свого переліку (moderator_rooms), 'admin' і 'superadmin' — усі

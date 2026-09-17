@@ -97,6 +97,11 @@ export const AuthService = {
     if (!updated) throw new NotFoundException();
     return { success: true, color: updated.color };
   },
+  async updateStatus({ userId, status }) {
+    const updated = await UserRepository.updateStatus(userId, status);
+    if (!updated) throw new NotFoundException();
+    return { success: true, status: updated.status };
+  },
 
   /**
    * getMe — профіль поточного користувача, включно з роллю і (для
@@ -121,6 +126,7 @@ export const AuthService = {
         email: user.email,
         gender: user.gender,
         color: user.color,
+        status: user.status,
         role: user.role,
         moderatorRooms,
       },

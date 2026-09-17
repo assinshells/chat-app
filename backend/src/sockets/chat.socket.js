@@ -1,9 +1,11 @@
 import { MessageService } from "../services/message.service.js";
 import { DEFAULT_ROOM, SOCKET_EVENTS, isValidRoom } from "../constants/chat.constants.js";
+import { STATUS_OPTIONS } from "../constants/auth.constants.js";
 import { RoomPresence } from "./presence.js";
 import { broadcastRoomUsers, broadcastRoomsState } from "./broadcast.js";
 import { BanRepository } from "../repositories/ban.repository.js";
 import { ConfinementRepository } from "../repositories/confinement.repository.js";
+import { AuthService } from "../services/auth.service.js";
 import { BannedException, ConfinedException } from "../exceptions/chat.exceptions.js";
 import logger from "../config/logger.js";
 
@@ -151,6 +153,7 @@ async function joinRoom(io, socket, requestedRoom) {
       login: socket.data.login,
       gender: socket.data.gender,
       color: socket.data.color,
+      status: socket.data.status,
     });
     socket.data.currentRoom = targetRoom;
 
@@ -320,6 +323,49 @@ export function registerChatSocket(io, socket) {
         // exceptions/chat.exceptions.js) — фронтенду потрібен саме він,
         // щоб показати живий зворотний відлік до кінця мута.
         ...(err.details ? { details: err.details } : {}),
+      });
+    }
+  });
+
+  // status:update — зміна статусу доступності (таб "Налаштування")
+  // без переходу в іншу кімнату. На відміну від кольору (PATCH
+  // /api/auth/color, без живої розсилки), статус повинен одразу
+  // з'явитися біля ніка у списку "Онлайн" в усіх, хто зараз бачить
+  // цю кімнату — тому персистимо в БД (AuthService.updateStatus, той
+  // самий шлях, що й REST PATCH /api/auth/status) І точково оновлюємо
+  // presence-запис поточної кімнати цього сокета.
+  socket.on(SOCKET_EVENTS.STATUS_UPDATE, async (payload, ack) => {
+    const status = typeof payload === "string" ? payload : payload?.status;
+    const respond = (result) => {
+      if (typeof ack === "function") ack(result);
+    };
+
+    if (!STATUS_OPTIONS.includes(status)) {
+      return respond({
+        success: false,
+        code: "STATUS_INVALID",
+        message: "Невірний статус",
+      });
+    }
+
+    try {
+      await AuthService.updateStatus({ userId: socket.data.userId, status });
+      socket.data.status = status;
+
+      const room = socket.data.currentRoom;
+      if (room && RoomPresence.updateStatus(room, socket.id, status)) {
+        broadcastRoomUsers(io, room);
+      }
+
+      respond({ success: true, status });
+    } catch (err) {
+      logger.warn(
+        `status:update не вдався для користувача ${socket.data.userId}: ${err.message}`,
+      );
+      respond({
+        success: false,
+        code: "STATUS_UPDATE_FAILED",
+        message: "Не вдалося оновити статус",
       });
     }
   });
