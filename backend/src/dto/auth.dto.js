@@ -131,3 +131,12 @@ export const toUpdateDisplayNameDto = (body) => ({
   displayName:
     body.displayName.trim() === "" ? null : body.displayName.trim(),
 });
+
+/**
+ * @typedef {Object} UpdateAboutDto
+ * @property {string|null} about - порожній рядок нормалізується в null
+ *   ("не вказано"), пробіли по краях обрізаються.
+ */
+export const toUpdateAboutDto = (body) => ({
+  about: body.about.trim() === "" ? null : body.about.trim(),
+});

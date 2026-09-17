@@ -3,7 +3,7 @@ import { pool } from "../config/database.js";
 export const UserRepository = {
   async findByLogin(login) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name FROM users WHERE login = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name, about FROM users WHERE login = $1",
       [login],
     );
     return rows[0] ?? null;
@@ -11,7 +11,7 @@ export const UserRepository = {
 
   async findByEmail(email) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name FROM users WHERE email = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name, about FROM users WHERE email = $1",
       [email],
     );
     return rows[0] ?? null;
@@ -19,7 +19,7 @@ export const UserRepository = {
 
   async findById(id) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name FROM users WHERE id = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name, about FROM users WHERE id = $1",
       [id],
     );
     return rows[0] ?? null;
@@ -132,6 +132,17 @@ export const UserRepository = {
     const { rows } = await pool.query(
       "UPDATE users SET display_name = $1 WHERE id = $2 RETURNING id, login, display_name",
       [displayName, id],
+    );
+    return rows[0] ?? null;
+  },
+
+  // "Про себе" в аккордеоні "Personal Info" — довільний текст
+  // (textarea), так само необов'язковий і без унікальності, як city
+  // та display_name.
+  async updateAbout(id, about) {
+    const { rows } = await pool.query(
+      "UPDATE users SET about = $1 WHERE id = $2 RETURNING id, login, about",
+      [about, id],
     );
     return rows[0] ?? null;
   },

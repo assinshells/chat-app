@@ -32,3 +32,13 @@ export const updateDisplayName = (displayName) =>
   apiClient
     .patch("/api/auth/display-name", { displayName })
     .then((r) => r.data);
+
+/**
+ * updateAbout — редагування поля "Про себе" (textarea) в аккордеоні
+ * "Personal Info".
+ *
+ * @param {string} about - порожній рядок дозволений (очищає поле)
+ * @returns {Promise<{ success: boolean, about: string|null }>}
+ */
+export const updateAbout = (about) =>
+  apiClient.patch("/api/auth/about", { about }).then((r) => r.data);

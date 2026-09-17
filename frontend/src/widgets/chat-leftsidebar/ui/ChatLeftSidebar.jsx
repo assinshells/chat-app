@@ -10,6 +10,7 @@ import {
   updateEmail,
   updateCity,
   updateDisplayName,
+  updateAbout,
 } from "@shared/api/profile.api.js";
 import { EditableProfileField } from "./EditableProfileField.jsx";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
@@ -80,10 +81,11 @@ const USER_SUBTABS = [
  *   сокет-з'єднання; сама зміна йде подією status:update, див.
  *   features/chat/model/useChatSocket.js; той самий дропдаун раніше
  *   був у "Налаштуваннях", тут замінив собою статичний бейдж) і
- *   аккордеон "Personal Info": Login (лише читання), Ім'я/Email/Місто
- *   (точково редагуються через EditableProfileField — власна
+ *   аккордеон "Personal Info": Login (лише читання), Ім'я/Email/Місто/
+ *   Про себе (точково редагуються через EditableProfileField — власна
  *   view/edit/saving/success/error state machine на кожне поле,
- *   PATCH /api/auth/display-name /email /city).
+ *   PATCH /api/auth/display-name /email /city /about). "Про себе" —
+ *   єдине багаторядкове поле (multiline, textarea), решта — однорядкові.
  *
  * Таба "Контакти" в застосунку більше немає (прибрано повністю разом
  * з пілюлею в рейці — окремої фічі під нього так і не було).
@@ -136,11 +138,13 @@ export function ChatLeftSidebar({
   const currentUserDisplayName = useCurrentUserStore(
     (state) => state.displayName,
   );
+  const currentUserAbout = useCurrentUserStore((state) => state.about);
   const setCurrentUserEmail = useCurrentUserStore((state) => state.setEmail);
   const setCurrentUserCity = useCurrentUserStore((state) => state.setCity);
   const setCurrentUserDisplayName = useCurrentUserStore(
     (state) => state.setDisplayName,
   );
+  const setCurrentUserAbout = useCurrentUserStore((state) => state.setAbout);
 
   // Кожен onSave стосується лише свого поля: помилка або успіх
   // редагування email жодним чином не зачіпає city чи ім'я, і
@@ -159,6 +163,11 @@ export function ChatLeftSidebar({
   const handleSaveDisplayName = async (nextDisplayName) => {
     const result = await updateDisplayName(nextDisplayName);
     setCurrentUserDisplayName(result.displayName);
+  };
+
+  const handleSaveAbout = async (nextAbout) => {
+    const result = await updateAbout(nextAbout);
+    setCurrentUserAbout(result.about);
   };
 
   // Діалоги для табу "Приватні повідомлення". Джерело — той самий
@@ -441,6 +450,15 @@ export function ChatLeftSidebar({
                       ))}
                     </div>
                   </div>
+                  <EditableProfileField
+                            label="About"
+                            value={currentUserAbout}
+                            placeholder="Розкажіть трохи про себе"
+                            maxLength={500}
+                            multiline
+                            rows={4}
+                            onSave={handleSaveAbout}
+                          />
                 </div>
 
                 {/* Аккордеон "Personal Info" — перенесений сюди з
@@ -450,9 +468,6 @@ export function ChatLeftSidebar({
                     точково редагуються, кожне своєю кнопкою "Edit" і
                     власною state machine (EditableProfileField). */}
                 <div className="p-4 user-profile-desc" data-simplebar>
-                  <div class="text-muted">
-                                    <p class="mb-4">About If several languages coalesce, the grammar of the resulting language is more simple and regular than that of the individual.</p>
-                                </div>
                   <div id="settingprofile" className="accordion">
                     <div className="accordion-item card border mb-2">
                       <div className="accordion-header" id="personalinfo1">
@@ -477,6 +492,7 @@ export function ChatLeftSidebar({
                           <div>
                             <p className="text-muted mb-1">Login</p>
                             <h5 className="font-size-14">{login}</h5>
+                            
                           </div>
 
                           <EditableProfileField
@@ -502,6 +518,8 @@ export function ChatLeftSidebar({
                             maxLength={120}
                             onSave={handleSaveCity}
                           />
+
+                          
                         </div>
                       </div>
                     </div>

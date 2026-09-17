@@ -11,6 +11,7 @@ import {
   toUpdateEmailDto,
   toUpdateCityDto,
   toUpdateDisplayNameDto,
+  toUpdateAboutDto,
 } from "../dto/auth.dto.js";
 import {
   validateLoginRequest,
@@ -24,6 +25,7 @@ import {
   validateUpdateEmailRequest,
   validateUpdateCityRequest,
   validateUpdateDisplayNameRequest,
+  validateUpdateAboutRequest,
 } from "../validators/auth.validator.js";
 import { CookieProvider } from "../providers/cookie.provider.js";
 import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
@@ -196,6 +198,19 @@ export const AuthController = {
       res
         .status(HTTP_STATUS.OK)
         .json({ success: true, displayName: result.displayName });
+    } catch (err) {
+      next(err);
+    }
+  },
+  updateAbout: async (req, res, next) => {
+    try {
+      validateUpdateAboutRequest(req.body);
+      const dto = toUpdateAboutDto(req.body);
+      const result = await AuthService.updateAbout({
+        userId: req.userId,
+        about: dto.about,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, about: result.about });
     } catch (err) {
       next(err);
     }

@@ -128,3 +128,17 @@ export const validateUpdateDisplayNameRequest = (body) => {
     errors.push(`ім'я має бути не довшим за ${MAX_DISPLAY_NAME_LENGTH} символів`);
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
+
+// Максимальна довжина "Про себе", узгоджена з users.about VARCHAR(500)
+// у БД (та EditableProfileField, maxLength на textarea).
+export const MAX_ABOUT_LENGTH = 500;
+
+export const validateUpdateAboutRequest = (body) => {
+  const errors = [];
+  // Так само необов'язкове, як і city/displayName — порожній рядок
+  // допустимий (означає "очистити поле").
+  if (typeof body.about !== "string") errors.push("поле «Про себе» має бути рядком");
+  else if (body.about.trim().length > MAX_ABOUT_LENGTH)
+    errors.push(`поле «Про себе» має бути не довшим за ${MAX_ABOUT_LENGTH} символів`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};

@@ -26,8 +26,13 @@ const SUCCESS_DISPLAY_MS = 1200;
  * @param {(next: string) => Promise<void>} onSave - викликається з
  *   обрізаним значенням поля; має кинути помилку (з .message) при невдачі
  * @param {string} [placeholder] - плейсхолдер, якщо значення порожнє
- * @param {string} [type] - тип <input> (за замовчуванням "text")
+ * @param {string} [type] - тип <input> (за замовчуванням "text"),
+ *   ігнорується при multiline
  * @param {number} [maxLength]
+ * @param {boolean} [multiline] - рендерити <textarea> замість <input>
+ *   (напр. поле "Про себе") — Enter вставляє новий рядок замість
+ *   збереження, зберігати можна лише кнопкою або Ctrl/Cmd+Enter
+ * @param {number} [rows] - кількість рядків textarea (лише при multiline)
  */
 export function EditableProfileField({
   label,
@@ -36,6 +41,8 @@ export function EditableProfileField({
   placeholder = "Не вказано",
   type = "text",
   maxLength,
+  multiline = false,
+  rows = 3,
 }) {
   const [status, setStatus] = useState("view");
   const [draft, setDraft] = useState(value ?? "");
@@ -108,6 +115,10 @@ export function EditableProfileField({
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
+      // У textarea звичайний Enter — це новий рядок, а не збереження;
+      // зберігати можна Ctrl/Cmd+Enter або кнопкою. У однорядкових
+      // полях (input) Enter, як і раніше, зберігає одразу.
+      if (multiline && !(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
       save();
     } else if (e.key === "Escape") {
@@ -145,14 +156,75 @@ export function EditableProfileField({
       </div>
 
       {status === "view" && (
-        <h5 className="font-size-14 mb-0">
+        <h5
+          className="font-size-14 mb-0"
+          style={multiline ? { whiteSpace: "pre-wrap" } : undefined}
+        >
           {value || <span className="text-muted fst-italic">{placeholder}</span>}
         </h5>
       )}
 
-      {status === "success" && <h5 className="font-size-14 mb-0">{value}</h5>}
+      {status === "success" && (
+        <h5
+          className="font-size-14 mb-0"
+          style={multiline ? { whiteSpace: "pre-wrap" } : undefined}
+        >
+          {value}
+        </h5>
+      )}
 
-      {showInput && (
+      {showInput && multiline && (
+        <div>
+          <textarea
+            ref={inputRef}
+            className={`form-control form-control-sm ${status === "error" ? "is-invalid" : ""}`}
+            value={draft}
+            maxLength={maxLength}
+            rows={rows}
+            disabled={isBusy}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            aria-invalid={status === "error"}
+            aria-label={label}
+          />
+
+          <div className="d-flex justify-content-end mt-1 gap-1">
+            <button
+              type="button"
+              className="btn btn-light btn-sm"
+              onClick={cancel}
+              disabled={isBusy}
+              aria-label="Скасувати"
+            >
+              <X size={14} className="me-1 align-middle" />
+              Скасувати
+            </button>
+            <button
+              type="button"
+              className="btn btn-success btn-sm"
+              onClick={save}
+              disabled={isBusy}
+              aria-label="Зберегти"
+            >
+              {isBusy ? (
+                <Loader2 size={14} className="editable-profile-field-spinner me-1 align-middle" />
+              ) : (
+                <Check size={14} className="me-1 align-middle" />
+              )}
+              Зберегти
+            </button>
+          </div>
+
+          {status === "error" && (
+            <div className="editable-profile-field-error">
+              <AlertCircle size={13} className="me-1" />
+              {errorMessage}
+            </div>
+          )}
+        </div>
+      )}
+
+      {showInput && !multiline && (
         <div>
           <div className="input-group input-group-sm">
             <input

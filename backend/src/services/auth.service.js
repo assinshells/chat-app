@@ -138,6 +138,12 @@ export const AuthService = {
     return { success: true, displayName: updated.display_name };
   },
 
+  async updateAbout({ userId, about }) {
+    const updated = await UserRepository.updateAbout(userId, about);
+    if (!updated) throw new NotFoundException();
+    return { success: true, about: updated.about };
+  },
+
   /**
    * getMe — профіль поточного користувача, включно з роллю і (для
    * модераторів) переліком кімнат, які він модерує. Викликається
@@ -164,6 +170,7 @@ export const AuthService = {
         status: user.status,
         city: user.city,
         displayName: user.display_name,
+        about: user.about,
         role: user.role,
         moderatorRooms,
       },

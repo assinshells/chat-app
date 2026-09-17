@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS users (
     -- чаті) це довільне ім'я/прізвище користувача, показується лише
     -- в "Personal Info" і ніде більше в застосунку. Необов'язкове.
     display_name VARCHAR(120),
+    -- "Про себе" — довільний текст користувача, редагується точково в
+    -- аккордеоні "Personal Info" (textarea, див. EditableProfileField
+    -- з multiline). Необов'язкове, як city/display_name.
+    about VARCHAR(500),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -40,6 +44,9 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(120);
 
 -- Так само для display_name.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(120);
+
+-- Так само для about.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS about VARCHAR(500);
 
 -- Домігрування для баз, створених до розширення палітри з 5 до 20
 -- кольорів (init.sql виконується лише на порожній базі, тому наявний

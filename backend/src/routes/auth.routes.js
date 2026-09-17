@@ -75,6 +75,12 @@ router.patch(
   csrfProtection,
   AuthController.updateDisplayName,
 );
+router.patch(
+  "/about",
+  authGuard,
+  csrfProtection,
+  AuthController.updateAbout,
+);
 router.get("/me", authGuard, AuthController.getMe);
 
 export default router;
