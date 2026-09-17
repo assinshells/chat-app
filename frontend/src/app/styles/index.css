@@ -20,7 +20,6 @@
 
 @import "./base/_reset.css";
 @import "./base/_body.css";
-@import "./base/_scrollbar.css";
 
 @import "./layout/_shell.css";
 @import "./layout/_side-menu.css";

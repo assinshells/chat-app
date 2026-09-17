@@ -451,7 +451,7 @@ export function ChatLeftSidebar({
                     власною state machine (EditableProfileField). */}
                 <div className="p-4 user-profile-desc" data-simplebar>
                   <div class="text-muted">
-                                    <p class="mb-4">If several languages coalesce, the grammar of the resulting language is more simple and regular than that of the individual.</p>
+                                    <p class="mb-4">About</p>
                                 </div>
                   <div id="settingprofile" className="accordion">
                     <div className="accordion-item card border mb-2">
