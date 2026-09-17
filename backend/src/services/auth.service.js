@@ -104,6 +104,41 @@ export const AuthService = {
   },
 
   /**
+   * updateEmail — точкове редагування email з аккордеона "Personal
+   * Info" (ChatLeftSidebar, таб "Налаштування"). Попередня перевірка
+   * через findByEmail дає людяне повідомлення в звичайному випадку;
+   * UNIQUE-обмеження users_email_key у БД лишається останнім рубежем
+   * на випадок гонки двох одночасних запитів з однаковим email.
+   */
+  async updateEmail({ userId, email }) {
+    const existing = await UserRepository.findByEmail(email);
+    if (existing && existing.id !== userId) {
+      throw new ConflictException(AUTH_ERRORS.EMAIL_TAKEN);
+    }
+
+    try {
+      const updated = await UserRepository.updateEmail(userId, email);
+      if (!updated) throw new NotFoundException();
+      return { success: true, email: updated.email };
+    } catch (err) {
+      if (err.code === "23505") throw new ConflictException(AUTH_ERRORS.EMAIL_TAKEN);
+      throw err;
+    }
+  },
+
+  async updateCity({ userId, city }) {
+    const updated = await UserRepository.updateCity(userId, city);
+    if (!updated) throw new NotFoundException();
+    return { success: true, city: updated.city };
+  },
+
+  async updateDisplayName({ userId, displayName }) {
+    const updated = await UserRepository.updateDisplayName(userId, displayName);
+    if (!updated) throw new NotFoundException();
+    return { success: true, displayName: updated.display_name };
+  },
+
+  /**
    * getMe — профіль поточного користувача, включно з роллю і (для
    * модераторів) переліком кімнат, які він модерує. Викликається
    * фронтом одразу після login/refresh, щоб знати, чи показувати пункт
@@ -127,6 +162,8 @@ export const AuthService = {
         gender: user.gender,
         color: user.color,
         status: user.status,
+        city: user.city,
+        displayName: user.display_name,
         role: user.role,
         moderatorRooms,
       },

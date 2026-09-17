@@ -8,6 +8,9 @@ import {
   toUpdateGenderDto,
   toUpdateColorDto,
   toUpdateStatusDto,
+  toUpdateEmailDto,
+  toUpdateCityDto,
+  toUpdateDisplayNameDto,
 } from "../dto/auth.dto.js";
 import {
   validateLoginRequest,
@@ -18,6 +21,9 @@ import {
   validateUpdateGenderRequest,
   validateUpdateColorRequest,
   validateUpdateStatusRequest,
+  validateUpdateEmailRequest,
+  validateUpdateCityRequest,
+  validateUpdateDisplayNameRequest,
 } from "../validators/auth.validator.js";
 import { CookieProvider } from "../providers/cookie.provider.js";
 import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
@@ -149,6 +155,47 @@ export const AuthController = {
         status: dto.status,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, status: result.status });
+    } catch (err) {
+      next(err);
+    }
+  },
+  updateEmail: async (req, res, next) => {
+    try {
+      validateUpdateEmailRequest(req.body);
+      const dto = toUpdateEmailDto(req.body);
+      const result = await AuthService.updateEmail({
+        userId: req.userId,
+        email: dto.email,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, email: result.email });
+    } catch (err) {
+      next(err);
+    }
+  },
+  updateCity: async (req, res, next) => {
+    try {
+      validateUpdateCityRequest(req.body);
+      const dto = toUpdateCityDto(req.body);
+      const result = await AuthService.updateCity({
+        userId: req.userId,
+        city: dto.city,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, city: result.city });
+    } catch (err) {
+      next(err);
+    }
+  },
+  updateDisplayName: async (req, res, next) => {
+    try {
+      validateUpdateDisplayNameRequest(req.body);
+      const dto = toUpdateDisplayNameDto(req.body);
+      const result = await AuthService.updateDisplayName({
+        userId: req.userId,
+        displayName: dto.displayName,
+      });
+      res
+        .status(HTTP_STATUS.OK)
+        .json({ success: true, displayName: result.displayName });
     } catch (err) {
       next(err);
     }

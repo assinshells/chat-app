@@ -18,6 +18,15 @@ CREATE TABLE IF NOT EXISTS users (
     -- обирається в налаштуваннях — див. коментар біля users_status_check нижче.
     status VARCHAR(16) NOT NULL DEFAULT 'online'
         CHECK (status IN ('online', 'away', 'busy', 'dnd')),
+    -- Місто користувача, редагується точково в аккордеоні "Personal
+    -- Info" сайдбара (див. widgets/chat-leftsidebar). Необов'язкове,
+    -- на відміну від email не бере участі в унікальності/логіні.
+    city VARCHAR(120),
+    -- Відображуване ім'я ("Erik Thompson") — на відміну від login
+    -- (нікнейм, унікальний, використовується для входу й скрізь у
+    -- чаті) це довільне ім'я/прізвище користувача, показується лише
+    -- в "Personal Info" і ніде більше в застосунку. Необов'язкове.
+    display_name VARCHAR(120),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -25,6 +34,12 @@ CREATE TABLE IF NOT EXISTS users (
 -- на порожній базі через docker-entrypoint-initdb.d) — доповнити наявну
 -- таблицю колонкою без падіння, якщо вона вже є.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS color VARCHAR(16) NOT NULL DEFAULT 'black';
+
+-- Так само для city — доповнити наявні бази, створені до появи цього поля.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(120);
+
+-- Так само для display_name.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(120);
 
 -- Домігрування для баз, створених до розширення палітри з 5 до 20
 -- кольорів (init.sql виконується лише на порожній базі, тому наявний

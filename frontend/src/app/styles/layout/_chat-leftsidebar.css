@@ -608,3 +608,46 @@
   font-weight: 600;
   color: var(--bs-body-color);
 }
+
+/* =========================================================
+   EDITABLE PROFILE FIELD — точкове редагування одного поля в
+   аккордеоні "Personal Info" (ChatLeftSidebar, таб "Налаштування",
+   EditableProfileField.jsx). Стани view/edit/saving/success/error —
+   логіка в компоненті, тут лише оформлення success/error/спінера.
+   ========================================================= */
+.editable-profile-field-edit {
+  display: inline-flex;
+  align-items: center;
+}
+
+.editable-profile-field-success {
+  display: inline-flex;
+  align-items: center;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--bs-success, #2fb344);
+}
+
+.editable-profile-field-error {
+  display: flex;
+  align-items: center;
+
+  margin-top: 0.35rem;
+
+  font-size: 0.78rem;
+  color: var(--bs-danger, #dc3545);
+}
+
+.editable-profile-field-spinner {
+  animation: editable-profile-field-spin 0.8s linear infinite;
+}
+
+@keyframes editable-profile-field-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

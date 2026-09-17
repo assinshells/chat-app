@@ -5,6 +5,13 @@ import { FriendsList } from "@features/friends";
 import { BlockedUsersList } from "@features/block";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
+import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
+import {
+  updateEmail,
+  updateCity,
+  updateDisplayName,
+} from "@shared/api/profile.api.js";
+import { EditableProfileField } from "./EditableProfileField.jsx";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import {
   STATUS_OPTIONS,
@@ -65,15 +72,18 @@ const USER_SUBTABS = [
  *   статусу доступності (user.status із presence, див.
  *   backend/src/sockets/presence.js), той самий смайл, що обирається
  *   нижче в "Налаштуваннях".
- * - "Налаштування" — вибір теми (світла/темна/системна) і статусу
- *   доступності (currentUserStatus/onStatusChange — з ChatLayout,
- *   яка тримає сокет-з'єднання; сама зміна йде подією status:update,
- *   див. features/chat/model/useChatSocket.js).
- * - "Профіль" — нік поточного користувача разом з емодзі й підписом
- *   його поточного статусу; раніше показувався
- *   текстом у дропдауні профілю рейки (@widgets/side-menu), тепер
- *   винесений у власну панель (пілюля цього табу лишається в рейці
- *   на своєму звичайному місці).
+ * - "Налаштування" — лише вибір теми (світла/темна/системна). Вибір
+ *   статусу доступності і аккордеон "Personal Info" звідси перенесені
+ *   в "Профіль" (див. нижче) — тут з унікального лишився тільки блок теми.
+ * - "Профіль" — нік користувача, дропдаун вибору статусу доступності
+ *   (currentUserStatus/onStatusChange — з ChatLayout, яка тримає
+ *   сокет-з'єднання; сама зміна йде подією status:update, див.
+ *   features/chat/model/useChatSocket.js; той самий дропдаун раніше
+ *   був у "Налаштуваннях", тут замінив собою статичний бейдж) і
+ *   аккордеон "Personal Info": Login (лише читання), Ім'я/Email/Місто
+ *   (точково редагуються через EditableProfileField — власна
+ *   view/edit/saving/success/error state machine на кожне поле,
+ *   PATCH /api/auth/display-name /email /city).
  *
  * Таба "Контакти" в застосунку більше немає (прибрано повністю разом
  * з пілюлею в рейці — окремої фічі під нього так і не було).
@@ -117,6 +127,39 @@ export function ChatLeftSidebar({
   // коректно перерендерився при зміні (нова/старий Set — різні
   // референси, сама функція стабільна і ререндер не викликала б).
   const friendLogins = useFriendStore((state) => state.friendLogins);
+
+  // Email/місто для точкового редагування в аккордеоні "Personal Info"
+  // нижче (таб "Налаштування") — джерело правди той самий
+  // useCurrentUserStore, що заповнюється з GET /api/auth/me в App.jsx.
+  const currentUserEmail = useCurrentUserStore((state) => state.email);
+  const currentUserCity = useCurrentUserStore((state) => state.city);
+  const currentUserDisplayName = useCurrentUserStore(
+    (state) => state.displayName,
+  );
+  const setCurrentUserEmail = useCurrentUserStore((state) => state.setEmail);
+  const setCurrentUserCity = useCurrentUserStore((state) => state.setCity);
+  const setCurrentUserDisplayName = useCurrentUserStore(
+    (state) => state.setDisplayName,
+  );
+
+  // Кожен onSave стосується лише свого поля: помилка або успіх
+  // редагування email жодним чином не зачіпає city чи ім'я, і
+  // навпаки (див. EditableProfileField — власна state machine на
+  // кожне поле).
+  const handleSaveEmail = async (nextEmail) => {
+    const result = await updateEmail(nextEmail);
+    setCurrentUserEmail(result.email);
+  };
+
+  const handleSaveCity = async (nextCity) => {
+    const result = await updateCity(nextCity);
+    setCurrentUserCity(result.city);
+  };
+
+  const handleSaveDisplayName = async (nextDisplayName) => {
+    const result = await updateDisplayName(nextDisplayName);
+    setCurrentUserDisplayName(result.displayName);
+  };
 
   // Діалоги для табу "Приватні повідомлення". Джерело — той самий
   // useDmStore, що й у модалці особистих повідомлень: список
@@ -353,22 +396,12 @@ export function ChatLeftSidebar({
             )}
 
             {id === "user" && (
-              <div className="text-center p-4 border-bottom">
-                <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
-                <span
-                  className="app-sidebar-status-badge"
-                  title={getStatusLabel(currentUserStatus)}
-                >
-                  <span aria-hidden="true">
-                    {getStatusEmoji(currentUserStatus)}
-                  </span>
-                  {getStatusLabel(currentUserStatus)}
-                </span>
-              </div>
-            )}
-
-            {id === "setting" && (
               <div>
+                {/* Статус доступності — раніше вибирався лише в
+                    "Налаштуваннях" (де тепер лишається тільки тема), а
+                    тут показувався статичним бейджем. Тепер це єдина
+                    точка вибору статусу: замість бейджа — той самий
+                    дропдаун, що раніше жив у "Налаштуваннях". */}
                 <div className="text-center p-4 border-bottom">
                   <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
                   <div className="dropdown d-inline-block mb-1">
@@ -410,7 +443,16 @@ export function ChatLeftSidebar({
                   </div>
                 </div>
 
+                {/* Аккордеон "Personal Info" — перенесений сюди з
+                    "Налаштувань". Нік (login) лишається лише для
+                    читання (незмінний після реєстрації, використовується
+                    для входу й скрізь у чаті); Ім'я, Email і Місто —
+                    точково редагуються, кожне своєю кнопкою "Edit" і
+                    власною state machine (EditableProfileField). */}
                 <div className="p-4 user-profile-desc" data-simplebar>
+                  <div class="text-muted">
+                                    <p class="mb-4">If several languages coalesce, the grammar of the resulting language is more simple and regular than that of the individual.</p>
+                                </div>
                   <div id="settingprofile" className="accordion">
                     <div className="accordion-item card border mb-2">
                       <div className="accordion-header" id="personalinfo1">
@@ -432,35 +474,46 @@ export function ChatLeftSidebar({
                         data-bs-parent="#settingprofile"
                       >
                         <div className="accordion-body">
-                          <div className="float-end">
-                            <button
-                              type="button"
-                              className="btn btn-light btn-sm"
-                            >
-                              <i className="ri-edit-fill me-1 ms-0 align-middle"></i>{" "}
-                              Edit
-                            </button>
-                          </div>
                           <div>
-                            <p className="text-muted mb-1">Name</p>
-                            <h5 className="font-size-14">Patricia Smith</h5>
+                            <p className="text-muted mb-1">Login</p>
+                            <h5 className="font-size-14">{login}</h5>
                           </div>
 
-                          <div className="mt-4">
-                            <p className="text-muted mb-1">Email</p>
-                            <h5 className="font-size-14">adc@123.com</h5>
-                          </div>
+                          <EditableProfileField
+                            label="Name"
+                            value={currentUserDisplayName}
+                            placeholder="Наприклад, Erik Thompson"
+                            maxLength={120}
+                            onSave={handleSaveDisplayName}
+                          />
 
-                          <div className="mt-4">
-                            <p className="text-muted mb-1">Location</p>
-                            <h5 className="font-size-14 mb-0">
-                              California, USA
-                            </h5>
-                          </div>
+                          <EditableProfileField
+                            label="Email"
+                            value={currentUserEmail}
+                            type="email"
+                            placeholder="Email не вказано"
+                            onSave={handleSaveEmail}
+                          />
+
+                          <EditableProfileField
+                            label="Location"
+                            value={currentUserCity}
+                            placeholder="Місто не вказано"
+                            maxLength={120}
+                            onSave={handleSaveCity}
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {id === "setting" && (
+              <div>
+                <div className="text-center p-4 border-bottom">
+                  <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
                 </div>
 
                 <div className="px-4 pt-3 pb-1">

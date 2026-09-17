@@ -17,6 +17,9 @@ export const useCurrentUserStore = create((set) => ({
   login: null,
   role: null,
   status: null,
+  email: null,
+  city: null,
+  displayName: null,
   moderatorRooms: [],
 
   setUser: (user) =>
@@ -25,6 +28,9 @@ export const useCurrentUserStore = create((set) => ({
       login: user.login,
       role: user.role,
       status: user.status,
+      email: user.email ?? null,
+      city: user.city ?? null,
+      displayName: user.displayName ?? null,
       moderatorRooms: user.moderatorRooms ?? [],
     }),
 
@@ -33,6 +39,22 @@ export const useCurrentUserStore = create((set) => ({
   // відреагував миттєво.
   setStatus: (status) => set({ status }),
 
+  // Точкове оновлення email/city/displayName після успішного
+  // PATCH-запиту з EditableProfileField (аккордеон "Personal Info" в
+  // ChatLeftSidebar, таб "Профіль") — так само без повторного getMe.
+  setEmail: (email) => set({ email }),
+  setCity: (city) => set({ city }),
+  setDisplayName: (displayName) => set({ displayName }),
+
   clear: () =>
-    set({ id: null, login: null, role: null, status: null, moderatorRooms: [] }),
+    set({
+      id: null,
+      login: null,
+      role: null,
+      status: null,
+      email: null,
+      city: null,
+      displayName: null,
+      moderatorRooms: [],
+    }),
 }));

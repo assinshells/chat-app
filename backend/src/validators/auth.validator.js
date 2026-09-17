@@ -92,3 +92,39 @@ export const validateUpdateStatusRequest = (body) => {
     errors.push(`статус обов'язковий і має бути одним із: ${STATUS_OPTIONS.join(", ")}`);
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
+
+// Максимальна довжина міста. users.city у БД — VARCHAR(120)
+// (див. docker/postgres/init.sql), обмеження узгоджене з фронтом
+// (EditableProfileField, maxLength на полі "Місто").
+export const MAX_CITY_LENGTH = 120;
+
+export const validateUpdateEmailRequest = (body) => {
+  const errors = [];
+  if (!isNonEmptyString(body.email) || !isValidEmail(body.email.trim()))
+    errors.push("потрібна дійсна email-адреса");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
+export const validateUpdateCityRequest = (body) => {
+  const errors = [];
+  // Місто необов'язкове — порожній рядок допустимий (означає "очистити
+  // поле", див. toUpdateCityDto), тому валідується лише тип і довжина.
+  if (typeof body.city !== "string") errors.push("місто має бути рядком");
+  else if (body.city.trim().length > MAX_CITY_LENGTH)
+    errors.push(`назва міста має бути не довшою за ${MAX_CITY_LENGTH} символів`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
+// Максимальна довжина відображуваного імені, узгоджена з
+// users.display_name VARCHAR(120) у БД.
+export const MAX_DISPLAY_NAME_LENGTH = 120;
+
+export const validateUpdateDisplayNameRequest = (body) => {
+  const errors = [];
+  // Так само необов'язкове, як і city — порожній рядок допустимий.
+  if (typeof body.displayName !== "string")
+    errors.push("ім'я має бути рядком");
+  else if (body.displayName.trim().length > MAX_DISPLAY_NAME_LENGTH)
+    errors.push(`ім'я має бути не довшим за ${MAX_DISPLAY_NAME_LENGTH} символів`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};

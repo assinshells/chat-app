@@ -54,6 +54,27 @@ router.patch(
   csrfProtection,
   AuthController.updateStatus,
 );
+// Точкове редагування полів "Personal Info" в аккордеоні сайдбара
+// (ChatLeftSidebar, таб "Налаштування") — окремий PATCH на кожне
+// поле, той самий патерн, що й gender/color/status вище.
+router.patch(
+  "/email",
+  authGuard,
+  csrfProtection,
+  AuthController.updateEmail,
+);
+router.patch(
+  "/city",
+  authGuard,
+  csrfProtection,
+  AuthController.updateCity,
+);
+router.patch(
+  "/display-name",
+  authGuard,
+  csrfProtection,
+  AuthController.updateDisplayName,
+);
 router.get("/me", authGuard, AuthController.getMe);
 
 export default router;

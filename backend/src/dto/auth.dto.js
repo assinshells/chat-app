@@ -104,3 +104,30 @@ export const toUpdateColorDto = (body) => ({
 export const toUpdateStatusDto = (body) => ({
   status: body.status,
 });
+
+/**
+ * @typedef {Object} UpdateEmailDto
+ * @property {string} email
+ */
+export const toUpdateEmailDto = (body) => ({
+  email: body.email.trim(),
+});
+
+/**
+ * @typedef {Object} UpdateCityDto
+ * @property {string|null} city - порожній рядок нормалізується в null
+ *   (означає "не вказано"), пробіли по краях обрізаються.
+ */
+export const toUpdateCityDto = (body) => ({
+  city: body.city.trim() === "" ? null : body.city.trim(),
+});
+
+/**
+ * @typedef {Object} UpdateDisplayNameDto
+ * @property {string|null} displayName - порожній рядок нормалізується
+ *   в null ("не вказано"), пробіли по краях обрізаються.
+ */
+export const toUpdateDisplayNameDto = (body) => ({
+  displayName:
+    body.displayName.trim() === "" ? null : body.displayName.trim(),
+});
