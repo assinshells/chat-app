@@ -4,9 +4,14 @@
 
 :root,
 [data-bs-theme="light"] {
+   --bs-body-color: #495057;
+   --bs-body-bg: #f7f7ff;
   --bs-sidebar-bg: #fff;
   --bs-border-color: #f0eff5;
   --bs-sidebar-menu-item-color: #878a92;
   --bs-sidebar-menu-item-active-color: var(--bs-primary);
   --bs-sidebar-menu-item-active-bg: #f7f7ff;
+--bs-sidebar-sub-bg: #f5f7fb;
+--bs-body-color-rgb: 73,80,87;
+ --bs-border-color-translucent: rgba(0,0,0,.175);
 }

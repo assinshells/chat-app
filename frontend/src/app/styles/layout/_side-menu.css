@@ -74,9 +74,9 @@
 }
 .side-menu-nav .nav-item .nav-link.active {
   background-color: var(--bs-sidebar-menu-item-active-bg);
-  color: #7269ef;
+  color: var(--bs-primary);
 }
 .side-menu-nav .nav-item.show > .nav-link {
   background-color: var(--bs-sidebar-menu-item-active-bg);
-  color: #7269ef;
+  color: var(--bs-primary);
 }

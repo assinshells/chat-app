@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { Sun, Moon, Monitor, BookOpen, MessageCircle } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  Monitor,
+  BookOpen,
+  MessageCircle,
+  ChevronDown,
+} from "lucide-react";
 import { DmTriggerButton, useDmStore } from "@features/dm";
 import { FriendsList } from "@features/friends";
 import { BlockedUsersList } from "@features/block";
@@ -34,73 +41,21 @@ const GENDER_GROUPS = [
   { id: "female", label: "Жінки" },
 ];
 
-// Варіанти теми у табі "Налаштування". Раніше жили в окремій модалці
-// налаштувань (відкривалася з шапки) — тепер це єдина точка вибору
-// теми, а сама модалка видалена: її друга вкладка ("Акаунт") лише
-// дублювала панель профілю справа (нік/роль, див. ChatLayout).
 const THEME_OPTIONS = [
   { id: THEMES.LIGHT, label: "Світла", icon: Sun },
   { id: THEMES.DARK, label: "Темна", icon: Moon },
   { id: THEMES.SYSTEM, label: "Системна", icon: Monitor },
 ];
 
-// Правила і зворотний зв'язок — перенесені сюди з видаленого
-// дропдауна-гамбургера в SideMenu.jsx (той був прихований на
-// мобільних через d-none d-lg-block і фактично недоступний нижче
-// lg-брейкпоінта). Самі модалки (RulesModal/FeedbackModal) не
-// змінювались — рендеряться порталом у document.body, тож їхнє
-// розташування у дереві компонентів ролі не грає, важливий лише
-// modalId, що збігається з data-bs-target тут.
 const RULES_MODAL_ID = "sidebarRulesModal";
 const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
 
-// Підвкладки табу "Користувачі": "Онлайн" — список онлайн-учасників
-// активної кімнати з фільтром за статтю (раніше був окремим
-// верхньорівневим табом поруч), "Друзі"/"Заблоковані" — перенесені
-// сюди з видаленого третього (порожнього) сайдбара. Самі
-// FriendsList/BlockedUsersList не змінювались, лише місце показу.
 const USER_SUBTABS = [
   { id: "online", label: "Онлайн" },
   { id: "friends", label: "Друзі" },
   { id: "blocked", label: "Заблоковані" },
 ];
 
-/**
- * Панель-вміст для вкладок іконкової "рейки" — другий з двох лівих
- * сайдбарів, винесений з ChatLayout.jsx (раніше — статичні
- * англомовні заглушки на кшталт "chats tab-pane").
- *
- * Кожна панель починається однаковим заголовком з title відповідного
- * табу в SIDE_TABS (єдине джерело — той самий рядок, що й підпис
- * пілюлі в рейці, тож нема чого дублювати чи розсинхронізовувати).
- *
- * - "Чат" — список кімнат.
- * - "Приватні повідомлення" — список діалогів з useDmStore. Клік по
- *   діалогу перемикає ОСНОВНУ область чату на приватне листування
- *   (onSelectDialog -> ChatLayout -> PrivateChat); activeDialog —
- *   логін діалогу, розгорнутого там зараз, для підсвітки рядка.
- * - "Користувачі" — підвкладки "Онлайн" (список + фільтр за статтю),
- *   "Друзі", "Заблоковані". Біля кожного ніка в "Онлайн" — емодзі
- *   статусу доступності (user.status із presence, див.
- *   backend/src/sockets/presence.js), той самий смайл, що обирається
- *   нижче в "Налаштуваннях".
- * - "Налаштування" — лише вибір теми (світла/темна/системна). Вибір
- *   статусу доступності і аккордеон "Personal Info" звідси перенесені
- *   в "Профіль" (див. нижче) — тут з унікального лишився тільки блок теми.
- * - "Профіль" — нік користувача, дропдаун вибору статусу доступності
- *   (currentUserStatus/onStatusChange — з ChatLayout, яка тримає
- *   сокет-з'єднання; сама зміна йде подією status:update, див.
- *   features/chat/model/useChatSocket.js; той самий дропдаун раніше
- *   був у "Налаштуваннях", тут замінив собою статичний бейдж) і
- *   аккордеон "Personal Info": Login (лише читання), Ім'я/Email/Місто/
- *   Про себе (точково редагуються через EditableProfileField — власна
- *   view/edit/saving/success/error state machine на кожне поле,
- *   PATCH /api/auth/display-name /email /city /about). "Про себе" —
- *   єдине багаторядкове поле (multiline, textarea), решта — однорядкові.
- *
- * Таба "Контакти" в застосунку більше немає (прибрано повністю разом
- * з пілюлею в рейці — окремої фічі під нього так і не було).
- */
 export function ChatLeftSidebar({
   login,
   activeRoom,
@@ -114,9 +69,6 @@ export function ChatLeftSidebar({
   currentUserStatus,
   onStatusChange,
 }) {
-  // Обраний варіант теми (light/dark/system). Джерело правди —
-  // localStorage (див. shared/lib/theme.js), тут лише локальне
-  // відображення поточного вибору для підсвітки активної кнопки.
   const [theme, setTheme] = useState(() => getStoredTheme());
 
   const handleThemeSelect = (next) => {
@@ -417,11 +369,6 @@ export function ChatLeftSidebar({
 
             {id === "user" && (
               <div>
-                {/* Статус доступності — раніше вибирався лише в
-                    "Налаштуваннях" (де тепер лишається тільки тема), а
-                    тут показувався статичним бейджем. Тепер це єдина
-                    точка вибору статусу: замість бейджа — той самий
-                    дропдаун, що раніше жив у "Налаштуваннях". */}
                 <div className="text-center p-4 border-bottom">
                   <h5 className="font-size-16 mb-1 text-truncate">{login}</h5>
                   <div className="dropdown d-inline-block mb-1">
@@ -438,7 +385,7 @@ export function ChatLeftSidebar({
                         {getStatusEmoji(currentUserStatus)}
                       </span>
                       {getStatusLabel(currentUserStatus)}
-                      <i className="mdi mdi-chevron-down"></i>
+                      <ChevronDown size={16} className="ms-1" />
                     </a>
 
                     <div className="dropdown-menu">
@@ -461,17 +408,9 @@ export function ChatLeftSidebar({
                       ))}
                     </div>
                   </div>
-                  <EditableProfileField
-                            label="About"
-                            value={currentUserAbout}
-                            placeholder="Розкажіть трохи про себе"
-                            maxLength={500}
-                            multiline
-                            rows={4}
-                            onSave={handleSaveAbout}
-                          />
                 </div>
 
+                
                 {/* Аккордеон "Personal Info" — перенесений сюди з
                     "Налаштувань". Нік (login) лишається лише для
                     читання (незмінний після реєстрації, використовується
@@ -479,9 +418,18 @@ export function ChatLeftSidebar({
                     точково редагуються, кожне своєю кнопкою "Edit" і
                     власною state machine (EditableProfileField). */}
                 <div className="p-4 user-profile-desc" data-simplebar>
-                  <div id="settingprofile" className="accordion">
-                    <div className="accordion-item card border mb-2">
-                      <div className="accordion-header" id="personalinfo1">
+                  <EditableProfileField
+                  label="Про себе"
+                  value={currentUserAbout}
+                  placeholder="Розкажіть трохи про себе"
+                  maxLength={500}
+                  multiline
+                  rows={4}
+                  onSave={handleSaveAbout}
+                />
+                  <div id="settingprofile" className="custom-accordion">
+                    <div className="shadow-none border mb-2 card">
+                      <div className="card-header" id="personalinfo1">
                         <button
                           className="accordion-button"
                           type="button"
@@ -490,7 +438,8 @@ export function ChatLeftSidebar({
                           aria-expanded="true"
                           aria-controls="personalinfo"
                         >
-                          <h5 className="font-size-14 m-0">Personal Info</h5>
+                          <h5 className="font-size-14 m-0">Особиста інформація</h5>
+                          <ChevronDown size={16} className="float-end" />
                         </button>
                       </div>
                       <div
@@ -503,7 +452,6 @@ export function ChatLeftSidebar({
                           <div>
                             <p className="text-muted mb-1">Login</p>
                             <h5 className="font-size-14">{login}</h5>
-                            
                           </div>
 
                           <EditableProfileField
@@ -529,8 +477,6 @@ export function ChatLeftSidebar({
                             maxLength={120}
                             onSave={handleSaveCity}
                           />
-
-                          
                         </div>
                       </div>
                     </div>

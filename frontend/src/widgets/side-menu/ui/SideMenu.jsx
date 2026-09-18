@@ -43,7 +43,7 @@ export function SideMenu({ onLogout }) {
           {SIDE_TABS.map(({ id, title, icon: Icon, defaultActive, badge }) => (
             <li className="nav-item" key={id} title={title}>
               <a
-                className={`nav-link ${defaultActive ? "active" : ""}`}
+                className={`nav-link position-relative ${defaultActive ? "active" : ""}`}
                 id={`pills-${id}-tab`}
                 data-bs-toggle="pill"
                 href={`#pills-${id}`}
@@ -52,9 +52,10 @@ export function SideMenu({ onLogout }) {
               >
                 <Icon  />
                 {badge === SIDE_TAB_BADGES.DM_UNREAD && dmUnread > 0 && (
-                  <span className="side-menu-badge">
-                    {dmUnread > 99 ? "99+" : dmUnread}
-                  </span>
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+  {dmUnread > 99 ? "99+" : dmUnread}
+                  <span className="visually-hidden">непрочитаних особистих повідомлень</span>
+</span>
                 )}
               </a>
             </li>

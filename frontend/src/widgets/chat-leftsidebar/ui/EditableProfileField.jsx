@@ -131,19 +131,19 @@ export function EditableProfileField({
   const showInput = status === "edit" || status === "saving" || status === "error";
 
   return (
-    <div className="mt-4 editable-profile-field" data-field-status={status}>
+    <div className="mt-4" data-field-status={status}>
       <div className="d-flex align-items-center justify-content-between">
         <p className="text-muted mb-1">{label}</p>
 
         {status === "view" && (
           <button
             type="button"
-            className="btn btn-light btn-sm editable-profile-field-edit"
+            className="btn btn-light btn-sm"
             onClick={startEdit}
             aria-label={`Редагувати поле «${label}»`}
           >
             <Pencil size={13} className="me-1 align-middle" />
-            Edit
+            Редагувати
           </button>
         )}
 
@@ -156,12 +156,12 @@ export function EditableProfileField({
       </div>
 
       {status === "view" && (
-        <h5
-          className="font-size-14 mb-0"
+        <div class="text-muted"
           style={multiline ? { whiteSpace: "pre-wrap" } : undefined}
-        >
+        ><p class="mb-4">
           {value || <span className="text-muted fst-italic">{placeholder}</span>}
-        </h5>
+        </p>
+        </div>
       )}
 
       {status === "success" && (
