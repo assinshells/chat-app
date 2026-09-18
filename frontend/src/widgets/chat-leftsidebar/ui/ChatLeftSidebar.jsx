@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon, Monitor, BookOpen, MessageCircle } from "lucide-react";
 import { DmTriggerButton, useDmStore } from "@features/dm";
 import { FriendsList } from "@features/friends";
 import { BlockedUsersList } from "@features/block";
+import { RulesModal, FeedbackModal } from "@features/info";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
@@ -42,6 +43,16 @@ const THEME_OPTIONS = [
   { id: THEMES.DARK, label: "Темна", icon: Moon },
   { id: THEMES.SYSTEM, label: "Системна", icon: Monitor },
 ];
+
+// Правила і зворотний зв'язок — перенесені сюди з видаленого
+// дропдауна-гамбургера в SideMenu.jsx (той був прихований на
+// мобільних через d-none d-lg-block і фактично недоступний нижче
+// lg-брейкпоінта). Самі модалки (RulesModal/FeedbackModal) не
+// змінювались — рендеряться порталом у document.body, тож їхнє
+// розташування у дереві компонентів ролі не грає, важливий лише
+// modalId, що збігається з data-bs-target тут.
+const RULES_MODAL_ID = "sidebarRulesModal";
+const FEEDBACK_MODAL_ID = "sidebarFeedbackModal";
 
 // Підвкладки табу "Користувачі": "Онлайн" — список онлайн-учасників
 // активної кімнати з фільтром за статтю (раніше був окремим
@@ -550,6 +561,30 @@ export function ChatLeftSidebar({
                     </button>
                   ),
                 )}
+
+                <div className="px-4 pt-3 pb-1">
+                  <span className="app-sidebar-settings-group-label">
+                    Інформація
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="app-sidebar-theme-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target={`#${RULES_MODAL_ID}`}
+                >
+                  <BookOpen size={18} />
+                  <span>Правила</span>
+                </button>
+                <button
+                  type="button"
+                  className="app-sidebar-theme-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target={`#${FEEDBACK_MODAL_ID}`}
+                >
+                  <MessageCircle size={18} />
+                  <span>Зворотний зв&apos;язок</span>
+                </button>
               </div>
             )}
 
@@ -568,6 +603,9 @@ export function ChatLeftSidebar({
           </div>
         ))}
       </div>
+
+      <RulesModal modalId={RULES_MODAL_ID} />
+      <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
     </div>
   );
 }

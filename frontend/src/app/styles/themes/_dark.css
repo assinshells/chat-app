@@ -3,5 +3,9 @@
    ========================================================= */
 
 [data-bs-theme="dark"] {
---bs-sidebar-bg: #36404a;
+  --bs-sidebar-bg: #36404a;
+  --bs-border-color: #36404a;
+  --bs-sidebar-menu-item-color: #a6b0cf;
+  --bs-sidebar-menu-item-active-color: #fff;
+  --bs-sidebar-menu-item-active-bg: #3e4a56;
 }

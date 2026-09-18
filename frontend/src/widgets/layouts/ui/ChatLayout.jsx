@@ -244,7 +244,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper d-lg-flex">
-      <SideMenu login={login} onLogout={onLogout} />
+      <SideMenu onLogout={onLogout} />
       <ChatLeftSidebar
         login={login}
         activeRoom={activeRoom}

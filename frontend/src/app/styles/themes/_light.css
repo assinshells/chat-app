@@ -4,5 +4,9 @@
 
 :root,
 [data-bs-theme="light"] {
---bs-sidebar-bg: #fff;
+  --bs-sidebar-bg: #fff;
+  --bs-border-color: #f0eff5;
+  --bs-sidebar-menu-item-color: #878a92;
+  --bs-sidebar-menu-item-active-color: var(--bs-primary);
+  --bs-sidebar-menu-item-active-bg: #f7f7ff;
 }

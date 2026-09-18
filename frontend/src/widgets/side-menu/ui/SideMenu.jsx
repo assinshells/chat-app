@@ -1,7 +1,6 @@
-import { LogOut, Menu, BookOpen, MessageCircle } from "lucide-react";
+import { LogOut } from "lucide-react";
 import LogoLight from "@shared/assets/logo/logo-light.svg";
 import LogoDark from "@shared/assets/logo/logo-dark.svg";
-import { RulesModal, FeedbackModal } from "@features/info";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { useDmStore } from "@features/dm";
 import {
@@ -9,11 +8,9 @@ import {
   SIDE_TAB_BADGES,
 } from "@shared/constants/sideTabs.constants.js";
 
-const RULES_MODAL_ID = "sideMenuRulesModal";
-const FEEDBACK_MODAL_ID = "sideMenuFeedbackModal";
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
-export function SideMenu({ login, onLogout }) {
+export function SideMenu({ onLogout }) {
   const dmUnread = useDmStore((state) =>
     Object.values(state.conversations).reduce(
       (sum, convo) => sum + (convo.unreadCount || 0),
@@ -62,57 +59,20 @@ export function SideMenu({ login, onLogout }) {
               </a>
             </li>
           ))}
-        </ul>
-      </div>
-
-      <div className="flex-lg-column d-none d-lg-block">
-        <ul className="nav side-menu-nav justify-content-center">
-          <li className="nav-item dropdown dropup profile-user-dropdown">
-            <a
-              className="nav-link"
-              href="#"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-              title={login}
+          <li className="nav-item" title="Вийти">
+            <button
+              type="button"
+              className="nav-link border-0 bg-transparent"
+              data-bs-toggle="modal"
+              data-bs-target={`#${LOGOUT_MODAL_ID}`}
+              aria-label="Вийти"
             >
-              <Menu  />
-            </a>
-            <div className="dropdown-menu">
-              <button
-                type="button"
-                className="dropdown-item"
-                data-bs-toggle="modal"
-                data-bs-target={`#${RULES_MODAL_ID}`}
-              >
-                Правила <BookOpen size={18} className=" text-muted" />
-              </button>
-              <button
-                type="button"
-                className="dropdown-item"
-                data-bs-toggle="modal"
-                data-bs-target={`#${FEEDBACK_MODAL_ID}`}
-              >
-                Зворотний зв&apos;язок
-                <MessageCircle size={18} className=" text-muted" />
-              </button>
-              <div className="dropdown-divider"></div>
-              <button
-                type="button"
-                className="dropdown-item"
-                data-bs-toggle="modal"
-                data-bs-target={`#${LOGOUT_MODAL_ID}`}
-              >
-                Вийти <LogOut size={18} className=" text-muted" />
-              </button>
-            </div>
+              <LogOut />
+            </button>
           </li>
         </ul>
       </div>
 
-      <RulesModal modalId={RULES_MODAL_ID} />
-      <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
     </div>
   );
