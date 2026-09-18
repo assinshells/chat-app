@@ -3,10 +3,5 @@
    ========================================================= */
 
 [data-bs-theme="dark"] {
-  --app-shadow-color: 0, 0, 0;
-  --app-shadow-soft: 0.24;
-  --app-shadow-strong: 0.55;
-
-  --app-overlay-color: 0, 0, 0;
-  --app-overlay-strength: 0.6;
+--bs-sidebar-bg: #36404a;
 }

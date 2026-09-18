@@ -4,15 +4,5 @@
 
 :root,
 [data-bs-theme="light"] {
-  /* Тінь для "плаваючих" елементів (composer, dropdown, popup) —
-     колір у форматі "R, G, B" (без rgba()), щоб можна було
-     підставляти свою прозорість у кожному конкретному місці. */
-  --app-shadow-color: 0, 0, 0;
-  --app-shadow-soft: 0.04;
-  --app-shadow-strong: 0.12;
-
-  /* Затемнення поверх контенту (мобільний бекдроп сайдбара,
-     hover на "хрестику" видалення чіпа тощо). */
-  --app-overlay-color: 0, 0, 0;
-  --app-overlay-strength: 0.4;
+--bs-sidebar-bg: #fff;
 }

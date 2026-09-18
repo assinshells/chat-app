@@ -244,14 +244,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper d-lg-flex">
-      {/* Два ліві сайдбари: іконкова "рейка" (@widgets/side-menu, тут
-          же — правила/фідбек у дропдауні профілю) і панель-вміст її
-          вкладок (@widgets/chat-leftsidebar: кімнати, і користувачі —
-          з підвкладками "Онлайн" (фільтр за статтю)/"Друзі"/
-          "Заблоковані"). Пов'язані між собою лише спільними Bootstrap
-          pill/pane id, React-стану в ChatLayout для цього не потрібно.
-          Третій (порожній) сайдбар прибрано — весь його функціонал
-          переїхав у ці два. */}
       <SideMenu login={login} onLogout={onLogout} />
       <ChatLeftSidebar
         login={login}

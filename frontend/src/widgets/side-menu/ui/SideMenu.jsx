@@ -98,10 +98,6 @@ export function SideMenu({ login, onLogout }) {
                 <MessageCircle size={18} className=" text-muted" />
               </button>
               <div className="dropdown-divider"></div>
-              {/* Вихід — єдина точка в застосунку (з шапки прибрано):
-                  дію тут і там дублювати нема сенсу, а дропдаун профілю
-                  для неї природніше місце. Підтвердження — та сама
-                  LogoutConfirmModal, що раніше рендерилась у шапці. */}
               <button
                 type="button"
                 className="dropdown-item"
