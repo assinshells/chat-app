@@ -53,12 +53,14 @@
   }
 }
 .side-menu-nav .nav-item .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 24px;
   color: var(--bs-sidebar-menu-item-color);
   width: 56px;
   height: 56px;
-  line-height: 56px;
   margin: 0 auto;
   border-radius: 8px;
   padding: 0;
@@ -68,7 +70,6 @@
     font-size: 20px;
     width: 48px;
     height: 48px;
-    line-height: 48px;
   }
 }
 .side-menu-nav .nav-item .nav-link.active {
