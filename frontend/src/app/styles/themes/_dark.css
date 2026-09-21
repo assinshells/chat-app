@@ -3,14 +3,7 @@
    ========================================================= */
 
 [data-bs-theme="dark"] {
+color-scheme: dark;
   --bs-body-color: #a6b0cf;
-   --bs-body-bg: #303841;
-  --bs-sidebar-bg: #36404a;
-  --bs-border-color: #36404a;
-  --bs-sidebar-menu-item-color: #a6b0cf;
-  --bs-sidebar-menu-item-active-color: #fff;
-  --bs-sidebar-menu-item-active-bg: #3e4a56;
-  --bs-sidebar-sub-bg: #303841;
-  --bs-body-color-rgb: 166,176,207;
-  --bs-border-color-translucent: #39414b;
+  --bs-body-bg: #303841;
 }

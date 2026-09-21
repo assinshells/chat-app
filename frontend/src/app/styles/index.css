@@ -20,7 +20,7 @@
 
 @import "./base/_reset.css";
 @import "./base/_body.css";
-
+/*
 @import "./layout/_shell.css";
 @import "./layout/_side-menu.css";
 @import "./layout/_chat-leftsidebar.css";
@@ -37,4 +37,4 @@
 @import "./components/_color-picker.css";
 @import "./components/_modals.css";
 
-@import "./components/_responsive.css";
+@import "./components/_responsive.css";*/

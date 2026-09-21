@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SimpleBar from "simplebar-react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
 import { ROOMS, DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
@@ -58,7 +59,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             className="form-select"
             value={room}
             onChange={(e) => setRoom(e.target.value)}
-            aria-label="Кімната для входу"
+            aria-label="Кімната для входу" 
           >
             {ROOMS.map((r) => (
               <option key={r.id} value={r.id}>

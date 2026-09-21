@@ -5,6 +5,7 @@ import { APP_NAME } from "@shared/constants/auth.constants.js";
 
 export function RegisterPage({ onNavigate }) {
   return (
+    
     <AuthLayout
       title={APP_NAME}
       subtitle="Ще не з нами? Буває. У кожного колись перший раз — приєднуйтесь і побачите самі."

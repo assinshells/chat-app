@@ -1,11 +1,14 @@
 /* =========================================================
    GLOBAL RESET
    ========================================================= */
-*,:after,:before {
-    box-sizing: border-box
+*,
+::after,
+::before {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
-@media(prefers-reduced-motion:no-preference) {
-    :root {
-        scroll-behavior: smooth
-    }
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
 }

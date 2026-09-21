@@ -2,17 +2,23 @@
    BODY
    ========================================================= */
 body {
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
-    font-family: var(--bs-body-font-family);
-    font-size: var(--bs-body-font-size);
-    font-weight: var(--bs-body-font-weight);
-    line-height: var(--bs-body-line-height);
-    margin: 0;
-    text-align: var(--bs-body-text-align)
+  margin: 0;
+  font-family: var(--bs-body-font-family);
+  font-size: var(--bs-body-font-size);
+  font-weight: var(--bs-body-font-weight);
+  line-height: var(--bs-body-line-height);
+  color: var(--bs-body-color);
+  text-align: var(--bs-body-text-align);
+  background-color: var(--bs-body-bg);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
+
+.footer-icon {
+  position: relative;
+  top: -0.15em;
+}
+/*
 a {
     text-decoration: none !important;
 }
@@ -29,4 +35,4 @@ a {
 
 .chat-brand-status.is-offline {
   color: var(--bs-warning);
-}
+}*/
