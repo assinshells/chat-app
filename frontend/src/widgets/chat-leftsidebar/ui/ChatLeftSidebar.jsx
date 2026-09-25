@@ -39,6 +39,7 @@ import {
 const GENDER_GROUPS = [
   { id: "male", label: "Чоловіки" },
   { id: "female", label: "Жінки" },
+  { id: "unknown", label: "Не вказано" },
 ];
 
 const THEME_OPTIONS = [
@@ -143,10 +144,10 @@ export function ChatLeftSidebar({
 
   // Група учасників активної кімнати за статтю рахується один раз за
   // рендер, а не на кожен чих — список учасників кімнати може бути
-  // довгим. gender може бути лише 'male' | 'female' (див. GENDER_VALUES
-  // на бекенді).
+  // довгим. gender може бути 'male' | 'female' | 'unknown' (див.
+  // GENDER_VALUES на бекенді).
   const usersByGender = useMemo(() => {
-    const grouped = { male: [], female: [] };
+    const grouped = { male: [], female: [], unknown: [] };
 
     for (const user of roomUsers) {
       if (grouped[user.gender]) grouped[user.gender].push(user);

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     login VARCHAR(64) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     email VARCHAR(255) UNIQUE,
-    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female')),
+    gender VARCHAR(16) NOT NULL CHECK (gender IN ('male', 'female', 'unknown')),
     -- Колір повідомлень/ніка користувача в сайдбарі, обирається в налаштуваннях.
     -- 'black' — значення за замовчуванням, ставиться всім новим користувачам.
     -- Повний спектр (20 відтінків) — див. коментар біля users_color_check
@@ -88,6 +88,23 @@ BEGIN
     END IF;
     ALTER TABLE users ADD CONSTRAINT users_gender_check
         CHECK (gender IN ('male', 'female'));
+END $$;
+
+-- Повторне додавання 'unknown' до допустимих значень статі. На відміну
+-- від домігрування вище (де 'unknown' був випадковим legacy-станом і
+-- прибирався разом з даними, що на нього спирались), тепер це свідомий
+-- варіант вибору на формі реєстрації (GenderPickerModal.jsx, "Не
+-- вказано"), тож наявні рядки тут не чіпаються — лише знову
+-- розширюється CHECK.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_gender_check'
+    ) THEN
+        ALTER TABLE users DROP CONSTRAINT users_gender_check;
+    END IF;
+    ALTER TABLE users ADD CONSTRAINT users_gender_check
+        CHECK (gender IN ('male', 'female', 'unknown'));
 END $$;
 
 -- Статус доступності користувача (таб "Налаштування", див.

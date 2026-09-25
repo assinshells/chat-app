@@ -151,3 +151,72 @@
 .color-picker-modal-body {
   padding-top: 1.5rem;
 }
+
+/* =========================================================
+   GENDER RADIO PICKER (GenderPickerModal.jsx) — той самий
+   патерн вибору, що й COLOR RADIO PICKER вище (нативний input
+   візуально прихований, кастомний вигляд — на сусідньому
+   елементі), але замість кольорових кружків — текстові
+   "пігулки" з написом варіанту, бо в статі немає кольору для
+   свотча. Той самий .color-picker-trigger (уже описаний вище)
+   лишається спільним для тригерів "Колір" і "Стать" на самій
+   формі реєстрації (RegisterForm.jsx) — тут стилюється лише
+   вміст модалки.
+   ========================================================= */
+.gender-radio-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.gender-radio-option {
+  cursor: pointer;
+}
+
+.gender-radio-input {
+  position: absolute;
+  z-index: 1;
+
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.gender-radio-pill {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--bs-body-color-rgb), 0.2);
+
+  font-size: 0.85rem;
+  font-weight: 700;
+
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.gender-radio-option:hover .gender-radio-pill {
+  border-color: rgba(var(--bs-primary-rgb), 0.5);
+}
+
+.gender-radio-input:checked ~ .gender-radio-pill {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+
+.gender-radio-input:focus-visible ~ .gender-radio-pill {
+  outline: 2px solid rgba(var(--bs-primary-rgb), 0.6);
+  outline-offset: 2px;
+}
+
+.gender-picker-modal-body {
+  padding-top: 1.5rem;
+}

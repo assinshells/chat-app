@@ -34,18 +34,24 @@ export const COOKIE_NAMES = Object.freeze({
 });
 
 // Стать — обов'язкове поле реєстрації без значення за замовчуванням —
-// клієнт завжди повинен надіслати одне з цих явних значень.
+// клієнт завжди повинен надіслати одне з цих явних значень. UNKNOWN
+// ("не вказано") — свідомий вибір користувача на формі реєстрації
+// (GenderPickerModal.jsx), а не технічний плейсхолдер / legacy-значення,
+// як було раніше (див. домігрування в docker/postgres/init.sql, де це
+// саме значення колись прибиралося, а тепер додається назад).
 export const GENDER_VALUES = Object.freeze({
   MALE: "male",
   FEMALE: "female",
+  UNKNOWN: "unknown",
 });
 
 export const GENDER_OPTIONS = Object.freeze(Object.values(GENDER_VALUES));
 
 // users.gender у БД — NOT NULL без DEFAULT (див. docker/postgres/init.sql).
-// Стать обирається прямо на формі реєстрації (RegisterForm.jsx, select)
-// і приходить у POST /api/auth/register разом з логіном/паролем —
-// окремого PATCH-запиту після логіну більше не потрібно.
+// Стать обирається прямо на формі реєстрації (RegisterForm.jsx через
+// GenderPickerModal.jsx) і приходить у POST /api/auth/register разом
+// з логіном/паролем — окремого PATCH-запиту після логіну більше не
+// потрібно.
 
 // Колір повідомлень/ніка користувача, обирається в налаштуваннях профілю.
 // 'black' — значення за замовчуванням (збігається з DEFAULT у БД).
