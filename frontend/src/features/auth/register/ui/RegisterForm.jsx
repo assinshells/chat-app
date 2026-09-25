@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRegisterStore } from "@features/auth/register/model/useRegisterStore.js";
-import { GENDER_OPTIONS, DEFAULT_GENDER } from "@shared/constants/auth.constants.js";
+import { DEFAULT_GENDER } from "@shared/constants/auth.constants.js";
 import {
   getColorLabel,
   getEffectiveColorHex,
@@ -111,43 +111,54 @@ export function RegisterForm({ onSuccess, onBack }) {
           />
         </div>
 
-        <div className="mb-3">
-          <select
-            id="genderSelect"
-            className="form-select"
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            aria-label="Стать"
-            required
-          >
-            {GENDER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-4">
+        <div className="mb-4 d-flex align-items-start justify-content-between gender-color-row">
           {/*
-            Сама палітра винесена в окрему модалку (ColorPickerModal.jsx) —
-            тут лишається лише лейбл і клікабельна назва поточного
-            кольору, пофарбована в цей-таки колір (так само, як раніше
-            підпис під палітрою) і з пунктирним підкресленням як
-            підказкою, що це елемент керування, а не просто текст.
-            isDarkTheme перемикає між hex і hexDark, щоб текст лишався
-            настільки ж читабельним, як і сам свотч у модалці.
+            Колір і стать зведені в один рядок: зліва лейбл + клікабельна
+            назва поточного кольору (сама палітра — в окремій модалці,
+            ColorPickerModal.jsx), пофарбована в цей-таки колір, з
+            пунктирним підкресленням як підказкою, що це елемент керування,
+            а не просто текст. isDarkTheme перемикає між hex і hexDark,
+            щоб текст лишався настільки ж читабельним, як і сам свотч
+            у модалці.
+
+            Справа — перемикач статі (form-switch замість select): лейбл
+            "Стать" зверху, сам тогл із поточним значенням — під ним
+            (симетрично лейблу "Колір" над свотчем зліва). "Чоловік" за
+            замовчуванням (DEFAULT_GENDER), тогл вправо переключає на
+            "Жінка". GENDER_OPTIONS тут більше не потрібен — підписи для
+            обох станів захардкоджені поруч.
           */}
-          <label className="form-label d-block mb-1">Колір</label>
-          <button
-            type="button"
-            className="color-picker-trigger"
-            style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
-            data-bs-toggle="modal"
-            data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
-          >
-            {getColorLabel(effectiveColor)}
-          </button>
+          <div className="d-flex align-items-center gap-2">
+            <label className="form-label mb-0">Колір</label>
+            <button
+              type="button"
+              className="color-picker-trigger"
+              style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
+              data-bs-toggle="modal"
+              data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
+            >
+              {getColorLabel(effectiveColor)}
+            </button>
+          </div>
+
+          <div className="form-check form-switch d-flex flex-column gap-1 mb-0">
+            <label className="form-label mb-0" htmlFor="genderSwitch">
+              Стать
+            </label>
+            <div className="d-flex align-items-center gap-2">
+              <input
+                id="genderSwitch"
+                type="checkbox"
+                role="switch"
+                className="form-check-input mt-0"
+                checked={gender === "female"}
+                onChange={(e) => setGender(e.target.checked ? "female" : "male")}
+              />
+              <label className="form-check-label mb-0" htmlFor="genderSwitch">
+                {gender === "female" ? "Жінка" : "Чоловік"}
+              </label>
+            </div>
+          </div>
         </div>
 
         <p className="text-muted small mb-2 text-center">
