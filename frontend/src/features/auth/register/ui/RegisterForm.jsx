@@ -162,7 +162,7 @@ export function RegisterForm({ onSuccess, onBack }) {
           </p>
         </div>
 
-        <p className="text-muted small mb-2">
+        <p className="text-muted small mb-2 text-center">
           Натискаючи «Зареєструватися», ви погоджуєтеся з{" "}
           <a
             href="#"
