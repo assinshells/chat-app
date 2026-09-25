@@ -9,11 +9,14 @@ import {
 } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { RulesModal } from "@features/info/ui/RulesModal.jsx";
+import { ColorPickerModal } from "@features/auth/register/ui/ColorPickerModal.jsx";
 
-// Окремий id, щоб не конфліктувати з модалкою правил у сайдбарі
-// (RulesModal.jsx монтується там лише для залогінених користувачів,
-// тож перетину насправді не буває, але id все одно тримаємо унікальним).
+// Окремі id, щоб не конфліктувати з однойменними модалками деінде
+// (RulesModal.jsx монтується в сайдбарі лише для залогінених
+// користувачів, тож перетину насправді не буває, але id все одно
+// тримаємо унікальними).
 const REGISTER_RULES_MODAL_ID = "registerRulesModal";
+const REGISTER_COLOR_MODAL_ID = "registerColorModal";
 
 // Той самий ліміт, що й на бекенді (див.
 // backend/src/validators/auth.validator.js, MAX_LOGIN_LENGTH) —
@@ -126,40 +129,25 @@ export function RegisterForm({ onSuccess, onBack }) {
         </div>
 
         <div className="mb-4">
-          <div className="color-radio-options">
-            {visibleColorOptions.map((option) => (
-              <label
-                key={option.value}
-                className="color-radio-option"
-                style={{ "--swatch-color": option.hex, "--swatch-color-dark": option.hexDark ?? option.hex }}
-                title={option.label}
-              >
-                <span className="color-radio-swatch" aria-hidden="true" />
-                <input
-                  className="color-radio-input"
-                  type="radio"
-                  name="color"
-                  value={option.value}
-                  checked={effectiveColor === option.value}
-                  onChange={(e) => setColor(e.target.value)}
-                  required
-                  aria-label={option.label}
-                />
-              </label>
-            ))}
-          </div>
           {/*
-            Підпис пофарбований у сам обраний колір - саме так нік/
-            повідомлення виглядатиме в чаті (а не нейтральним текстом,
-            як було раніше). isDarkTheme перемикає між hex і hexDark,
-            щоб підпис лишався настільки ж читабельним, як і сам свотч.
+            Сама палітра винесена в окрему модалку (ColorPickerModal.jsx) —
+            тут лишається лише лейбл і клікабельна назва поточного
+            кольору, пофарбована в цей-таки колір (так само, як раніше
+            підпис під палітрою) і з пунктирним підкресленням як
+            підказкою, що це елемент керування, а не просто текст.
+            isDarkTheme перемикає між hex і hexDark, щоб текст лишався
+            настільки ж читабельним, як і сам свотч у модалці.
           */}
-          <p
-            className="color-radio-selected-name mb-0"
+          <label className="form-label d-block mb-1">Колір</label>
+          <button
+            type="button"
+            className="color-picker-trigger"
             style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
+            data-bs-toggle="modal"
+            data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
           >
             {getColorLabel(effectiveColor)}
-          </p>
+          </button>
         </div>
 
         <p className="text-muted small mb-2 text-center">
@@ -185,6 +173,13 @@ export function RegisterForm({ onSuccess, onBack }) {
       </form>
 
       <RulesModal modalId={REGISTER_RULES_MODAL_ID} />
+      <ColorPickerModal
+        modalId={REGISTER_COLOR_MODAL_ID}
+        colorOptions={visibleColorOptions}
+        currentColor={effectiveColor}
+        isDarkTheme={isDarkTheme}
+        onApply={setColor}
+      />
       <p>
         <button
           type="button"

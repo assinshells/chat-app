@@ -109,3 +109,45 @@
   font-size: 0.85rem;
   font-weight: 700;
 }
+
+/* =========================================================
+   COLOR PICKER TRIGGER — на формі реєстрації (RegisterForm.jsx)
+   сама палітра більше не видно одразу на сторінці, лише назва
+   поточного кольору під лейблом "Колір". Пофарбована в обраний
+   колір (як і раніше .color-radio-selected-name) і з пунктирним
+   підкресленням — той самий прийом, що й у .system-message-room-btn
+   (_messages.css), який сигналізує "це клікабельно, тисни, щоб
+   змінити" замість простого статичного тексту.
+   ========================================================= */
+.color-picker-trigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+
+  cursor: pointer;
+
+  transition: text-decoration-style 0.15s ease;
+}
+
+.color-picker-trigger:hover,
+.color-picker-trigger:focus-visible {
+  text-decoration-style: solid;
+}
+
+/* =========================================================
+   COLOR PICKER MODAL (ColorPickerModal.jsx) — навмисно без
+   modal-header і modal-footer (лише палітра й дві кнопки в
+   тілі), тож .modal-body компенсує відсутній верхній відступ
+   від хедера власним паддингом.
+   ========================================================= */
+.color-picker-modal-body {
+  padding-top: 1.5rem;
+}
