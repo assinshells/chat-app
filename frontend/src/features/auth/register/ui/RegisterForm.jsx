@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRegisterStore } from "@features/auth/register/model/useRegisterStore.js";
-import { DEFAULT_GENDER, GENDER_OPTIONS, getGenderLabel } from "@shared/constants/auth.constants.js";
+import { DEFAULT_GENDER, GENDER_OPTIONS } from "@shared/constants/auth.constants.js";
 import {
   getColorLabel,
   getEffectiveColorHex,
@@ -9,16 +9,12 @@ import {
 } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { RulesModal } from "@features/info/ui/RulesModal.jsx";
-import { ColorPickerModal } from "@features/auth/register/ui/ColorPickerModal.jsx";
-import { GenderPickerModal } from "@features/auth/register/ui/GenderPickerModal.jsx";
 
-// Окремі id, щоб не конфліктувати з однойменними модалками деінде
+// Окремий id, щоб не конфліктувати з однойменними модалками деінде
 // (RulesModal.jsx монтується в сайдбарі лише для залогінених
 // користувачів, тож перетину насправді не буває, але id все одно
-// тримаємо унікальними).
+// тримаємо унікальним).
 const REGISTER_RULES_MODAL_ID = "registerRulesModal";
-const REGISTER_COLOR_MODAL_ID = "registerColorModal";
-const REGISTER_GENDER_MODAL_ID = "registerGenderModal";
 
 // Той самий ліміт, що й на бекенді (див.
 // backend/src/validators/auth.validator.js, MAX_LOGIN_LENGTH) —
@@ -113,48 +109,72 @@ export function RegisterForm({ onSuccess, onBack }) {
           />
         </div>
 
-        <div className="mb-4 d-flex align-items-center justify-content-between gender-color-row">
+        <div className="mb-4">
           {/*
-            Колір і стать зведені в один рядок і обираються однаковим
-            патерном — лейбл + клікабельна назва поточного значення, що
-            відкриває окрему модалку з самим вибором (ColorPickerModal.jsx
-            / GenderPickerModal.jsx), а не select чи перемикач прямо на
-            формі. Спільний .color-picker-trigger (app/styles/components/
-            _color-picker.css) — звідси однаковий вигляд обох тригерів
-            (пунктирне підкреслення).
+            Стать і колір раніше відкривали окремі модалки вибору
+            (ColorPickerModal.jsx / GenderPickerModal.jsx), тепер обидва
+            набори радіокнопок винесені прямо у форму — без чернетки й
+            кнопок "Прийняти"/"Скасувати", вибір застосовується одразу
+            по кліку на варіант (onChange одразу пише в стан форми).
+            Без лейблів "Стать"/"Колір" над ними — самі кнопки/свотчі
+            достатньо промовисті.
 
-            Колір тригера кольору пофарбований у цей-таки колір
-            (isDarkTheme перемикає між hex і hexDark, щоб текст лишався
-            читабельним); тригер статі — звичайний текст, кольору
-            вибирати нема з чого.
+            Стать — над кольором: рівні по ширині кнопки-"пігулки" в
+            один рядок на всю ширину форми (той самий border-radius,
+            що й у .form-control, замість круглої пігулки), кожна
+            .gender-radio-option розтягнута через flex: 1.
 
-            "Чоловік" за замовчуванням (DEFAULT_GENDER), інші варіанти —
-            GENDER_OPTIONS (включно з "Не вказано") обираються в модалці.
+            "Чоловік" за замовчуванням (DEFAULT_GENDER), "Чорний"/"Білий"
+            за замовчуванням (getDefaultColorForTheme) — інші варіанти
+            обираються тут-таки, серед усіх (GENDER_OPTIONS, включно з
+            "Не вказано") / видимих (getVisibleColorOptions).
           */}
-          <div className="d-flex align-items-center gap-2">
-            <label className="form-label mb-0">Колір</label>
-            <button
-              type="button"
-              className="color-picker-trigger"
-              style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
-              data-bs-toggle="modal"
-              data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
-            >
-              {getColorLabel(effectiveColor)}
-            </button>
+          <div className="gender-radio-options mb-3">
+            {GENDER_OPTIONS.map((option) => (
+              <label key={option.value} className="gender-radio-option">
+                <input
+                  className="gender-radio-input"
+                  type="radio"
+                  name="gender"
+                  value={option.value}
+                  checked={gender === option.value}
+                  onChange={(e) => setGender(e.target.value)}
+                />
+                <span className="gender-radio-pill">{option.label}</span>
+              </label>
+            ))}
           </div>
 
-          <div className="d-flex align-items-center gap-2">
-            <label className="form-label mb-0">Стать</label>
-            <button
-              type="button"
-              className="color-picker-trigger"
-              data-bs-toggle="modal"
-              data-bs-target={`#${REGISTER_GENDER_MODAL_ID}`}
-            >
-              {getGenderLabel(gender)}
-            </button>
+          <div className="color-radio-options">
+            {visibleColorOptions.map((option) => (
+              <label
+                key={option.value}
+                className="color-radio-option"
+                style={{
+                  "--swatch-color": option.hex,
+                  "--swatch-color-dark": option.hexDark ?? option.hex,
+                }}
+                title={option.label}
+              >
+                <span className="color-radio-swatch" aria-hidden="true" />
+                <input
+                  className="color-radio-input"
+                  type="radio"
+                  name="color"
+                  value={option.value}
+                  checked={effectiveColor === option.value}
+                  onChange={(e) => setColor(e.target.value)}
+                  aria-label={option.label}
+                />
+              </label>
+            ))}
           </div>
+          <p
+            className="color-radio-selected-name mb-0"
+            style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
+          >
+            {getColorLabel(effectiveColor)}
+          </p>
         </div>
 
         <p className="text-muted small mb-2 text-center">
@@ -180,19 +200,6 @@ export function RegisterForm({ onSuccess, onBack }) {
       </form>
 
       <RulesModal modalId={REGISTER_RULES_MODAL_ID} />
-      <ColorPickerModal
-        modalId={REGISTER_COLOR_MODAL_ID}
-        colorOptions={visibleColorOptions}
-        currentColor={effectiveColor}
-        isDarkTheme={isDarkTheme}
-        onApply={setColor}
-      />
-      <GenderPickerModal
-        modalId={REGISTER_GENDER_MODAL_ID}
-        genderOptions={GENDER_OPTIONS}
-        currentGender={gender}
-        onApply={setGender}
-      />
       <p>
         <button
           type="button"

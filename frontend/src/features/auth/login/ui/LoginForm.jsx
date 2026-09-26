@@ -29,6 +29,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
 
   return (
     <>
+    {error && <p className="text-danger text-center mb-3">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <input
@@ -67,7 +68,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             ))}
           </select>
         </div>
-        {error && <p className="text-danger text-center mb-3">{error}</p>}
+        
         <div className="mb-4 d-flex gap-2 auth-button-row">
           <button
             type="submit"

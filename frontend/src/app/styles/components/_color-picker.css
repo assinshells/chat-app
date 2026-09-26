@@ -10,7 +10,8 @@
    назва поточно обраного кольору (див. .color-radio-selected-name,
    текст рендериться в RegisterForm.jsx через getColorLabel(color),
    не в CSS).
-   Використовується у формі реєстрації (RegisterForm.jsx).
+   Рендериться прямо у формі реєстрації (RegisterForm.jsx), без
+   окремої модалки вибору.
    ========================================================= */
 
 .color-radio-options {
@@ -111,57 +112,13 @@
 }
 
 /* =========================================================
-   COLOR PICKER TRIGGER — на формі реєстрації (RegisterForm.jsx)
-   сама палітра більше не видно одразу на сторінці, лише назва
-   поточного кольору під лейблом "Колір". Пофарбована в обраний
-   колір (як і раніше .color-radio-selected-name) і з пунктирним
-   підкресленням — той самий прийом, що й у .system-message-room-btn
-   (_messages.css), який сигналізує "це клікабельно, тисни, щоб
-   змінити" замість простого статичного тексту.
-   ========================================================= */
-.color-picker-trigger {
-  padding: 0;
-  border: 0;
-  background: transparent;
-
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 3px;
-
-  cursor: pointer;
-
-  transition: text-decoration-style 0.15s ease;
-}
-
-.color-picker-trigger:hover,
-.color-picker-trigger:focus-visible {
-  text-decoration-style: solid;
-}
-
-/* =========================================================
-   COLOR PICKER MODAL (ColorPickerModal.jsx) — навмисно без
-   modal-header і modal-footer (лише палітра й дві кнопки в
-   тілі), тож .modal-body компенсує відсутній верхній відступ
-   від хедера власним паддингом.
-   ========================================================= */
-.color-picker-modal-body {
-  padding-top: 1.5rem;
-}
-
-/* =========================================================
-   GENDER RADIO PICKER (GenderPickerModal.jsx) — той самий
-   патерн вибору, що й COLOR RADIO PICKER вище (нативний input
-   візуально прихований, кастомний вигляд — на сусідньому
-   елементі), але замість кольорових кружків — текстові
-   "пігулки" з написом варіанту, бо в статі немає кольору для
-   свотча. Той самий .color-picker-trigger (уже описаний вище)
-   лишається спільним для тригерів "Колір" і "Стать" на самій
-   формі реєстрації (RegisterForm.jsx) — тут стилюється лише
-   вміст модалки.
+   GENDER RADIO PICKER — той самий патерн вибору, що й COLOR
+   RADIO PICKER вище (нативний input візуально прихований,
+   кастомний вигляд — на сусідньому елементі), але замість
+   кольорових кружків — текстові "пігулки" з написом варіанту,
+   бо в статі немає кольору для свотча. Обидва набори радіокнопок
+   рендеряться прямо у формі реєстрації (RegisterForm.jsx),
+   інлайново, без окремої модалки.
    ========================================================= */
 .gender-radio-options {
   display: flex;
@@ -170,6 +127,7 @@
 }
 
 .gender-radio-option {
+  flex: 1 1 0;
   cursor: pointer;
 }
 
@@ -189,15 +147,18 @@
 }
 
 .gender-radio-pill {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
 
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--bs-border-radius); /* как у .form-control, вместо круглой пилюли */
   border: 1px solid rgba(var(--bs-body-color-rgb), 0.2);
 
   font-size: 0.85rem;
   font-weight: 700;
+  text-align: center;
 
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -215,8 +176,4 @@
 .gender-radio-input:focus-visible ~ .gender-radio-pill {
   outline: 2px solid rgba(var(--bs-primary-rgb), 0.6);
   outline-offset: 2px;
-}
-
-.gender-picker-modal-body {
-  padding-top: 1.5rem;
 }
