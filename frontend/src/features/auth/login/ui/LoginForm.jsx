@@ -68,11 +68,11 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
           </select>
         </div>
         {error && <p className="text-danger text-center mb-3">{error}</p>}
-        <div className="mb-5">
+        <div className="mb-4 d-flex gap-2 auth-button-row">
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary me-2"
+            className="btn btn-primary"
           >
             {loading ? "Заходимо..." : "Увійти"}
           </button>
@@ -84,9 +84,16 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             Зареєструватися
           </button>
         </div>
-        <button type="button" onClick={onForgot} className="text-muted mb-2">
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            onForgot();
+          }}
+          className="forgot-password-link text-muted mb-2 d-inline-block"
+        >
           Забули пароль?
-        </button>
+        </a>
       </form>
     </>
   );

@@ -1,8 +1,10 @@
 import SimpleBar from "simplebar-react";
-import { Heart, Copyright } from "lucide-react";
+import { Copyright } from "lucide-react";
+import { DeveloperModal } from "@features/info";
 
 const creationYear = 2026;
 const currentYear = new Date().getFullYear();
+const DEVELOPER_MODAL_ID = "authDeveloperModal";
 
 export function AuthLayout({ title, subtitle, children }) {
   return (
@@ -16,23 +18,22 @@ export function AuthLayout({ title, subtitle, children }) {
                 {subtitle && <p className="text-muted mb-4">{subtitle}</p>}
                 {children}
                 <div className="small">
-                  <a href="/terms" className="text-muted me-3">
+                  <a href="/terms" className="text-muted text-decoration-none me-3">
                     Файли cookie
                   </a>
-                  <a href="/privacy" className="text-muted">
+                  <a
+                    href="#"
+                    className="text-muted text-decoration-none"
+                    data-bs-toggle="modal"
+                    data-bs-target={`#${DEVELOPER_MODAL_ID}`}
+                    onClick={(e) => e.preventDefault()}
+                  >
                     Розробники
                   </a>
                   <p>
                     <Copyright className="footer-icon" size="1em" />{" "}
                     {creationYear}
                     {creationYear !== currentYear && `-${currentYear}`} {title}.
-                    Programmed by{" "}
-                    <Heart
-                      className="text-danger footer-icon"
-                      size="1em"
-                      fill="currentColor"
-                    />{" "}
-                    E.Thompson.
                   </p>
                   <span>All rights reserved.</span>
                 </div>
@@ -41,6 +42,7 @@ export function AuthLayout({ title, subtitle, children }) {
           </div>
         </div>
       </div>
+      <DeveloperModal modalId={DEVELOPER_MODAL_ID} />
     </SimpleBar>
   );
 }
