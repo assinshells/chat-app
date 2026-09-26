@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
 import {
-  ROOMS,
+  ROOMS_BY_ID,
   DEFAULT_ROOM,
 } from "@features/chat/constants/rooms.constants.js";
+import { RoomSelectModal } from "./RoomSelectModal.jsx";
+
+const ROOM_MODAL_ID = "loginRoomSelectModal";
 
 /**
  * LoginForm — "тупий" компонент.
@@ -53,49 +56,53 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             required
           />
         </div>
-        <div className="mb-4">
-          <select
-            id="roomSelect"
-            className="form-select"
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            aria-label="Кімната для входу"
+        <div className="mb-4 d-flex justify-content-between align-items-center room-select-field">
+          <span>
+            <span className="room-select-label">Кімната: </span>
+            <button
+              type="button"
+              className="room-select-trigger"
+              data-bs-toggle="modal"
+              data-bs-target={`#${ROOM_MODAL_ID}`}
+            >
+              {ROOMS_BY_ID[room]?.name ?? ROOMS_BY_ID[DEFAULT_ROOM].name}
+            </button>
+          </span>
+
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              onForgot();
+            }}
+            className="forgot-password-link text-muted"
           >
-            {ROOMS.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
+            Забули пароль?
+          </a>
         </div>
-        
-        <div className="mb-4 d-flex gap-2 auth-button-row">
+
+        <div className="mb-4">
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary"
+            className="btn btn-primary w-100"
           >
             {loading ? "Заходимо..." : "Увійти"}
-          </button>
-          <button
-            type="button"
-            onClick={onRegister}
-            className="btn btn-secondary"
-          >
-            Зареєструватися
           </button>
         </div>
         <a
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            onForgot();
+            onRegister();
           }}
-          className="forgot-password-link text-muted mb-2 d-inline-block"
+          className="forgot-password-link text-muted mb-4 d-inline-block"
         >
-          Забули пароль?
+          Зареєструватися
         </a>
       </form>
+
+      <RoomSelectModal modalId={ROOM_MODAL_ID} room={room} onConfirm={setRoom} />
     </>
   );
 }

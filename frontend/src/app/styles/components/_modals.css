@@ -79,3 +79,80 @@
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
+
+/* =========================================================
+   ROOM SELECT MODAL — вибір кімнати на формі входу
+   (RoomSelectModal.jsx). Той самий "безшапковий" патерн, що й
+   DeveloperModal (лишається лише хрестик), футера нема взагалі —
+   кнопка підтвердження лежить прямо в .modal-body під сіткою.
+   Діалог трохи ширший за стандартний modal-dialog-centered, щоб
+   5 колонок по 6 кімнат не тіснились одна до одної на десктопі.
+   ========================================================= */
+.room-select-modal-dialog {
+  max-width: 520px;
+}
+
+.room-select-modal-body {
+  min-height: 0;
+  /* Відступ зверху, щоб хрестик закриття (в .modal-header) не
+     наїжджав на перший ряд кімнат сітки. */
+  padding-top: 0.5rem;
+}
+
+/* 5 колонок × 6 кімнат на десктопі. */
+.room-select-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.room-select-item {
+  padding: 0.5rem 0.35rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--bs-body-color);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+
+  /* Назви кімнат різної довжини (напр. "Ів-Франківськ") мають
+     переноситись у межах комірки, а не розтягувати сітку. */
+  overflow-wrap: anywhere;
+}
+
+.room-select-item:hover,
+.room-select-item:focus-visible {
+  border-color: var(--bs-primary);
+}
+
+.room-select-item.is-active {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------
+   Адаптація під мобільні екрани: менше колонок, щоб назви кімнат
+   лишались читабельними, а не стискались у вузькі стовпчики.
+   --------------------------------------------------------- */
+@media (max-width: 576px) {
+  .room-select-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  .room-select-item {
+    padding: 0.6rem 0.35rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .room-select-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

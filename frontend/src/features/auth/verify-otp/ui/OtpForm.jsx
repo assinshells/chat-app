@@ -119,25 +119,26 @@ export function OtpForm({ email, onSuccess, onBack }) {
             />
           ))}
         </div>
-
+<div className="mb-4">
         <button
           type="submit"
           disabled={loading || !isComplete}
-          className="btn btn-primary w-100 text-decoration-none rounded-4 fw-bold m-0"
+          className="btn btn-primary w-100"
         >
           {loading ? "Верифікація..." : "Верифікувати"}
         </button>
-      </form>
-
-      <p>
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn btn-outline-primary w-100 text-break rounded-4 fw-bold mt-4"
+        </div>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            onBack();
+          }}
+          className="forgot-password-link text-muted mb-4 d-inline-block"
         >
           Увійти
-        </button>
-      </p>
+        </a>
+      </form>
     </>
   );
 }

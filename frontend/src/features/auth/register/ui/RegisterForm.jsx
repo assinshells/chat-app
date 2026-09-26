@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useRegisterStore } from "@features/auth/register/model/useRegisterStore.js";
-import { DEFAULT_GENDER, GENDER_OPTIONS } from "@shared/constants/auth.constants.js";
+import {
+  DEFAULT_GENDER,
+  GENDER_OPTIONS,
+} from "@shared/constants/auth.constants.js";
 import {
   getColorLabel,
   getEffectiveColorHex,
@@ -38,7 +41,9 @@ export function RegisterForm({ onSuccess, onBack }) {
   // він майже нечитабельний і взагалі прибраний з палітри нижче) —
   // тому початкове значення підлаштовується під тему вже при монтуванні.
   const isDarkTheme = useIsDarkTheme();
-  const [color, setColor] = useState(() => getDefaultColorForTheme(isDarkTheme));
+  const [color, setColor] = useState(() =>
+    getDefaultColorForTheme(isDarkTheme),
+  );
   const visibleColorOptions = getVisibleColorOptions(isDarkTheme);
 
   // effectiveColor замість синхронізації через useEffect: якщо тема
@@ -46,7 +51,9 @@ export function RegisterForm({ onSuccess, onBack }) {
   // той, що ховається на новій темі ("чорний" на темній / "білий" на
   // світлій) — на льоту підміняється симетричним дефолтом. Порахований
   // прямо в рендері, без побічного ефекту й зайвого re-render.
-  const effectiveColor = visibleColorOptions.some((option) => option.value === color)
+  const effectiveColor = visibleColorOptions.some(
+    (option) => option.value === color,
+  )
     ? color
     : getDefaultColorForTheme(isDarkTheme);
 
@@ -59,7 +66,10 @@ export function RegisterForm({ onSuccess, onBack }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     clearError();
-    register({ login, password, email, gender, color: effectiveColor }, onSuccess);
+    register(
+      { login, password, email, gender, color: effectiveColor },
+      onSuccess,
+    );
   };
 
   return (
@@ -79,7 +89,9 @@ export function RegisterForm({ onSuccess, onBack }) {
               placeholder="Введіть нікнейм"
               value={login}
               maxLength={MAX_LOGIN_LENGTH}
-              onChange={(e) => setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))}
+              onChange={(e) =>
+                setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))
+              }
               required
             />
             <span className="input-inline-counter" aria-hidden="true">
@@ -189,26 +201,28 @@ export function RegisterForm({ onSuccess, onBack }) {
           </a>
           .
         </p>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary w-100 text-decoration-none rounded-4 fw-bold m-0"
+        <div className="mb-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-100"
+          >
+            {loading ? "Реєструємо..." : "Зареєструватися"}
+          </button>
+        </div>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            onBack();
+          }}
+          className="forgot-password-link text-muted mb-4 d-inline-block"
         >
-          {loading ? "Реєструємо..." : "Зареєструватися"}
-        </button>
+          Увійти
+        </a>
       </form>
 
       <RulesModal modalId={REGISTER_RULES_MODAL_ID} />
-      <p>
-        <button
-          type="button"
-          onClick={onBack}
-          className="btn btn-outline-primary w-100 text-break rounded-4 fw-bold mt-4"
-        >
-          Увійти
-        </button>
-      </p>
     </>
   );
 }
