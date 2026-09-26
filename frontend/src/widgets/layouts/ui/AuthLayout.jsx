@@ -7,34 +7,39 @@ const currentYear = new Date().getFullYear();
 export function AuthLayout({ title, subtitle, children }) {
   return (
     <SimpleBar style={{ maxHeight: "100vh" }} autoHide={true}>
-      <div className="d-flex align-items-center py-4">
-        <main className="authentication-template w-100 m-auto">
-          <header>
-            <h4 className="text-center mb-4">
-              <span className="text-muted text-break">{title}</span>
-            </h4>
-            {subtitle && (
-              <span className="d-block text-muted text-break mb-4">{subtitle}</span>
-            )}
-          </header>
-
-          {children}
-
-          <footer className="d-flex flex-wrap align-items-center justify-content-center gap-1 text-muted small text-center mt-4">
-            <span>
-              <Copyright className="footer-icon" size="1em" /> {creationYear}
-              {creationYear !== currentYear && `-${currentYear}`} {title}.
-              Programmed by{" "}
-              <Heart
-                className="text-danger footer-icon"
-                size="1em"
-                fill="currentColor"
-              />{" "}
-              E.Thompson.
-            </span>
-            <span>All rights reserved.</span>
-          </footer>
-        </main>
+      <div className="auth-layout">
+        <div className="container-fluid px-3 h-100">
+          <div className="d-table w-100 h-100">
+            <div className="d-table-cell align-middle">
+              <div className="auth-content text-center">
+                <span className="d-inline-block auth-brand mb-5">{title}</span>
+                {subtitle && <p className="text-muted mb-4">{subtitle}</p>}
+                {children}
+                <div className="small">
+                  <a href="/terms" className="text-muted me-3">
+                    Файли cookie
+                  </a>
+                  <a href="/privacy" className="text-muted">
+                    Розробники
+                  </a>
+                  <p>
+                    <Copyright className="footer-icon" size="1em" />{" "}
+                    {creationYear}
+                    {creationYear !== currentYear && `-${currentYear}`} {title}.
+                    Programmed by{" "}
+                    <Heart
+                      className="text-danger footer-icon"
+                      size="1em"
+                      fill="currentColor"
+                    />{" "}
+                    E.Thompson.
+                  </p>
+                  <span>All rights reserved.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </SimpleBar>
   );

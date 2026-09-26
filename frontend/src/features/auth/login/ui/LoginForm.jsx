@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
-import { ROOMS, DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
+import {
+  ROOMS,
+  DEFAULT_ROOM,
+} from "@features/chat/constants/rooms.constants.js";
 
 /**
  * LoginForm — "тупий" компонент.
@@ -26,7 +29,6 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
 
   return (
     <>
-      {error && <p className="text-danger text-center mb-3">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <input
@@ -39,7 +41,6 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             required
           />
         </div>
-
         <div className="mb-3">
           <input
             id="passwordInput"
@@ -51,14 +52,13 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             required
           />
         </div>
-
         <div className="mb-4">
           <select
             id="roomSelect"
             className="form-select"
             value={room}
             onChange={(e) => setRoom(e.target.value)}
-            aria-label="Кімната для входу" 
+            aria-label="Кімната для входу"
           >
             {ROOMS.map((r) => (
               <option key={r.id} value={r.id}>
@@ -67,30 +67,27 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             ))}
           </select>
         </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary w-100 text-decoration-none rounded-4 fw-bold m-0"
-        >
-          {loading ? "Заходимо..." : "Увійти"}
+        {error && <p className="text-danger text-center mb-3">{error}</p>}
+        <div className="mb-5">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary me-2"
+          >
+            {loading ? "Заходимо..." : "Увійти"}
+          </button>
+          <button
+            type="button"
+            onClick={onRegister}
+            className="btn btn-secondary"
+          >
+            Зареєструватися
+          </button>
+        </div>
+        <button type="button" onClick={onForgot} className="text-muted mb-2">
+          Забули пароль?
         </button>
       </form>
-      <button
-        type="button"
-        onClick={onForgot}
-        className="btn btn-outline-primary w-100 text-break rounded-4 fw-bold mt-3"
-      >
-        Забули пароль?
-      </button>
-
-      <button
-        type="button"
-        onClick={onRegister}
-        className="btn btn-outline-primary w-100 text-break rounded-4 fw-bold mt-4"
-      >
-        Зареєструватися
-      </button>
     </>
   );
 }
