@@ -7,6 +7,10 @@ import { GENDER_OPTIONS, COLOR_OPTIONS, STATUS_OPTIONS } from "../constants/auth
 // див. RegisterForm.jsx, maxLength на полі нікнейма).
 export const MAX_LOGIN_LENGTH = 20;
 
+// Мінімальна довжина нікнейма при реєстрації (узгоджено з фронтом,
+// див. RegisterForm.jsx, minLength/підказка під полем нікнейма).
+export const MIN_LOGIN_LENGTH = 3;
+
 const isNonEmptyString = (val) =>
   typeof val === "string" && val.trim().length > 0;
 const isValidEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
@@ -29,6 +33,8 @@ export const validateLoginRequest = (body) => {
 export const validateRegisterRequest = (body) => {
   const errors = [];
   if (!isNonEmptyString(body.login)) errors.push("логін обов'язковий");
+  else if (body.login.trim().length < MIN_LOGIN_LENGTH)
+    errors.push(`нікнейм має бути не коротшим за ${MIN_LOGIN_LENGTH} символи`);
   else if (body.login.trim().length > MAX_LOGIN_LENGTH)
     errors.push(`нікнейм має бути не довшим за ${MAX_LOGIN_LENGTH} символів`);
   if (!isValidPassword(body.password))

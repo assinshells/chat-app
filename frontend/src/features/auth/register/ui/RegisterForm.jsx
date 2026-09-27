@@ -28,6 +28,18 @@ const REGISTER_GENDER_MODAL_ID = "registerGenderPickerModal";
 // довший нікнейм сервер все одно відхилить, тому обрізаємо ще на вводі.
 const MAX_LOGIN_LENGTH = 20;
 
+// Мінімальна довжина нікнейма, узгоджена з бекендом (MIN_LOGIN_LENGTH у
+// backend/src/validators/auth.validator.js). На відміну від
+// MAX_LOGIN_LENGTH це не обрізає ввід, а лише перевіряється при
+// сабміті (minLength на інпуті + перевірка в handleSubmit нижче).
+const MIN_LOGIN_LENGTH = 3;
+
+// Мінімальна довжина пароля, узгоджена з бекендом (isValidPassword у
+// backend/src/validators/auth.validator.js) — там же відсутнє
+// обмеження на набір символів, тому підказка під полем каже про це
+// прямо, а не вигадує неіснуюче правило.
+const MIN_PASSWORD_LENGTH = 6;
+
 /**
  * Стать і колір нікнейма/повідомлень обираються тут, а не на формі
  * входу (LoginForm.jsx) і не в модалці налаштувань
@@ -92,6 +104,7 @@ export function RegisterForm({ onSuccess, onBack }) {
               className="form-control"
               placeholder="Введіть нікнейм"
               value={login}
+              minLength={MIN_LOGIN_LENGTH}
               maxLength={MAX_LOGIN_LENGTH}
               onChange={(e) =>
                 setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))
@@ -101,6 +114,10 @@ export function RegisterForm({ onSuccess, onBack }) {
             <span className="input-inline-counter" aria-hidden="true">
               {login.length}/{MAX_LOGIN_LENGTH}
             </span>
+          </div>
+          <div className="form-text text-start">
+            Від {MIN_LOGIN_LENGTH} до {MAX_LOGIN_LENGTH} символів: літери,
+            цифри та інші знаки.
           </div>
         </div>
         <div className="mb-3">
@@ -113,6 +130,10 @@ export function RegisterForm({ onSuccess, onBack }) {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <div className="form-text text-start">
+            Не менше {MIN_PASSWORD_LENGTH} символів: літери, цифри та
+            інші знаки.
+          </div>
         </div>
         <div className="mb-3">
           <input
@@ -180,7 +201,10 @@ export function RegisterForm({ onSuccess, onBack }) {
           </span>
         </div>
 
-        <p className="text-muted small mb-2 text-center">
+        {/* text-start (а не успадкований text-center з .auth-content) —
+            за завданням цей інфотекст над кнопкою реєстрації зміщено
+            вліво, на відміну від решти центрованої форми. */}
+        <p className="text-muted small mb-2 text-start">
           Натискаючи «Зареєструватися», ви погоджуєтеся з{" "}
           <a
             href="#"

@@ -53,14 +53,30 @@
 /* .rules-modal-body — той самий елемент, що й .modal-body (класи
    комбіновані прямо на скрол-контейнері у RulesModal.jsx). Bootstrap
    (.modal-dialog-scrollable .modal-body) сам вішає overflow-y: auto
-   і обмежує висоту .modal-content вʼюпортом — тут overflow-y все
-   одно перевизначається явним значенням у .app-scrollbar (auto),
-   а по горизонталі ховається через .no-horizontal. min-height: 0 —
-   щоб flex-контейнер міг стиснутися нижче контенту замість
-   розтягування .modal-content. */
+   і обмежує висоту .modal-content вʼюпортом — тут прокрутку від
+   браузера явно вимкнено (overflow: hidden), бо фактичний скрол
+   тепер віддано SimpleBar. Сам .rules-modal-body зроблено flex-
+   контейнером (display:flex; flex-direction:column), а обгортці
+   SimpleBar всередині задано flex: 1 1 auto; min-height: 0 (а не
+   style={{height:"100%"}}) — відсоткова висота на дитині
+   flex-елемента з "авто"-висотою по-різному резолвиться в різних
+   браузерах, тоді як flex-grow надійно розтягує SimpleBar на всю
+   доступну висоту незалежно від цього. Селектор навмисно зроблений
+   специфічнішим (.modal-dialog-scrollable .modal-body.rules-modal-body,
+   3 класи), інакше однокласовий .rules-modal-body програє
+   двокласовому правилу Bootstrap (.modal-dialog-scrollable .modal-body)
+   за специфічністю. min-height: 0 на самому .rules-modal-body — щоб
+   flex-контейнер міг стиснутися нижче контенту замість розтягування
+   .modal-content. */
 .rules-modal-body {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   font-size: 0.9rem;
+}
+
+.modal-dialog-scrollable .modal-body.rules-modal-body {
+  overflow: hidden;
 }
 
 .rules-modal-section {
