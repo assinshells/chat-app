@@ -156,3 +156,43 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* =========================================================
+   COLOR PICKER MODAL — вибір кольору нікнейма/повідомлень на
+   реєстрації (ColorPickerModal.jsx), відкривається кліком на
+   .color-select-trigger (RegisterForm.jsx). Той самий "безшапковий"
+   патерн, що й RoomSelectModal вище: .modal-header лишається лише
+   заради хрестика закриття, футера нема — кнопка "Прийняти" лежить
+   прямо в .modal-body, під палітрою кольорів і прикладом тексту.
+   ========================================================= */
+.color-picker-modal-body {
+  min-height: 0;
+  /* Відступ зверху, щоб хрестик закриття не наїжджав на палітру. */
+  padding-top: 0.5rem;
+}
+
+.color-picker-modal-body .color-radio-options {
+  margin-bottom: 0.25rem;
+}
+
+/* Приклад фрази, пофарбованої обраним кольором (PREVIEW_TEXT у
+   ColorPickerModal.jsx) — трохи більший за назву кольору над ним,
+   щоб читабельність кольору на тексті було справді видно. */
+.color-picker-preview-text {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   GENDER PICKER MODAL — вибір статі на реєстрації
+   (GenderPickerModal.jsx), відкривається кліком на
+   .gender-select-trigger (RegisterForm.jsx). Той самий "безшапковий"
+   патерн, що й COLOR PICKER MODAL вище: хрестик закриття замість
+   заголовка. Футера й кнопки "Прийняти" тут нема — клік по варіанту
+   в .modal-body одразу застосовує вибір (див. .gender-radio-pill у
+   _color-picker.css).
+   ========================================================= */
+.gender-picker-modal-body {
+  min-height: 0;
+  padding-top: 0.5rem;
+}

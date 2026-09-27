@@ -32,7 +32,7 @@
 
 .auth-content {
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
 }
 .auth-brand {
   width: 40%;
@@ -79,4 +79,19 @@
 .room-select-trigger:hover,
 .room-select-trigger:focus-visible {
   color: var(--bs-primary);
+}
+
+/* ---------------------------------------------------------
+   REGISTER FORM: рядок "Стать" + "Колір" (RegisterForm.jsx) — той
+   самий патерн start/end, що й .room-select-field вище: стать —
+   .gender-select-trigger по лівому краю, колір — .color-select-trigger
+   по правому, обидва в один рядок через
+   d-flex justify-content-between. flex-wrap і row-gap — щоб на дуже
+   вузьких екранах тригери переносились одне під одне, а не
+   стискались/накладались, а не тому, що це бажаний вигляд на
+   звичайних екранах.
+   --------------------------------------------------------- */
+.gender-color-row {
+  flex-wrap: wrap;
+  row-gap: 0.75rem;
 }
