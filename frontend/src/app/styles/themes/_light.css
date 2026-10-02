@@ -4,6 +4,6 @@
 
 :root,
 [data-bs-theme="light"] {
---bs-body-color: #495057;
---bs-body-bg: #f7f7ff;
+--bs-body-color: #212529;
+--bs-body-bg: #f5f8fa;
 }

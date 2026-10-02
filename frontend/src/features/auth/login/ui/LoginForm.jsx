@@ -32,8 +32,15 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
 
   return (
     <>
-    {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit}>
+      {error && <p className="text-danger text-center mb-3">{error}</p>}
+      <form
+        onSubmit={handleSubmit}
+        role="form"
+        className="mx-auto text-center login-form"
+      >
+        <a href="/" className="d-inline-block mb-5 brand-link">
+          <img src="../assets/img/brand.png" alt="brand" className="w-100" />
+        </a>
         <div className="mb-3">
           <input
             id="loginInput"
@@ -68,41 +75,40 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
               {ROOMS_BY_ID[room]?.name ?? ROOMS_BY_ID[DEFAULT_ROOM].name}
             </button>
           </span>
-
+        </div>
+        <div className="mb-5">
+          <button type="submit" disabled={loading} className="btn btn-primary">
+            {loading ? "Заходимо..." : "Увійти"}
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onRegister();
+            }}
+            className="btn btn-secondary"
+          >
+            Зареєструватися
+          </button>
+        </div>
+        <footer>
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
               onForgot();
             }}
-            className="forgot-password-link text-muted"
+            className="text-muted"
           >
             Забули пароль?
           </a>
-        </div>
-
-        <div className="mb-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary w-100"
-          >
-            {loading ? "Заходимо..." : "Увійти"}
-          </button>
-        </div>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            onRegister();
-          }}
-          className="forgot-password-link text-muted mb-4 d-inline-block"
-        >
-          Зареєструватися
-        </a>
+        </footer>
       </form>
 
-      <RoomSelectModal modalId={ROOM_MODAL_ID} room={room} onConfirm={setRoom} />
+      <RoomSelectModal
+        modalId={ROOM_MODAL_ID}
+        room={room}
+        onConfirm={setRoom}
+      />
     </>
   );
 }

@@ -20,23 +20,13 @@ export function AuthLayout({ title, subtitle, children }) {
     // самого SimpleBar, і заголовок сайту, що завжди першим у потоці,
     // ставав недосяжним.
     <SimpleBar style={{ height: "100vh" }} autoHide={true}>
-      <div className="auth-layout">
-        <div className="container-fluid px-3 auth-layout-inner">
-          <div className="auth-content text-center">
+      <div className="container-fluid d-table w-100 vh-100">
+        <div className="d-table-cell align-middle">
+          {/*<div className="auth-content text-center">
             <span className="d-inline-block auth-brand mb-5">{title}</span>
-            {subtitle && <p className="text-muted mb-4">{subtitle}</p>}
+            {subtitle && <p className="text-muted mb-4">{subtitle}</p>}*/}
             {children}
-            {/*
-              Порядок лінків — за спаданням важливості: "Попередження"
-              (вікове обмеження й особиста безпека — критично побачити
-              ще до реєстрації) → "Правила" (умови користування) →
-              "Файли cookie" (суто технічна інформація) → "Розробники"
-              (не юридична інформація, тому завжди останній). Усі три
-              нові лінки відкривають "безшапкові" модалки (без
-              заголовка й футера, лише хрестик закриття) — той самий
-              патерн, що й уже наявна модалка "Розробники".
-            */}
-            <div className="small">
+            {/*<div className="small">
               <div className="mb-2">
                 <a
                   href="#"
@@ -82,7 +72,7 @@ export function AuthLayout({ title, subtitle, children }) {
               </p>
               <span>All rights reserved.</span>
             </div>
-          </div>
+          </div>*/}
         </div>
       </div>
       <WarningModal modalId={WARNING_MODAL_ID} />
