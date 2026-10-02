@@ -4,6 +4,7 @@ import {
   ROOMS_BY_ID,
   DEFAULT_ROOM,
 } from "@features/chat/constants/rooms.constants.js";
+import { Brand } from "@shared/ui/brand";
 import { RoomSelectModal } from "./RoomSelectModal.jsx";
 
 const ROOM_MODAL_ID = "loginRoomSelectModal";
@@ -38,9 +39,7 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
         role="form"
         className="mx-auto text-center login-form"
       >
-        <a href="/" className="d-inline-block mb-5 brand-link">
-          <img src="../assets/img/brand.png" alt="brand" className="w-100" />
-        </a>
+        <Brand className="mb-5" />
         <div className="mb-3">
           <input
             id="loginInput"
@@ -63,28 +62,35 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
             required
           />
         </div>
-        <div className="mb-4 d-flex justify-content-between align-items-center room-select-field">
-          <span>
-            <span className="room-select-label">Кімната: </span>
-            <button
-              type="button"
-              className="room-select-trigger"
-              data-bs-toggle="modal"
-              data-bs-target={`#${ROOM_MODAL_ID}`}
-            >
-              {ROOMS_BY_ID[room]?.name ?? ROOMS_BY_ID[DEFAULT_ROOM].name}
-            </button>
-          </span>
+        <div className="mb-4">
+          {/* readOnly-інпут з кімнатою за замовчуванням: клік (або
+              Enter/Пробіл) відкриває RoomSelectModal, обрана кімната
+              підставляється в інпут. form-select додає шеврон. */}
+          <input
+            id="roomInput"
+            type="text"
+            className="form-select room-select-input"
+            value={ROOMS_BY_ID[room]?.name ?? ROOMS_BY_ID[DEFAULT_ROOM].name}
+            readOnly
+            aria-label="Кімната"
+            aria-haspopup="dialog"
+            data-bs-toggle="modal"
+            data-bs-target={`#${ROOM_MODAL_ID}`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.currentTarget.click();
+              }
+            }}
+          />
         </div>
-        <div className="mb-5">
+        <div className="mb-5 d-grid gap-2">
           <button type="submit" disabled={loading} className="btn btn-primary">
             {loading ? "Заходимо..." : "Увійти"}
           </button>
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              onRegister();
-            }}
+            type="button"
+            onClick={onRegister}
             className="btn btn-secondary"
           >
             Зареєструватися

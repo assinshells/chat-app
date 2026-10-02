@@ -6,10 +6,6 @@
     margin-top: -60px;
 }
 
-/* Нет в Bootstrap: ширина логотипа 40% */
-.brand-link {
-    width: 40%;
-}
 /* ---------------------------------------------------------
    LOGIN FORM: лінки "Забули пароль?" і "Зареєструватися"
    (LoginForm.jsx) — без підкреслення завжди, і в звичайному стані,
@@ -43,7 +39,7 @@
   background: none;
   color: var(--bs-body-color);
   font-weight: 600;
-  text-decoration: underline;
+  text-decoration: none;
   text-underline-offset: 2px;
   cursor: pointer;
 }
@@ -51,6 +47,14 @@
 .room-select-trigger:hover,
 .room-select-trigger:focus-visible {
   color: var(--bs-primary);
+  text-decoration: underline;
+}
+
+/* Readonly-інпут вибору кімнати (LoginForm.jsx): виглядає як інпут,
+   але поводиться як тригер модалки. */
+.room-select-input {
+  cursor: pointer;
+  text-overflow: ellipsis;
 }
 
 /* ---------------------------------------------------------

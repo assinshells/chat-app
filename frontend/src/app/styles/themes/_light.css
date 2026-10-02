@@ -7,3 +7,10 @@
 --bs-body-color: #212529;
 --bs-body-bg: #f5f8fa;
 }
+
+/* Інпути на світлій темі — білий фон за замовчуванням
+   (а не --bs-body-bg сторінки). */
+:root:not([data-bs-theme="dark"]) .form-control,
+:root:not([data-bs-theme="dark"]) .form-select {
+  background-color: #fff;
+}

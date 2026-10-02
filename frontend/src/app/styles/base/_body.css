@@ -19,6 +19,17 @@ body {
   position: relative;
   top: -0.15em;
 }
+/* Лінки: без підкреслення, підкреслення — лише при наведенні/фокусі.
+   Кнопки-лінки (.btn) не чіпаємо. */
+a:not(.btn) {
+  text-decoration: none;
+}
+
+a:not(.btn):hover,
+a:not(.btn):focus-visible {
+  text-decoration: underline;
+}
+
 /*
 a {
     text-decoration: none !important;
