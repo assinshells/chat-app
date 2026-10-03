@@ -1,5 +1,5 @@
 .chat-leftsidebar {
-  height: 100vh;
+  height: calc(100vh - var(--app-navbar-height));
   background-color: var(--bs-sidebar-sub-bg);
 }
 @media (min-width: 992px) {

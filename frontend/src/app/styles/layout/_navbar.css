@@ -1,0 +1,85 @@
+/* =========================================================
+   NAVBAR — спільний фіксований навбар (widgets/navbar).
+   Фон — bg-primary (Bootstrap); іконки й посилання — rgba(255,255,255,.5);
+   пункти дропдауна — колір primary.
+   ========================================================= */
+:root {
+  --app-navbar-height: 56px;
+}
+
+.app-navbar {
+  height: var(--app-navbar-height);
+  padding-top: 0;
+  padding-bottom: 0;
+  z-index: 1030;
+}
+
+.app-navbar .container-fluid {
+  height: 100%;
+  flex-wrap: nowrap;
+}
+
+.app-navbar-brand {
+  display: flex;
+  align-items: center;
+  margin-right: 1.5rem;
+  padding: 0;
+}
+
+.app-navbar-links {
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.app-navbar-link,
+.app-navbar-toggle {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.app-navbar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.app-navbar-link:hover,
+.app-navbar-link:focus-visible,
+.app-navbar-toggle:hover,
+.app-navbar-toggle:focus-visible,
+.app-navbar-toggle.show {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Глобальне a:not(.btn):hover має вищу специфічність — перебиваємо,
+   щоб посилання навбара не підкреслювались. */
+.app-navbar a.app-navbar-link:hover,
+.app-navbar a.app-navbar-link:focus-visible {
+  text-decoration: none;
+}
+
+.app-navbar-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Дропдаун: назви — primary, без фону та підкреслення при наведенні. */
+.app-navbar-dropdown .dropdown-item {
+  color: var(--bs-primary);
+}
+
+.app-navbar-dropdown .dropdown-item:hover,
+.app-navbar-dropdown .dropdown-item:focus,
+.app-navbar-dropdown .dropdown-item:active {
+  color: var(--bs-primary);
+  background-color: transparent;
+  text-decoration: none;
+}
+
+/* Усе, що раніше займало 100vh, віддає місце під фіксований навбар. */
+.layout-wrapper {
+  padding-top: var(--app-navbar-height);
+}

@@ -1,16 +1,12 @@
-import { LogOut } from "lucide-react";
 import LogoLight from "@shared/assets/logo/logo-light.svg";
 import LogoDark from "@shared/assets/logo/logo-dark.svg";
-import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { useDmStore } from "@features/dm";
 import {
   SIDE_TABS,
   SIDE_TAB_BADGES,
 } from "@shared/constants/sideTabs.constants.js";
 
-const LOGOUT_MODAL_ID = "logoutConfirmModal";
-
-export function SideMenu({ onLogout }) {
+export function SideMenu() {
   const dmUnread = useDmStore((state) =>
     Object.values(state.conversations).reduce(
       (sum, convo) => sum + (convo.unreadCount || 0),
@@ -60,21 +56,8 @@ export function SideMenu({ onLogout }) {
               </a>
             </li>
           ))}
-          <li className="nav-item" title="Вийти">
-            <button
-              type="button"
-              className="nav-link border-0 bg-transparent"
-              data-bs-toggle="modal"
-              data-bs-target={`#${LOGOUT_MODAL_ID}`}
-              aria-label="Вийти"
-            >
-              <LogOut />
-            </button>
-          </li>
         </ul>
       </div>
-
-      <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
     </div>
   );
 }

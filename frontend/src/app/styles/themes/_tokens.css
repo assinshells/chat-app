@@ -5,6 +5,18 @@
    ========================================================= */
 
 :root {
+  --light: #f5f8fa;
+  --dark: #122a38;
+  --red: #dc3545;
+  --bs-primary: #3097D1;
+  --bs-primary-rgb: 48, 151, 209;
+  --bs-secondary: #D4DBE0;
+  --bs-secondary-rgb: 212, 219, 224;
+  --bs-danger: #D9534F;
+  --bs-danger-rgb: 217, 83, 79;
+  --bs-success: #5CB85C;
+  --bs-success-rgb: 92, 184, 92;
+
   --bs-body-font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 300;

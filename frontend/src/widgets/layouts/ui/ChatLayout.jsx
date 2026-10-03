@@ -4,6 +4,7 @@ import { X, User as UserIcon } from "lucide-react";
 import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
+import { Navbar } from "@widgets/navbar";
 import { SideMenu } from "@widgets/side-menu";
 import { ChatLeftSidebar } from "@widgets/chat-leftsidebar";
 import { PrivateChat } from "@widgets/private-chat";
@@ -244,7 +245,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper d-lg-flex">
-      <SideMenu onLogout={onLogout} />
+      <Navbar onLogout={onLogout} />
+      <SideMenu />
       <ChatLeftSidebar
         login={login}
         activeRoom={activeRoom}
