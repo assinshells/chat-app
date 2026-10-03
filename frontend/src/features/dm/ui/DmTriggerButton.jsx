@@ -8,18 +8,16 @@ import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { ROLE_MANAGER_ROLES } from "@shared/constants/role.constants.js";
 import { canModerateRoom } from "@shared/constants/moderationAction.constants.js";
-// Пункт "Написати особисте повідомлення" не лише розгортає діалог в
-// основній області, а й перемикає ліву рейку на таб приватних
-// повідомлень — інакше виглядало б, ніби сайдбар "відстав".
-import { PRIVATE_TAB_BUTTON_ID } from "@shared/constants/sideTabs.constants.js";
+// Пункт "Написати особисте повідомлення" відкриває діалог у модалці
+// приватних повідомлень (її тригер — іконка message-circle в навбарі).
+import { PRIVATE_MODAL_TRIGGER_ID } from "@shared/constants/privateModal.constants.js";
 
 /**
  * DmTriggerButton — кнопка "три вертикальні крапки" поруч з чужим ніком
  * (використовується і в ChatLeftSidebar.jsx — список "Користувачі", і в
  * ChatConversation.jsx — автор повідомлення). Пункти меню:
  *  - написати особисте повідомлення (усім, завжди): відкриває діалог
- *    в основній області чату (@widgets/private-chat), окремої модалки
- *    особистих повідомлень більше немає;
+ *    у модалці приватних повідомлень (@widgets/private-chat);
  *  - "Додати до друзів" / "Видалити з друзів" (усім, завжди —
  *    персональна дія без підтвердження з боку іншої сторони, див.
  *    features/friends/model/useFriendStore.js): додає користувача у
@@ -79,13 +77,13 @@ export function DmTriggerButton({
   const canManageRoles = ROLE_MANAGER_ROLES.includes(ownRole);
   const canModerate = Boolean(room) && canModerateRoom(ownRole, ownModeratorRooms, room);
 
-  // Bootstrap-таби рейки перемикаються лише кліком по самому pill —
-  // програмно робимо рівно те саме, без імпорту Bootstrap JS API.
+  // Модалку відкриває кнопка в навбарі (data-bs-toggle="modal") —
+  // програмно клікаємо по ній, без імпорту Bootstrap JS API.
   const handleOpenConversation = (e) => {
     e.preventDefault();
     e.stopPropagation();
     openConversation(login, color);
-    document.getElementById(PRIVATE_TAB_BUTTON_ID)?.click();
+    document.getElementById(PRIVATE_MODAL_TRIGGER_ID)?.click();
   };
 
   const handleToggleFriend = (e) => {

@@ -7,7 +7,7 @@ import {
   MessageCircle,
   ChevronDown,
 } from "lucide-react";
-import { DmTriggerButton, useDmStore } from "@features/dm";
+import { DmTriggerButton } from "@features/dm";
 import { FriendsList } from "@features/friends";
 import { BlockedUsersList } from "@features/block";
 import { RulesModal, FeedbackModal } from "@features/info";
@@ -64,8 +64,6 @@ export function ChatLeftSidebar({
   roomUsers,
   onSelectRoom,
   onNicknameClick,
-  onSelectDialog,
-  activeDialog = null,
   selectedNicknames = [],
   currentUserStatus,
   onStatusChange,
@@ -134,14 +132,6 @@ export function ChatLeftSidebar({
     setCurrentUserAbout(result.about);
   };
 
-  // Діалоги для табу "Приватні повідомлення". Джерело — той самий
-  // useDmStore, що й у модалці особистих повідомлень: список
-  // наповнюється syncList одразу після конекту (див. ChatLayout) і
-  // живими подіями dm:new, тому окремих запитів тут не потрібно.
-  const dmConversations = useDmStore((state) => state.conversations);
-  const dmOrder = useDmStore((state) => state.order);
-  const dmListLoading = useDmStore((state) => state.listLoading);
-
   // Група учасників активної кімнати за статтю рахується один раз за
   // рендер, а не на кожен чих — список учасників кімнати може бути
   // довгим. gender може бути 'male' | 'female' | 'unknown' (див.
@@ -191,64 +181,6 @@ export function ChatLeftSidebar({
                     </span>
                   </a>
                 ))}
-              </div>
-            )}
-
-            {id === "private" && (
-              <div className="app-sidebar-list app-sidebar-dialogs">
-                {dmOrder.length === 0 ? (
-                  <div className="app-sidebar-empty">
-                    {dmListLoading
-                      ? "Завантаження…"
-                      : "Немає розпочатих діалогів"}
-                  </div>
-                ) : (
-                  dmOrder.map((dialogLogin) => {
-                    const convo = dmConversations[dialogLogin];
-                    if (!convo) return null;
-
-                    const preview =
-                      convo.lastMessage?.text ??
-                      convo.messages[convo.messages.length - 1]?.text;
-
-                    return (
-                      <button
-                        key={dialogLogin}
-                        type="button"
-                        className={`app-sidebar-dialog-item ${
-                          dialogLogin === activeDialog ? "is-active" : ""
-                        }`}
-                        onClick={() =>
-                          onSelectDialog?.(dialogLogin, convo.color)
-                        }
-                      >
-                        <span className="app-sidebar-dialog-row">
-                          <span
-                            className="app-sidebar-dialog-name"
-                            style={{
-                              color: getEffectiveColorHex(
-                                convo.color,
-                                isDarkTheme,
-                              ),
-                            }}
-                          >
-                            {dialogLogin}
-                          </span>
-                          {convo.unreadCount > 0 && (
-                            <span className="app-sidebar-dialog-badge">
-                              {convo.unreadCount > 99
-                                ? "99+"
-                                : convo.unreadCount}
-                            </span>
-                          )}
-                        </span>
-                        <span className="app-sidebar-dialog-preview">
-                          {preview ?? "Немає повідомлень"}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
               </div>
             )}
 
@@ -537,7 +469,6 @@ export function ChatLeftSidebar({
 
             {id !== "chat" &&
               id !== "users" &&
-              id !== "private" &&
               id !== "setting" &&
               id !== "user" && (
                 <div className="d-flex flex-column align-items-center justify-content-center text-center text-muted p-4">

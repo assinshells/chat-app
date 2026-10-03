@@ -36,6 +36,7 @@
 @import "./components/_emoji-picker.css";
 @import "./components/_dm-trigger.css";
 @import "./components/_private-chat.css";
+@import "./components/_dm-modal.css";
 @import "./components/_color-picker.css";
 @import "./components/_modals.css";
 

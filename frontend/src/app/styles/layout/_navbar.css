@@ -83,3 +83,15 @@
 .layout-wrapper {
   padding-top: var(--app-navbar-height);
 }
+
+/* Іконка приватних повідомлень + лічильник непрочитаних. */
+.app-navbar-dm-badge {
+  position: absolute;
+  top: 0;
+  right: -0.15rem;
+  min-width: 1.1rem;
+  padding: 0.2em 0.4em;
+  font-size: 0.65rem;
+  line-height: 1;
+  color: #fff;
+}

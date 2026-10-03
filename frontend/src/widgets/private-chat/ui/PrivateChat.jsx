@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Ban, Send } from "lucide-react";
+import { Ban, Send } from "lucide-react";
 
 import { useDmStore } from "@features/dm";
-import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { formatMessageTime, normalizeMessageText } from "@shared/lib/message.js";
-import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 // Той самий ліміт, що й у публічному чаті (ChatComposer) і в модалці
 // особистих повідомлень, і на бекенді
@@ -12,22 +10,15 @@ import { useIsDarkTheme } from "@shared/lib/theme.js";
 const MAX_MESSAGE_LENGTH = 300;
 
 /**
- * PrivateChat — приватний діалог, розгорнутий В ОСНОВНІЙ області чату
- * (замість стрічки кімнати), а не в модалці: вхід — вибір діалогу в
- * табі "Приватні" лівого сайдбара (див. ChatLeftSidebar).
+ * PrivateChat — листування з одним співрозмовником усередині модалки
+ * приватних повідомлень (@widgets/private-chat/ui/PrivateMessagesModal).
+ * Шапка (назва/"Назад"/хрестик) належить модалці, тут лише
+ * повідомлення і форма відправлення.
  *
  * Джерело даних — useDmStore (персональний сокет-канал dm:*), той
- * самий, що наповнює список діалогів у сайдбарі: окремої модалки
- * особистих повідомлень більше немає, тому це єдине місце, де
- * показується листування, і лічильники непрочитаних не можуть
- * розійтися між двома вікнами.
- *
- * Кнопка "Назад" повертає основну область до публічної кімнати
- * (closeConversation) — сам чат кімнати при цьому нікуди не дівається:
- * сокет-підписка живе в ChatLayout і продовжує накопичувати
- * повідомлення, поки відкрито приватний діалог.
+ * самий, що наповнює список діалогів і лічильник у навбарі.
  */
-export function PrivateChat({ login, onClose }) {
+export function PrivateChat({ login }) {
   const currentUser = useDmStore((state) => state.currentUser);
   const convo = useDmStore((state) => state.conversations[login]);
   const sendError = useDmStore((state) => state.sendError);
@@ -36,8 +27,6 @@ export function PrivateChat({ login, onClose }) {
 
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
-
-  const isDarkTheme = useIsDarkTheme();
 
   // Чернетка навмисно НЕ скидається тут ефектом: компонент
   // монтується заново на кожен діалог (key={login} у ChatLayout),
@@ -62,29 +51,6 @@ export function PrivateChat({ login, onClose }) {
 
   return (
     <div className="private-chat">
-      <div className="private-chat-header">
-        <button
-          type="button"
-          className="private-chat-back-btn"
-          title="Повернутися до кімнати"
-          aria-label="Повернутися до кімнати"
-          onClick={onClose}
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <div className="private-chat-header-info">
-          <span
-            className="private-chat-header-name"
-            style={{ color: getEffectiveColorHex(convo?.color, isDarkTheme) }}
-          >
-            {login}
-          </span>
-          <span className="private-chat-header-subtitle">
-            Приватний діалог
-          </span>
-        </div>
-      </div>
-
       <div className="private-chat-messages">
         <div className="app-scrollbar no-horizontal" style={{ height: "100%" }}>
           <div className="private-chat-messages-list">

@@ -1,19 +1,8 @@
 import LogoLight from "@shared/assets/logo/logo-light.svg";
 import LogoDark from "@shared/assets/logo/logo-dark.svg";
-import { useDmStore } from "@features/dm";
-import {
-  SIDE_TABS,
-  SIDE_TAB_BADGES,
-} from "@shared/constants/sideTabs.constants.js";
+import { SIDE_TABS } from "@shared/constants/sideTabs.constants.js";
 
 export function SideMenu() {
-  const dmUnread = useDmStore((state) =>
-    Object.values(state.conversations).reduce(
-      (sum, convo) => sum + (convo.unreadCount || 0),
-      0,
-    ),
-  );
-
   const logos = [
     ["dark", LogoDark],
     ["light", LogoLight],
@@ -36,7 +25,7 @@ export function SideMenu() {
           className="nav nav-pills side-menu-nav justify-content-center"
           role="tablist"
         >
-          {SIDE_TABS.map(({ id, title, icon: Icon, defaultActive, badge }) => (
+          {SIDE_TABS.map(({ id, title, icon: Icon, defaultActive }) => (
             <li className="nav-item" key={id} title={title}>
               <a
                 className={`nav-link position-relative ${defaultActive ? "active" : ""}`}
@@ -46,13 +35,7 @@ export function SideMenu() {
                 role="tab"
                 aria-label={title}
               >
-                <Icon  />
-                {badge === SIDE_TAB_BADGES.DM_UNREAD && dmUnread > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-  {dmUnread > 99 ? "99+" : dmUnread}
-                  <span className="visually-hidden">непрочитаних особистих повідомлень</span>
-</span>
-                )}
+                <Icon />
               </a>
             </li>
           ))}

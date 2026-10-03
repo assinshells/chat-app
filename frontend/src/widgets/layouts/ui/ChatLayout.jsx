@@ -7,7 +7,7 @@ import { ChatComposer } from "@widgets/chat-composer";
 import { Navbar } from "@widgets/navbar";
 import { SideMenu } from "@widgets/side-menu";
 import { ChatLeftSidebar } from "@widgets/chat-leftsidebar";
-import { PrivateChat } from "@widgets/private-chat";
+import { PrivateMessagesModal } from "@widgets/private-chat";
 import { useChatSocket } from "@features/chat";
 import { useDmStore } from "@features/dm";
 import { useBlockStore } from "@features/block";
@@ -169,29 +169,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
-  // panelLogin — приватний діалог, розгорнутий ЗАМІСТЬ стрічки кімнати
-  // в основній області (таб "Приватні повідомлення" в лівій рейці або
-  // пункт "Написати особисте повідомлення" біля ніка). Живе в
-  // useDmStore, а не в локальному стані: той самий стор тримає
-  // історію/лічильники діалогів, і обидва входи мають вести в один
-  // і той самий стан.
-  //
-  // ВАЖЛИВО: сокет-підписка на кімнату (useChatSocket вище) при цьому
-  // не розривається — користувач лишається в кімнаті, її повідомлення
-  // продовжують накопичуватися, і після "Назад" стрічка на місці.
-  const dmPanelLogin = useDmStore((state) => state.panelLogin);
-  const openDmPanel = useDmStore((state) => state.openConversation);
-  const closeDmPanel = useDmStore((state) => state.closeConversation);
-
-  const handleSelectDialog = (dialogLogin, color) => {
-    openDmPanel(dialogLogin, color);
-  };
-
   const handleSelectRoom = (roomId) => {
-    // Вибір кімнати — явне повернення до публічного чату: якщо зараз
-    // відкрито приватний діалог, він згортається, інакше клік по
-    // кімнаті виглядав би так, ніби нічого не сталося.
-    closeDmPanel();
     switchRoom(roomId);
     // Ніки/час обиралися з повідомлень поточної кімнати — при переході
     // в іншу кімнату вони втрачають сенс.
@@ -254,8 +232,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         roomUsers={visibleRoomUsers}
         onSelectRoom={handleSelectRoom}
         onNicknameClick={handleNicknameClick}
-        onSelectDialog={handleSelectDialog}
-        activeDialog={dmPanelLogin}
         selectedNicknames={targetNicknames}
         currentUserStatus={currentUserStatus}
         onStatusChange={handleStatusChange}
@@ -264,24 +240,10 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       <div className="user-chat w-100 overflow-hidden">
         <div className="chat-main">
           <ChatHeader
-            title={dmPanelLogin ? `Приватні · ${dmPanelLogin}` : activeRoomName}
+            title={activeRoomName}
             online={connected}
             onOpenProfile={openProfileSidebar}
           />
-          {/* Основна область — або стрічка публічної кімнати, або
-              приватний діалог, обраний у табі "Приватні повідомлення"
-              лівого сайдбара (див. dmPanelLogin вище). Банери модерації
-              і композер кімнати стосуються саме кімнати, тому в
-              приватному режимі не рендеряться — свій композер у
-              PrivateChat, зі своїми правилами (blocked). */}
-          {dmPanelLogin ? (
-            <PrivateChat
-              key={dmPanelLogin}
-              login={dmPanelLogin}
-              onClose={closeDmPanel}
-            />
-          ) : (
-            <>
             <ConfinementBanner confinement={confinement} />
             <RoomBanNoticeBanner notice={roomBanNotice} />
             {roomBan && (
@@ -338,9 +300,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
                 }`
               }
             />
-            </>
-          )}
-
         </div>
         {/* Підкладка — клік поза панеллю закриває її (той самий патерн, що
           й Bootstrap-модалки: data-bs-backdrop="static" тут не потрібен,
@@ -409,6 +368,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         </aside>
       </div>
 
+      <PrivateMessagesModal />
       <RoleManageModal />
       <KickModal />
       <BanModal />
