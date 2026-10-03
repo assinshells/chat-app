@@ -27,7 +27,7 @@
 
 /* Оболонка .modal-content для всіх модалок застосунку. */
 .app-modal {
-  border-radius: 16px;
+  border-radius: var(--bs-border-radius);
   border: none;
 }
 
@@ -124,7 +124,7 @@
 .room-select-item {
   padding: 0.5rem 0.35rem;
   border: 1px solid var(--bs-border-color);
-  border-radius: 10px;
+  border-radius: var(--bs-border-radius);
   background: transparent;
   color: var(--bs-body-color);
   font-size: 0.8rem;

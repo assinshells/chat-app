@@ -9,16 +9,16 @@
 /* Радіус бордера інпутів і кнопок */
 .form-control,
 .form-select {
-  border-radius: 0.25rem;
+  border-radius: var(--bs-border-radius);
 }
 
 .btn {
-  --bs-btn-border-radius: 0.25rem;
+  --bs-btn-border-radius: var(--bs-border-radius);
 }
 
 .btn-sm,
 .btn-lg {
-  --bs-btn-border-radius: 0.25rem;
+  --bs-btn-border-radius: var(--bs-border-radius);
 }
 
 .form-control,

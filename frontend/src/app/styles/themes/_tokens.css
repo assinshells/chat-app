@@ -17,6 +17,9 @@
   --bs-success: #5CB85C;
   --bs-success-rgb: 92, 184, 92;
 
+  --bs-border-color: #ced4da;
+  --bs-border-radius: 0.25rem;
+
   --bs-body-font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 300;
