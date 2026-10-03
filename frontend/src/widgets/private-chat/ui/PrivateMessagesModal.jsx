@@ -126,7 +126,7 @@ export function PrivateMessagesModal({ modalId = PRIVATE_MODAL_ID }) {
                           {dialogLogin}
                         </span>
                         {convo.unreadCount > 0 && (
-                          <span className="badge rounded-pill bg-danger">
+                          <span className="badge bg-danger">
                             {convo.unreadCount > 99 ? "99+" : convo.unreadCount}
                           </span>
                         )}

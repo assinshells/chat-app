@@ -62,7 +62,7 @@
   width: 56px;
   height: 56px;
   margin: 0 auto;
-  border-radius: 8px;
+  border-radius: var(--bs-border-radius);
   padding: 0;
 }
 @media (max-width: 991.98px) {

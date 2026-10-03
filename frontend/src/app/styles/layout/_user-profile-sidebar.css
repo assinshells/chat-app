@@ -71,7 +71,7 @@
 
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--bs-border-radius);
 
   color: var(--bs-secondary-color);
 
@@ -129,7 +129,7 @@
 .user-profile-role-badge {
   padding: 0.2rem 0.65rem;
 
-  border-radius: 999px;
+  border-radius: var(--bs-border-radius);
 
   background: var(--bs-tertiary-bg);
   color: var(--bs-primary);
@@ -150,7 +150,7 @@
   padding: 0.6rem 0.8rem;
 
   background: var(--bs-tertiary-bg);
-  border-radius: 10px;
+  border-radius: var(--bs-border-radius);
 }
 
 .user-profile-info-label {

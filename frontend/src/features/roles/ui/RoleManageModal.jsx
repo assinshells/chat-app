@@ -176,7 +176,7 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
                 <div className="d-flex gap-2">
                   <button
                     type="submit"
-                    className="btn btn-primary rounded-4 fw-bold"
+                    className="btn btn-primary fw-bold"
                     disabled={formLocked || saving}
                   >
                     {saving ? "Зберігаємо..." : "Зберегти"}
@@ -185,7 +185,7 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
                   {currentRole !== ROLE_VALUES.USER && (
                     <button
                       type="button"
-                      className="btn btn-outline-danger rounded-4 fw-bold"
+                      className="btn btn-outline-danger fw-bold"
                       disabled={formLocked || saving}
                       onClick={submitRemove}
                     >

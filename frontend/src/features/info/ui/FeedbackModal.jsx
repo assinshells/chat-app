@@ -99,7 +99,7 @@ export function FeedbackModal({ modalId = "feedbackModal" }) {
 
                   <button
                     type="submit"
-                    className="btn btn-primary rounded-4 fw-bold"
+                    className="btn btn-primary fw-bold"
                     disabled={!text.trim() || sending}
                   >
                     {sending ? "Надсилаємо..." : "Надіслати"}

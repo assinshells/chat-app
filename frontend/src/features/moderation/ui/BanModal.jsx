@@ -150,7 +150,7 @@ export function BanModal({ modalId = "banModerationModal" }) {
               )}
               <button
                 type="button"
-                className="btn btn-outline-danger rounded-4 fw-bold"
+                className="btn btn-outline-danger fw-bold"
                 disabled={banningRoom}
                 onClick={() => banRoom()}
               >
@@ -193,7 +193,7 @@ export function BanModal({ modalId = "banModerationModal" }) {
               )}
               <button
                 type="button"
-                className="btn btn-danger rounded-4 fw-bold"
+                className="btn btn-danger fw-bold"
                 disabled={banningChat}
                 onClick={() => banChat()}
               >
@@ -224,7 +224,7 @@ export function BanModal({ modalId = "banModerationModal" }) {
                     </span>
                     <button
                       type="button"
-                      className="btn btn-sm btn-outline-secondary rounded-4"
+                      className="btn btn-sm btn-outline-secondary"
                       disabled={!b.id || unbanningId === b.id}
                       onClick={() => unban(b.id)}
                     >

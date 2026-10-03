@@ -64,7 +64,7 @@ export function Navbar({ onLogout }) {
             >
               <MessageCircle size={24} />
               {dmUnread > 0 && (
-                <span className="app-navbar-dm-badge badge rounded-pill bg-danger">
+                <span className="app-navbar-dm-badge badge bg-danger">
                   {dmUnread > 99 ? "99+" : dmUnread}
                   <span className="visually-hidden">
                     непрочитаних особистих повідомлень

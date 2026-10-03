@@ -23,7 +23,7 @@ export function BannedScreen({ banInfo, onLogout }) {
         {onLogout && (
           <button
             type="button"
-            className="btn btn-outline-secondary rounded-4 fw-bold mt-2"
+            className="btn btn-outline-secondary fw-bold mt-2"
             onClick={onLogout}
           >
             Вийти з акаунту

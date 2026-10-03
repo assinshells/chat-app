@@ -25,6 +25,12 @@
   z-index: 1065;
 }
 
+/* Менший хрестик закриття в усіх модалках (розміри .btn-close — в em,
+   тож достатньо зменшити font-size). */
+.modal .btn-close {
+  font-size: 0.65rem;
+}
+
 /* Оболонка .modal-content для всіх модалок застосунку. */
 .app-modal {
   border-radius: var(--bs-border-radius);

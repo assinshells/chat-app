@@ -422,7 +422,7 @@ export function RulesModal({ modalId = "rulesModal", bare = false }) {
             <div className="modal-footer">
               <button
                 type="button"
-                className="btn btn-primary rounded-4 fw-bold"
+                className="btn btn-primary fw-bold"
                 data-bs-dismiss="modal"
               >
                 Зрозуміло

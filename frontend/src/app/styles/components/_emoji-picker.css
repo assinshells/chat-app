@@ -20,7 +20,7 @@
 
   border: 1px solid var(--bs-border-color);
 
-  border-radius: 14px;
+  border-radius: var(--bs-border-radius);
 
   background: var(--bs-body-bg);
 
@@ -40,7 +40,7 @@
   justify-content: center;
 
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--bs-border-radius);
 
   background: transparent;
 

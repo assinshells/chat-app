@@ -92,7 +92,7 @@
 
   cursor: pointer;
 
-  border-radius: 4px;
+  border-radius: var(--bs-border-radius);
 
   transition:
     opacity 0.15s ease,
@@ -167,7 +167,7 @@
 
   cursor: pointer;
 
-  border-radius: 4px;
+  border-radius: var(--bs-border-radius);
 
   transition:
     color 0.15s ease,
@@ -195,7 +195,7 @@
 
   cursor: pointer;
 
-  border-radius: 4px;
+  border-radius: var(--bs-border-radius);
 
   transition:
     background-color 0.15s ease,

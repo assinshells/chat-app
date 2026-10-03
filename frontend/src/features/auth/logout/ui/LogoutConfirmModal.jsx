@@ -7,6 +7,9 @@ import { LogOut } from "lucide-react";
  * (див. SideMenu.jsx — дропдаун профілю). Сам логаут виконується в onConfirm — модалка нічого
  * не знає про useLogoutStore/AuthSession, лише просить підтвердження.
  *
+ * Small-модалка без шапки (ні заголовка, ні хрестика); кнопки в футері
+ * розтягнуті на всю ширину порівну. Закрити можна кнопкою "Скасувати".
+ *
  * Рендериться через портал у document.body: якщо залишити її звичайним
  * React-child всередині сайдбара, вона потрапить у піддерево з
  * transform/overflow:hidden і буде або обрізана, або зміщена відносно
@@ -18,35 +21,23 @@ export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }
       className="modal fade"
       id={modalId}
       tabIndex="-1"
-      aria-labelledby={`${modalId}Label`}
+      aria-labelledby={`${modalId}Text`}
       aria-hidden="true"
       data-bs-backdrop="static"
     >
-      <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-dialog modal-sm modal-dialog-centered">
         <div className="modal-content app-modal">
-          <div className="modal-header">
-            <h5 className="modal-title" id={`${modalId}Label`}>
-              Вийти з акаунту
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Закрити"
-            />
-          </div>
-
           <div className="modal-body">
-            <p className="mb-0 text-muted">
+            <p className="mb-0 text-muted text-center" id={`${modalId}Text`}>
               Ви впевнені, що хочете вийти? Доведеться увійти знову, щоб
               продовжити спілкування.
             </p>
           </div>
 
-          <div className="modal-footer">
+          <div className="modal-footer flex-nowrap">
             <button
               type="button"
-              className="btn btn-outline-secondary rounded-4 fw-bold"
+              className="btn btn-outline-secondary fw-bold flex-fill"
               data-bs-dismiss="modal"
             >
               Скасувати
@@ -54,7 +45,7 @@ export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }
 
             <button
               type="button"
-              className="btn btn-danger rounded-4 fw-bold"
+              className="btn btn-danger fw-bold flex-fill"
               data-bs-dismiss="modal"
               onClick={onConfirm}
             >

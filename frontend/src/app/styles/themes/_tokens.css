@@ -20,6 +20,14 @@
   --bs-border-color: #ced4da;
   --bs-border-radius: 0.25rem;
 
+  /* Усі інші радіуси/колір рамки Bootstrap зведені до двох токенів вище */
+  --bs-border-radius-sm: var(--bs-border-radius);
+  --bs-border-radius-lg: var(--bs-border-radius);
+  --bs-border-radius-xl: var(--bs-border-radius);
+  --bs-border-radius-xxl: var(--bs-border-radius);
+  --bs-border-radius-pill: var(--bs-border-radius);
+  --bs-border-color-translucent: var(--bs-border-color);
+
   --bs-body-font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 300;

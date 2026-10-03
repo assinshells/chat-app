@@ -142,7 +142,7 @@
   justify-content: center;
 
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--bs-border-radius);
 
   background: var(--bs-primary);
   color: var(--bs-white);
@@ -175,7 +175,7 @@
   margin: 0.5rem 1rem 1rem;
   padding: 0.55rem 0.75rem;
 
-  border-radius: 8px;
+  border-radius: var(--bs-border-radius);
   border: 1px solid rgba(var(--bs-danger-rgb), 0.35);
   background: rgba(var(--bs-danger-rgb), 0.08);
 

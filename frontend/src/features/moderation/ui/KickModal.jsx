@@ -108,7 +108,7 @@ export function KickModal({ modalId = "kickModerationModal" }) {
                 <div className="mt-2">
                   <button
                     type="button"
-                    className="btn btn-sm btn-outline-secondary rounded-4"
+                    className="btn btn-sm btn-outline-secondary"
                     disabled={releasing}
                     onClick={releaseConfinement}
                   >
@@ -151,7 +151,7 @@ export function KickModal({ modalId = "kickModerationModal" }) {
               )}
               <button
                 type="button"
-                className="btn btn-outline-warning rounded-4 fw-bold"
+                className="btn btn-outline-warning fw-bold"
                 disabled={kickingBespredel}
                 onClick={() => kickToBespredel()}
               >
@@ -184,7 +184,7 @@ export function KickModal({ modalId = "kickModerationModal" }) {
               )}
               <button
                 type="button"
-                className="btn btn-outline-danger rounded-4 fw-bold"
+                className="btn btn-outline-danger fw-bold"
                 disabled={kickingChat}
                 onClick={() => kickFromChat()}
               >

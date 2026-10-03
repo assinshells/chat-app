@@ -35,6 +35,7 @@ a:not(.btn):focus-visible {
   --bs-btn-border-color: var(--bs-primary);
   --bs-btn-hover-bg: #2783b8;
   --bs-btn-hover-border-color: #2783b8;
+  --bs-btn-disabled-bg: var(--bs-primary);
 
   --bs-btn-active-bg: #247ba9;
   --bs-btn-active-border-color: #247ba9;

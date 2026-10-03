@@ -45,7 +45,7 @@
   .chat-composer {
     min-height: 64px;
 
-    border-radius: 16px;
+    border-radius: var(--bs-border-radius);
 
     padding: 0.65rem;
   }
