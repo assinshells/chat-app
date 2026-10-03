@@ -19,7 +19,7 @@ export function RoomSelectModal({
       id={modalId}
       tabIndex="-1"
       aria-hidden="true"
-      data-bs-backdrop="true"
+      data-bs-backdrop="static"
     >
       <div className="modal-dialog modal-dialog-centered room-select-modal-dialog">
         <div className="modal-content app-modal">

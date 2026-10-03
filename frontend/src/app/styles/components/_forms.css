@@ -25,6 +25,7 @@
 .form-select,
 textarea,
 input {
+  border: 1px solid #ced4da;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,

@@ -15,7 +15,8 @@ export function ResetPasswordForm({ verifiedToken, onSuccess, onBack }) {
   return (
     <>
       {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} role="form"
+        className="mx-auto text-center auth-form">
         <div className="mb-3">
           <input
             id="passwordInput"
@@ -38,25 +39,25 @@ export function ResetPasswordForm({ verifiedToken, onSuccess, onBack }) {
             required
           />
         </div>
-        <div className="mb-4">
+        <div className="mb-5 d-grid gap-2">
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary w-100"
+          className="btn btn-primary"
         >
           {loading ? "Зберігаємо..." : "Зберегти"}
         </button>
-        </div>
-        <a
-          href="#"
-          onClick={(e) => {
+        <button
+            type="button"
+            onClick={(e) => {
             e.preventDefault();
             onBack();
           }}
-          className="forgot-password-link text-muted mb-4 d-inline-block"
-        >
-          Увійти
-        </a>
+            className="btn btn-secondary"
+          >
+            Увійти
+          </button>
+        </div>
       </form>
     </>
   );

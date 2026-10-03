@@ -4,7 +4,6 @@ import {
   ROOMS_BY_ID,
   DEFAULT_ROOM,
 } from "@features/chat/constants/rooms.constants.js";
-import { Brand } from "@shared/ui/brand";
 import { RoomSelectModal } from "./RoomSelectModal.jsx";
 
 const ROOM_MODAL_ID = "loginRoomSelectModal";
@@ -37,9 +36,8 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
       <form
         onSubmit={handleSubmit}
         role="form"
-        className="mx-auto text-center login-form"
+        className="mx-auto text-center auth-form"
       >
-        <Brand className="mb-5" />
         <div className="mb-3">
           <input
             id="loginInput"

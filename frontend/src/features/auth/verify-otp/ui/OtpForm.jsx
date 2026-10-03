@@ -92,7 +92,8 @@ export function OtpForm({ email, onSuccess, onBack }) {
   return (
     <>
       {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} role="form"
+        className="mx-auto text-center auth-form">
         <div className="d-flex justify-content-between gap-2 mb-4">
           {otp.map((digit, index) => (
             <input
@@ -108,36 +109,31 @@ export function OtpForm({ email, onSuccess, onBack }) {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
-              className="form-control text-center fw-bold"
-              style={{
-                width: "3rem",
-                height: "3.5rem",
-                fontSize: "1.5rem",
-                padding: 0,
-              }}
+              className="form-control text-center"
+              
               aria-label={`OTP digit ${index + 1}`}
             />
           ))}
         </div>
-<div className="mb-4">
+<div className="mb-5 d-grid gap-2">
         <button
           type="submit"
           disabled={loading || !isComplete}
-          className="btn btn-primary w-100"
+          className="btn btn-primary"
         >
           {loading ? "Верифікація..." : "Верифікувати"}
         </button>
-        </div>
-        <a
-          href="#"
-          onClick={(e) => {
+        <button
+            type="button"
+            onClick={(e) => {
             e.preventDefault();
             onBack();
           }}
-          className="forgot-password-link text-muted mb-4 d-inline-block"
-        >
-          Увійти
-        </a>
+            className="btn btn-secondary"
+          >
+            Увійти
+          </button>
+        </div>
       </form>
     </>
   );

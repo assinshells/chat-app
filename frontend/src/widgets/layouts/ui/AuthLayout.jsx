@@ -1,6 +1,6 @@
 import SimpleBar from "simplebar-react";
 import { Copyright } from "lucide-react";
-import Brand from "@shared/assets/logo/brand.png";
+import { Brand } from "@shared/ui/brand";
 import { DeveloperModal, RulesModal, CookiesModal, WarningModal } from "@features/info";
 
 const creationYear = 2026;
@@ -24,12 +24,11 @@ export function AuthLayout({ title, subtitle, children }) {
       <div className="container-fluid d-table w-100 vh-100">
         <div className="d-table-cell align-middle">
           {/* Логотип спільний для всіх екранів авторизації (логін,
-              реєстрація, відновлення пароля, OTP, скидання) — раніше
-              жив усередині LoginForm. */}
-          <div className="text-center">
-            <a href="/" className="d-inline-block mb-5 brand-link">
-              <img src={Brand} alt={title} className="w-100"/>
-            </a>
+              реєстрація, відновлення пароля, OTP, скидання).
+              Обгортка .auth-brand-wrap відтворює колишні розмір і
+              позицію логотипа (ширина 40% від 280px, зсув -60px). */}
+          <div className="mx-auto text-center auth-brand-wrap">
+            <Brand className="mb-5" alt={title} />
           </div>
           {/*<div className="auth-content text-center">
             <span className="d-inline-block auth-brand mb-5">{title}</span>
