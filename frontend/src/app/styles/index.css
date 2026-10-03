@@ -22,9 +22,9 @@
 @import "./base/_body.css";
 
 @import "./layout/_authentication.css";
-/*@import "./layout/_side-menu.css";
+@import "./layout/_side-menu.css";
 @import "./layout/_chat-leftsidebar.css";
-@import "./layout/_user-profile-sidebar.css";*/
+@import "./layout/_user-profile-sidebar.css";
 
 @import "./components/_chat-header.css";
 @import "./components/_chat-conversation.css";
