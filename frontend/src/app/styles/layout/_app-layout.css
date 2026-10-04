@@ -150,14 +150,6 @@
   min-height: 0;
 }
 
-.app-panel-search {
-  flex: 0 0 auto;
-
-  padding: 0.5rem 0.75rem;
-
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
 .app-panel-group-label,
 .app-sidebar-settings-group-label {
   font-size: 0.72rem;

@@ -9,10 +9,8 @@ export const AUTH_SCREENS = Object.freeze({
 
 export const APP_NAME = "Балачка";
 
-// Обов'язкове поле — обирається на формі реєстрації через модалку
-// GenderPickerModal.jsx (той самий патерн, що й для кольору —
-// ColorPickerModal.jsx / color.constants.js). Значення збігаються з
-// backend GENDER_VALUES.
+// Обов'язкове поле — обирається на формі реєстрації звичайними
+// радіокнопками. Значення збігаються з backend GENDER_VALUES.
 export const GENDER_OPTIONS = Object.freeze([
   { value: "male", label: "Чоловік" },
   { value: "female", label: "Жінка" },
@@ -20,7 +18,7 @@ export const GENDER_OPTIONS = Object.freeze([
 ]);
 
 // Значення статі, обране на формі реєстрації за замовчуванням, доки
-// користувач не обере інше явно через GenderPickerModal.
+// користувач не обере інше явно на формі реєстрації.
 export const DEFAULT_GENDER = "male";
 
 const GENDER_LABEL_BY_VALUE = Object.fromEntries(

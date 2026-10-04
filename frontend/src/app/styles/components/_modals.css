@@ -181,7 +181,7 @@
 /* =========================================================
    COLOR PICKER MODAL — вибір кольору нікнейма/повідомлень на
    реєстрації (ColorPickerModal.jsx), відкривається кліком на
-   .color-select-trigger (RegisterForm.jsx). Той самий "безшапковий"
+   .color-select-input (RegisterForm.jsx). Той самий "безшапковий"
    патерн, що й RoomSelectModal вище: .modal-header лишається лише
    заради хрестика закриття, футера нема — кнопка "Прийняти" лежить
    прямо в .modal-body, під палітрою кольорів і прикладом тексту.
@@ -202,18 +202,4 @@
 .color-picker-preview-text {
   font-size: 1rem;
   font-weight: 700;
-}
-
-/* =========================================================
-   GENDER PICKER MODAL — вибір статі на реєстрації
-   (GenderPickerModal.jsx), відкривається кліком на
-   .gender-select-trigger (RegisterForm.jsx). Той самий "безшапковий"
-   патерн, що й COLOR PICKER MODAL вище: хрестик закриття замість
-   заголовка. Футера й кнопки "Прийняти" тут нема — клік по варіанту
-   в .modal-body одразу застосовує вибір (див. .gender-radio-pill у
-   _color-picker.css).
-   ========================================================= */
-.gender-picker-modal-body {
-  min-height: 0;
-  padding-top: 0.5rem;
 }

@@ -1,21 +1,23 @@
 /* =========================================================
    ROOM PICKER — вибір кімнати з чату (@widgets/room-picker).
    Сітка кімнат — спільна з RoomSelectModal (.room-select-grid /
-   .room-select-item у _modals.css), тут лише доповнення: пошук,
-   групи і лічильник онлайн біля кімнати.
+   .room-select-item у _modals.css), тут лише доповнення: групи і лічильник онлайн біля кімнати.
    ========================================================= */
 
 .room-picker-dialog {
   max-width: 560px;
 }
 
-.room-picker-search {
-  margin-bottom: 0.75rem;
-
+.room-picker-heading {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+}
 
+/* Загальна кількість людей у чаті під заголовком модалки. */
+.room-picker-total {
+  margin-top: 2px;
+
+  font-size: 0.8rem;
   color: var(--bs-secondary-color);
 }
 
@@ -57,17 +59,8 @@
   color: inherit;
 }
 
-.room-picker-empty {
-  margin: 1.5rem 0;
-
-  font-size: 0.85rem;
-  text-align: center;
-
-  color: var(--bs-secondary-color);
-}
-
 /* Тіло модалки — flex-колонка без власного скролу: прокручується лише
-   список кімнат (SimpleBar), а пошук лишається на місці. Селектор
+   список кімнат (SimpleBar). Селектор
    специфічніший за .modal-dialog-scrollable .modal-body (Bootstrap) —
    той самий прийом, що й для .rules-modal-body. */
 .modal-dialog-scrollable .modal-body.room-picker-body {

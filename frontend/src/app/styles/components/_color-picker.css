@@ -10,7 +10,7 @@
    назва поточно обраного кольору (див. .color-radio-selected-name,
    текст рендериться через getColorLabel(color), не в CSS).
    Рендериться в ColorPickerModal.jsx (форма реєстрації відкриває цю
-   модалку через .color-select-trigger, див. нижче) — самої палітри
+   модалку через інпут .color-select-input) — самої палітри
    на формі більше нема.
    ========================================================= */
 
@@ -109,83 +109,4 @@
 
   font-size: 0.85rem;
   font-weight: 700;
-}
-
-/* =========================================================
-   COLOR SELECT TRIGGER — поле "Колір" на формі реєстрації
-   (RegisterForm.jsx). Лейбл "Колір" — звичайний текст
-   (.room-select-label, той самий, що й у полі "Кімната"/"Стать"), а
-   сам тригер модалки (ColorPickerModal.jsx) — просто кружок поточного
-   кольору: назву кольору текстом тут більше не дублюємо (вона й так
-   видно в самій модалці) — колір кружка вже й є повноцінним
-   індикатором поточного вибору.
-   ========================================================= */
-.color-select-trigger {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  padding: 0;
-
-  border-radius: 50%;
-  border: 1px solid var(--bs-border-color);
-  cursor: pointer;
-
-  transition: transform 0.15s ease;
-}
-
-.color-select-trigger:hover,
-.color-select-trigger:focus-visible {
-  transform: scale(1.12);
-}
-
-/* =========================================================
-   GENDER PILLS — вибір статі в GenderPickerModal.jsx. Клік по
-   пігулці одразу застосовує вибір і закриває модалку (onClick +
-   data-bs-dismiss прямо на кнопці) — той самий патерн, що й
-   .room-select-item у RoomSelectModal.jsx, без окремої кнопки
-   "Прийняти" й без чернетки: нема проміжного стану вибору, який
-   потрібно було б підтверджувати чи скасовувати.
-   ========================================================= */
-.gender-radio-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.gender-radio-pill {
-  flex: 1 1 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0.4rem 0.6rem;
-  border-radius: var(--bs-border-radius);
-  border: 1px solid var(--bs-border-color);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-align: center;
-  cursor: pointer;
-
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.gender-radio-pill:hover,
-.gender-radio-pill:focus-visible {
-  border-color: rgba(var(--bs-primary-rgb), 0.5);
-}
-
-.gender-radio-pill:focus-visible {
-  outline: 2px solid rgba(var(--bs-primary-rgb), 0.6);
-  outline-offset: 2px;
-}
-
-.gender-radio-pill.is-active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
 }

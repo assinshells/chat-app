@@ -280,3 +280,40 @@ button:focus-visible,
   user-select: none;
 }
 
+/* ---------------------------------------------------------
+   AUTH FORMS: кнопка "показати/сховати пароль" (глазик) усередині
+   інпута (RegisterForm.jsx) — .form-control отримує запас праворуч,
+   кнопка абсолютно позиціонується поверх нього.
+   --------------------------------------------------------- */
+
+.input-with-toggle {
+  position: relative;
+}
+
+.input-with-toggle .form-control {
+  padding-right: 2.5rem;
+}
+
+.input-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.25rem;
+  border: none;
+  background: none;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+
+  transition: color 0.15s ease;
+}
+
+.input-toggle-btn:hover,
+.input-toggle-btn:focus-visible {
+  color: var(--bs-primary);
+}

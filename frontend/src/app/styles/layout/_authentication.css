@@ -64,16 +64,18 @@
 }
 
 /* ---------------------------------------------------------
-   REGISTER FORM: рядок "Стать" + "Колір" (RegisterForm.jsx) — той
-   самий патерн start/end, що й .room-select-field вище: стать —
-   .gender-select-trigger по лівому краю, колір — .color-select-trigger
-   по правому, обидва в один рядок через
-   d-flex justify-content-between. flex-wrap і row-gap — щоб на дуже
-   вузьких екранах тригери переносились одне під одне, а не
-   стискались/накладались, а не тому, що це бажаний вигляд на
-   звичайних екранах.
+   REGISTER FORM: стать — звичайні радіокнопки в один рядок
+   (RegisterForm.jsx). flex-wrap і row-gap — щоб на дуже вузьких
+   екранах варіанти переносились, а не накладались.
    --------------------------------------------------------- */
-.gender-color-row {
+.gender-radio-row {
   flex-wrap: wrap;
-  row-gap: 0.75rem;
+  row-gap: 0.5rem;
+  column-gap: 1rem;
+}
+
+/* Readonly-інпут вибору кольору (RegisterForm.jsx): текст — назва
+   кольору, пофарбована самим кольором (інлайн-стилем). */
+.color-select-input {
+  font-weight: 600;
 }

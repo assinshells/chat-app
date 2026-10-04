@@ -73,11 +73,3 @@ a:not(.btn):focus-visible {
 .dropdown-toggle::after {
     display: none !important;
 }
-
-.chat-brand-status.is-online {
-  color: var(--bs-success);
-}
-
-.chat-brand-status.is-offline {
-  color: var(--bs-warning);
-}

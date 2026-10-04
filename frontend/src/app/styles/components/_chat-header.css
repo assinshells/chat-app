@@ -67,14 +67,6 @@
   text-overflow: ellipsis;
 }
 
-.chat-brand-status {
-  margin-top: 2px;
-
-  font-size: 0.72rem;
-
-  color: var(--bs-secondary-color);
-}
-
 /* =========================================================
    HEADER ACTIONS
    ========================================================= */
@@ -177,6 +169,45 @@
 .chat-header-count {
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+/* Крапка статусу з'єднання перед назвою кімнати в .chat-room-btn
+   (замість тексту "Онлайн / Підключення…" під назвою). Звичайний
+   flex-елемент у потоці кнопки — без absolute-позиціонування.
+   Колір: success / warning. */
+.chat-status-dot {
+  flex-shrink: 0;
+
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+  background: var(--bs-secondary-color);
+}
+
+.chat-status-dot.is-online {
+  background: var(--bs-success);
+}
+
+.chat-status-dot.is-offline {
+  background: var(--bs-warning);
+  animation: chat-status-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes chat-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-status-dot.is-offline {
+    animation: none;
+  }
 }
 
 /* Бейдж непрочитаних особистих на іконці повідомлень. */

@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRegisterStore } from "@features/auth/register/model/useRegisterStore.js";
 import {
   DEFAULT_GENDER,
-  getGenderLabel,
+  GENDER_OPTIONS,
 } from "@shared/constants/auth.constants.js";
 import {
   getColorLabel,
@@ -12,8 +13,8 @@ import {
 } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { RulesModal } from "@features/info/ui/RulesModal.jsx";
+import { CookiesModal } from "@features/info/ui/CookiesModal.jsx";
 import { ColorPickerModal } from "./ColorPickerModal.jsx";
-import { GenderPickerModal } from "./GenderPickerModal.jsx";
 
 // Окремі id, щоб не конфліктувати з однойменними модалками деінде
 // (RulesModal.jsx монтується в сайдбарі лише для залогінених
@@ -21,7 +22,7 @@ import { GenderPickerModal } from "./GenderPickerModal.jsx";
 // тримаємо унікальними).
 const REGISTER_RULES_MODAL_ID = "registerRulesModal";
 const REGISTER_COLOR_MODAL_ID = "registerColorPickerModal";
-const REGISTER_GENDER_MODAL_ID = "registerGenderPickerModal";
+const REGISTER_COOKIES_MODAL_ID = "registerCookiesModal";
 
 // Той самий ліміт, що й на бекенді (див.
 // backend/src/validators/auth.validator.js, MAX_LOGIN_LENGTH) —
@@ -35,9 +36,7 @@ const MAX_LOGIN_LENGTH = 20;
 const MIN_LOGIN_LENGTH = 3;
 
 // Мінімальна довжина пароля, узгоджена з бекендом (isValidPassword у
-// backend/src/validators/auth.validator.js) — там же відсутнє
-// обмеження на набір символів, тому підказка під полем каже про це
-// прямо, а не вигадує неіснуюче правило.
+// backend/src/validators/auth.validator.js).
 const MIN_PASSWORD_LENGTH = 6;
 
 /**
@@ -52,6 +51,7 @@ export function RegisterForm({ onSuccess, onBack }) {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState(DEFAULT_GENDER);
+  const [showPassword, setShowPassword] = useState(false);
 
   // "Чорний" за замовчуванням доречний лише на світлій темі (на темній
   // він майже нечитабельний і взагалі прибраний з палітри нижче) —
@@ -116,24 +116,31 @@ export function RegisterForm({ onSuccess, onBack }) {
               {login.length}/{MAX_LOGIN_LENGTH}
             </span>
           </div>
-          <div className="form-text text-start">
-            Від {MIN_LOGIN_LENGTH} до {MAX_LOGIN_LENGTH} символів: літери,
-            цифри та інші знаки.
-          </div>
         </div>
         <div className="mb-3">
-          <input
-            id="passwordInput"
-            type="password"
-            className="form-control"
-            placeholder="Введіть пароль"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <div className="form-text text-start">
-            Не менше {MIN_PASSWORD_LENGTH} символів: літери, цифри та
-            інші знаки.
+          {/* Глазик показати/сховати пароль — усередині інпута, справа
+              (.input-with-toggle, див. _forms.css). */}
+          <div className="input-with-toggle">
+            <input
+              id="passwordInput"
+              type={showPassword ? "text" : "password"}
+              className="form-control"
+              placeholder="Введіть пароль"
+              value={password}
+              minLength={MIN_PASSWORD_LENGTH}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="input-toggle-btn"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Сховати пароль" : "Показати пароль"}
+              aria-pressed={showPassword}
+              title={showPassword ? "Сховати пароль" : "Показати пароль"}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
         </div>
         <div className="mb-3">
@@ -147,73 +154,74 @@ export function RegisterForm({ onSuccess, onBack }) {
           />
         </div>
 
-        <div className="mb-4 d-flex align-items-center justify-content-between gender-color-row">
-          {/*
-            Стать і колір — той самий патерн, що й поле "Кімната" на
-            формі входу (LoginForm.jsx, .room-select-label +
-            .room-select-trigger — лейбл звичайним текстом, значення —
-            підкреслений клікабельний тригер): відкривають окремі
-            модалки (GenderPickerModal.jsx / ColorPickerModal.jsx, той
-            самий "безшапковий" патерн, що й RoomSelectModal — без
-            заголовка й футера, лише хрестик закриття). У статі вибір
-            застосовується одразу по кліку на варіант у модалці (як і в
-            RoomSelectModal) — без окремої кнопки "Прийняти"; у кольору
-            — по кнопці "Прийняти" (там ще й приклад тексту обраним
-            кольором, який варто встигнути роздивитись).
-
-            Колір, на відміну від статі, має власний візуальний
-            індикатор — кружок, пофарбований обраним кольором, — тому
-            замість тексту з назвою кольору (це дублювало б інформацію,
-            яку й так передає колір кружка) тут просто лейбл "Колір" і
-            сам кружок як тригер модалки.
-
-            В одному рядку на всю ширину форми: стать — по лівому краю
-            (start), колір — по правому (end).
-
-            "Чоловік" за замовчуванням (DEFAULT_GENDER), "Чорний"/"Білий"
-            за замовчуванням (getDefaultColorForTheme) — інші варіанти
-            обираються серед усіх (GENDER_OPTIONS, включно з "Не
-            вказано") / видимих у модалці (getVisibleColorOptions).
-          */}
-          <span>
-            <span className="room-select-label">Стать: </span>
-            <button
-              type="button"
-              className="room-select-trigger"
-              data-bs-toggle="modal"
-              data-bs-target={`#${REGISTER_GENDER_MODAL_ID}`}
-            >
-              {getGenderLabel(gender)}
-            </button>
-          </span>
-
-          <span className="d-flex align-items-center gap-2">
-            <span className="room-select-label">Колір: </span>
-            <button
-              type="button"
-              className="color-select-trigger"
-              data-bs-toggle="modal"
-              data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
-              style={{
-                backgroundColor: getEffectiveColorHex(effectiveColor, isDarkTheme),
-              }}
-              aria-label={`Колір: ${getColorLabel(effectiveColor)}`}
-            />
-          </span>
+        {/* Стать — звичайні радіокнопки (без модалки). */}
+        <div className="mb-3 d-flex align-items-center justify-content-between gender-radio-row">
+          {GENDER_OPTIONS.map((option) => (
+            <div className="form-check mb-0" key={option.value}>
+              <input
+                className="form-check-input"
+                type="radio"
+                name="registerGender"
+                id={`registerGender-${option.value}`}
+                value={option.value}
+                checked={gender === option.value}
+                onChange={() => setGender(option.value)}
+              />
+              <label
+                className="form-check-label"
+                htmlFor={`registerGender-${option.value}`}
+              >
+                {option.label}
+              </label>
+            </div>
+          ))}
         </div>
 
-        {/* text-start (а не успадкований text-center з .auth-content) —
-            за завданням цей інфотекст над кнопкою реєстрації зміщено
-            вліво, на відміну від решти центрованої форми. */}
-        <p className="text-muted small mb-2 text-start">
-          Натискаючи «Зареєструватися», ви погоджуєтеся з{" "}
+        {/* Колір — той самий патерн, що й поле "Кімната" на формі входу
+            (LoginForm.jsx): readOnly-інпут з назвою кольору, пофарбованою
+            в обраний колір; клік (або Enter/Пробіл) відкриває
+            ColorPickerModal. form-select додає шеврон. */}
+        <div className="mb-4">
+          <input
+            id="colorInput"
+            type="text"
+            className="form-select room-select-input color-select-input"
+            value={getColorLabel(effectiveColor)}
+            readOnly
+            aria-label="Колір"
+            aria-haspopup="dialog"
+            data-bs-toggle="modal"
+            data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
+            style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.currentTarget.click();
+              }
+            }}
+          />
+        </div>
+
+        <p className="text-muted small mb-3 text-start">
+          Натискаючи «Зареєструватися», ви підтверджуєте, що вам виповнилося
+          18 років, і приймаєте{" "}
           <a
             href="#"
             data-bs-toggle="modal"
             data-bs-target={`#${REGISTER_RULES_MODAL_ID}`}
             onClick={(e) => e.preventDefault()}
           >
-            правилами чату
+            Правила чату
+          </a>
+          . Для роботи сайту використовуються необхідні файли cookie —
+          докладніше в{" "}
+          <a
+            href="#"
+            data-bs-toggle="modal"
+            data-bs-target={`#${REGISTER_COOKIES_MODAL_ID}`}
+            onClick={(e) => e.preventDefault()}
+          >
+            Політиці cookie
           </a>
           .
         </p>
@@ -238,16 +246,12 @@ export function RegisterForm({ onSuccess, onBack }) {
         </div>
       </form>
 
-      <RulesModal modalId={REGISTER_RULES_MODAL_ID} />
+      <RulesModal modalId={REGISTER_RULES_MODAL_ID} bare />
+      <CookiesModal modalId={REGISTER_COOKIES_MODAL_ID} />
       <ColorPickerModal
         modalId={REGISTER_COLOR_MODAL_ID}
         color={effectiveColor}
         onConfirm={setColor}
-      />
-      <GenderPickerModal
-        modalId={REGISTER_GENDER_MODAL_ID}
-        gender={gender}
-        onConfirm={setGender}
       />
     </>
   );

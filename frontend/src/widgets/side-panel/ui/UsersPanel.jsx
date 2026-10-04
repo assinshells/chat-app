@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { DmTriggerButton } from "@features/dm";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
@@ -7,9 +7,19 @@ import { getStatusEmoji, getStatusLabel } from "@shared/constants/status.constan
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
 
+// Групи за статтю (значення gender збігаються з backend GENDER_VALUES);
+// група без match — "Інші": "unknown" і будь-яке невідоме/порожнє значення.
+const GENDER_GROUPS = [
+  { key: "male", label: "Чоловіки", match: "male" },
+  { key: "female", label: "Жінки", match: "female" },
+  { key: "other", label: "Інші", match: null },
+];
+const KNOWN_GENDERS = new Set(["male", "female"]);
+
 /**
- * UsersPanel — учасники поточної кімнати: один список із пошуком.
- * Друзі йдуть першими (жирним), решта — за алфавітом.
+ * UsersPanel — учасники поточної кімнати, розділені за статтю:
+ * "Чоловіки (N)", "Жінки (N)", "Інші (N)" (стать не вказано). Усередині
+ * кожної групи друзі йдуть першими (жирним), решта — за алфавітом.
  *
  * Клік по ніку додає людину адресатом у форму повідомлення
  * (onNicknameClick), кнопка зліва від ніка (DmTriggerButton) відкриває
@@ -22,21 +32,24 @@ export function UsersPanel({
   selectedNicknames = [],
   onNicknameClick,
 }) {
-  const [query, setQuery] = useState("");
   const friendLogins = useFriendStore((state) => state.friendLogins);
   const isDarkTheme = useIsDarkTheme();
 
-  const { friends, others } = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    const sorted = users
-      .filter((user) => !normalized || user.login.toLowerCase().includes(normalized))
-      .sort((a, b) => a.login.localeCompare(b.login));
+  const groups = useMemo(() => {
+    // Друзі першими, далі за алфавітом.
+    const sorted = [...users].sort((a, b) => {
+      const friendDiff =
+        Number(friendLogins.has(b.login)) - Number(friendLogins.has(a.login));
+      return friendDiff || a.login.localeCompare(b.login);
+    });
 
-    return {
-      friends: sorted.filter((user) => friendLogins.has(user.login)),
-      others: sorted.filter((user) => !friendLogins.has(user.login)),
-    };
-  }, [users, query, friendLogins]);
+    return GENDER_GROUPS.map((group) => ({
+      ...group,
+      users: sorted.filter((user) =>
+        group.match ? user.gender === group.match : !KNOWN_GENDERS.has(user.gender),
+      ),
+    })).filter((group) => group.users.length > 0);
+  }, [users, friendLogins]);
 
   const renderUser = (user) => {
     const isOwn = user.login === login;
@@ -81,42 +94,25 @@ export function UsersPanel({
     );
   };
 
-  const isEmpty = friends.length === 0 && others.length === 0;
+  const isEmpty = groups.length === 0;
 
   return (
     <>
-      <div className="app-panel-search">
-        <input
-          type="search"
-          className="form-control form-control-sm"
-          placeholder="Пошук серед учасників"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Пошук серед учасників"
-        />
-      </div>
-
       <AppScrollbar className="app-panel-scroll">
         {isEmpty ? (
           <div className="app-sidebar-empty">
-            {query ? "Нікого не знайдено" : "У кімнаті поки нікого немає"}
+            У кімнаті поки нікого немає
           </div>
         ) : (
           <div className="app-sidebar-list">
-            {friends.length > 0 && (
-              <>
-                <div className="app-panel-group-label">Друзі · {friends.length}</div>
-                {friends.map(renderUser)}
-              </>
-            )}
-            {others.length > 0 && (
-              <>
-                {friends.length > 0 && (
-                  <div className="app-panel-group-label">Інші · {others.length}</div>
-                )}
-                {others.map(renderUser)}
-              </>
-            )}
+            {groups.map((group) => (
+              <div key={group.key}>
+                <div className="app-panel-group-label">
+                  {group.label} ({group.users.length})
+                </div>
+                {group.users.map(renderUser)}
+              </div>
+            ))}
           </div>
         )}
       </AppScrollbar>

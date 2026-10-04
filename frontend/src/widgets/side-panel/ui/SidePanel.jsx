@@ -38,7 +38,7 @@ export function SidePanel({
   let title = "Профіль";
   let titleStyle;
   if (panel === SIDE_PANELS.USERS) {
-    title = `Учасники · ${users.length}`;
+    title = `У кімнаті: ${users.length}`;
   } else if (panel === SIDE_PANELS.DM) {
     title = dmPeerLogin ?? "Особисті повідомлення";
     if (dmPeerLogin) {

@@ -8,7 +8,8 @@ import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
  * ChatHeader — шапка чату з трьома кнопками, які відкривають усе
  * "додаткове" поверх/поруч із чатом (постійних колонок і табів нема):
  *
- *  - назва кімнати з ▾ — відкриває вибір кімнати (RoomPickerModal,
+ *  - крапка статусу з'єднання (.chat-status-dot: зелена — онлайн, жовта
+ *    пульсуюча — підключення) + назва кімнати з ▾ — відкриває вибір кімнати (RoomPickerModal,
  *    id передається в roomPickerModalId, відкриття — штатний
  *    data-bs-toggle="modal");
  *  - "Учасники" + число онлайн — права панель (SidePanel, режим users);
@@ -51,16 +52,17 @@ export function ChatHeader({
             className="chat-room-btn"
             data-bs-toggle="modal"
             data-bs-target={`#${roomPickerModalId}`}
-            title="Змінити кімнату"
-            aria-label={`Кімната ${title ?? ""}. Змінити кімнату`}
+            title={`Змінити кімнату · ${online ? "Онлайн" : "Підключення…"}`}
+            aria-label={`Кімната ${title ?? ""}. ${
+              online ? "Онлайн" : "Підключення…"
+            }. Змінити кімнату`}
           >
+            <span
+              className={`chat-status-dot ${online ? "is-online" : "is-offline"}`}
+              aria-hidden="true"
+            />
             <span className="chat-brand-info">
               <span className="chat-brand-title">{title || APP_NAME}</span>
-              <span
-                className={`chat-brand-status ${online ? "is-online" : "is-offline"}`}
-              >
-                {online ? "Онлайн" : "Підключення…"}
-              </span>
             </span>
             <ChevronDown size={18} aria-hidden="true" />
           </button>

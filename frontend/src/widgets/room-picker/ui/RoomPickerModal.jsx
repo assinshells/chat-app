@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Search } from "lucide-react";
 
 import { AppScrollbar } from "@shared/ui/scrollbar";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
@@ -20,7 +18,8 @@ const CITY_ROOMS = ROOMS.filter((room) => !THEMATIC_ROOM_IDS.includes(room.id));
  * кімнаті одразу перемикає її і закриває вікно (data-bs-dismiss).
  * На телефоні — на весь екран (modal-fullscreen-sm-down).
  *
- * Біля кожної кімнати — кількість людей онлайн; зверху пошук.
+ * Біля кожної кімнати — кількість людей онлайн; у шапці — загальна
+ * кількість людей у чаті (сума по всіх кімнатах).
  */
 export function RoomPickerModal({
   modalId = ROOM_PICKER_MODAL_ID,
@@ -28,28 +27,6 @@ export function RoomPickerModal({
   roomCounts,
   onSelectRoom,
 }) {
-  const [query, setQuery] = useState("");
-
-  // Закрили вікно — наступне відкриття починається з чистого пошуку.
-  useEffect(() => {
-    const element = document.getElementById(modalId);
-    if (!element) return undefined;
-
-    const handleHidden = () => setQuery("");
-    element.addEventListener("hidden.bs.modal", handleHidden);
-    return () => element.removeEventListener("hidden.bs.modal", handleHidden);
-  }, [modalId]);
-
-  const normalizedQuery = query.trim().toLowerCase();
-
-  const found = useMemo(
-    () =>
-      normalizedQuery
-        ? ROOMS.filter((room) => room.name.toLowerCase().includes(normalizedQuery))
-        : null,
-    [normalizedQuery],
-  );
-
   const renderRoom = (room) => (
     <button
       key={room.id}
@@ -65,6 +42,11 @@ export function RoomPickerModal({
     </button>
   );
 
+  const totalOnline = Object.values(roomCounts ?? {}).reduce(
+    (sum, count) => sum + (Number(count) || 0),
+    0,
+  );
+
   return createPortal(
     <div
       className="modal fade"
@@ -76,9 +58,12 @@ export function RoomPickerModal({
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down room-picker-dialog">
         <div className="modal-content app-modal">
           <div className="modal-header">
-            <h5 className="modal-title" id={`${modalId}Label`}>
-              Оберіть кімнату
-            </h5>
+            <div className="room-picker-heading">
+              <h5 className="modal-title" id={`${modalId}Label`}>
+                Оберіть кімнату
+              </h5>
+              <span className="room-picker-total">У чаті: {totalOnline}</span>
+            </div>
             <button
               type="button"
               className="btn-close"
@@ -88,40 +73,16 @@ export function RoomPickerModal({
           </div>
 
           <div className="modal-body room-picker-body">
-            <div className="room-picker-search">
-              <Search size={16} aria-hidden="true" />
-              <input
-                type="search"
-                className="form-control form-control-sm"
-                placeholder="Пошук кімнати"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                aria-label="Пошук кімнати"
-              />
-            </div>
-
             <AppScrollbar>
-              {found ? (
-                found.length === 0 ? (
-                  <p className="room-picker-empty">Кімнату не знайдено</p>
-                ) : (
-                  <div className="room-select-grid room-picker-grid">
-                    {found.map(renderRoom)}
-                  </div>
-                )
-              ) : (
-                <>
-                  <h6 className="room-picker-group-label">Тематичні</h6>
-                  <div className="room-select-grid room-picker-grid">
-                    {THEMATIC_ROOMS.map(renderRoom)}
-                  </div>
+              <h6 className="room-picker-group-label">Тематичні</h6>
+              <div className="room-select-grid room-picker-grid">
+                {THEMATIC_ROOMS.map(renderRoom)}
+              </div>
 
-                  <h6 className="room-picker-group-label">Міста</h6>
-                  <div className="room-select-grid room-picker-grid">
-                    {CITY_ROOMS.map(renderRoom)}
-                  </div>
-                </>
-              )}
+              <h6 className="room-picker-group-label">Міста</h6>
+              <div className="room-select-grid room-picker-grid">
+                {CITY_ROOMS.map(renderRoom)}
+              </div>
             </AppScrollbar>
           </div>
         </div>
