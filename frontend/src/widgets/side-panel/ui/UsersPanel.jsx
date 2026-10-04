@@ -3,7 +3,8 @@ import { useMemo } from "react";
 import { DmTriggerButton } from "@features/dm";
 import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
-import { getStatusEmoji, getStatusLabel } from "@shared/constants/status.constants.js";
+import { getStatusLabel } from "@shared/constants/status.constants.js";
+import { StatusIcon } from "@shared/ui/status-icon";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
 
@@ -63,9 +64,8 @@ export function UsersPanel({
             <span
               className="app-sidebar-status-emoji"
               title={getStatusLabel(user.status)}
-              aria-hidden="true"
             >
-              {getStatusEmoji(user.status)}
+              <StatusIcon status={user.status} />
             </span>
             {user.login}
           </span>
@@ -83,8 +83,8 @@ export function UsersPanel({
               style={{ "--user-color": getEffectiveColorHex(user.color, isDarkTheme) }}
               onClick={() => onNicknameClick?.(user.login)}
             >
-              <span className="app-sidebar-status-emoji" aria-hidden="true">
-                {getStatusEmoji(user.status)}
+              <span className="app-sidebar-status-emoji">
+                <StatusIcon status={user.status} />
               </span>
               {user.login}
             </button>

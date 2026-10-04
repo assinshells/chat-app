@@ -35,6 +35,8 @@ export function SidePanel({
 
   const isDmConversation = panel === SIDE_PANELS.DM && Boolean(dmPeerLogin);
 
+  const isProfile = panel === SIDE_PANELS.PROFILE;
+
   let title = "Профіль";
   let titleStyle;
   if (panel === SIDE_PANELS.USERS) {
@@ -48,7 +50,9 @@ export function SidePanel({
 
   return (
     <aside className="app-panel" aria-label={title}>
-      <div className="app-panel-header">
+      <div
+        className={`app-panel-header ${isProfile ? "app-panel-header--flush" : ""}`}
+      >
         {isDmConversation && (
           <button
             type="button"
@@ -61,9 +65,13 @@ export function SidePanel({
           </button>
         )}
 
-        <h5 className="app-panel-title" style={titleStyle}>
-          {title}
-        </h5>
+        {isProfile ? (
+          <span className="app-panel-title" />
+        ) : (
+          <h5 className="app-panel-title" style={titleStyle}>
+            {title}
+          </h5>
+        )}
 
         <button
           type="button"
@@ -92,6 +100,10 @@ export function SidePanel({
         {panel === SIDE_PANELS.PROFILE && (
           <ProfilePanel
             login={login}
+            nicknameColor={getEffectiveColorHex(
+              users.find((user) => user.login === login)?.color,
+              isDarkTheme,
+            )}
             currentUserStatus={currentUserStatus}
             onStatusChange={onStatusChange}
           />

@@ -229,7 +229,20 @@
 
 .app-sidebar-status-emoji {
   margin-right: 0.3rem;
+
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
+
+/* Іконки статусу (lucide) */
+.status-icon {
+  flex: 0 0 auto;
+}
+.status-icon--online { color: var(--bs-success, #198754); fill: currentColor; }
+.status-icon--away { color: var(--bs-warning, #ffc107); }
+.status-icon--busy { color: var(--bs-danger, #dc3545); }
+.status-icon--dnd { color: var(--bs-secondary-color); }
 
 .app-sidebar-empty {
   padding: 1.5rem 1rem;
@@ -272,8 +285,11 @@
    PROFILE PANEL
    ========================================================= */
 
+/* Шапка профілю прикріплена під хедером панелі (поза скролом). */
 .app-profile-head {
-  padding: 1.25rem 1rem;
+  flex: 0 0 auto;
+
+  padding: 0.75rem 1rem;
 
   display: flex;
   flex-direction: column;
@@ -283,35 +299,23 @@
   border-bottom: 1px solid var(--bs-border-color);
 }
 
-/* Аватар — навмисно коло. */
-.app-profile-avatar {
-  width: 56px;
-  height: 56px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: var(--bs-secondary-bg);
-  color: var(--bs-secondary-color);
-}
-
 .app-profile-login {
   margin: 0;
-
   max-width: 100%;
-
-  font-size: 1rem;
-
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .app-profile-status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
   padding: 0.2rem 0.5rem;
+
+  font-size: 0.85rem;
 
   border: 0;
   border-radius: var(--bs-border-radius);
@@ -389,4 +393,31 @@
   justify-content: center;
   column-gap: 1rem;
   row-gap: 0.25rem;
+}
+
+/* Футер: копірайт і посилання — респонсивно, з переносом за потреби. */
+.app-profile-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+
+  padding: 0.6rem 0.75rem;
+}
+
+.app-profile-footer-copy {
+  white-space: nowrap;
+}
+
+/* Шапка панелі профілю без нижнього бордера (над ніком). */
+.app-panel-header--flush {
+  border-bottom: 0;
+}
+
+/* Пункти дропдауну статусу — без підкреслення при наведенні. */
+.app-profile-head .dropdown-item,
+.app-profile-head .dropdown-item:hover,
+.app-profile-head .dropdown-item:focus-visible {
+  text-decoration: none;
 }

@@ -1,3 +1,5 @@
+import { Circle, Moon, CircleMinus, BellOff } from "lucide-react";
+
 // Статус доступності користувача (таб "Налаштування" -> вибір,
 // таб "Профіль" -> показ з емодзі, список "Онлайн" -> той самий
 // емодзі біля ніка). Значення (value) точно збігаються з backend
@@ -16,10 +18,10 @@ export const DEFAULT_STATUS = STATUS_VALUES.ONLINE;
 // Порядок — від "найбільш доступний" до "найменш доступний", саме в
 // такому порядку статуси показуються в табі "Налаштування".
 export const STATUS_OPTIONS = Object.freeze([
-  { value: STATUS_VALUES.ONLINE, emoji: "🟢", label: "На зв'язку" },
-  { value: STATUS_VALUES.AWAY, emoji: "🌙", label: "Відійшов" },
-  { value: STATUS_VALUES.BUSY, emoji: "⛔", label: "Зайнятий" },
-  { value: STATUS_VALUES.DND, emoji: "🔕", label: "Не турбувати" },
+  { value: STATUS_VALUES.ONLINE, icon: Circle, tone: "online", label: "На зв'язку" },
+  { value: STATUS_VALUES.AWAY, icon: Moon, tone: "away", label: "Відійшов" },
+  { value: STATUS_VALUES.BUSY, icon: CircleMinus, tone: "busy", label: "Зайнятий" },
+  { value: STATUS_VALUES.DND, icon: BellOff, tone: "dnd", label: "Не турбувати" },
 ]);
 
 const STATUS_BY_VALUE = Object.fromEntries(
@@ -27,13 +29,11 @@ const STATUS_BY_VALUE = Object.fromEntries(
 );
 
 /**
- * getStatusEmoji — емодзі для значення статусу з БД/сокета. Невідоме
- * або відсутнє значення (наприклад, presence-запис зі старого сокета
- * без поля status) тихо відкочується на статус за замовчуванням, а не
- * ламає рендер — той самий принцип, що й getColorHex у color.constants.js.
+ * getStatusOption — опція статусу (icon/tone/label) для значення з БД/сокета.
+ * Невідоме значення тихо відкочується на статус за замовчуванням.
  */
-export const getStatusEmoji = (value) =>
-  (STATUS_BY_VALUE[value] ?? STATUS_BY_VALUE[DEFAULT_STATUS]).emoji;
+export const getStatusOption = (value) =>
+  STATUS_BY_VALUE[value] ?? STATUS_BY_VALUE[DEFAULT_STATUS];
 
 export const getStatusLabel = (value) =>
   (STATUS_BY_VALUE[value] ?? STATUS_BY_VALUE[DEFAULT_STATUS]).label;

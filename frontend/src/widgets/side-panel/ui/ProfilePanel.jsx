@@ -3,10 +3,7 @@ import {
   Sun,
   Moon,
   Monitor,
-  BookOpen,
-  MessageCircle,
   ChevronDown,
-  User as UserIcon,
   Copyright,
 } from "lucide-react";
 
@@ -23,7 +20,6 @@ import { EditableProfileField } from "./EditableProfileField.jsx";
 import {
   STATUS_OPTIONS,
   DEFAULT_STATUS,
-  getStatusEmoji,
   getStatusLabel,
 } from "@shared/constants/status.constants.js";
 import {
@@ -33,6 +29,7 @@ import {
   COOKIES_MODAL_ID,
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
+import { StatusIcon } from "@shared/ui/status-icon";
 import { AppScrollbar } from "@shared/ui/scrollbar";
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
@@ -44,6 +41,7 @@ const FOOTER_LINKS = [
   { label: "Правила", modalId: RULES_MODAL_ID },
   { label: "Файли cookie", modalId: COOKIES_MODAL_ID },
   { label: "Розробники", modalId: DEVELOPER_MODAL_ID },
+  { label: "Зворотний зв'язок", modalId: FEEDBACK_MODAL_ID },
 ];
 
 const THEME_OPTIONS = [
@@ -57,7 +55,12 @@ const THEME_OPTIONS = [
  * тема, друзі, заблоковані, правила/зворотний зв'язок. Вихід — іконка Power в шапці чату.
  * Замінює колишні таби "Профіль" і "Налаштування" лівого сайдбара.
  */
-export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
+export function ProfilePanel({
+  login,
+  nicknameColor,
+  currentUserStatus,
+  onStatusChange,
+}) {
   const [theme, setTheme] = useState(() => getStoredTheme());
 
   const email = useCurrentUserStore((state) => state.email);
@@ -84,12 +87,11 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
   const handleSaveAbout = async (next) => setAbout((await updateAbout(next)).about);
 
   return (
-    <AppScrollbar className="app-panel-scroll">
+    <>
       <div className="app-profile-head">
-        <div className="app-profile-avatar" aria-hidden="true">
-          <UserIcon size={28} />
-        </div>
-        <h5 className="app-profile-login">{login}</h5>
+        <h5 className="app-profile-login" style={{ color: nicknameColor }}>
+          {login}
+        </h5>
 
         <div className="dropdown">
           <button
@@ -98,13 +100,13 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <span aria-hidden="true">{getStatusEmoji(currentUserStatus)}</span>{" "}
+            <StatusIcon status={currentUserStatus} size={12} />
             {getStatusLabel(currentUserStatus)}
-            <ChevronDown size={16} className="ms-1" />
+            <ChevronDown size={14} className="ms-1" />
           </button>
 
           <div className="dropdown-menu">
-            {STATUS_OPTIONS.map(({ value, emoji, label }) => (
+            {STATUS_OPTIONS.map(({ value, label }) => (
               <a
                 key={value}
                 className={`dropdown-item ${
@@ -116,13 +118,14 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
                   onStatusChange?.(value);
                 }}
               >
-                <span aria-hidden="true">{emoji}</span> {label}
+                <StatusIcon status={value} size={12} /> {label}
               </a>
             ))}
           </div>
         </div>
       </div>
 
+    <AppScrollbar className="app-panel-scroll">
       <section className="app-panel-section">
         <h6 className="app-sidebar-settings-group-label">Про себе</h6>
         <EditableProfileField
@@ -192,37 +195,16 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
         <BlockedUsersList />
       </details>
 
-      <section className="app-panel-section app-panel-section-flush">
-        <h6 className="app-sidebar-settings-group-label px-3">Інформація</h6>
-        <button
-          type="button"
-          className="app-sidebar-theme-btn"
-          data-bs-toggle="modal"
-          data-bs-target={`#${RULES_MODAL_ID}`}
-        >
-          <BookOpen size={18} />
-          <span>Правила</span>
-        </button>
-        <button
-          type="button"
-          className="app-sidebar-theme-btn"
-          data-bs-toggle="modal"
-          data-bs-target={`#${FEEDBACK_MODAL_ID}`}
-        >
-          <MessageCircle size={18} />
-          <span>Зворотний зв&apos;язок</span>
-        </button>
-      </section>
-
       <div className="card m-3">
-        <div className="card-body small text-muted">
-          <Copyright className="footer-icon" size="1em" /> {CREATION_YEAR}
-          {CREATION_YEAR !== currentYear && `-${currentYear}`} {APP_NAME}.
+        <div className="card-body app-profile-footer-row text-muted">
+          <span className="app-profile-footer-copy">
+            <Copyright className="footer-icon" size="1em" /> {CREATION_YEAR}
+            {CREATION_YEAR !== currentYear && `-${currentYear}`} {APP_NAME}.
+          </span>
           {FOOTER_LINKS.map(({ label, modalId }) => (
             <a
               key={modalId}
               href="#"
-              className="ms-2"
               data-bs-toggle="modal"
               data-bs-target={`#${modalId}`}
               onClick={(e) => e.preventDefault()}
@@ -233,5 +215,6 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
         </div>
       </div>
     </AppScrollbar>
+    </>
   );
 }
