@@ -3,7 +3,8 @@
    1. TOKENS/THEMES — CSS-змінні (шрифт, тіні/оверлей під тему тощо),
       мають бути визначені ДО будь-яких правил, що їх використовують.
    2. BASE — reset, body/#root: найзагальніші правила.
-   3. LAYOUT — великі структурні блоки застосунку (обгортка, sidebar).
+   3. LAYOUT — великі структурні блоки застосунку (обгортка чату,
+      права панель).
    4. COMPONENTS — конкретні віджети (шапка, стрічка повідомлень,
       композер, форми, попапи тощо).
    5. COMPONENTS/_RESPONSIVE — обов'язково ОСТАННІЙ імпорт: усередині
@@ -22,10 +23,7 @@
 @import "./base/_body.css";
 
 @import "./layout/_authentication.css";
-@import "./layout/_navbar.css";
-@import "./layout/_side-menu.css";
-@import "./layout/_chat-leftsidebar.css";
-@import "./layout/_user-profile-sidebar.css";
+@import "./layout/_app-layout.css";
 
 @import "./components/_chat-header.css";
 @import "./components/_chat-conversation.css";
@@ -39,5 +37,7 @@
 @import "./components/_dm-modal.css";
 @import "./components/_color-picker.css";
 @import "./components/_modals.css";
+@import "./components/_room-picker.css";
+@import "./components/_dm-toast.css";
 
 @import "./components/_responsive.css";

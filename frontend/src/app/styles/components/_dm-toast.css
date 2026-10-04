@@ -1,0 +1,57 @@
+/* =========================================================
+   DM TOAST — плашка "Ім'я: текст" про нове особисте повідомлення
+   (@features/dm/ui/DmToast). Над панелями, але під модалками.
+   ========================================================= */
+
+.dm-toast {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+
+  max-width: min(320px, calc(100vw - 1.5rem));
+
+  padding: 0.6rem 0.85rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: 0 6px 20px rgba(var(--app-shadow-color), var(--app-shadow-strong));
+
+  text-align: left;
+  cursor: pointer;
+
+  z-index: 1050;
+
+  animation: dm-toast-in 0.18s ease-out;
+}
+
+.dm-toast-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dm-toast-text {
+  font-size: 0.85rem;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes dm-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

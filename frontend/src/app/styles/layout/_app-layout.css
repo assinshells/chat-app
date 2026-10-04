@@ -1,0 +1,358 @@
+/* =========================================================
+   APP LAYOUT — чат на всю ширину + одна права панель.
+
+   Структура (ChatLayout.jsx):
+     .layout-wrapper.app-layout
+       .user-chat > .chat-main   — шапка, стрічка, композер
+       .app-panel                — учасники / особисті / профіль
+                                    (рендериться лише коли відкрита)
+
+   Десктоп (від 992px): панель — колонка 360px поруч із чатом, чат
+   лишається доступним (можна читати кімнату й відповідати в особисті).
+   Телефон: панель на весь екран.
+   ========================================================= */
+
+.app-layout {
+  display: flex;
+
+  height: 100vh;
+  height: 100dvh;
+}
+
+.user-chat {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  height: 100%;
+
+  display: flex;
+}
+
+.chat-main {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* Скрол-контейнери (стрічка кімнати, листування в панелі). */
+.app-scrollbar {
+  overflow-y: auto;
+}
+
+.no-horizontal {
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   PANEL SHELL
+   ========================================================= */
+
+.app-panel {
+  flex: 0 0 360px;
+
+  width: 360px;
+  min-height: 0;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bs-body-bg);
+  border-left: 1px solid var(--bs-border-color);
+}
+
+@media (max-width: 991.98px) {
+  .app-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    width: auto;
+    height: auto;
+
+    border-left: 0;
+
+    z-index: 1020;
+  }
+}
+
+.app-panel-header {
+  flex: 0 0 auto;
+
+  min-height: 56px;
+  padding: 0.5rem 0.75rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-panel-title {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  margin: 0;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-panel-body {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.app-panel-scroll {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  overflow-y: auto;
+}
+
+.app-panel-search {
+  flex: 0 0 auto;
+
+  padding: 0.5rem 0.75rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-panel-group-label,
+.app-sidebar-settings-group-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: var(--bs-secondary-color);
+}
+
+.app-panel-group-label {
+  padding: 0.6rem 0.75rem 0.15rem;
+}
+
+.app-sidebar-settings-group-label {
+  margin: 0 0 0.5rem;
+}
+
+/* =========================================================
+   USERS LIST
+   ========================================================= */
+
+.app-sidebar-list {
+  display: flex;
+  flex-direction: column;
+
+  padding: 0.25rem 0;
+}
+
+.app-sidebar-online-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  padding: 0.3rem 0.75rem;
+}
+
+.app-sidebar-online-name {
+  min-width: 0;
+
+  font-size: 0.92rem;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-sidebar-online-name-btn {
+  padding: 0 0.25rem;
+
+  border: 0;
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--user-color, var(--bs-body-color));
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.app-sidebar-online-name-btn:hover,
+.app-sidebar-online-name-btn:focus-visible {
+  background: var(--bs-secondary-bg);
+}
+
+.app-sidebar-online-name-btn.is-friend {
+  font-weight: 700;
+}
+
+.app-sidebar-online-name-btn.is-selected {
+  background: var(--bs-secondary-bg);
+  text-decoration: underline;
+}
+
+.app-sidebar-status-emoji {
+  margin-right: 0.3rem;
+}
+
+.app-sidebar-empty {
+  padding: 1.5rem 1rem;
+
+  font-size: 0.85rem;
+  text-align: center;
+
+  color: var(--bs-secondary-color);
+}
+
+/* Кнопки "Видалити"/"Розблокувати" у списках друзів і заблокованих. */
+.app-sidebar-unfriend-btn,
+.app-sidebar-unblock-btn {
+  margin-left: auto;
+  padding: 0.15rem 0.5rem;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  font-size: 0.75rem;
+
+  cursor: pointer;
+}
+
+.app-sidebar-unfriend-btn:hover,
+.app-sidebar-unblock-btn:hover {
+  color: var(--bs-body-color);
+
+  background: var(--bs-secondary-bg);
+}
+
+/* =========================================================
+   PROFILE PANEL
+   ========================================================= */
+
+.app-profile-head {
+  padding: 1.25rem 1rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Аватар — навмисно коло. */
+.app-profile-avatar {
+  width: 56px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--bs-secondary-bg);
+  color: var(--bs-secondary-color);
+}
+
+.app-profile-login {
+  margin: 0;
+
+  max-width: 100%;
+
+  font-size: 1rem;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-profile-status-btn {
+  padding: 0.2rem 0.5rem;
+
+  border: 0;
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  cursor: pointer;
+}
+
+.app-profile-status-btn:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.app-panel-section {
+  padding: 0.85rem 1rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-panel-section-flush {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.app-panel-details {
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-panel-details > summary {
+  padding: 0.7rem 1rem;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.app-sidebar-theme-btn {
+  width: 100%;
+  padding: 0.55rem 1rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  border: 0;
+
+  background: transparent;
+  color: var(--bs-body-color);
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.app-sidebar-theme-btn:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.app-sidebar-theme-btn.is-active {
+  color: var(--bs-primary);
+  font-weight: 600;
+}

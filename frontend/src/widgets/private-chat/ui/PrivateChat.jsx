@@ -4,15 +4,15 @@ import { Ban, Send } from "lucide-react";
 import { useDmStore } from "@features/dm";
 import { formatMessageTime, normalizeMessageText } from "@shared/lib/message.js";
 
-// Той самий ліміт, що й у публічному чаті (ChatComposer) і в модалці
+// Той самий ліміт, що й у публічному чаті (ChatComposer) і в панелі
 // особистих повідомлень, і на бекенді
 // (DM_LIMITS.MAX_MESSAGE_LENGTH).
 const MAX_MESSAGE_LENGTH = 300;
 
 /**
- * PrivateChat — листування з одним співрозмовником усередині модалки
- * приватних повідомлень (@widgets/private-chat/ui/PrivateMessagesModal).
- * Шапка (назва/"Назад"/хрестик) належить модалці, тут лише
+ * PrivateChat — листування з одним співрозмовником усередині правої панелі
+ * особистих повідомлень (@widgets/private-chat/ui/PrivateMessagesPanel).
+ * Шапка (назва/"Назад"/закриття) належить SidePanel, тут лише
  * повідомлення і форма відправлення.
  *
  * Джерело даних — useDmStore (персональний сокет-канал dm:*), той

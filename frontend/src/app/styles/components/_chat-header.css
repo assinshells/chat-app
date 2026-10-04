@@ -19,7 +19,7 @@
 
 .chat-header-inner {
   width: 100%;
-  max-width: 640px;
+  max-width: 840px;
   min-height: 68px;
 
   margin: 0 auto;
@@ -119,4 +119,82 @@
 .chat-header-btn:focus {
   outline: none;
   box-shadow: none;
+}
+
+
+/* Назва кімнати — кнопка, що відкриває вибір кімнати (RoomPickerModal). */
+.chat-room-btn {
+  min-width: 0;
+
+  margin-left: -0.5rem;
+  padding: 0.25rem 0.5rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  border: 0;
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--bs-body-color);
+
+  text-align: left;
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.chat-room-btn:hover,
+.chat-room-btn:focus-visible {
+  background: var(--bs-secondary-bg);
+}
+
+.chat-room-btn .chat-brand-info {
+  min-width: 0;
+}
+
+.chat-header-start {
+  min-width: 0;
+}
+
+/* Кнопка відкритої панелі в шапці. */
+.chat-header-btn.is-active {
+  color: var(--bs-primary);
+
+  background: var(--bs-secondary-bg);
+}
+
+/* "Учасники" — іконка + число онлайн, тому ширша за квадратну. */
+.chat-header-btn.chat-header-btn-wide {
+  width: auto;
+
+  padding: 0 0.6rem;
+
+  gap: 0.35rem;
+}
+
+.chat-header-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Бейдж непрочитаних особистих на іконці повідомлень. */
+.chat-header-badge {
+  position: absolute;
+  top: 0;
+  right: -0.15rem;
+
+  min-width: 1.1rem;
+  padding: 0.2em 0.4em;
+
+  font-size: 0.65rem;
+  line-height: 1;
+  color: #fff;
+}
+
+/* Кнопка виходу (Power) — при наведенні підсвічується як небезпечна дія. */
+.chat-header-btn.chat-header-btn-logout:hover,
+.chat-header-btn.chat-header-btn-logout:focus-visible {
+  color: var(--bs-danger);
 }

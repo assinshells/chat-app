@@ -1,52 +1,10 @@
 /* =========================================================
-   PRIVATE MESSAGES MODAL — модалка приватних повідомлень
-   (@widgets/private-chat/ui/PrivateMessagesModal), тригер —
-   іконка message-circle в навбарі. Два стани: список чатів і
-   відкрите листування (див. _private-chat.css).
+   PRIVATE MESSAGES PANEL — вміст правої панелі особистих
+   повідомлень (@widgets/private-chat/ui/PrivateMessagesPanel):
+   список діалогів; відкрите листування — див. _private-chat.css.
+   Шапку панелі (назва, "назад", закриття) малює SidePanel
+   (layout/_app-layout.css).
    ========================================================= */
-
-.private-modal-header {
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Заголовок/ім'я співрозмовника займає вільне місце, хрестик
-   лишається притиснутим праворуч. */
-.private-modal-header .modal-title,
-.private-modal-peer {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.private-modal-peer {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-}
-
-.private-modal-back {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.9rem;
-}
-
-.private-modal-header a.private-modal-back:hover {
-  text-decoration: none;
-}
-
-/* Фіксована висота тіла: і список, і листування скролляться
-   всередині, а модалка не "стрибає" при перемиканні. */
-.private-modal-body {
-  display: flex;
-  flex-direction: column;
-  height: min(70vh, 560px);
-  min-height: 0;
-  padding: 0;
-  overflow: hidden;
-}
 
 .private-modal-list {
   flex: 1 1 auto;

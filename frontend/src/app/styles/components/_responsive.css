@@ -22,6 +22,10 @@
     height: 36px;
   }
 
+  .chat-header-btn.chat-header-btn-wide {
+    width: auto;
+  }
+
   .chat-conversation {
     padding: 1rem 0.35rem 1.5rem 0.85rem;
   }

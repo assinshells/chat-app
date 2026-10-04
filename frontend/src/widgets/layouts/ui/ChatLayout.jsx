@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { X, User as UserIcon } from "lucide-react";
 
 import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
-import { Navbar } from "@widgets/navbar";
-import { SideMenu } from "@widgets/side-menu";
-import { ChatLeftSidebar } from "@widgets/chat-leftsidebar";
-import { PrivateMessagesModal } from "@widgets/private-chat";
+import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
+import { SidePanel } from "@widgets/side-panel";
+import { RoomPickerModal, ROOM_PICKER_MODAL_ID } from "@widgets/room-picker";
 import { useChatSocket } from "@features/chat";
-import { useDmStore } from "@features/dm";
+import { useDmStore, DmToast } from "@features/dm";
 import { useBlockStore } from "@features/block";
 import { useFriendStore } from "@features/friends";
+import { RulesModal, FeedbackModal } from "@features/info";
 import { RoleManageModal } from "@features/roles";
 import {
   KickModal,
@@ -22,11 +21,18 @@ import {
 } from "@features/moderation";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
-import { getRoleLabel, ROLE_VALUES } from "@shared/constants/role.constants.js";
+import {
+  RULES_MODAL_ID,
+  FEEDBACK_MODAL_ID,
+} from "@shared/constants/infoModals.constants.js";
+import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
 const MAX_TARGETS = 3;
+
+// id модалки підтвердження виходу (кнопка-тригер — в ChatHeader).
+const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 export function ChatLayout({ login, initialRoom, onLogout }) {
   // useDmStore потрібен свій логін, щоб за вхідним dm:new {sender,
@@ -124,35 +130,37 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
 
-  // Показ/приховування панелі профілю користувача (справа) — кнопка
-  // "user-profile-show" у шапці (ChatHeader) відкриває, хрестик
-  // усередині панелі закриває. Проста булева стейт-машина: панель
-  // рендериться завжди, видимість перемикається класом .is-open
-  // (transform у app/styles/layout/_user-profile-sidebar.css), щоб
-  // анімація відкриття/закриття працювала плавно.
-  const [isProfileSidebarOpen, setProfileSidebarOpen] = useState(false);
-  const openProfileSidebar = () => setProfileSidebarOpen(true);
-  const closeProfileSidebar = () => setProfileSidebarOpen(false);
+  // Права панель (учасники / особисті / профіль) — стан у спільному
+  // сторі (useSidePanelStore), бо її відкривають і з шапки, і з меню
+  // біля ніка (DmTriggerButton), і з тосту нового особистого.
+  const sidePanel = useSidePanelStore((state) => state.panel);
+  const closeSidePanel = useSidePanelStore((state) => state.close);
 
-  // Escape закриває панель профілю, якщо вона зараз відкрита.
+  // Панель особистих закрита — діалог більше не "переглядається":
+  // нові повідомлення знову рахуються непрочитаними, а наступне
+  // відкриття починається зі списку діалогів (див. useDmStore).
   useEffect(() => {
-    if (!isProfileSidebarOpen) return undefined;
+    if (sidePanel !== SIDE_PANELS.DM) useDmStore.getState().closeConversation();
+  }, [sidePanel]);
+
+  // Escape закриває панель — але не поверх відкритої модалки, яка
+  // сама обробляє Escape.
+  useEffect(() => {
+    if (!sidePanel) return undefined;
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") closeProfileSidebar();
+      if (e.key !== "Escape") return;
+      if (document.querySelector(".modal.show")) return;
+      closeSidePanel();
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isProfileSidebarOpen]);
+  }, [sidePanel, closeSidePanel]);
 
-  // Роль поточного користувача — єдине джерело правди на фронті (див.
-  // коментар у currentUserStore.js), показуємо в панелі профілю.
-  const currentUserRole = useCurrentUserStore((state) => state.role);
-
-  // Статус доступності поточного користувача (таб "Налаштування" ->
-  // "Профіль" у лівому сайдбарі, див. ChatLeftSidebar). Джерело
-  // правди — той самий useCurrentUserStore, що й роль вище: заповнюється
+  // Статус доступності поточного користувача (панель "Профіль",
+  // див. @widgets/side-panel/ui/ProfilePanel). Джерело
+  // правди — useCurrentUserStore: заповнюється
   // з GET /api/auth/me при завантаженні і оптимістично оновлюється
   // одразу після успішного status:update (handleStatusChange нижче).
   const currentUserStatus = useCurrentUserStore((state) => state.status);
@@ -182,6 +190,14 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       if (prev.includes(nickname) || prev.length >= MAX_TARGETS) return prev;
       return [...prev, nickname];
     });
+  };
+
+  // Клік по ніку в панелі учасників. На телефоні панель займає весь
+  // екран і закрила б форму відправлення, тож після вибору адресата
+  // закриваємо її, щоб одразу можна було писати.
+  const handlePanelNicknameClick = (nickname) => {
+    handleNicknameClick(nickname);
+    if (window.matchMedia("(max-width: 991.98px)").matches) closeSidePanel();
   };
 
   const handleTimeClick = (time) => {
@@ -222,153 +238,101 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   }
 
   return (
-    <div className="layout-wrapper d-lg-flex">
-      <Navbar onLogout={onLogout} />
-      <SideMenu />
-      <ChatLeftSidebar
-        login={login}
-        activeRoom={activeRoom}
-        roomCounts={roomCounts}
-        roomUsers={visibleRoomUsers}
-        onSelectRoom={handleSelectRoom}
-        onNicknameClick={handleNicknameClick}
-        selectedNicknames={targetNicknames}
-        currentUserStatus={currentUserStatus}
-        onStatusChange={handleStatusChange}
-      />
-
-      <div className="user-chat w-100 overflow-hidden">
+    <div className="layout-wrapper app-layout">
+      <div className="user-chat">
         <div className="chat-main">
           <ChatHeader
             title={activeRoomName}
             online={connected}
-            onOpenProfile={openProfileSidebar}
+            roomPickerModalId={ROOM_PICKER_MODAL_ID}
+            logoutModalId={LOGOUT_MODAL_ID}
+            usersCount={visibleRoomUsers.length}
           />
-            <ConfinementBanner confinement={confinement} />
-            <RoomBanNoticeBanner notice={roomBanNotice} />
-            {roomBan && (
-              <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
-                Вас заблоковано в цій кімнаті
-                {roomBan.expiresAt
+          <ConfinementBanner confinement={confinement} />
+          <RoomBanNoticeBanner notice={roomBanNotice} />
+          {roomBan && (
+            <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
+              Вас заблоковано в цій кімнаті
+              {roomBan.expiresAt
+                ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                : " назавжди"}
+              {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
+            </div>
+          )}
+          {joinError && (
+            <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
+              <span>
+                {joinError.message || "Не вдалося приєднатися до кімнати"}
+                {joinError.details?.expiresAt &&
+                  ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
+              </span>
+              <button
+                type="button"
+                className="btn-close ms-2"
+                aria-label="Закрити"
+                onClick={dismissJoinError}
+              />
+            </div>
+          )}
+          <ChatConversation
+            messages={visibleMessages}
+            currentUser={login}
+            onNicknameClick={handleNicknameClick}
+            onTimeClick={handleTimeClick}
+            onRoomClick={handleSelectRoom}
+            selectedNicknames={targetNicknames}
+            selectedTimes={targetTimes}
+            roomUsers={visibleRoomUsers}
+            activeRoom={activeRoom}
+          />
+          <ChatComposer
+            onSend={sendMessage}
+            cooldownMs={cooldownMs}
+            targetNicknames={targetNicknames}
+            targetTimes={targetTimes}
+            onRemoveNickname={handleRemoveNickname}
+            onRemoveTime={handleRemoveTime}
+            onClearTargets={handleClearTargets}
+            onRestoreTargets={handleRestoreTargets}
+            disabled={Boolean(roomBan)}
+            disabledReason={
+              roomBan &&
+              `Вас заблоковано в цій кімнаті${
+                roomBan.expiresAt
                   ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
-                  : " назавжди"}
-                {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
-              </div>
-            )}
-            {joinError && (
-              <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
-                <span>
-                  {joinError.message || "Не вдалося приєднатися до кімнати"}
-                  {joinError.details?.expiresAt &&
-                    ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
-                </span>
-                <button
-                  type="button"
-                  className="btn-close ms-2"
-                  aria-label="Закрити"
-                  onClick={dismissJoinError}
-                />
-              </div>
-            )}
-            <ChatConversation
-              messages={visibleMessages}
-              currentUser={login}
-              onNicknameClick={handleNicknameClick}
-              onTimeClick={handleTimeClick}
-              onRoomClick={handleSelectRoom}
-              selectedNicknames={targetNicknames}
-              selectedTimes={targetTimes}
-              roomUsers={visibleRoomUsers}
-              activeRoom={activeRoom}
-            />
-            <ChatComposer
-              onSend={sendMessage}
-              cooldownMs={cooldownMs}
-              targetNicknames={targetNicknames}
-              targetTimes={targetTimes}
-              onRemoveNickname={handleRemoveNickname}
-              onRemoveTime={handleRemoveTime}
-              onClearTargets={handleClearTargets}
-              onRestoreTargets={handleRestoreTargets}
-              disabled={Boolean(roomBan)}
-              disabledReason={
-                roomBan &&
-                `Вас заблоковано в цій кімнаті${
-                  roomBan.expiresAt
-                    ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
-                    : " назавжди"
-                }`
-              }
-            />
-        </div>
-        {/* Підкладка — клік поза панеллю закриває її (той самий патерн, що
-          й Bootstrap-модалки: data-bs-backdrop="static" тут не потрібен,
-          профіль не блокує критичних дій, тому закриття по кліку зовні
-          доречне). Рендериться лише коли панель відкрита. */}
-        {isProfileSidebarOpen && (
-          <div
-            className="user-profile-sidebar-backdrop"
-            onClick={closeProfileSidebar}
-            aria-hidden="true"
+                  : " назавжди"
+              }`
+            }
           />
-        )}
-
-        {/* Панель профілю користувача (справа) — показ/приховування через
-          isProfileSidebarOpen (клас .is-open, див.
-          app/styles/layout/_user-profile-sidebar.css). Рендериться
-          завжди, щоб анімація закриття встигала відіграти, а не
-          зникала миттєво разом з розмонтуванням. */}
-        <aside
-          className={`user-profile-sidebar ${isProfileSidebarOpen ? "is-open" : ""}`}
-          aria-hidden={!isProfileSidebarOpen}
-        >
-          <div className="user-profile-sidebar-header">
-            <span className="user-profile-sidebar-title">Профіль</span>
-            <button
-              type="button"
-              className="user-profile-sidebar-close"
-              id="user-profile-hide"
-              title="Закрити"
-              aria-label="Закрити профіль"
-              onClick={closeProfileSidebar}
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          <div className="user-profile-sidebar-content">
-            <div className="user-profile-avatar" aria-hidden="true">
-              <UserIcon size={28} />
-            </div>
-
-            <p className="user-profile-login">{login}</p>
-
-            {currentUserRole && currentUserRole !== ROLE_VALUES.USER && (
-              <span className="user-profile-role-badge">
-                {getRoleLabel(currentUserRole)}
-              </span>
-            )}
-
-            <div className="user-profile-info-row">
-              <span className="user-profile-info-label">Кімната</span>
-              <span className="user-profile-info-value">
-                {activeRoomName ?? "—"}
-              </span>
-            </div>
-
-            <div className="user-profile-info-row">
-              <span className="user-profile-info-label">Статус</span>
-              <span
-                className={`user-profile-info-value ${connected ? "is-online" : "is-offline"}`}
-              >
-                {connected ? "Онлайн" : "Підключення…"}
-              </span>
-            </div>
-          </div>
-        </aside>
+        </div>
       </div>
 
-      <PrivateMessagesModal />
+      {/* Права панель: на десктопі — колонка поруч із чатом (чат лишається
+          доступним), на телефоні — на весь екран. */}
+      {sidePanel && (
+        <SidePanel
+          panel={sidePanel}
+          onClose={closeSidePanel}
+          login={login}
+          users={visibleRoomUsers}
+          activeRoom={activeRoom}
+          selectedNicknames={targetNicknames}
+          onNicknameClick={handlePanelNicknameClick}
+          currentUserStatus={currentUserStatus}
+          onStatusChange={handleStatusChange}
+        />
+      )}
+
+      <DmToast />
+
+      <RoomPickerModal
+        activeRoom={activeRoom}
+        roomCounts={roomCounts}
+        onSelectRoom={handleSelectRoom}
+      />
+      <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
+      <RulesModal modalId={RULES_MODAL_ID} />
+      <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
       <RoleManageModal />
       <KickModal />
       <BanModal />

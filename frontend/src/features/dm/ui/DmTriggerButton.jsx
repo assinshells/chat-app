@@ -10,7 +10,7 @@ import { ROLE_MANAGER_ROLES } from "@shared/constants/role.constants.js";
 import { canModerateRoom } from "@shared/constants/moderationAction.constants.js";
 // Пункт "Написати особисте повідомлення" відкриває діалог у модалці
 // приватних повідомлень (її тригер — іконка message-circle в навбарі).
-import { PRIVATE_MODAL_TRIGGER_ID } from "@shared/constants/privateModal.constants.js";
+import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
 
 /**
  * DmTriggerButton — кнопка "три вертикальні крапки" поруч з чужим ніком
@@ -77,13 +77,14 @@ export function DmTriggerButton({
   const canManageRoles = ROLE_MANAGER_ROLES.includes(ownRole);
   const canModerate = Boolean(room) && canModerateRoom(ownRole, ownModeratorRooms, room);
 
-  // Модалку відкриває кнопка в навбарі (data-bs-toggle="modal") —
-  // програмно клікаємо по ній, без імпорту Bootstrap JS API.
+  // Особисті повідомлення живуть у правій панелі (SidePanel): відкриваємо
+  // її в режимі "dm" через спільний стор, діалог уже розгорнутий
+  // openConversation вище.
   const handleOpenConversation = (e) => {
     e.preventDefault();
     e.stopPropagation();
     openConversation(login, color);
-    document.getElementById(PRIVATE_MODAL_TRIGGER_ID)?.click();
+    useSidePanelStore.getState().open(SIDE_PANELS.DM);
   };
 
   const handleToggleFriend = (e) => {

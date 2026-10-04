@@ -1,0 +1,67 @@
+/* =========================================================
+   ROOM PICKER — вибір кімнати з чату (@widgets/room-picker).
+   Сітка кімнат — спільна з RoomSelectModal (.room-select-grid /
+   .room-select-item у _modals.css), тут лише доповнення: пошук,
+   групи і лічильник онлайн біля кімнати.
+   ========================================================= */
+
+.room-picker-dialog {
+  max-width: 560px;
+}
+
+.room-picker-search {
+  margin-bottom: 0.75rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  color: var(--bs-secondary-color);
+}
+
+.room-picker-group-label {
+  margin: 0.75rem 0 0.5rem;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: var(--bs-secondary-color);
+}
+
+.room-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.room-picker-name {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-picker-count {
+  flex: 0 0 auto;
+
+  font-size: 0.75rem;
+
+  color: var(--bs-secondary-color);
+}
+
+.room-picker-item.is-active .room-picker-count {
+  color: inherit;
+}
+
+.room-picker-empty {
+  margin: 1.5rem 0;
+
+  font-size: 0.85rem;
+  text-align: center;
+
+  color: var(--bs-secondary-color);
+}
