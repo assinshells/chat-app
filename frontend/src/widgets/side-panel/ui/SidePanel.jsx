@@ -102,7 +102,6 @@ export function SidePanel({
 
         {panel === SIDE_PANELS.PROFILE && (
           <ProfilePanel
-            login={login}
             currentUserStatus={currentUserStatus}
             onStatusChange={onStatusChange}
             logoutModalId={logoutModalId}
