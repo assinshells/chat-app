@@ -14,7 +14,7 @@ export function VerifyOtpPage({ onNavigate, email }) {
         onSuccess={(verifiedToken) =>
           onNavigate(AUTH_SCREENS.RESET, { verifiedToken })
         }
-        onBack={() => onNavigate(AUTH_SCREENS.FORGOT)}
+        onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
       />
     </AuthLayout>
   );

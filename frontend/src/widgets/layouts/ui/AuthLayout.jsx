@@ -30,9 +30,9 @@ export function AuthLayout({ title, subtitle, children }) {
           <div className="mx-auto text-center auth-brand-wrap">
             <Brand className="mb-5" alt={title} />
           </div>
-          {/*<div className="auth-content text-center">
+          <div className="auth-content text-center">
             <span className="d-inline-block auth-brand mb-5">{title}</span>
-            {subtitle && <p className="text-muted mb-4">{subtitle}</p>}*/}
+            {subtitle && <p className="text-muted mb-4">{subtitle}</p>}
             {children}
             {/*<div className="small">
               <div className="mb-2">
@@ -79,8 +79,8 @@ export function AuthLayout({ title, subtitle, children }) {
                 {creationYear !== currentYear && `-${currentYear}`} {title}.
               </p>
               <span>All rights reserved.</span>
-            </div>
-          </div>*/}
+            </div>*/}
+          </div>
         </div>
       </div>
       <WarningModal modalId={WARNING_MODAL_ID} />
