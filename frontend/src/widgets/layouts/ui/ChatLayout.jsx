@@ -10,7 +10,13 @@ import { useChatSocket } from "@features/chat";
 import { useDmStore, DmToast } from "@features/dm";
 import { useBlockStore } from "@features/block";
 import { useFriendStore } from "@features/friends";
-import { RulesModal, FeedbackModal } from "@features/info";
+import {
+  RulesModal,
+  FeedbackModal,
+  WarningModal,
+  CookiesModal,
+  DeveloperModal,
+} from "@features/info";
 import { RoleManageModal } from "@features/roles";
 import {
   KickModal,
@@ -24,6 +30,9 @@ import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import {
   RULES_MODAL_ID,
   FEEDBACK_MODAL_ID,
+  WARNING_MODAL_ID,
+  COOKIES_MODAL_ID,
+  DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
 import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
 
@@ -333,6 +342,9 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
       <RulesModal modalId={RULES_MODAL_ID} />
       <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
+      <WarningModal modalId={WARNING_MODAL_ID} />
+      <CookiesModal modalId={COOKIES_MODAL_ID} />
+      <DeveloperModal modalId={DEVELOPER_MODAL_ID} />
       <RoleManageModal />
       <KickModal />
       <BanModal />

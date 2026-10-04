@@ -7,6 +7,7 @@ import {
   MessageCircle,
   ChevronDown,
   User as UserIcon,
+  Copyright,
 } from "lucide-react";
 
 import { FriendsList } from "@features/friends";
@@ -28,9 +29,22 @@ import {
 import {
   RULES_MODAL_ID,
   FEEDBACK_MODAL_ID,
+  WARNING_MODAL_ID,
+  COOKIES_MODAL_ID,
+  DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
+import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
+
+const CREATION_YEAR = 2026;
+
+const FOOTER_LINKS = [
+  { label: "Попередження", modalId: WARNING_MODAL_ID },
+  { label: "Правила", modalId: RULES_MODAL_ID },
+  { label: "Файли cookie", modalId: COOKIES_MODAL_ID },
+  { label: "Розробники", modalId: DEVELOPER_MODAL_ID },
+];
 
 const THEME_OPTIONS = [
   { id: THEMES.LIGHT, label: "Світла", icon: Sun },
@@ -54,6 +68,8 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
   const setCity = useCurrentUserStore((state) => state.setCity);
   const setDisplayName = useCurrentUserStore((state) => state.setDisplayName);
   const setAbout = useCurrentUserStore((state) => state.setAbout);
+
+  const currentYear = new Date().getFullYear();
 
   const handleThemeSelect = (next) => {
     setTheme(next);
@@ -197,6 +213,25 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
           <span>Зворотний зв&apos;язок</span>
         </button>
       </section>
+
+      <div className="card m-3">
+        <div className="card-body small text-muted">
+          <Copyright className="footer-icon" size="1em" /> {CREATION_YEAR}
+          {CREATION_YEAR !== currentYear && `-${currentYear}`} {APP_NAME}.
+          {FOOTER_LINKS.map(({ label, modalId }) => (
+            <a
+              key={modalId}
+              href="#"
+              className="ms-2"
+              data-bs-toggle="modal"
+              data-bs-target={`#${modalId}`}
+              onClick={(e) => e.preventDefault()}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+      </div>
     </AppScrollbar>
   );
 }

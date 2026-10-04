@@ -380,3 +380,18 @@
   color: var(--bs-primary);
   font-weight: 600;
 }
+
+/* Футер панелі профілю (посилання на інформаційні модалки + копірайт). */
+.app-profile-footer {
+  padding: 1rem;
+  text-align: center;
+  color: var(--bs-secondary-color, #74788d);
+}
+
+.app-profile-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+}

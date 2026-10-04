@@ -70,21 +70,14 @@ a:not(.btn):focus-visible {
   --bs-btn-active-bg: #449d44;
   --bs-btn-active-border-color: #449d44;
 }
-/*
-a {
-    text-decoration: none !important;
-}
 .dropdown-toggle::after {
     display: none !important;
 }
-.font-size-14
- {
-    font-size: 14px !important;
-}
+
 .chat-brand-status.is-online {
   color: var(--bs-success);
 }
 
 .chat-brand-status.is-offline {
   color: var(--bs-warning);
-}*/
+}
