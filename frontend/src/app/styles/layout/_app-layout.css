@@ -219,9 +219,12 @@
   font-weight: 700;
 }
 
+/* Обраний нік — той самий вигляд, що й .message-author-btn.is-selected
+   у загальному чаті (_messages.css): колір primary + легка підсвітка,
+   без підкреслення. */
 .app-sidebar-online-name-btn.is-selected {
-  background: var(--bs-secondary-bg);
-  text-decoration: underline;
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.14);
 }
 
 .app-sidebar-status-emoji {
