@@ -1,5 +1,4 @@
 import { createPortal } from "react-dom";
-import { LogOut } from "lucide-react";
 
 /**
  * LogoutConfirmModal — Bootstrap-модалка підтвердження виходу з акаунту.
@@ -37,7 +36,7 @@ export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }
           <div className="modal-footer flex-nowrap">
             <button
               type="button"
-              className="btn btn-outline-secondary fw-bold flex-fill"
+              className="btn btn-secondary fw-bold flex-fill"
               data-bs-dismiss="modal"
             >
               Скасувати
@@ -49,7 +48,6 @@ export function LogoutConfirmModal({ modalId = "logoutConfirmModal", onConfirm }
               data-bs-dismiss="modal"
               onClick={onConfirm}
             >
-              <LogOut size={16} strokeWidth={2} className="me-2" />
               Вийти
             </button>
           </div>
