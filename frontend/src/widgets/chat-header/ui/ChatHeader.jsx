@@ -1,13 +1,7 @@
-import { ChevronDown, MessageCircle, Power, User, Users } from "lucide-react";
+import { ChevronDown, MessageCircle, User, Users } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
-import {
-  STATUS_OPTIONS,
-  DEFAULT_STATUS,
-  getStatusLabel,
-} from "@shared/constants/status.constants.js";
-import { StatusIcon } from "@shared/ui/status-icon";
 import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
 
 /**
@@ -18,13 +12,10 @@ import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
  *    пульсуюча — підключення) + назва кімнати з ▾ — відкриває вибір кімнати (RoomPickerModal,
  *    id передається в roomPickerModalId, відкриття — штатний
  *    data-bs-toggle="modal");
- *  - "Статус" — іконка поточного статусу доступності з дропдауном вибору;
  *  - "Учасники" + число онлайн — права панель (SidePanel, режим users);
  *  - "Особисті повідомлення" + бейдж непрочитаних — права панель, режим dm;
  *  - "Профіль" — права панель, режим profile (профіль, тема, друзі,
- *    правила);
- *  - "Вийти" (іконка Power) — відкриває модалку підтвердження виходу
- *    (LogoutConfirmModal, id передається в logoutModalId).
+ *    інформація, вихід);
  *
  * Яка панель відкрита — у useSidePanelStore; повторний клік по тій
  * самій кнопці закриває панель.
@@ -33,10 +24,7 @@ export function ChatHeader({
   title,
   online,
   roomPickerModalId,
-  logoutModalId,
   usersCount = 0,
-  currentUserStatus,
-  onStatusChange,
 }) {
   const panel = useSidePanelStore((state) => state.panel);
   const togglePanel = useSidePanelStore((state) => state.toggle);
@@ -78,39 +66,6 @@ export function ChatHeader({
         </div>
 
         <div className="chat-header-actions">
-          <div className="dropdown">
-            <button
-              type="button"
-              className="chat-header-btn"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              title={`Статус: ${getStatusLabel(currentUserStatus)}`}
-              aria-label={`Статус: ${getStatusLabel(currentUserStatus)}. Змінити`}
-            >
-              <StatusIcon status={currentUserStatus} size={18} />
-            </button>
-
-            <div className="dropdown-menu dropdown-menu-end chat-status-menu">
-              {STATUS_OPTIONS.map(({ value, label }) => (
-                <a
-                  key={value}
-                  className={`dropdown-item ${
-                    (currentUserStatus ?? DEFAULT_STATUS) === value
-                      ? "is-active"
-                      : ""
-                  }`}
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onStatusChange?.(value);
-                  }}
-                >
-                  <StatusIcon status={value} size={14} /> {label}
-                </a>
-              ))}
-            </div>
-          </div>
-
           <button
             type="button"
             className={`${panelButtonClass(SIDE_PANELS.USERS)} chat-header-btn-wide`}
@@ -153,16 +108,6 @@ export function ChatHeader({
             <User size={18} />
           </button>
 
-          <button
-            type="button"
-            className="chat-header-btn chat-header-btn-logout"
-            data-bs-toggle="modal"
-            data-bs-target={`#${logoutModalId}`}
-            title="Вийти"
-            aria-label="Вийти"
-          >
-            <Power size={18} />
-          </button>
         </div>
       </div>
     </header>

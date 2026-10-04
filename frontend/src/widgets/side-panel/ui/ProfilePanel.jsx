@@ -3,7 +3,13 @@ import {
   Sun,
   Moon,
   Monitor,
-  Copyright,
+  ChevronDown,
+  Info,
+  TriangleAlert,
+  ScrollText,
+  Cookie,
+  Code,
+  MessageSquareText,
 } from "lucide-react";
 
 import { FriendsList } from "@features/friends";
@@ -15,6 +21,12 @@ import {
   updateDisplayName,
   updateAbout,
 } from "@shared/api/profile.api.js";
+import {
+  STATUS_OPTIONS,
+  DEFAULT_STATUS,
+  getStatusLabel,
+} from "@shared/constants/status.constants.js";
+import { StatusIcon } from "@shared/ui/status-icon";
 import { EditableProfileField } from "./EditableProfileField.jsx";
 import {
   RULES_MODAL_ID,
@@ -24,17 +36,18 @@ import {
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
-import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
 
-const CREATION_YEAR = 2026;
-
-const FOOTER_LINKS = [
-  { label: "Попередження", modalId: WARNING_MODAL_ID },
-  { label: "Правила", modalId: RULES_MODAL_ID },
-  { label: "Файли cookie", modalId: COOKIES_MODAL_ID },
-  { label: "Розробники", modalId: DEVELOPER_MODAL_ID },
-  { label: "Зворотний зв'язок", modalId: FEEDBACK_MODAL_ID },
+const INFO_LINKS = [
+  { label: "Попередження", icon: TriangleAlert, modalId: WARNING_MODAL_ID },
+  { label: "Правила", icon: ScrollText, modalId: RULES_MODAL_ID },
+  { label: "Файли cookie", icon: Cookie, modalId: COOKIES_MODAL_ID },
+  { label: "Розробники", icon: Code, modalId: DEVELOPER_MODAL_ID },
+  {
+    label: "Зворотний зв'язок",
+    icon: MessageSquareText,
+    modalId: FEEDBACK_MODAL_ID,
+  },
 ];
 
 const THEME_OPTIONS = [
@@ -44,11 +57,16 @@ const THEME_OPTIONS = [
 ];
 
 /**
- * ProfilePanel — "усе про мене" в одній панелі: профіль,
- * тема, друзі, заблоковані, правила/зворотний зв'язок. Вихід — іконка Power в шапці чату.
+ * ProfilePanel — "усе про мене" в одній панелі: статус, профіль,
+ * тема, друзі, заблоковані, інформація (правила, зворотний зв'язок), вихід — кнопка в кінці панелі.
  * Замінює колишні таби "Профіль" і "Налаштування" лівого сайдбара.
  */
-export function ProfilePanel({ login, nicknameColor }) {
+export function ProfilePanel({
+  login,
+  currentUserStatus,
+  onStatusChange,
+  logoutModalId,
+}) {
   const [theme, setTheme] = useState(() => getStoredTheme());
 
   const email = useCurrentUserStore((state) => state.email);
@@ -59,8 +77,6 @@ export function ProfilePanel({ login, nicknameColor }) {
   const setCity = useCurrentUserStore((state) => state.setCity);
   const setDisplayName = useCurrentUserStore((state) => state.setDisplayName);
   const setAbout = useCurrentUserStore((state) => state.setAbout);
-
-  const currentYear = new Date().getFullYear();
 
   const handleThemeSelect = (next) => {
     setTheme(next);
@@ -77,9 +93,36 @@ export function ProfilePanel({ login, nicknameColor }) {
   return (
     <>
       <div className="app-profile-head">
-        <h5 className="app-profile-login" style={{ color: nicknameColor }}>
-          {login}
-        </h5>
+        <div className="dropdown">
+          <button
+            type="button"
+            className="app-profile-status-btn dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <StatusIcon status={currentUserStatus} size={12} />
+            {getStatusLabel(currentUserStatus)}
+            <ChevronDown size={14} className="ms-1" />
+          </button>
+
+          <div className="dropdown-menu">
+            {STATUS_OPTIONS.map(({ value, label }) => (
+              <a
+                key={value}
+                className={`dropdown-item ${
+                  (currentUserStatus ?? DEFAULT_STATUS) === value ? "is-active" : ""
+                }`}
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onStatusChange?.(value);
+                }}
+              >
+                <StatusIcon status={value} size={12} /> {label}
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
 
     <AppScrollbar className="app-panel-scroll">
@@ -152,24 +195,36 @@ export function ProfilePanel({ login, nicknameColor }) {
         <BlockedUsersList />
       </details>
 
-      <div className="card m-3">
-        <div className="card-body app-profile-footer-row text-muted">
-          <span className="app-profile-footer-copy">
-            <Copyright className="footer-icon" size="1em" /> {CREATION_YEAR}
-            {CREATION_YEAR !== currentYear && `-${currentYear}`} {APP_NAME}.
-          </span>
-          {FOOTER_LINKS.map(({ label, modalId }) => (
-            <a
-              key={modalId}
-              href="#"
-              data-bs-toggle="modal"
-              data-bs-target={`#${modalId}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              {label}
-            </a>
-          ))}
-        </div>
+      <details className="app-panel-details">
+        <summary className="app-panel-summary">
+          <Info size={18} />
+          <span className="app-panel-summary-label">Інформація</span>
+          <ChevronDown size={16} className="app-panel-summary-chevron" />
+        </summary>
+
+        {INFO_LINKS.map(({ label, icon: LinkIcon, modalId }) => (
+          <button
+            key={modalId}
+            type="button"
+            className="app-sidebar-theme-btn"
+            data-bs-toggle="modal"
+            data-bs-target={`#${modalId}`}
+          >
+            <LinkIcon size={18} />
+            <span>{label}</span>
+          </button>
+        ))}
+      </details>
+
+      <div className="p-3">
+        <button
+          type="button"
+          className="btn btn-outline-danger w-100"
+          data-bs-toggle="modal"
+          data-bs-target={`#${logoutModalId}`}
+        >
+          Вийти
+        </button>
       </div>
     </AppScrollbar>
     </>

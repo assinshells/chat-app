@@ -22,6 +22,9 @@ export function SidePanel({
   activeRoom,
   selectedNicknames,
   onNicknameClick,
+  currentUserStatus,
+  onStatusChange,
+  logoutModalId,
 }) {
   const isDarkTheme = useIsDarkTheme();
 
@@ -35,9 +38,17 @@ export function SidePanel({
 
   const isProfile = panel === SIDE_PANELS.PROFILE;
 
-  let title = "Профіль";
+  let title = login ?? "Профіль";
   let titleStyle;
-  if (panel === SIDE_PANELS.USERS) {
+  if (isProfile) {
+    // Логін як заголовок: лише поточний колір ніка, шрифт — стандартний.
+    titleStyle = {
+      color: getEffectiveColorHex(
+        users.find((user) => user.login === login)?.color,
+        isDarkTheme,
+      ),
+    };
+  } else if (panel === SIDE_PANELS.USERS) {
     title = `У кімнаті: ${users.length}`;
   } else if (panel === SIDE_PANELS.DM) {
     title = dmPeerLogin ?? "Особисті повідомлення";
@@ -48,9 +59,7 @@ export function SidePanel({
 
   return (
     <aside className="app-panel" aria-label={title}>
-      <div
-        className={`app-panel-header ${isProfile ? "app-panel-header--flush" : ""}`}
-      >
+      <div className="app-panel-header">
         {isDmConversation && (
           <button
             type="button"
@@ -63,13 +72,9 @@ export function SidePanel({
           </button>
         )}
 
-        {isProfile ? (
-          <span className="app-panel-title" />
-        ) : (
-          <h5 className="app-panel-title" style={titleStyle}>
-            {title}
-          </h5>
-        )}
+        <h5 className="app-panel-title" style={titleStyle}>
+          {title}
+        </h5>
 
         <button
           type="button"
@@ -98,10 +103,9 @@ export function SidePanel({
         {panel === SIDE_PANELS.PROFILE && (
           <ProfilePanel
             login={login}
-            nicknameColor={getEffectiveColorHex(
-              users.find((user) => user.login === login)?.color,
-              isDarkTheme,
-            )}
+            currentUserStatus={currentUserStatus}
+            onStatusChange={onStatusChange}
+            logoutModalId={logoutModalId}
           />
         )}
       </div>

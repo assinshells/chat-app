@@ -254,10 +254,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             title={activeRoomName}
             online={connected}
             roomPickerModalId={ROOM_PICKER_MODAL_ID}
-            logoutModalId={LOGOUT_MODAL_ID}
             usersCount={visibleRoomUsers.length}
-            currentUserStatus={currentUserStatus}
-            onStatusChange={handleStatusChange}
           />
           <ConfinementBanner confinement={confinement} />
           <RoomBanNoticeBanner notice={roomBanNotice} />
@@ -329,6 +326,9 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
           activeRoom={activeRoom}
           selectedNicknames={targetNicknames}
           onNicknameClick={handlePanelNicknameClick}
+          currentUserStatus={currentUserStatus}
+          onStatusChange={handleStatusChange}
+          logoutModalId={LOGOUT_MODAL_ID}
         />
       )}
 
