@@ -22,8 +22,6 @@ export function SidePanel({
   activeRoom,
   selectedNicknames,
   onNicknameClick,
-  currentUserStatus,
-  onStatusChange,
 }) {
   const isDarkTheme = useIsDarkTheme();
 
@@ -104,8 +102,6 @@ export function SidePanel({
               users.find((user) => user.login === login)?.color,
               isDarkTheme,
             )}
-            currentUserStatus={currentUserStatus}
-            onStatusChange={onStatusChange}
           />
         )}
       </div>

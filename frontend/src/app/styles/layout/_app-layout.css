@@ -301,33 +301,15 @@
 
 .app-profile-login {
   margin: 0;
+
   max-width: 100%;
+
+  font-size: 16px;
   font-weight: 600;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.app-profile-status-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-
-  padding: 0.2rem 0.5rem;
-
-  font-size: 0.85rem;
-
-  border: 0;
-  border-radius: var(--bs-border-radius);
-
-  background: transparent;
-  color: var(--bs-secondary-color);
-
-  cursor: pointer;
-}
-
-.app-profile-status-btn:hover {
-  background: var(--bs-secondary-bg);
 }
 
 .app-panel-section {
@@ -415,9 +397,21 @@
   border-bottom: 0;
 }
 
-/* Пункти дропдауну статусу — без підкреслення при наведенні. */
-.app-profile-head .dropdown-item,
-.app-profile-head .dropdown-item:hover,
-.app-profile-head .dropdown-item:focus-visible {
+/* Дропдаун статусу в шапці чату — без підкреслення при наведенні. */
+.chat-status-menu .dropdown-item,
+.chat-status-menu .dropdown-item:hover,
+.chat-status-menu .dropdown-item:focus-visible {
   text-decoration: none;
+}
+
+.chat-status-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-status-menu .dropdown-item.is-active {
+  font-weight: 600;
+  background: var(--bs-secondary-bg);
+  color: var(--bs-body-color);
 }

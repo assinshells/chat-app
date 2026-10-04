@@ -3,7 +3,6 @@ import {
   Sun,
   Moon,
   Monitor,
-  ChevronDown,
   Copyright,
 } from "lucide-react";
 
@@ -18,18 +17,12 @@ import {
 } from "@shared/api/profile.api.js";
 import { EditableProfileField } from "./EditableProfileField.jsx";
 import {
-  STATUS_OPTIONS,
-  DEFAULT_STATUS,
-  getStatusLabel,
-} from "@shared/constants/status.constants.js";
-import {
   RULES_MODAL_ID,
   FEEDBACK_MODAL_ID,
   WARNING_MODAL_ID,
   COOKIES_MODAL_ID,
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
-import { StatusIcon } from "@shared/ui/status-icon";
 import { AppScrollbar } from "@shared/ui/scrollbar";
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
@@ -51,16 +44,11 @@ const THEME_OPTIONS = [
 ];
 
 /**
- * ProfilePanel — "усе про мене" в одній панелі: статус, профіль,
+ * ProfilePanel — "усе про мене" в одній панелі: профіль,
  * тема, друзі, заблоковані, правила/зворотний зв'язок. Вихід — іконка Power в шапці чату.
  * Замінює колишні таби "Профіль" і "Налаштування" лівого сайдбара.
  */
-export function ProfilePanel({
-  login,
-  nicknameColor,
-  currentUserStatus,
-  onStatusChange,
-}) {
+export function ProfilePanel({ login, nicknameColor }) {
   const [theme, setTheme] = useState(() => getStoredTheme());
 
   const email = useCurrentUserStore((state) => state.email);
@@ -92,37 +80,6 @@ export function ProfilePanel({
         <h5 className="app-profile-login" style={{ color: nicknameColor }}>
           {login}
         </h5>
-
-        <div className="dropdown">
-          <button
-            type="button"
-            className="app-profile-status-btn dropdown-toggle"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            <StatusIcon status={currentUserStatus} size={12} />
-            {getStatusLabel(currentUserStatus)}
-            <ChevronDown size={14} className="ms-1" />
-          </button>
-
-          <div className="dropdown-menu">
-            {STATUS_OPTIONS.map(({ value, label }) => (
-              <a
-                key={value}
-                className={`dropdown-item ${
-                  (currentUserStatus ?? DEFAULT_STATUS) === value ? "is-active" : ""
-                }`}
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onStatusChange?.(value);
-                }}
-              >
-                <StatusIcon status={value} size={12} /> {label}
-              </a>
-            ))}
-          </div>
-        </div>
       </div>
 
     <AppScrollbar className="app-panel-scroll">
