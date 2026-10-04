@@ -65,3 +65,16 @@
 
   color: var(--bs-secondary-color);
 }
+
+/* Тіло модалки — flex-колонка без власного скролу: прокручується лише
+   список кімнат (SimpleBar), а пошук лишається на місці. Селектор
+   специфічніший за .modal-dialog-scrollable .modal-body (Bootstrap) —
+   той самий прийом, що й для .rules-modal-body. */
+.modal-dialog-scrollable .modal-body.room-picker-body {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 0;
+
+  overflow: hidden;
+}

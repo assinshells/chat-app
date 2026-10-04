@@ -29,6 +29,7 @@ import {
   RULES_MODAL_ID,
   FEEDBACK_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
+import { AppScrollbar } from "@shared/ui/scrollbar";
 import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
 
 const THEME_OPTIONS = [
@@ -67,7 +68,7 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
   const handleSaveAbout = async (next) => setAbout((await updateAbout(next)).about);
 
   return (
-    <div className="app-panel-scroll">
+    <AppScrollbar className="app-panel-scroll">
       <div className="app-profile-head">
         <div className="app-profile-avatar" aria-hidden="true">
           <UserIcon size={28} />
@@ -196,6 +197,6 @@ export function ProfilePanel({ login, currentUserStatus, onStatusChange }) {
           <span>Зворотний зв&apos;язок</span>
         </button>
       </section>
-    </div>
+    </AppScrollbar>
   );
 }

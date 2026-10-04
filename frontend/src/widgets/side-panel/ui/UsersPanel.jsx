@@ -5,6 +5,7 @@ import { useFriendStore } from "@features/friends/model/useFriendStore.js";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { getStatusEmoji, getStatusLabel } from "@shared/constants/status.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
+import { AppScrollbar } from "@shared/ui/scrollbar";
 
 /**
  * UsersPanel — учасники поточної кімнати: один список із пошуком.
@@ -95,7 +96,7 @@ export function UsersPanel({
         />
       </div>
 
-      <div className="app-panel-scroll">
+      <AppScrollbar className="app-panel-scroll">
         {isEmpty ? (
           <div className="app-sidebar-empty">
             {query ? "Нікого не знайдено" : "У кімнаті поки нікого немає"}
@@ -118,7 +119,7 @@ export function UsersPanel({
             )}
           </div>
         )}
-      </div>
+      </AppScrollbar>
     </>
   );
 }

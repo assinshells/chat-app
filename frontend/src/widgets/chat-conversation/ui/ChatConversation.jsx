@@ -6,6 +6,7 @@ import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { hasRoomLink } from "@shared/lib/systemMessage.js";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { DmTriggerButton } from "@features/dm";
+import { AppScrollbar } from "@shared/ui/scrollbar";
 
 /**
  * renderMessageText — рендерить текст повідомлення, підсвічуючи згадки
@@ -156,10 +157,7 @@ export function ChatConversation({
   }, [messages.length]);
 
   return (
-    <div
-      className="chat-conversation app-scrollbar no-horizontal"
-      tabIndex={-1}
-    >
+    <AppScrollbar className="chat-conversation">
       <div className="chat-messages">
 
         {messages.length === 0 ? (
@@ -267,6 +265,6 @@ export function ChatConversation({
         )}
 
       </div>
-    </div>
+    </AppScrollbar>
   );
 }

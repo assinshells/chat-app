@@ -182,3 +182,10 @@
   font-size: 0.82rem;
   color: var(--bs-danger);
 }
+
+/* Список повідомлень скролиться через SimpleBar (AppScrollbar), якому
+   потрібен батько-flex-колонка з обмеженою висотою. */
+.private-chat-messages {
+  display: flex;
+  flex-direction: column;
+}

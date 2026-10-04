@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Search } from "lucide-react";
 
+import { AppScrollbar } from "@shared/ui/scrollbar";
 import { ROOMS } from "@features/chat/constants/rooms.constants.js";
 
 export const ROOM_PICKER_MODAL_ID = "roomPickerModal";
@@ -86,7 +87,7 @@ export function RoomPickerModal({
             />
           </div>
 
-          <div className="modal-body">
+          <div className="modal-body room-picker-body">
             <div className="room-picker-search">
               <Search size={16} aria-hidden="true" />
               <input
@@ -99,27 +100,29 @@ export function RoomPickerModal({
               />
             </div>
 
-            {found ? (
-              found.length === 0 ? (
-                <p className="room-picker-empty">Кімнату не знайдено</p>
+            <AppScrollbar>
+              {found ? (
+                found.length === 0 ? (
+                  <p className="room-picker-empty">Кімнату не знайдено</p>
+                ) : (
+                  <div className="room-select-grid room-picker-grid">
+                    {found.map(renderRoom)}
+                  </div>
+                )
               ) : (
-                <div className="room-select-grid room-picker-grid">
-                  {found.map(renderRoom)}
-                </div>
-              )
-            ) : (
-              <>
-                <h6 className="room-picker-group-label">Тематичні</h6>
-                <div className="room-select-grid room-picker-grid">
-                  {THEMATIC_ROOMS.map(renderRoom)}
-                </div>
+                <>
+                  <h6 className="room-picker-group-label">Тематичні</h6>
+                  <div className="room-select-grid room-picker-grid">
+                    {THEMATIC_ROOMS.map(renderRoom)}
+                  </div>
 
-                <h6 className="room-picker-group-label">Міста</h6>
-                <div className="room-select-grid room-picker-grid">
-                  {CITY_ROOMS.map(renderRoom)}
-                </div>
-              </>
-            )}
+                  <h6 className="room-picker-group-label">Міста</h6>
+                  <div className="room-select-grid room-picker-grid">
+                    {CITY_ROOMS.map(renderRoom)}
+                  </div>
+                </>
+              )}
+            </AppScrollbar>
           </div>
         </div>
       </div>

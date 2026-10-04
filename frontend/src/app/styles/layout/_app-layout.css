@@ -15,6 +15,8 @@
 .app-layout {
   display: flex;
 
+  overflow: hidden;
+
   height: 100vh;
   height: 100dvh;
 }
@@ -38,13 +40,37 @@
   flex-direction: column;
 }
 
-/* Скрол-контейнери (стрічка кімнати, листування в панелі). */
-.app-scrollbar {
-  overflow-y: auto;
+/* =========================================================
+   SIMPLEBAR — скрол-області (shared/ui/scrollbar/AppScrollbar) з
+   автоприховуванням повзунка.
+   ========================================================= */
+
+/* Host AppScrollbar: flex-item із фіксованою flex-висотою, усередині
+   SimpleBar з height: 100% (див. AppScrollbar.jsx). overflow: hidden —
+   щоб навіть у разі збою розрахунку висоти вміст не виліз назовні й
+   не з'явився нативний скролбар. */
+.app-scroll-host {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
 }
 
-.no-horizontal {
-  overflow-x: hidden;
+/* Колір повзунка береться з теми (за замовчуванням SimpleBar чорний
+   і непомітний у темній темі). */
+.simplebar-track .simplebar-scrollbar::before {
+  background-color: var(--bs-secondary-color);
+}
+
+/* .no-horizontal — без горизонтальної прокрутки і її повзунка. */
+.no-horizontal .simplebar-content-wrapper {
+  overflow-x: hidden !important;
+}
+
+.no-horizontal .simplebar-track.simplebar-horizontal {
+  display: none;
 }
 
 /* =========================================================
@@ -118,12 +144,10 @@
   flex-direction: column;
 }
 
+/* Скрол віддано SimpleBar (AppScrollbar) — flex/min-height задає сам
+   компонент. */
 .app-panel-scroll {
-  flex: 1 1 auto;
-
   min-height: 0;
-
-  overflow-y: auto;
 }
 
 .app-panel-search {

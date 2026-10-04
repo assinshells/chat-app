@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Ban, Send } from "lucide-react";
 
 import { useDmStore } from "@features/dm";
+import { AppScrollbar } from "@shared/ui/scrollbar";
 import { formatMessageTime, normalizeMessageText } from "@shared/lib/message.js";
 
 // Той самий ліміт, що й у публічному чаті (ChatComposer) і в панелі
@@ -52,7 +53,7 @@ export function PrivateChat({ login }) {
   return (
     <div className="private-chat">
       <div className="private-chat-messages">
-        <div className="app-scrollbar no-horizontal" style={{ height: "100%" }}>
+        <AppScrollbar>
           <div className="private-chat-messages-list">
             {convo?.loading ? (
               <div className="private-chat-empty">Завантаження…</div>
@@ -80,7 +81,7 @@ export function PrivateChat({ login }) {
                 губився при зміні стану. */}
             <div ref={endRef} />
           </div>
-        </div>
+        </AppScrollbar>
       </div>
 
       {/* blocked — хтось із двох боків заблокував іншого (див.

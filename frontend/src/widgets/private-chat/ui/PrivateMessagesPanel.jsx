@@ -2,6 +2,7 @@ import { useDmStore } from "@features/dm";
 import { PrivateChat } from "./PrivateChat.jsx";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
+import { AppScrollbar } from "@shared/ui/scrollbar";
 
 /**
  * PrivateMessagesPanel — вміст правої панелі "Особисті повідомлення"
@@ -38,7 +39,7 @@ export function PrivateMessagesPanel() {
   }
 
   return (
-    <div className="private-modal-list">
+    <AppScrollbar className="private-modal-list">
       {order.map((dialogLogin) => {
         const convo = conversations[dialogLogin];
         if (!convo) return null;
@@ -75,6 +76,6 @@ export function PrivateMessagesPanel() {
           </button>
         );
       })}
-    </div>
+    </AppScrollbar>
   );
 }
