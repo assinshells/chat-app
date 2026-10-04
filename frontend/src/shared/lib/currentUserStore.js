@@ -21,6 +21,7 @@ export const useCurrentUserStore = create((set) => ({
   city: null,
   displayName: null,
   about: null,
+  maritalStatus: null,
   moderatorRooms: [],
 
   setUser: (user) =>
@@ -33,6 +34,7 @@ export const useCurrentUserStore = create((set) => ({
       city: user.city ?? null,
       displayName: user.displayName ?? null,
       about: user.about ?? null,
+      maritalStatus: user.maritalStatus ?? null,
       moderatorRooms: user.moderatorRooms ?? [],
     }),
 
@@ -48,6 +50,7 @@ export const useCurrentUserStore = create((set) => ({
   setCity: (city) => set({ city }),
   setDisplayName: (displayName) => set({ displayName }),
   setAbout: (about) => set({ about }),
+  setMaritalStatus: (maritalStatus) => set({ maritalStatus }),
 
   clear: () =>
     set({
@@ -59,6 +62,7 @@ export const useCurrentUserStore = create((set) => ({
       city: null,
       displayName: null,
       about: null,
+      maritalStatus: null,
       moderatorRooms: [],
     }),
 }));

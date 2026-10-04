@@ -140,3 +140,11 @@ export const toUpdateDisplayNameDto = (body) => ({
 export const toUpdateAboutDto = (body) => ({
   about: body.about.trim() === "" ? null : body.about.trim(),
 });
+/**
+ * @typedef {Object} UpdateMaritalStatusDto
+ * @property {string|null} maritalStatus - порожній рядок нормалізується
+ *   в null ("не вказано").
+ */
+export const toUpdateMaritalStatusDto = (body) => ({
+  maritalStatus: body.maritalStatus === "" ? null : body.maritalStatus,
+});

@@ -1,5 +1,10 @@
 import { ValidationException } from "../exceptions/auth.exceptions.js";
-import { GENDER_OPTIONS, COLOR_OPTIONS, STATUS_OPTIONS } from "../constants/auth.constants.js";
+import {
+  GENDER_OPTIONS,
+  COLOR_OPTIONS,
+  STATUS_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+} from "../constants/auth.constants.js";
 
 // Максимальна довжина нікнейма при реєстрації. users.login у БД —
 // VARCHAR(64) (див. docker/postgres/init.sql), тобто технічно влізе й
@@ -146,5 +151,19 @@ export const validateUpdateAboutRequest = (body) => {
   if (typeof body.about !== "string") errors.push("поле «Про себе» має бути рядком");
   else if (body.about.trim().length > MAX_ABOUT_LENGTH)
     errors.push(`поле «Про себе» має бути не довшим за ${MAX_ABOUT_LENGTH} символів`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
+export const validateUpdateMaritalStatusRequest = (body) => {
+  const errors = [];
+  // Порожній рядок допустимий (означає "очистити поле").
+  if (
+    typeof body.maritalStatus !== "string" ||
+    (body.maritalStatus !== "" &&
+      !MARITAL_STATUS_OPTIONS.includes(body.maritalStatus))
+  )
+    errors.push(
+      `сімейний стан має бути порожнім або одним із: ${MARITAL_STATUS_OPTIONS.join(", ")}`,
+    );
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };

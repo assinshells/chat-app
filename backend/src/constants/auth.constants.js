@@ -101,6 +101,21 @@ export const STATUS_VALUES = Object.freeze({
 export const STATUS_OPTIONS = Object.freeze(Object.values(STATUS_VALUES));
 export const DEFAULT_STATUS = STATUS_VALUES.ONLINE;
 
+// Сімейний стан користувача (профіль). Зберігається як код; підписи —
+// на фронті (shared/constants/maritalStatus.constants.js). Порожнє
+// значення (null) означає "не вказано".
+export const MARITAL_STATUS_OPTIONS = Object.freeze([
+  "single",
+  "in_relationship",
+  "married",
+  "civil_marriage",
+  "cohabiting",
+  "open_relationship",
+  "complicated",
+  "separated",
+  "divorced",
+]);
+
 // Ролі користувачів. 'user' — значення за замовчуванням (звичайний
 // учасник чату, без прав модерації). 'moderator' модерує лише кімнати
 // зі свого переліку (moderator_rooms), 'admin' і 'superadmin' — усі

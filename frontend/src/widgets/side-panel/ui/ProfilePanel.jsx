@@ -1,10 +1,13 @@
 import { useState } from "react";
 import {
-  Sun,
   Moon,
-  Monitor,
+  Users,
+  UserX,
+  UserPen,
   ChevronDown,
-  Info,
+  ChevronRight,
+  Settings,
+  CircleHelp,
   TriangleAlert,
   ScrollText,
   Cookie,
@@ -19,7 +22,6 @@ import {
   updateEmail,
   updateCity,
   updateDisplayName,
-  updateAbout,
 } from "@shared/api/profile.api.js";
 import {
   STATUS_OPTIONS,
@@ -36,7 +38,16 @@ import {
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
-import { applyTheme, getStoredTheme, THEMES } from "@shared/lib/theme.js";
+import { ProfileEditView } from "./ProfileEditView.jsx";
+import { DarkModeView } from "./DarkModeView.jsx";
+import { SubPanelView } from "./SubPanelView.jsx";
+
+const SETTINGS_ITEMS = [
+  { id: "profile", label: "Інформація профілю", icon: UserPen },
+  { id: "friends", label: "Друзі", icon: Users },
+  { id: "blocked", label: "Заблоковані", icon: UserX },
+  { id: "dark-mode", label: "Темний режим", icon: Moon },
+];
 
 const INFO_LINKS = [
   { label: "Попередження", icon: TriangleAlert, modalId: WARNING_MODAL_ID },
@@ -50,15 +61,10 @@ const INFO_LINKS = [
   },
 ];
 
-const THEME_OPTIONS = [
-  { id: THEMES.LIGHT, label: "Світла", icon: Sun },
-  { id: THEMES.DARK, label: "Темна", icon: Moon },
-  { id: THEMES.SYSTEM, label: "Системна", icon: Monitor },
-];
-
 /**
  * ProfilePanel — "усе про мене" в одній панелі: статус, профіль,
- * тема, друзі, заблоковані, інформація (правила, зворотний зв'язок), вихід — кнопка в кінці панелі.
+ * налаштування (інформація профілю, друзі, заблоковані, темний режим), допомога (правила,
+ * зворотний зв'язок), вихід — кнопка в кінці панелі.
  * Замінює колишні таби "Профіль" і "Налаштування" лівого сайдбара.
  */
 export function ProfilePanel({
@@ -67,28 +73,22 @@ export function ProfilePanel({
   onStatusChange,
   logoutModalId,
 }) {
-  const [theme, setTheme] = useState(() => getStoredTheme());
+  // Яка вкладена панель відкрита поверх профілю (null — жодна).
+  const [subView, setSubView] = useState(null);
+  const closeSubView = () => setSubView(null);
 
   const email = useCurrentUserStore((state) => state.email);
   const city = useCurrentUserStore((state) => state.city);
   const displayName = useCurrentUserStore((state) => state.displayName);
-  const about = useCurrentUserStore((state) => state.about);
   const setEmail = useCurrentUserStore((state) => state.setEmail);
   const setCity = useCurrentUserStore((state) => state.setCity);
   const setDisplayName = useCurrentUserStore((state) => state.setDisplayName);
-  const setAbout = useCurrentUserStore((state) => state.setAbout);
-
-  const handleThemeSelect = (next) => {
-    setTheme(next);
-    applyTheme(next);
-  };
 
   // Кожен onSave стосується лише свого поля (див. EditableProfileField).
   const handleSaveEmail = async (next) => setEmail((await updateEmail(next)).email);
   const handleSaveCity = async (next) => setCity((await updateCity(next)).city);
   const handleSaveDisplayName = async (next) =>
     setDisplayName((await updateDisplayName(next)).displayName);
-  const handleSaveAbout = async (next) => setAbout((await updateAbout(next)).about);
 
   return (
     <>
@@ -127,19 +127,6 @@ export function ProfilePanel({
 
     <AppScrollbar className="app-panel-scroll">
       <section className="app-panel-section">
-        <h6 className="app-sidebar-settings-group-label">Про себе</h6>
-        <EditableProfileField
-          label="Про себе"
-          value={about}
-          placeholder="Розкажіть трохи про себе"
-          maxLength={500}
-          multiline
-          rows={4}
-          onSave={handleSaveAbout}
-        />
-      </section>
-
-      <section className="app-panel-section">
         <h6 className="app-sidebar-settings-group-label">Особиста інформація</h6>
 
         <div className="mb-2">
@@ -170,35 +157,31 @@ export function ProfilePanel({
         />
       </section>
 
-      <section className="app-panel-section app-panel-section-flush">
-        <h6 className="app-sidebar-settings-group-label px-3">Тема</h6>
-        {THEME_OPTIONS.map(({ id, label, icon: ThemeIcon }) => (
+      <details className="app-panel-details">
+        <summary className="app-panel-summary">
+          <Settings size={18} />
+          <span className="app-panel-summary-label">Налаштування</span>
+          <ChevronDown size={16} className="app-panel-summary-chevron" />
+        </summary>
+
+        {SETTINGS_ITEMS.map(({ id, label, icon: ItemIcon }) => (
           <button
             key={id}
             type="button"
-            className={`app-sidebar-theme-btn ${theme === id ? "is-active" : ""}`}
-            onClick={() => handleThemeSelect(id)}
+            className="app-sidebar-theme-btn"
+            onClick={() => setSubView(id)}
           >
-            <ThemeIcon size={18} />
+            <ItemIcon size={18} />
             <span>{label}</span>
+            <ChevronRight size={16} className="ms-auto" />
           </button>
         ))}
-      </section>
-
-      <details className="app-panel-details">
-        <summary>Друзі</summary>
-        <FriendsList />
-      </details>
-
-      <details className="app-panel-details">
-        <summary>Заблоковані</summary>
-        <BlockedUsersList />
       </details>
 
       <details className="app-panel-details">
         <summary className="app-panel-summary">
-          <Info size={18} />
-          <span className="app-panel-summary-label">Інформація</span>
+          <CircleHelp size={18} />
+          <span className="app-panel-summary-label">Допомога</span>
           <ChevronDown size={16} className="app-panel-summary-chevron" />
         </summary>
 
@@ -227,6 +210,19 @@ export function ProfilePanel({
         </button>
       </div>
     </AppScrollbar>
+
+    {subView === "profile" && <ProfileEditView onBack={closeSubView} />}
+    {subView === "friends" && (
+      <SubPanelView title="Друзі" onBack={closeSubView}>
+        <FriendsList />
+      </SubPanelView>
+    )}
+    {subView === "blocked" && (
+      <SubPanelView title="Заблоковані" onBack={closeSubView}>
+        <BlockedUsersList />
+      </SubPanelView>
+    )}
+    {subView === "dark-mode" && <DarkModeView onBack={closeSubView} />}
     </>
   );
 }

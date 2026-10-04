@@ -42,3 +42,15 @@ export const updateDisplayName = (displayName) =>
  */
 export const updateAbout = (about) =>
   apiClient.patch("/api/auth/about", { about }).then((r) => r.data);
+
+/**
+ * updateMaritalStatus — сімейний стан (код зі списку
+ * MARITAL_STATUS_OPTIONS).
+ *
+ * @param {string} maritalStatus - порожній рядок дозволений (очищає поле)
+ * @returns {Promise<{ success: boolean, maritalStatus: string|null }>}
+ */
+export const updateMaritalStatus = (maritalStatus) =>
+  apiClient
+    .patch("/api/auth/marital-status", { maritalStatus })
+    .then((r) => r.data);

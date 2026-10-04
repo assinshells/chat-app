@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS users (
     -- аккордеоні "Personal Info" (textarea, див. EditableProfileField
     -- з multiline). Необов'язкове, як city/display_name.
     about VARCHAR(500),
+    -- Сімейний стан — код зі списку (single, married, ...), перелік
+    -- узгоджений з MARITAL_STATUS_OPTIONS (backend) і фронтом.
+    -- Необов'язкове, як city/display_name/about.
+    marital_status VARCHAR(32),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -47,6 +51,9 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(120);
 
 -- Так само для about.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS about VARCHAR(500);
+
+-- Так само для marital_status.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS marital_status VARCHAR(32);
 
 -- Домігрування для баз, створених до розширення палітри з 5 до 20
 -- кольорів (init.sql виконується лише на порожній базі, тому наявний

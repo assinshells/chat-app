@@ -144,6 +144,12 @@ export const AuthService = {
     return { success: true, about: updated.about };
   },
 
+  async updateMaritalStatus({ userId, maritalStatus }) {
+    const updated = await UserRepository.updateMaritalStatus(userId, maritalStatus);
+    if (!updated) throw new NotFoundException();
+    return { success: true, maritalStatus: updated.marital_status };
+  },
+
   /**
    * getMe — профіль поточного користувача, включно з роллю і (для
    * модераторів) переліком кімнат, які він модерує. Викликається
@@ -171,6 +177,7 @@ export const AuthService = {
         city: user.city,
         displayName: user.display_name,
         about: user.about,
+        maritalStatus: user.marital_status,
         role: user.role,
         moderatorRooms,
       },

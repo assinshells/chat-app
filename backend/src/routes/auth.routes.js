@@ -81,6 +81,12 @@ router.patch(
   csrfProtection,
   AuthController.updateAbout,
 );
+router.patch(
+  "/marital-status",
+  authGuard,
+  csrfProtection,
+  AuthController.updateMaritalStatus,
+);
 router.get("/me", authGuard, AuthController.getMe);
 
 export default router;
