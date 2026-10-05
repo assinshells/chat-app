@@ -5,7 +5,6 @@ import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { hasRoomLink } from "@shared/lib/systemMessage.js";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
-import { DmTriggerButton } from "@features/dm";
 import { AppScrollbar } from "@shared/ui/scrollbar";
 
 /**
@@ -135,7 +134,6 @@ export function ChatConversation({
   selectedNicknames = [],
   selectedTimes = [],
   roomUsers = [],
-  activeRoom,
 }) {
   const endRef = useRef(null);
 
@@ -227,11 +225,6 @@ export function ChatConversation({
                       </span>
                     ) : (
                       <>
-                        <DmTriggerButton
-                          login={message.author}
-                          color={message.color}
-                          room={activeRoom}
-                        />
                         <button
                           type="button"
                           className={`message-author message-author-btn ${

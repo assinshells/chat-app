@@ -183,4 +183,27 @@ export const AuthService = {
       },
     };
   },
+
+  /**
+   * getPublicProfile — публічна частина профілю будь-якого користувача
+   * за логіном (панель "Профіль" з меню дій біля ніка). Навмисно без
+   * email, ролі та інших службових полів.
+   */
+  async getPublicProfile({ login }) {
+    const user = await UserRepository.findByLogin(login);
+    if (!user) throw new NotFoundException();
+
+    return {
+      profile: {
+        login: user.login,
+        color: user.color,
+        status: user.status,
+        gender: user.gender,
+        displayName: user.display_name,
+        about: user.about,
+        city: user.city,
+        maritalStatus: user.marital_status,
+      },
+    };
+  },
 };

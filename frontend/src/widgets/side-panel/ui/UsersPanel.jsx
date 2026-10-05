@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-import { DmTriggerButton } from "@features/dm";
-import { useFriendStore } from "@features/friends/model/useFriendStore.js";
+import { useFriendStore, FriendsList } from "@features/friends";
+import { useBlockStore, BlockedUsersList } from "@features/block";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { getStatusLabel } from "@shared/constants/status.constants.js";
 import { StatusIcon } from "@shared/ui/status-icon";
@@ -19,22 +20,35 @@ const KNOWN_GENDERS = new Set(["male", "female"]);
 
 /**
  * UsersPanel — учасники поточної кімнати, розділені за статтю:
- * "Чоловіки (N)", "Жінки (N)", "Інші (N)" (стать не вказано). Усередині
- * кожної групи друзі йдуть першими (жирним), решта — за алфавітом.
+ * "Чоловіки (N)", "Жінки (N)", "Інші (N)" (стать не вказано). Кожна
+ * група розкривається/згортається кліком по заголовку (шеврон справа).
+ * Усередині групи друзі йдуть першими (жирним), решта — за алфавітом.
+ *
+ * Після груп за статтю в кінці вкладки йдуть персональні списки
+ * "Друзі (N)" і "Заблоковані (N)" (раніше були в налаштуваннях профілю).
  *
  * Клік по ніку додає людину адресатом у форму повідомлення
- * (onNicknameClick), кнопка зліва від ніка (DmTriggerButton) відкриває
- * меню дій: написати особисте, друзі, блокування, модерація.
+ * (onNicknameClick), меню дій (особисте, друзі, блокування, модерація) відкривається
+ * кнопкою "три крапки" у формі повідомлення, коли нік додано.
  */
 export function UsersPanel({
   login,
   users,
-  activeRoom,
   selectedNicknames = [],
   onNicknameClick,
 }) {
   const friendLogins = useFriendStore((state) => state.friendLogins);
+  const friendsCount = useFriendStore((state) => state.friends.length);
+  const blockedCount = useBlockStore((state) => state.blocked.length);
   const isDarkTheme = useIsDarkTheme();
+
+  // Стан розгортання груп: за замовчуванням групи за статтю розгорнуті,
+  // "Друзі" і "Заблоковані" — згорнуті. Явно змінені користувачем значення
+  // лишаються, навіть якщо група тимчасово зникає (порожня).
+  const [expanded, setExpanded] = useState({});
+  const isExpanded = (key, defaultOpen = true) => expanded[key] ?? defaultOpen;
+  const toggleGroup = (key, defaultOpen = true) =>
+    setExpanded((prev) => ({ ...prev, [key]: !(prev[key] ?? defaultOpen) }));
 
   const groups = useMemo(() => {
     // Друзі першими, далі за алфавітом.
@@ -71,7 +85,6 @@ export function UsersPanel({
           </span>
         ) : (
           <>
-            <DmTriggerButton login={user.login} color={user.color} room={activeRoom} />
             <button
               type="button"
               className={`app-sidebar-online-name app-sidebar-online-name-btn ${
@@ -94,6 +107,30 @@ export function UsersPanel({
     );
   };
 
+  // Заголовок-кнопка розкривного списку: назва (N) і шеврон наприкінці.
+  const renderGroup = ({ key, label, count, defaultOpen = true, children }) => {
+    const open = isExpanded(key, defaultOpen);
+    return (
+      <div key={key} className="app-panel-group">
+        <button
+          type="button"
+          className="app-panel-group-toggle"
+          aria-expanded={open}
+          onClick={() => toggleGroup(key, defaultOpen)}
+        >
+          <span className="app-panel-group-toggle-label">
+            {label} ({count})
+          </span>
+          <ChevronDown
+            size={16}
+            className={`app-panel-group-chevron ${open ? "is-open" : ""}`}
+          />
+        </button>
+        {open && children}
+      </div>
+    );
+  };
+
   const isEmpty = groups.length === 0;
 
   return (
@@ -105,16 +142,34 @@ export function UsersPanel({
           </div>
         ) : (
           <div className="app-sidebar-list">
-            {groups.map((group) => (
-              <div key={group.key}>
-                <div className="app-panel-group-label">
-                  {group.label} ({group.users.length})
-                </div>
-                {group.users.map(renderUser)}
-              </div>
-            ))}
+            {groups.map((group) =>
+              renderGroup({
+                key: group.key,
+                label: group.label,
+                count: group.users.length,
+                children: group.users.map(renderUser),
+              }),
+            )}
           </div>
         )}
+
+        {/* Персональні списки — завжди в кінці, після всіх груп. */}
+        <div className="app-sidebar-list">
+          {renderGroup({
+            key: "friends",
+            label: "Друзі",
+            count: friendsCount,
+            defaultOpen: false,
+            children: <FriendsList />,
+          })}
+          {renderGroup({
+            key: "blocked",
+            label: "Заблоковані",
+            count: blockedCount,
+            defaultOpen: false,
+            children: <BlockedUsersList />,
+          })}
+        </div>
       </AppScrollbar>
     </>
   );

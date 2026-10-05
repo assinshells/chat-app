@@ -1,4 +1,5 @@
-import { User } from "lucide-react";
+import { useRef } from "react";
+import { Ellipsis } from "lucide-react";
 
 import { useDmStore } from "@features/dm/model/useDmStore.js";
 import { useRolesStore } from "@features/roles/model/useRolesStore.js";
@@ -13,9 +14,12 @@ import { canModerateRoom } from "@shared/constants/moderationAction.constants.js
 import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
 
 /**
- * DmTriggerButton — кнопка "три вертикальні крапки" поруч з чужим ніком
- * (використовується і в ChatLeftSidebar.jsx — список "Користувачі", і в
- * ChatConversation.jsx — автор повідомлення). Пункти меню:
+ * DmTriggerButton — кнопка "три горизонтальні крапки" у формі
+ * повідомлення, поруч із емодзі (див. ChatComposer.jsx). Неактивна, поки
+ * у формі немає обраного ніка; коли є — меню діє на останній доданий
+ * нік. Пункти меню:
+ *  - "Профіль": відкриває праву панель із профілем користувача
+ *    (UserProfileView, дані з GET /api/auth/profile/:login);
  *  - написати особисте повідомлення (усім, завжди): відкриває діалог
  *    у модалці приватних повідомлень (@widgets/private-chat);
  *  - "Додати до друзів" / "Видалити з друзів" (усім, завжди —
@@ -47,8 +51,7 @@ import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
  * login/color — той, з ким починаємо діалог або кого караємо (колір —
  * щоб модалка одразу могла зафарбувати ім'я, не роблячи окремого
  * запиту). room — кімната, з чийого списку/стрічки відкрито меню
- * (Sidebar передає activeRoom, ChatConversation — той самий activeRoom
- * ChatLayout'а) — саме вона є ціллю "в беспредел" (kickToBespredel);
+ * (ChatComposer отримує activeRoom від ChatLayout) — саме вона є ціллю "в беспредел" (kickToBespredel);
  * "із чату"/"бан кімнати"/"бан чату" від конкретної room не залежать.
  */
 export function DmTriggerButton({
@@ -58,14 +61,24 @@ export function DmTriggerButton({
   roleModalId = "roleManageModal",
   kickModalId = "kickModerationModal",
   banModalId = "banModerationModal",
+  // Кнопка живе у формі повідомлення (ChatComposer): неактивна, поки
+  // жодного ніка не обрано (disabled), меню розкривається вгору (dropup)
+  // і підписане ніком, до якого застосовуються дії (showHeader).
+  disabled = false,
+  dropup = false,
+  showHeader = false,
+  buttonClassName = "",
+  // onAction — викликається після будь-якої виконаної дії з меню
+  // (ChatComposer прибирає нік із форми).
+  onAction,
 }) {
   const openConversation = useDmStore((state) => state.openConversation);
   const openRoleManager = useRolesStore((state) => state.openFor);
   const openModeration = useModerationStore((state) => state.openFor);
 
   const isBlocked = useBlockStore((state) => state.blockedLogins.has(login));
-  const blockUser = useBlockStore((state) => state.blockUser);
   const unblockUser = useBlockStore((state) => state.unblockUser);
+  const requestBlock = useBlockStore((state) => state.requestBlock);
 
   const isFriend = useFriendStore((state) => state.friendLogins.has(login));
   const addFriend = useFriendStore((state) => state.addFriend);
@@ -77,14 +90,36 @@ export function DmTriggerButton({
   const canManageRoles = ROLE_MANAGER_ROLES.includes(ownRole);
   const canModerate = Boolean(room) && canModerateRoom(ownRole, ownModeratorRooms, room);
 
+  // Після дії меню закриваємо явно (stopPropagation в обробниках не дає
+  // події дійти до автозакриття Bootstrap, а кнопка одразу стає
+  // неактивною), і лише потім повідомляємо onAction — той прибирає нік
+  // із форми. Закриваємо кліком по тригеру: Bootstrap сам перемикає меню.
+  const toggleRef = useRef(null);
+  const closeMenu = () => {
+    const toggle = toggleRef.current;
+    if (toggle?.getAttribute("aria-expanded") === "true") toggle.click();
+  };
+  const finish = () => {
+    closeMenu();
+    onAction?.(login);
+  };
+
   // Особисті повідомлення живуть у правій панелі (SidePanel): відкриваємо
   // її в режимі "dm" через спільний стор, діалог уже розгорнутий
   // openConversation вище.
+  const handleOpenProfile = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    useSidePanelStore.getState().openUserProfile(login);
+    finish();
+  };
+
   const handleOpenConversation = (e) => {
     e.preventDefault();
     e.stopPropagation();
     openConversation(login, color);
     useSidePanelStore.getState().open(SIDE_PANELS.DM);
+    finish();
   };
 
   const handleToggleFriend = (e) => {
@@ -92,9 +127,10 @@ export function DmTriggerButton({
     e.stopPropagation();
     if (isFriend) {
       removeFriend(login);
-      return;
+    } else {
+      addFriend(login);
     }
-    addFriend(login);
+    finish();
   };
 
   const handleToggleBlock = (e) => {
@@ -102,30 +138,39 @@ export function DmTriggerButton({
     e.stopPropagation();
     if (isBlocked) {
       unblockUser(login);
+      finish();
       return;
     }
-    // Проста нативна підтвердка — на відміну від кіку/бану, це
-    // персональна оборотна дія (розблокувати можна одним кліком зі
-    // списку "Заблоковані" в сайдбарі), тому окрема модалка тут зайва.
-    if (window.confirm(`Заблокувати користувача ${login}? Він зникне з чату та не зможе писати вам особисті повідомлення.`)) {
-      blockUser(login);
-    }
+    // Підтвердження — мала модалка (BlockConfirmModal у ChatLayout), а не
+    // системний confirm: закриваємо меню й просимо підтвердження. Нік
+    // із форми прибере сама модалка після "Заблокувати" (onBlocked).
+    closeMenu();
+    requestBlock(login);
   };
 
   return (
-    <div className="dropdown dm-trigger-dropdown">
+    <div className={`${dropup ? "dropup" : "dropdown"} dm-trigger-dropdown`}>
       <button
         type="button"
-        className="dm-trigger-btn"
+        className={`dm-trigger-btn ${buttonClassName}`.trim()}
+        ref={toggleRef}
         data-bs-toggle="dropdown"
         aria-expanded="false"
-        title="Дії"
+        title={disabled ? "Оберіть нік, щоб побачити дії" : `Дії: ${login}`}
+        disabled={disabled}
         onClick={(e) => e.stopPropagation()}
       >
-        <User size="0.8em" />
+        <Ellipsis size={18} />
       </button>
 
       <div className="dropdown-menu dm-trigger-menu">
+        {showHeader && login && (
+          <h6 className="dropdown-header dm-trigger-header">@{login}</h6>
+        )}
+        <a className="dropdown-item" href="#" onClick={handleOpenProfile}>
+          Профіль
+        </a>
+
         <a
           className="dropdown-item"
           href="#"
@@ -162,6 +207,7 @@ export function DmTriggerButton({
               e.preventDefault();
               e.stopPropagation();
               openRoleManager(login, color);
+              finish();
             }}
           >
             Керувати роллю
@@ -179,6 +225,7 @@ export function DmTriggerButton({
                 e.preventDefault();
                 e.stopPropagation();
                 openModeration(login, color, room);
+                finish();
               }}
             >
               Кикнути
@@ -192,6 +239,7 @@ export function DmTriggerButton({
                 e.preventDefault();
                 e.stopPropagation();
                 openModeration(login, color, room);
+                finish();
               }}
             >
               Бан

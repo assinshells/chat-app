@@ -28,6 +28,7 @@ import {
   validateUpdateDisplayNameRequest,
   validateUpdateAboutRequest,
   validateUpdateMaritalStatusRequest,
+  validateProfileLoginParam,
 } from "../validators/auth.validator.js";
 import { CookieProvider } from "../providers/cookie.provider.js";
 import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
@@ -228,6 +229,17 @@ export const AuthController = {
         about: dto.about,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, about: result.about });
+    } catch (err) {
+      next(err);
+    }
+  },
+  getPublicProfile: async (req, res, next) => {
+    try {
+      validateProfileLoginParam(req.params.login);
+      const result = await AuthService.getPublicProfile({
+        login: req.params.login,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
     } catch (err) {
       next(err);
     }

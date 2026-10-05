@@ -167,3 +167,12 @@ export const validateUpdateMaritalStatusRequest = (body) => {
     );
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
+
+export const validateProfileLoginParam = (login) => {
+  if (
+    typeof login !== "string" ||
+    login.length < MIN_LOGIN_LENGTH ||
+    login.length > MAX_LOGIN_LENGTH
+  )
+    throw new ValidationException("Помилка валідації", ["некоректний нікнейм"]);
+};

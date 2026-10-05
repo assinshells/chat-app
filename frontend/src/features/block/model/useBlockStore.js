@@ -44,7 +44,13 @@ export const useBlockStore = create((set, get) => ({
   loading: false,
   actionError: null,
 
-  reset: () => set({ blocked: [], blockedLogins: new Set(), loaded: false, loading: false, actionError: null }),
+  // Логін, для якого відкрито модалку підтвердження блокування
+  // (BlockConfirmModal); null — модалка закрита.
+  pendingLogin: null,
+  requestBlock: (login) => set({ pendingLogin: login }),
+  cancelBlock: () => set({ pendingLogin: null }),
+
+  reset: () => set({ blocked: [], blockedLogins: new Set(), loaded: false, loading: false, actionError: null, pendingLogin: null }),
 
   _applyList: (blocked) =>
     set({

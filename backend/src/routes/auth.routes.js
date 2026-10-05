@@ -88,5 +88,7 @@ router.patch(
   AuthController.updateMaritalStatus,
 );
 router.get("/me", authGuard, AuthController.getMe);
+// Публічний профіль іншого користувача (панель "Профіль" у чаті).
+router.get("/profile/:login", authGuard, AuthController.getPublicProfile);
 
 export default router;

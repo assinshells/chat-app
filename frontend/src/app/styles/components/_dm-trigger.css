@@ -1,5 +1,5 @@
 /* =========================================================
-   DM TRIGGER — кнопка "три вертикальні точки" біля чужого ніка
+   DM TRIGGER — кнопка "три горизонтальні точки" біля чужого ніка
    (ChatLeftSidebar.jsx: список "Користувачі"; ChatConversation.jsx:
    автор повідомлення). Меню дій: написати особисте повідомлення,
    друзі/блокування, модерація.
@@ -54,4 +54,33 @@
    небезпечної дії, як і в модерації. */
 .dropdown-item-block-toggle {
   color: var(--bs-danger);
+}
+
+/* У формі повідомлення кнопка виглядає як інші інструменти (.composer-tool-btn),
+   а без обраного ніка — неактивна. */
+.dm-trigger-btn.composer-tool-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.dm-trigger-btn:disabled {
+  opacity: 0.4;
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  cursor: not-allowed;
+}
+
+.dm-trigger-header {
+  font-weight: 700;
+}
+
+/* Пункти меню дій — без підкреслення при наведенні/фокусі (глобальне
+   правило для посилань у _body.css тут не потрібне). */
+.dm-trigger-menu .dropdown-item,
+.dm-trigger-menu .dropdown-item:hover,
+.dm-trigger-menu .dropdown-item:focus,
+.dm-trigger-menu .dropdown-item:focus-visible {
+  text-decoration: none;
 }

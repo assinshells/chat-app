@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Smile, Paperclip, Send, X } from "lucide-react";
+import { DmTriggerButton } from "@features/dm";
 import { normalizeMessageText } from "@shared/lib/message.js";
 import { describeSendError, describeCooldownHint } from "@shared/lib/moderationMessages.js";
 
@@ -14,6 +15,11 @@ const MAX_MESSAGE_LENGTH = 300;
  * можуть бути видалені по одному (хрестик на чипі) або всі одразу
  * (кнопка "Очистити"). Самі по собі, без тексту повідомлення, вони
  * нікуди не відправляються — лише разом з непорожнім текстом.
+ *
+ * actionTarget — {login, color} останнього доданого ніка (null, якщо
+ * ніків немає): для нього кнопка "три крапки" поруч із емодзі відкриває
+ * меню дій (особисте, друзі, блокування, модерація); після будь-якої
+ * дії нік прибирається з форми. Без ніка кнопка неактивна. activeRoom — кімната для модерації (кик/бан).
  *
  * cooldownMs — скільки мс залишилося до наступного дозволеного
  * відправлення (клієнтський rate-limit або серверний
@@ -31,6 +37,8 @@ export function ChatComposer({
   onRemoveTime,
   onClearTargets,
   onRestoreTargets,
+  actionTarget = null,
+  activeRoom,
   disabled = false,
   disabledReason,
 }) {
@@ -309,6 +317,20 @@ export function ChatComposer({
               )}
 
             </div>
+
+
+            {/* Дії з обраним ніком (три крапки) */}
+
+            <DmTriggerButton
+              login={actionTarget?.login}
+              color={actionTarget?.color}
+              room={activeRoom}
+              disabled={!actionTarget || disabled}
+              dropup
+              showHeader
+              buttonClassName="composer-tool-btn"
+              onAction={(login) => onRemoveNickname?.(login)}
+            />
 
 
           </div>

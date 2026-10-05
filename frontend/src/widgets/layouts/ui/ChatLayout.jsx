@@ -8,7 +8,7 @@ import { SidePanel } from "@widgets/side-panel";
 import { RoomPickerModal, ROOM_PICKER_MODAL_ID } from "@widgets/room-picker";
 import { useChatSocket } from "@features/chat";
 import { useDmStore, DmToast } from "@features/dm";
-import { useBlockStore } from "@features/block";
+import { useBlockStore, BlockConfirmModal } from "@features/block";
 import { useFriendStore } from "@features/friends";
 import {
   RulesModal,
@@ -138,6 +138,16 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   // компонента (ChatConversation) — спільний стан двох "дітей".
   const [targetNicknames, setTargetNicknames] = useState([]);
   const [targetTimes, setTargetTimes] = useState([]);
+
+  // Адресат для меню дій ("три крапки" у формі): останній доданий нік
+  // і його колір (з учасників кімнати; якщо вже вийшов — без кольору).
+  const lastTargetLogin = targetNicknames[targetNicknames.length - 1];
+  const actionTarget = lastTargetLogin
+    ? {
+        login: lastTargetLogin,
+        color: roomUsers.find((user) => user.login === lastTargetLogin)?.color,
+      }
+    : null;
 
   // Права панель (учасники / особисті / профіль) — стан у спільному
   // сторі (useSidePanelStore), бо її відкривають і з шапки, і з меню
@@ -291,7 +301,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             selectedNicknames={targetNicknames}
             selectedTimes={targetTimes}
             roomUsers={visibleRoomUsers}
-            activeRoom={activeRoom}
           />
           <ChatComposer
             onSend={sendMessage}
@@ -302,6 +311,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
             onRemoveTime={handleRemoveTime}
             onClearTargets={handleClearTargets}
             onRestoreTargets={handleRestoreTargets}
+            actionTarget={actionTarget}
+            activeRoom={activeRoom}
             disabled={Boolean(roomBan)}
             disabledReason={
               roomBan &&
@@ -340,6 +351,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onSelectRoom={handleSelectRoom}
       />
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
+      <BlockConfirmModal onBlocked={handleRemoveNickname} />
       <RulesModal modalId={RULES_MODAL_ID} />
       <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
       <WarningModal modalId={WARNING_MODAL_ID} />

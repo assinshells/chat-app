@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   Moon,
-  Users,
-  UserX,
   UserPen,
   ChevronDown,
   ChevronRight,
@@ -15,8 +13,6 @@ import {
   MessageSquareText,
 } from "lucide-react";
 
-import { FriendsList } from "@features/friends";
-import { BlockedUsersList } from "@features/block";
 import {
   STATUS_OPTIONS,
   DEFAULT_STATUS,
@@ -33,12 +29,9 @@ import {
 import { AppScrollbar } from "@shared/ui/scrollbar";
 import { ProfileEditView } from "./ProfileEditView.jsx";
 import { DarkModeView } from "./DarkModeView.jsx";
-import { SubPanelView } from "./SubPanelView.jsx";
 
 const SETTINGS_ITEMS = [
   { id: "profile", label: "Інформація профілю", icon: UserPen },
-  { id: "friends", label: "Друзі", icon: Users },
-  { id: "blocked", label: "Заблоковані", icon: UserX },
   { id: "dark-mode", label: "Темний режим", icon: Moon },
 ];
 
@@ -56,7 +49,7 @@ const INFO_LINKS = [
 
 /**
  * ProfilePanel — "усе про мене" в одній панелі: статус, профіль,
- * налаштування (інформація профілю, друзі, заблоковані, темний режим), допомога (правила,
+ * налаштування (інформація профілю, темний режим), допомога (правила,
  * зворотний зв'язок), вихід — кнопка, закріплена внизу панелі.
  * Замінює колишні таби "Профіль" і "Налаштування" лівого сайдбара.
  */
@@ -162,16 +155,6 @@ export function ProfilePanel({
     </div>
 
     {subView === "profile" && <ProfileEditView onBack={closeSubView} />}
-    {subView === "friends" && (
-      <SubPanelView title="Друзі" onBack={closeSubView}>
-        <FriendsList />
-      </SubPanelView>
-    )}
-    {subView === "blocked" && (
-      <SubPanelView title="Заблоковані" onBack={closeSubView}>
-        <BlockedUsersList />
-      </SubPanelView>
-    )}
     {subView === "dark-mode" && <DarkModeView onBack={closeSubView} />}
     </>
   );
