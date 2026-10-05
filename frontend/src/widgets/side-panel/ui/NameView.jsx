@@ -60,7 +60,7 @@ export function NameView({ onBack }) {
           type="text"
           className="form-control"
           maxLength={MAX_NAME_LENGTH}
-          placeholder="Наприклад, Erik Thompson"
+          placeholder="Ваше ім'я"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />

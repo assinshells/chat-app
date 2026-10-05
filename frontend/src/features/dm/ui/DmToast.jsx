@@ -36,7 +36,7 @@ export function DmToast() {
           id: `${login}:${convo.lastMessage?.timestamp ?? Date.now()}`,
           login,
           color: convo.color,
-          text: convo.lastMessage?.text ?? "",
+          text: convo.lastMessage?.text || (convo.lastMessage?.hasImage ? "[зображення]" : ""),
         });
         return;
       }

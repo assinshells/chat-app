@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Smile, Paperclip, Send, X } from "lucide-react";
 import { DmTriggerButton } from "@features/dm";
 import { normalizeMessageText } from "@shared/lib/message.js";
+import { IMAGE_ACCEPT, prepareImage, revokePreview } from "@shared/lib/image.js";
 import { describeSendError, describeCooldownHint } from "@shared/lib/moderationMessages.js";
 
 const MAX_MESSAGE_LENGTH = 300;
@@ -46,6 +47,22 @@ export function ChatComposer({
   const [showEmoji, setShowEmoji] = useState(false);
   const [sendError, setSendError] = useState(null);
   const [sending, setSending] = useState(false);
+
+  // image — прикріплена картинка ({blob, previewUrl}), уже стиснута і
+  // готова до відправлення (див. shared/lib/image.js); показується
+  // мініатюрою над полем вводу. preparing — триває стиснення.
+  const [image, setImage] = useState(null);
+  const [preparing, setPreparing] = useState(false);
+  const [imageError, setImageError] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Звільняємо objectURL прев'ю при розмонтуванні (напр. зміна кімнати
+  // не розмонтовує, а вихід з чату — так).
+  const imageRef = useRef(null);
+  useEffect(() => {
+    imageRef.current = image;
+  }, [image]);
+  useEffect(() => () => revokePreview(imageRef.current), []);
 
   const hasTargets = targetNicknames.length > 0 || targetTimes.length > 0;
   const cooldownActive = cooldownMs > 0;
@@ -95,31 +112,69 @@ export function ChatComposer({
       ? `[${targetTimes.join(", ")}] `
       : "";
 
-    return `${mentionsPrefix}${timePrefix}${text}`;
+    return `${mentionsPrefix}${timePrefix}${text}`.trim();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    // Скидаємо value, щоб повторний вибір ТОГО САМОГО файлу знову
+    // викликав change.
+    e.target.value = "";
+    if (!file) return;
+
+    setImageError(null);
+    setPreparing(true);
+    try {
+      const prepared = await prepareImage(file);
+      revokePreview(image);
+      setImage(prepared);
+    } catch (err) {
+      setImageError(err.message);
+    } finally {
+      setPreparing(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    revokePreview(image);
+    setImage(null);
+    setImageError(null);
   };
 
   const handleSend = () => {
     const text = normalizeMessageText(message).trim();
 
-    if (!text || sending || cooldownActive || disabled) return;
+    // Повідомлення може складатися лише з картинки (без тексту).
+    if ((!text && !image) || sending || preparing || cooldownActive || disabled) return;
 
     const outgoingText = buildOutgoingText(text);
+    const imageSnapshot = image;
     const targetsSnapshot = { nicknames: targetNicknames, times: targetTimes };
 
     setMessage("");
+    setImage(null);
+    setImageError(null);
     setSendError(null);
     onClearTargets?.();
 
-    const result = onSend?.(outgoingText);
+    const result = onSend?.(outgoingText, imageSnapshot?.blob);
 
     // onSend може бути асинхронним (реальне відправлення через сокет) —
     // якщо сервер відхилив повідомлення або зв'язок обірвався, повертаємо
     // текст і обрані цілі назад у форму, щоб користувач не
     // втрачав набране.
+    if (!result?.then) {
+      revokePreview(imageSnapshot);
+    }
+
     if (result?.then) {
       setSending(true);
       result
+        .then(() => revokePreview(imageSnapshot))
         .catch((err) => {
+          // Відправлення не вдалось — повертаємо й картинку (її
+          // прев'ю ще не звільнено, див. then вище).
+          if (imageSnapshot) setImage(imageSnapshot);
           // Сервер відхилив повідомлення або зв'язок обірвався — повертаємо
           // і текст, і обрані раніше цілі (ніки/час), щоб
           // користувач міг просто повторити відправлення. Зберігаємо сам
@@ -157,6 +212,7 @@ export function ChatComposer({
   //  3. інакше — стандартна підказка.
   const hintText =
     (disabled && disabledReason) ||
+    imageError ||
     (activeError && (describeSendError(activeError.code, cooldownMs || activeError.details?.retryAfterMs) ?? activeError.message)) ||
     (cooldownActive ? describeCooldownHint(cooldownMs) : null);
 
@@ -228,6 +284,31 @@ export function ChatComposer({
 
 
         {/* =========================================
+            ПРИКРІПЛЕНЕ ЗОБРАЖЕННЯ (мініатюра)
+            ========================================= */}
+
+        {(image || preparing) && (
+          <div className="composer-attachment">
+            {preparing ? (
+              <span className="composer-attachment-status">Обробка зображення…</span>
+            ) : (
+              <div className="composer-attachment-thumb">
+                <img src={image.previewUrl} alt="Прикріплене зображення" />
+                <button
+                  type="button"
+                  className="composer-attachment-remove"
+                  title="Прибрати зображення"
+                  aria-label="Прибрати зображення"
+                  onClick={handleRemoveImage}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* =========================================
             ПОЛЕ ВВОДУ
             ========================================= */}
 
@@ -259,10 +340,19 @@ export function ChatComposer({
 
             {/* Вкладення */}
 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={IMAGE_ACCEPT}
+              hidden
+              onChange={handleFileChange}
+            />
             <button
               type="button"
               className="composer-tool-btn"
-              title="Прикріпити файл"
+              title="Прикріпити зображення (JPEG, PNG, WebP)"
+              disabled={disabled || preparing || sending}
+              onClick={() => fileInputRef.current?.click()}
             >
               <Paperclip size={18} />
             </button>
@@ -356,7 +446,7 @@ export function ChatComposer({
             <button
               type="button"
               className="chat-send-btn"
-              disabled={!message.trim() || sending || cooldownActive || disabled}
+              disabled={(!message.trim() && !image) || sending || preparing || cooldownActive || disabled}
               title={
                 disabled
                   ? disabledReason || "Надсилання недоступне"

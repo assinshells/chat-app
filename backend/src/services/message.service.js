@@ -2,6 +2,7 @@ import { MessageRepository } from "../repositories/message.repository.js";
 import { UserRepository } from "../repositories/user.repository.js";
 import { toMessageDto } from "../dto/message.dto.js";
 import { MessageValidationException } from "../exceptions/chat.exceptions.js";
+import { ImageProvider } from "../providers/image.provider.js";
 import { ModerationService } from "../moderation/moderation.service.js";
 import {
   CHAT_ERRORS,
@@ -26,7 +27,7 @@ export const MessageService = {
    * замінюється на DEFAULT_ROOM — кімнати фіксовані списком на бекенді,
    * клієнт не може завести довільну.
    */
-  async sendMessage({ authorId, authorLogin, authorColor, text, room = DEFAULT_ROOM }) {
+  async sendMessage({ authorId, authorLogin, authorColor, text, image: rawImage, room = DEFAULT_ROOM }) {
     // Мут перевіряється раніше за нормалізацію тексту: замученому
     // користувачу не потрібне пояснення про порожнє/довге повідомлення —
     // йому потрібен лише код MUTED із часом, що залишився.
@@ -34,19 +35,27 @@ export const MessageService = {
 
     const normalized = normalizeText(text);
 
-    if (!normalized) {
+    // Вкладення валідується за магічними байтами і розміром (див.
+    // providers/image.provider.js). Повідомлення може складатися лише з
+    // картинки — тоді текст порожній і це не помилка.
+    const image = ImageProvider.normalize(rawImage);
+
+    if (!normalized && !image) {
       throw new MessageValidationException(CHAT_ERRORS.MESSAGE_EMPTY);
     }
     if (normalized.length > CHAT_LIMITS.MAX_MESSAGE_LENGTH) {
       throw new MessageValidationException(CHAT_ERRORS.MESSAGE_TOO_LONG);
     }
 
-    // Автомодератор: мат / КАПС / спам-повтор / спам-посилання (див.
-    // moderation/moderation.service.js). Кидає виняток із кодом
-    // конкретної причини — повідомлення до збереження/розсилки не
-    // доходить. Накопичення порушень може тут же ввімкнути тимчасовий
-    // мут для наступних повідомлень цього користувача.
-    ModerationService.check({ userId: authorId, text: normalized });
+    // Автомодератор працює з текстом: порожній підпис (лише картинка)
+    // не перевіряється, інакше повторні картинки без тексту ловилися б
+    // як спам-дубль. Частота картинок обмежується окремо.
+    if (normalized) {
+      ModerationService.check({ userId: authorId, text: normalized });
+    }
+    if (image) {
+      ImageProvider.assertRateLimit(authorId);
+    }
 
     const safeRoom = isValidRoom(room) ? room : DEFAULT_ROOM;
 
@@ -54,6 +63,7 @@ export const MessageService = {
       authorId,
       text: normalized,
       room: safeRoom,
+      image,
     });
 
     return toMessageDto({ ...created, author: authorLogin, color: authorColor });

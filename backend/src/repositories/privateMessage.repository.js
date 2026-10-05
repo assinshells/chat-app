@@ -1,7 +1,7 @@
 import { pool } from "../config/database.js";
 
 const SELECT_WITH_PARTIES = `
-  SELECT pm.id, pm.text, pm.created_at, pm.sender_id, pm.recipient_id,
+  SELECT pm.id, pm.text, pm.created_at, pm.sender_id, pm.recipient_id, pm.image_id,
          s.login AS sender_login, s.color AS sender_color,
          r.login AS recipient_login
   FROM private_messages pm
@@ -10,12 +10,30 @@ const SELECT_WITH_PARTIES = `
 `;
 
 export const PrivateMessageRepository = {
-  async create({ senderId, recipientId, text }) {
+  async create({ senderId, recipientId, text, image = null }) {
+    if (!image) {
+      const { rows } = await pool.query(
+        `INSERT INTO private_messages (sender_id, recipient_id, text)
+         VALUES ($1, $2, $3)
+         RETURNING id, text, created_at, sender_id, recipient_id, image_id`,
+        [senderId, recipientId, text],
+      );
+      return rows[0];
+    }
+
+    // Картинка + повідомлення — один атомарний запит (див. коментар у
+    // message.repository.js). scope='dm' і recipient_id обмежують доступ
+    // до файлу двома учасниками діалогу (services/image.service.js).
     const { rows } = await pool.query(
-      `INSERT INTO private_messages (sender_id, recipient_id, text)
-       VALUES ($1, $2, $3)
-       RETURNING id, text, created_at, sender_id, recipient_id`,
-      [senderId, recipientId, text],
+      `WITH img AS (
+         INSERT INTO chat_images (owner_id, scope, recipient_id, mime, size, data)
+         VALUES ($1, 'dm', $2, $3, $4, $5)
+         RETURNING id
+       )
+       INSERT INTO private_messages (sender_id, recipient_id, text, image_id)
+       VALUES ($1, $2, $6, (SELECT id FROM img))
+       RETURNING id, text, created_at, sender_id, recipient_id, image_id`,
+      [senderId, recipientId, image.mime, image.size, image.data, text],
     );
     return rows[0];
   },
@@ -55,6 +73,7 @@ export const PrivateMessageRepository = {
          other_login,
          other_color,
          text AS last_text,
+         has_image,
          created_at AS last_at,
          is_own,
          -- Скалярний корельований підзапит: рахує непрочитані САМЕ від
@@ -77,6 +96,7 @@ export const PrivateMessageRepository = {
            CASE WHEN pm.sender_id = $1 THEN r.color ELSE s.color END AS other_color,
            pm.id,
            pm.text,
+           (pm.image_id IS NOT NULL) AS has_image,
            pm.created_at,
            (pm.sender_id = $1) AS is_own
          FROM private_messages pm

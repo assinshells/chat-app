@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { clearImageCache } from "@shared/api/image.api.js";
 import { logoutRequest } from "@features/auth/logout/api/logout.api.js";
 import { AuthSession } from "@shared/lib/authSession.js";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
@@ -21,6 +22,7 @@ export const useLogoutStore = create((set) => ({
       // потрапили б у сесію наступного логіну в цій самій вкладці (див.
       // детальний коментар у setCurrentUser/reset в useDmStore.js).
       useDmStore.getState().reset();
+      clearImageCache();
       useBlockStore.getState().reset();
       set({ loading: false });
       onSuccess();

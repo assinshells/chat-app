@@ -15,6 +15,25 @@ export const CHAT_ERRORS = Object.freeze({
   MUTED: "Вас тимчасово заглушено за повторні порушення",
 });
 
+// Зображення-вкладення. Клієнт перед відправленням зменшує/перекодовує
+// картинку (див. frontend shared/lib/image.js), але сервер не довіряє
+// клієнту: розмір і ТИП перевіряються за магічними байтами.
+// SVG і GIF свідомо не дозволені (SVG — вектор XSS, GIF — навантаження).
+export const IMAGE_LIMITS = Object.freeze({
+  MAX_BYTES: 1024 * 1024, // 1 МБ
+  ALLOWED_MIME: Object.freeze(["image/jpeg", "image/png", "image/webp"]),
+  // Окремий (суворіший за текстовий) ліміт частоти саме для картинок.
+  RATE_WINDOW_MS: 60_000,
+  RATE_MAX: 5,
+});
+
+export const IMAGE_ERRORS = Object.freeze({
+  INVALID_TYPE: "Дозволені лише зображення JPEG, PNG або WebP",
+  TOO_LARGE: "Зображення завелике (максимум 1 МБ)",
+  RATE_LIMITED: "Забагато зображень поспіль. Спробуйте трохи пізніше",
+  NOT_FOUND: "Зображення не знайдено",
+});
+
 export const CHAT_LIMITS = Object.freeze({
   MAX_MESSAGE_LENGTH: 300,
   HISTORY_DEFAULT_LIMIT: 50,

@@ -113,6 +113,7 @@ export function registerDmSocket(io, socket) {
 
     const recipientLogin = typeof payload === "object" ? payload?.to : undefined;
     const text = typeof payload === "object" ? payload?.text : undefined;
+    const image = typeof payload === "object" ? payload?.image : undefined;
 
     try {
       const { message, recipientId } =
@@ -121,6 +122,7 @@ export function registerDmSocket(io, socket) {
           senderLogin: socket.data.login,
           recipientLogin,
           text,
+          image,
         });
 
       // Особистий канал одержувача + особистий канал самого відправника

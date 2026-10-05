@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import logger from "./config/logger.js";
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
+import imageRoutes from "./routes/image.routes.js";
 import roleRoutes from "./routes/role.routes.js";
 import moderationActionRoutes from "./routes/moderationAction.routes.js";
 import { notFoundHandler } from "./middlewares/notFound.middleware.js";
@@ -37,6 +38,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/images", imageRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/moderation", moderationActionRoutes);
 

@@ -44,9 +44,13 @@ export function PrivateMessagesPanel() {
         const convo = conversations[dialogLogin];
         if (!convo) return null;
 
-        const preview =
-          convo.lastMessage?.text ??
-          convo.messages[convo.messages.length - 1]?.text;
+        const lastLoaded = convo.messages[convo.messages.length - 1];
+        const previewText = convo.lastMessage?.text ?? lastLoaded?.text;
+        const previewHasImage = convo.lastMessage
+          ? convo.lastMessage.hasImage
+          : Boolean(lastLoaded?.image);
+        // Повідомлення лише з картинкою не має тексту — показуємо мітку.
+        const preview = previewText || (previewHasImage ? "[зображення]" : previewText);
 
         return (
           <button

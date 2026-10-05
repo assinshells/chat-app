@@ -251,6 +251,8 @@ export function registerChatSocket(io, socket) {
 
     const room = socket.data.currentRoom;
     const text = typeof payload === "string" ? payload : payload?.text;
+    // Бінарне вкладення (Buffer) — див. IMAGE_LIMITS і ImageProvider.
+    const image = typeof payload === "object" ? payload?.image : undefined;
 
     // room обов'язково береться з серверного стану сокета (не з
     // payload — клієнт номінально й не передає room, див.
@@ -302,6 +304,7 @@ export function registerChatSocket(io, socket) {
         authorLogin: socket.data.login,
         authorColor: socket.data.color,
         text,
+        image,
         room,
       });
 

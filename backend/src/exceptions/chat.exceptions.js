@@ -1,6 +1,6 @@
 import { BaseException } from "./base.exception.js";
 import { HTTP_STATUS } from "../constants/auth.constants.js";
-import { CHAT_ERRORS, DM_ERRORS, BLOCK_ERRORS, FRIEND_ERRORS } from "../constants/chat.constants.js";
+import { CHAT_ERRORS, DM_ERRORS, BLOCK_ERRORS, FRIEND_ERRORS, IMAGE_ERRORS } from "../constants/chat.constants.js";
 
 export class MessageValidationException extends BaseException {
   constructor(message = CHAT_ERRORS.MESSAGE_EMPTY) {
@@ -119,5 +119,22 @@ export class ConfinedException extends BaseException {
   constructor({ confinedRoom, reason, expiresAt }) {
     super("Ви тимчасово обмежені однією кімнатою", HTTP_STATUS.FORBIDDEN, "CONFINED");
     this.details = { confinedRoom, reason: reason ?? null, expiresAt };
+  }
+}
+
+/**
+ * ImageValidationException — відхилене вкладення (невірний тип, завелике,
+ * перевищено ліміт частоти). Власні коди, за якими фронтенд підбирає
+ * підказку (див. shared/lib/moderationMessages.js).
+ */
+export class ImageValidationException extends BaseException {
+  constructor(code = "IMAGE_INVALID_TYPE", message = IMAGE_ERRORS.INVALID_TYPE) {
+    super(message, HTTP_STATUS.BAD_REQUEST, code);
+  }
+}
+
+export class ImageNotFoundException extends BaseException {
+  constructor() {
+    super(IMAGE_ERRORS.NOT_FOUND, HTTP_STATUS.NOT_FOUND, "IMAGE_NOT_FOUND");
   }
 }

@@ -39,5 +39,6 @@
 @import "./components/_modals.css";
 @import "./components/_room-picker.css";
 @import "./components/_dm-toast.css";
+@import "./components/_image-attachment.css";
 
 @import "./components/_responsive.css";

@@ -419,7 +419,13 @@ export function useChatSocket({ enabled, initialRoom }) {
 
   const { remainingMs: cooldownMs, startCooldown } = useMessageCooldown();
 
-  const sendMessage = useCallback((text) => {
+  /**
+   * sendMessage — text і/або image (Blob, уже стиснутий — див.
+   * shared/lib/image.js). Картинка їде бінарним вкладенням тієї ж події
+   * message:send, тож повідомлення і файл зберігаються атомарно, а ack
+   * приходить один — так само, як для звичайного тексту.
+   */
+  const sendMessage = useCallback((text, image) => {
     return new Promise((resolve, reject) => {
       if (!chatSocket.connected) {
         reject(new Error("Немає з'єднання з сервером"));
@@ -446,9 +452,9 @@ export function useChatSocket({ enabled, initialRoom }) {
         return;
       }
 
-      chatSocket.emit(
+      const send = (imageBuffer) => chatSocket.emit(
         MESSAGE_SEND,
-        { text, room: activeRoomRef.current },
+        { text, room: activeRoomRef.current, ...(imageBuffer ? { image: imageBuffer } : {}) },
         (result) => {
           if (result?.success) {
             resolve();
@@ -478,6 +484,12 @@ export function useChatSocket({ enabled, initialRoom }) {
           reject(err);
         },
       );
+
+      if (image) {
+        image.arrayBuffer().then(send, () => reject(new Error("Не вдалося прочитати зображення")));
+      } else {
+        send();
+      }
     });
   }, [startCooldown]);
 

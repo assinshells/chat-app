@@ -6,6 +6,7 @@ import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { hasRoomLink } from "@shared/lib/systemMessage.js";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
+import { ChatImageButton } from "@shared/ui/image-viewer";
 
 /**
  * renderMessageText — рендерить текст повідомлення, підсвічуючи згадки
@@ -246,6 +247,15 @@ export function ChatConversation({
                         messageColorHex,
                       )}
                     </span>
+
+                    {/* Вкладення: у стрічці лише посилання, саму картинку
+                        (на весь екран поверх вікон) завантажуємо за кліком. */}
+                    {message.image && (
+                      <>
+                        {message.text ? " " : null}
+                        <ChatImageButton imageId={message.image.id} />
+                      </>
+                    )}
                   </div>
 
                 </div>

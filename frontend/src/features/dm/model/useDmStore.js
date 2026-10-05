@@ -304,7 +304,7 @@ export const useDmStore = create((set, get) => ({
    * прийде через module-level підписку нижче — єдине джерело істини,
    * без ризику задвоєння.
    */
-  sendMessage: async (login, text) => {
+  sendMessage: async (login, text, image) => {
     // Клієнтська підстраховка перед запитом (реальна заборона все одно
     // на бекенді, див. privateMessage.service.js): діалог міг стати
     // заблокованим ПІСЛЯ рендеру поточного кадру (жива подія
@@ -314,7 +314,12 @@ export const useDmStore = create((set, get) => ({
       return { success: false, message: "Не можна надіслати повідомлення цьому користувачу" };
     }
 
-    const result = await emitWithAck(DM_SEND, { to: login, text });
+    // image — Blob (стиснутий у shared/lib/image.js); у Socket.IO
+    // бінарні дані передаються ArrayBuffer'ом у тому ж пакеті.
+    const payload = { to: login, text };
+    if (image) payload.image = await image.arrayBuffer();
+
+    const result = await emitWithAck(DM_SEND, payload);
     if (!result?.success) {
       set({ sendError: result?.message ?? "Не вдалося надіслати" });
     }
@@ -361,7 +366,12 @@ export const useDmStore = create((set, get) => ({
           // випадку мій) затерла б уже відомий колір співрозмовника.
           color: existing?.color ?? message.color,
           messages: [...(existing?.messages ?? []), message],
-          lastMessage: { text: message.text, timestamp: message.timestamp, own: isOwn },
+          lastMessage: {
+            text: message.text,
+            hasImage: Boolean(message.image),
+            timestamp: message.timestamp,
+            own: isOwn,
+          },
           loading: existing?.loading ?? false,
           loaded: existing?.loaded ?? false,
           unreadCount,

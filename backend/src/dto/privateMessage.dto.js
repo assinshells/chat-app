@@ -16,6 +16,7 @@ export const toPrivateMessageDto = (row) => ({
   recipient: row.recipient_login ?? row.recipient,
   text: row.text,
   timestamp: new Date(row.created_at).getTime(),
+  image: row.image_id ? { id: String(row.image_id) } : null,
   color: row.sender_color ?? row.color ?? DEFAULT_COLOR,
 });
 
@@ -23,7 +24,7 @@ export const toPrivateMessageDto = (row) => ({
  * @typedef {Object} ConversationSummaryDto
  * @property {string} login - співрозмовник (не сам користувач)
  * @property {string} color
- * @property {{ text: string, timestamp: number, own: boolean }} lastMessage
+ * @property {{ text: string, hasImage: boolean, timestamp: number, own: boolean }} lastMessage
  * @property {number} unreadCount - скільки вхідних від нього ще не
  *   прочитано (read_at IS NULL), рахується в
  *   PrivateMessageRepository.findConversationsList
@@ -33,6 +34,7 @@ export const toConversationSummaryDto = (row) => ({
   color: row.other_color ?? DEFAULT_COLOR,
   lastMessage: {
     text: row.last_text,
+    hasImage: Boolean(row.has_image),
     timestamp: new Date(row.last_at).getTime(),
     own: Boolean(row.is_own),
   },

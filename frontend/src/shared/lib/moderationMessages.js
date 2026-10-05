@@ -33,6 +33,12 @@ export function describeSendError(code, retryAfterMs) {
       return `Тимчасове обмеження за порушення правил чату. Спробуйте через ${formatSeconds(retryAfterMs)} с.`;
     case "RATE_LIMITED":
       return `Забагато повідомлень поспіль. Спробуйте через ${formatSeconds(retryAfterMs)} с.`;
+    case "IMAGE_INVALID_TYPE":
+      return "Дозволені лише зображення JPEG, PNG або WebP.";
+    case "IMAGE_TOO_LARGE":
+      return "Зображення завелике (максимум 1 МБ).";
+    case "IMAGE_RATE_LIMITED":
+      return "Забагато зображень поспіль. Спробуйте трохи пізніше.";
     case "MESSAGE_VALIDATION_FAILED":
       return "Повідомлення порожнє або занадто довге.";
     default:

@@ -9,6 +9,7 @@ import {
   PrivateMessageValidationException,
   PrivateMessageBlockedException,
 } from "../exceptions/chat.exceptions.js";
+import { ImageProvider } from "../providers/image.provider.js";
 import { DM_ERRORS, DM_LIMITS } from "../constants/chat.constants.js";
 
 // Той самий принцип, що й у message.service.js: сервер ніколи не довіряє
@@ -24,10 +25,11 @@ export const PrivateMessageService = {
    * і не повинен знати чужі user id), валідує текст, забороняє
    * писати самому собі, зберігає і повертає готовий DTO.
    */
-  async sendPrivateMessage({ senderId, senderLogin, recipientLogin, text }) {
+  async sendPrivateMessage({ senderId, senderLogin, recipientLogin, text, image: rawImage }) {
     const normalized = normalizeText(text);
+    const image = ImageProvider.normalize(rawImage);
 
-    if (!normalized) {
+    if (!normalized && !image) {
       throw new PrivateMessageValidationException(DM_ERRORS.MESSAGE_EMPTY);
     }
     if (normalized.length > DM_LIMITS.MAX_MESSAGE_LENGTH) {
@@ -54,10 +56,17 @@ export const PrivateMessageService = {
       throw new PrivateMessageBlockedException();
     }
 
+    // Ліміт частоти картинок — ПІСЛЯ всіх перевірок, що можуть відхилити
+    // запит (блокування тощо): відхилена відправка не витрачає слот.
+    if (image) {
+      ImageProvider.assertRateLimit(senderId);
+    }
+
     const created = await PrivateMessageRepository.create({
       senderId,
       recipientId: recipient.id,
       text: normalized,
+      image,
     });
 
     return {

@@ -297,6 +297,30 @@ CREATE INDEX IF NOT EXISTS idx_private_messages_unread
     ON private_messages (recipient_id, sender_id)
     WHERE read_at IS NULL;
 
+-- Зображення-вкладення (публічні й особисті повідомлення). Бінарні дані
+-- лежать у БД (bytea) — не потрібні окремий volume/файловий сервер, а
+-- ліміт розміру (1 МБ, див. backend/src/constants/chat.constants.js
+-- IMAGE_LIMITS) робить таблицю керованою. scope='room' — бачить будь-який
+-- автентифікований користувач; scope='dm' — лише owner_id і recipient_id
+-- (перевіряється в services/image.service.js).
+CREATE TABLE IF NOT EXISTS chat_images (
+    id BIGSERIAL PRIMARY KEY,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    scope VARCHAR(8) NOT NULL CHECK (scope IN ('room', 'dm')),
+    recipient_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    mime VARCHAR(32) NOT NULL,
+    size INTEGER NOT NULL,
+    data BYTEA NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Для вже створених БД (init.sql виконується лише при першому створенні
+-- тому ці ALTER потрібно прогнати вручну, див. docker/postgres/migrations).
+ALTER TABLE messages
+    ADD COLUMN IF NOT EXISTS image_id BIGINT REFERENCES chat_images(id) ON DELETE SET NULL;
+ALTER TABLE private_messages
+    ADD COLUMN IF NOT EXISTS image_id BIGINT REFERENCES chat_images(id) ON DELETE SET NULL;
+
 -- Персональні блокування користувачів ("Заблокувати" в дропдавні ніка,
 -- доступно будь-якому користувачу, а не лише модерації — на відміну
 -- від bans/moderation_log вище). ОДНОСТОРОННЄ: blocker_id заблокував
