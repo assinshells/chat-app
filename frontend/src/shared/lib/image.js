@@ -109,6 +109,46 @@ export async function prepareImage(file) {
   }
 }
 
+// Мініатюра для сітки галереї: коротша сторона ~256px (щоб object-fit:
+// cover у плитці лишався різким), довша — не більше 512px (панорами).
+const THUMB_SHORT_SIDE = 256;
+const THUMB_MAX_SIDE = 512;
+
+/**
+ * createThumbnail — робить маленьку копію вже підготовленого зображення
+ * (результат prepareImage) для сітки прев'ю. WebP, а якщо браузер його не
+ * кодує — JPEG. Зазвичай виходить 10–40 КБ.
+ *
+ * @param {Blob} blob
+ * @returns {Promise<Blob>}
+ */
+export async function createThumbnail(blob) {
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(blob);
+  } catch {
+    throw new Error("Не вдалося прочитати зображення");
+  }
+
+  try {
+    const shortest = Math.min(bitmap.width, bitmap.height);
+    const longest = Math.max(bitmap.width, bitmap.height);
+    const scale = Math.min(1, THUMB_SHORT_SIDE / shortest, THUMB_MAX_SIDE / longest);
+
+    let { canvas } = render(bitmap, scale, false);
+    let thumb = await canvasToBlob(canvas, "image/webp", 0.7);
+
+    if (thumb?.type !== "image/webp") {
+      ({ canvas } = render(bitmap, scale, true));
+      thumb = await canvasToBlob(canvas, "image/jpeg", 0.75);
+    }
+    if (!thumb) throw new Error("Не вдалося створити мініатюру");
+    return thumb;
+  } finally {
+    bitmap.close?.();
+  }
+}
+
 /** revokePreview — звільняє objectURL прев'ю, коли воно більше не потрібне. */
 export function revokePreview(image) {
   if (image?.previewUrl) URL.revokeObjectURL(image.previewUrl);

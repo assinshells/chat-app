@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { clearImageCache } from "@shared/api/image.api.js";
+import { clearGalleryCache } from "@shared/api/gallery.api.js";
 import { logoutRequest } from "@features/auth/logout/api/logout.api.js";
 import { AuthSession } from "@shared/lib/authSession.js";
 import { useDmStore } from "@features/dm/model/useDmStore.js";
@@ -23,6 +24,7 @@ export const useLogoutStore = create((set) => ({
       // детальний коментар у setCurrentUser/reset в useDmStore.js).
       useDmStore.getState().reset();
       clearImageCache();
+      clearGalleryCache();
       useBlockStore.getState().reset();
       set({ loading: false });
       onSuccess();

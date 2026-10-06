@@ -9,7 +9,7 @@ import { fetchImageUrl } from "@shared/api/image.api.js";
  * document.body, z-index вищий за сайдбар/модалки). Закривається
  * кліком по фону, кнопкою або Esc.
  */
-export function ImageLightbox({ src, onClose }) {
+export function ImageLightbox({ src, onClose, alt = "Вкладення" }) {
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") onClose();
@@ -39,7 +39,7 @@ export function ImageLightbox({ src, onClose }) {
       <img
         className="image-lightbox-img"
         src={src}
-        alt="Вкладення"
+        alt={alt}
         onClick={(e) => e.stopPropagation()}
       />
     </div>,

@@ -379,3 +379,18 @@ CREATE INDEX IF NOT EXISTS idx_users_points ON users(points DESC);
 -- Жирний/курсивний текст повідомлень ("Зовнішній вигляд"), видно всім.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS text_bold BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS text_italic BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- Фотогалерея профілю (до 10 фото на користувача, див. migrations/004_user_gallery.sql).
+CREATE TABLE IF NOT EXISTS user_gallery_photos (
+    id BIGSERIAL PRIMARY KEY,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    mime VARCHAR(32) NOT NULL,
+    size INTEGER NOT NULL,
+    data BYTEA NOT NULL,
+    thumb_mime VARCHAR(32) NOT NULL,
+    thumb BYTEA NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_gallery_photos_owner
+    ON user_gallery_photos(owner_id, created_at DESC);

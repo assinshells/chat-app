@@ -40,5 +40,6 @@
 @import "./components/_room-picker.css";
 @import "./components/_dm-toast.css";
 @import "./components/_image-attachment.css";
+@import "./components/_photo-gallery.css";
 
 @import "./components/_responsive.css";

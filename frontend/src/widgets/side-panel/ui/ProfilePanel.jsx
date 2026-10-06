@@ -13,6 +13,7 @@ import {
   Cookie,
   Code,
   MessageSquareText,
+  Images,
 } from "lucide-react";
 
 import {
@@ -33,6 +34,7 @@ import { ProfileEditView } from "./ProfileEditView.jsx";
 import { DarkModeView } from "./DarkModeView.jsx";
 import { AppearanceView } from "./AppearanceView.jsx";
 import { SecurityView } from "./SecurityView.jsx";
+import { GalleryView } from "./GalleryView.jsx";
 
 const SETTINGS_ITEMS = [
   { id: "profile", label: "Інформація профілю", icon: UserPen },
@@ -106,6 +108,17 @@ export function ProfilePanel({
       </div>
 
     <AppScrollbar className="app-panel-scroll">
+      {/* Звичайний пункт (не розкривний список) — відкриває вкладену панель. */}
+      <button
+        type="button"
+        className="app-panel-link"
+        onClick={() => setSubView("gallery")}
+      >
+        <Images size={18} />
+        <span className="app-panel-summary-label">Фотогалерея</span>
+        <ChevronRight size={16} />
+      </button>
+
       <details className="app-panel-details">
         <summary className="app-panel-summary">
           <Settings size={18} />
@@ -165,6 +178,7 @@ export function ProfilePanel({
     {subView === "profile" && <ProfileEditView onBack={closeSubView} />}
     {subView === "dark-mode" && <DarkModeView onBack={closeSubView} />}
     {subView === "security" && <SecurityView onBack={closeSubView} />}
+    {subView === "gallery" && <GalleryView onBack={closeSubView} />}
     {subView === "appearance" && (
       <AppearanceView
         onBack={closeSubView}

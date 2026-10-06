@@ -7,6 +7,7 @@ import logger from "./config/logger.js";
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import imageRoutes from "./routes/image.routes.js";
+import galleryRoutes from "./routes/gallery.routes.js";
 import roleRoutes from "./routes/role.routes.js";
 import moderationActionRoutes from "./routes/moderationAction.routes.js";
 import { notFoundHandler } from "./middlewares/notFound.middleware.js";
@@ -28,9 +29,13 @@ app.use(
   }),
 );
 app.use(compression());
+app.use(cookieParser());
+// Галерея підключається ДО глобального express.json(): фото йде JSON-ом
+// у base64 (до ~2 МБ), а глобальний парсер має ліміт 100 КБ і відхилив би
+// запит раніше. Власний парсер із потрібним лімітом — у gallery.routes.js.
+app.use("/api/gallery", galleryRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ success: true, status: "ok" });
