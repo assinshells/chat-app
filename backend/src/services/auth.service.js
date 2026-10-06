@@ -9,6 +9,7 @@ import {
   ConflictException,
   NotFoundException,
   AuthorizationException,
+  ValidationException,
 } from "../exceptions/auth.exceptions.js";
 import { AUTH_ERRORS, ROLE_VALUES } from "../constants/auth.constants.js";
 
@@ -73,6 +74,36 @@ export const AuthService = {
     const userId = await OtpService.consumeVerifiedToken(verifiedToken);
     if (!userId)
       throw new AuthorizationException(AUTH_ERRORS.RESET_TOKEN_INVALID);
+
+    const passwordHash = await PasswordProvider.hash(password);
+    await UserRepository.updatePassword(userId, passwordHash);
+    return { success: true };
+  },
+
+  /**
+   * requestPasswordChange — крок 1 зміни пароля з налаштувань
+   * (Безпека → Змінити пароль): надсилає OTP на email ПОТОЧНОГО
+   * користувача (береться з БД за userId із access-токена, а не з тіла
+   * запиту). Без email змінити пароль неможливо.
+   */
+  async requestPasswordChange({ userId }) {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new NotFoundException();
+    if (!user.email)
+      throw new ValidationException(AUTH_ERRORS.PASSWORD_CHANGE_EMAIL_REQUIRED);
+
+    const otp = await OtpService.generateOtp(user.id);
+    await EmailAdapter.sendOtp(user.email, otp);
+    return { success: true };
+  },
+
+  /**
+   * confirmPasswordChange — крок 2: перевіряє OTP (з тим самим лімітом
+   * спроб, що й у відновленні пароля) і записує новий пароль.
+   */
+  async confirmPasswordChange({ userId, otpCode, password }) {
+    await OtpService.validateOtp(userId, otpCode);
+    await OtpService.invalidateOtp(userId);
 
     const passwordHash = await PasswordProvider.hash(password);
     await UserRepository.updatePassword(userId, passwordHash);

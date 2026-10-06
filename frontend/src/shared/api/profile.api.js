@@ -75,3 +75,21 @@ export const updateColor = (color) =>
  */
 export const updateTextStyle = (style) =>
   apiClient.patch("/api/auth/text-style", style).then((r) => r.data);
+
+/**
+ * requestPasswordChange — крок 1 зміни пароля (Безпека → Змінити
+ * пароль): сервер надсилає OTP на email поточного користувача.
+ *
+ * @returns {Promise<{ success: boolean }>}
+ */
+export const requestPasswordChange = () =>
+  apiClient.post("/api/auth/password-change/request").then((r) => r.data);
+
+/**
+ * confirmPasswordChange — крок 2: код з листа + новий пароль.
+ *
+ * @param {{ otpCode: string, password: string, confirmPassword: string }} dto
+ * @returns {Promise<{ success: boolean }>}
+ */
+export const confirmPasswordChange = (dto) =>
+  apiClient.post("/api/auth/password-change/confirm", dto).then((r) => r.data);

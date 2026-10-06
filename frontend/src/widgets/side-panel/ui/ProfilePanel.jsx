@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Moon,
   Palette,
+  ShieldCheck,
   UserPen,
   ChevronDown,
   ChevronRight,
@@ -31,11 +32,13 @@ import { AppScrollbar } from "@shared/ui/scrollbar";
 import { ProfileEditView } from "./ProfileEditView.jsx";
 import { DarkModeView } from "./DarkModeView.jsx";
 import { AppearanceView } from "./AppearanceView.jsx";
+import { SecurityView } from "./SecurityView.jsx";
 
 const SETTINGS_ITEMS = [
   { id: "profile", label: "Інформація профілю", icon: UserPen },
   { id: "dark-mode", label: "Темний режим", icon: Moon },
   { id: "appearance", label: "Зовнішній вигляд", icon: Palette },
+  { id: "security", label: "Безпека", icon: ShieldCheck },
 ];
 
 const INFO_LINKS = [
@@ -161,6 +164,7 @@ export function ProfilePanel({
 
     {subView === "profile" && <ProfileEditView onBack={closeSubView} />}
     {subView === "dark-mode" && <DarkModeView onBack={closeSubView} />}
+    {subView === "security" && <SecurityView onBack={closeSubView} />}
     {subView === "appearance" && (
       <AppearanceView
         onBack={closeSubView}

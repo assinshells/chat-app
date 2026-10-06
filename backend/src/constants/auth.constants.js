@@ -5,6 +5,7 @@ export const AUTH_ERRORS = Object.freeze({
   USER_NOT_FOUND: "Користувача не знайдено",
   OTP_EXPIRED: "Код OTP прострочено або не знайдено",
   OTP_INVALID: "Невірний код OTP",
+  PASSWORD_CHANGE_EMAIL_REQUIRED: "Для зміни пароля потрібна ел. пошта",
   RESET_TOKEN_INVALID: "Токен скидання прострочено або недійсний",
   UNAUTHORIZED: "Не авторизовано",
   ACCESS_TOKEN_INVALID: "Токен доступу відсутній або недійсний",

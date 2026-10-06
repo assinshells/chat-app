@@ -8,7 +8,6 @@ import {
   MapPin,
   Heart,
   Pencil,
-  Mail,
 } from "lucide-react";
 
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
@@ -16,7 +15,6 @@ import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { SubPanelView } from "./SubPanelView.jsx";
 import { AboutView } from "./AboutView.jsx";
 import { CityView } from "./CityView.jsx";
-import { EmailView } from "./EmailView.jsx";
 import { NameView } from "./NameView.jsx";
 import { MaritalStatusView } from "./MaritalStatusView.jsx";
 import { getMaritalStatusLabel } from "@shared/constants/maritalStatus.constants.js";
@@ -27,7 +25,7 @@ import { getMaritalStatusLabel } from "@shared/constants/maritalStatus.constants
  * з пунктами "Про себе" (AboutView) та "Ваше ім'я" (NameView) і розкривний список "Особиста інформація"
  * з пунктами "Місто" (CityView) та "Сімейний стан" (MaritalStatusView);
  * і розкривний список "Контактна інформація" з пунктом "Додати ел. адресу"
- * (EmailView); якщо значення задане — пункт показує його замість назви.
+ * (ел. адреса перенесена в Налаштування → Безпека, див. SecurityView).
  */
 export function ProfileEditView({ onBack }) {
   // Яка вкладена панель відкрита поверх (null — жодна).
@@ -36,7 +34,6 @@ export function ProfileEditView({ onBack }) {
 
   const city = useCurrentUserStore((state) => state.city);
   const displayName = useCurrentUserStore((state) => state.displayName);
-  const email = useCurrentUserStore((state) => state.email);
   const maritalStatus = useCurrentUserStore((state) => state.maritalStatus);
 
   return (
@@ -104,30 +101,10 @@ export function ProfileEditView({ onBack }) {
           </button>
         </details>
 
-        <details className="app-panel-details" open>
-          <summary className="app-panel-summary">
-            <Mail size={18} />
-            <span className="app-panel-summary-label">Контактна інформація</span>
-            <ChevronDown size={16} className="app-panel-summary-chevron" />
-          </summary>
-
-          <button
-            type="button"
-            className="app-sidebar-theme-btn"
-            onClick={() => setSubView("email")}
-          >
-            <Mail size={18} />
-            <span className="app-panel-summary-label">
-              {email?.trim() || "Додати ел. адресу"}
-            </span>
-            <ChevronRight size={16} className="ms-auto" />
-          </button>
-        </details>
       </SubPanelView>
 
       {subView === "about" && <AboutView onBack={closeSubView} />}
       {subView === "city" && <CityView onBack={closeSubView} />}
-      {subView === "email" && <EmailView onBack={closeSubView} />}
       {subView === "name" && <NameView onBack={closeSubView} />}
       {subView === "marital" && <MaritalStatusView onBack={closeSubView} />}
     </>

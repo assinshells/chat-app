@@ -48,6 +48,20 @@ router.patch(
   csrfProtection,
   AuthController.updateColor,
 );
+router.post(
+  "/password-change/request",
+  authGuard,
+  csrfProtection,
+  RateLimitProvider.forgotPassword,
+  AuthController.requestPasswordChange,
+);
+router.post(
+  "/password-change/confirm",
+  authGuard,
+  csrfProtection,
+  RateLimitProvider.verifyOtp,
+  AuthController.confirmPasswordChange,
+);
 router.patch(
   "/text-style",
   authGuard,

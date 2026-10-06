@@ -84,6 +84,11 @@ export const toResetPasswordDto = (body) => ({
   password: body.password,
   confirmPassword: body.confirmPassword,
 });
+export const toConfirmPasswordChangeDto = (body) => ({
+  otpCode: body.otpCode,
+  password: body.password,
+  confirmPassword: body.confirmPassword,
+});
 export const toUpdateGenderDto = (body) => ({
   gender: body.gender,
 });

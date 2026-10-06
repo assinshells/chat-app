@@ -7,6 +7,7 @@ import {
   toResetPasswordDto,
   toUpdateGenderDto,
   toUpdateColorDto,
+  toConfirmPasswordChangeDto,
   toUpdateTextStyleDto,
   toUpdateStatusDto,
   toUpdateEmailDto,
@@ -23,6 +24,7 @@ import {
   validateResetPasswordRequest,
   validateUpdateGenderRequest,
   validateUpdateColorRequest,
+  validateConfirmPasswordChangeRequest,
   validateUpdateTextStyleRequest,
   validateUpdateStatusRequest,
   validateUpdateEmailRequest,
@@ -97,6 +99,34 @@ export const AuthController = {
       validateResetPasswordRequest(req.body);
       const dto = toResetPasswordDto(req.body);
       const result = await AuthService.resetPassword(dto);
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Зміна пароля з налаштувань (Безпека): OTP на email поточного
+  // користувача, потім підтвердження кодом + новий пароль.
+  requestPasswordChange: async (req, res, next) => {
+    try {
+      const result = await AuthService.requestPasswordChange({
+        userId: req.userId,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  confirmPasswordChange: async (req, res, next) => {
+    try {
+      validateConfirmPasswordChangeRequest(req.body);
+      const dto = toConfirmPasswordChangeDto(req.body);
+      const result = await AuthService.confirmPasswordChange({
+        userId: req.userId,
+        otpCode: dto.otpCode,
+        password: dto.password,
+      });
       res.status(HTTP_STATUS.OK).json({ success: true, ...result });
     } catch (err) {
       next(err);

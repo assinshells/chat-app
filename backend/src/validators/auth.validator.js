@@ -83,6 +83,18 @@ export const validateResetPasswordRequest = (body) => {
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
+export const validateConfirmPasswordChangeRequest = (body) => {
+  const errors = [];
+  if (!isNonEmptyString(body.otpCode)) errors.push("otpCode обов'язковий");
+  if (!isValidPassword(body.password))
+    errors.push("пароль має містити щонайменше 6 символів");
+  if (!isNonEmptyString(body.confirmPassword))
+    errors.push("підтвердження пароля обов'язкове");
+  if (body.password !== body.confirmPassword)
+    errors.push("Паролі не збігаються");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
 export const validateUpdateGenderRequest = (body) => {
   const errors = [];
   if (!isValidGender(body.gender))
