@@ -19,7 +19,7 @@ export const UserRepository = {
 
   async findById(id) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name, about, marital_status FROM users WHERE id = $1",
+      "SELECT id, login, email, password_hash, gender, color, text_bold, text_italic, status, role, city, display_name, about, marital_status FROM users WHERE id = $1",
       [id],
     );
     return rows[0] ?? null;
@@ -90,6 +90,21 @@ export const UserRepository = {
     const { rows } = await pool.query(
       "UPDATE users SET color = $1 WHERE id = $2 RETURNING id, login, email, color",
       [color, id],
+    );
+    return rows[0] ?? null;
+  },
+  /**
+   * updateTextStyle — жирний/курсивний текст. Кожне поле необов'язкове:
+   * undefined лишає поточне значення (COALESCE).
+   */
+  async updateTextStyle(id, { bold, italic }) {
+    const { rows } = await pool.query(
+      `UPDATE users
+          SET text_bold = COALESCE($1, text_bold),
+              text_italic = COALESCE($2, text_italic)
+        WHERE id = $3
+        RETURNING id, text_bold, text_italic`,
+      [bold ?? null, italic ?? null, id],
     );
     return rows[0] ?? null;
   },

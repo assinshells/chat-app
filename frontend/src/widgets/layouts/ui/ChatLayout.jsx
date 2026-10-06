@@ -5,6 +5,10 @@ import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { SidePanel } from "@widgets/side-panel";
+import {
+  updateColor as updateColorRest,
+  updateTextStyle as updateTextStyleRest,
+} from "@shared/api/profile.api.js";
 import { RoomPickerModal, ROOM_PICKER_MODAL_ID } from "@widgets/room-picker";
 import { useChatSocket } from "@features/chat";
 import { useDmStore, DmToast } from "@features/dm";
@@ -66,6 +70,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     joinError,
     dismissJoinError,
     updateStatus,
+    updateColor,
+    updateTextStyle,
   } = useChatSocket({
     enabled: Boolean(login),
     initialRoom,
@@ -193,6 +199,37 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         // (той самий підхід, що й для теми/кольору в цьому файлі).
       });
   };
+
+  // "Зовнішній вигляд" (колір, жирний, курсив): спочатку через сокет —
+  // тоді нові повідомлення одразу йдуть оновленим стилем. Якщо сокет
+  // недоступний, зберігаємо через REST: у БД зміна є, але сокет
+  // підхопить її лише після повторного входу. Повертає
+  // { applied: true|false } — applied=false означає "потрібно перезайти".
+  const saveAppearance = async (viaSocket, viaRest, onSaved) => {
+    try {
+      await viaSocket();
+      onSaved();
+      return { applied: true };
+    } catch {
+      await viaRest();
+      onSaved();
+      return { applied: false };
+    }
+  };
+
+  const handleColorChange = (color) =>
+    saveAppearance(
+      () => updateColor(color),
+      () => updateColorRest(color),
+      () => useCurrentUserStore.getState().setColor(color),
+    );
+
+  const handleTextStyleChange = (style) =>
+    saveAppearance(
+      () => updateTextStyle(style),
+      () => updateTextStyleRest(style),
+      () => useCurrentUserStore.getState().setTextStyle(style),
+    );
 
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
@@ -339,6 +376,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
           onNicknameClick={handlePanelNicknameClick}
           currentUserStatus={currentUserStatus}
           onStatusChange={handleStatusChange}
+          onColorChange={handleColorChange}
+          onTextStyleChange={handleTextStyleChange}
           logoutModalId={LOGOUT_MODAL_ID}
         />
       )}

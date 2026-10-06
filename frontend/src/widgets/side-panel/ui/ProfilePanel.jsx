@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Moon,
+  Palette,
   UserPen,
   ChevronDown,
   ChevronRight,
@@ -29,10 +30,12 @@ import {
 import { AppScrollbar } from "@shared/ui/scrollbar";
 import { ProfileEditView } from "./ProfileEditView.jsx";
 import { DarkModeView } from "./DarkModeView.jsx";
+import { AppearanceView } from "./AppearanceView.jsx";
 
 const SETTINGS_ITEMS = [
   { id: "profile", label: "Інформація профілю", icon: UserPen },
   { id: "dark-mode", label: "Темний режим", icon: Moon },
+  { id: "appearance", label: "Зовнішній вигляд", icon: Palette },
 ];
 
 const INFO_LINKS = [
@@ -56,6 +59,8 @@ const INFO_LINKS = [
 export function ProfilePanel({
   currentUserStatus,
   onStatusChange,
+  onColorChange,
+  onTextStyleChange,
   logoutModalId,
 }) {
   // Яка вкладена панель відкрита поверх профілю (null — жодна).
@@ -156,6 +161,13 @@ export function ProfilePanel({
 
     {subView === "profile" && <ProfileEditView onBack={closeSubView} />}
     {subView === "dark-mode" && <DarkModeView onBack={closeSubView} />}
+    {subView === "appearance" && (
+      <AppearanceView
+        onBack={closeSubView}
+        onColorChange={onColorChange}
+        onTextStyleChange={onTextStyleChange}
+      />
+    )}
     </>
   );
 }

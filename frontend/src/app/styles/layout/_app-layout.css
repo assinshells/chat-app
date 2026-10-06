@@ -549,3 +549,33 @@
 
   border-top: 1px solid var(--bs-border-color);
 }
+
+/* Рядок з перемикачем (form-switch) у вкладеній панелі, напр.
+   "Курсив"/"Жирний текст" у AppearanceView. Той самий вигляд, що й
+   .app-radio-row, але перемикач притиснутий праворуч. */
+.app-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.85rem 1rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+
+  cursor: pointer;
+}
+
+.app-switch-row:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.app-switch-row .form-check-input {
+  cursor: pointer;
+}
+
+/* Назва обраного кольору в пункті "Змінити колір тексту". */
+.app-appearance-color-name {
+  font-weight: 400;
+  font-style: normal;
+  opacity: 0.75;
+}

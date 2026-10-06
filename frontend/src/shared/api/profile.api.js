@@ -54,3 +54,24 @@ export const updateMaritalStatus = (maritalStatus) =>
   apiClient
     .patch("/api/auth/marital-status", { maritalStatus })
     .then((r) => r.data);
+
+/**
+ * updateColor — колір тексту повідомлень (REST-варіант; у чаті
+ * використовується сокет-подія color:update, див. useChatSocket.js,
+ * бо вона ще й оновлює колір вже відкритого сокета).
+ *
+ * @param {string} color - одне з COLOR_OPTIONS
+ * @returns {Promise<{ success: boolean, color: string }>}
+ */
+export const updateColor = (color) =>
+  apiClient.patch("/api/auth/color", { color }).then((r) => r.data);
+
+/**
+ * updateTextStyle — жирний/курсивний текст повідомлень (REST-варіант,
+ * див. updateColor вище). Кожне поле необов'язкове.
+ *
+ * @param {{ bold?: boolean, italic?: boolean }} style
+ * @returns {Promise<{ success: boolean, bold: boolean, italic: boolean }>}
+ */
+export const updateTextStyle = (style) =>
+  apiClient.patch("/api/auth/text-style", style).then((r) => r.data);

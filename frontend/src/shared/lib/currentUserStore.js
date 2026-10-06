@@ -17,6 +17,9 @@ export const useCurrentUserStore = create((set) => ({
   login: null,
   role: null,
   status: null,
+  color: null,
+  bold: false,
+  italic: false,
   email: null,
   city: null,
   displayName: null,
@@ -30,6 +33,9 @@ export const useCurrentUserStore = create((set) => ({
       login: user.login,
       role: user.role,
       status: user.status,
+      color: user.color ?? null,
+      bold: Boolean(user.bold),
+      italic: Boolean(user.italic),
       email: user.email ?? null,
       city: user.city ?? null,
       displayName: user.displayName ?? null,
@@ -42,6 +48,16 @@ export const useCurrentUserStore = create((set) => ({
   // useChatSocket.js) — не чекаємо наступного getMe, щоб таб "Профіль"
   // відреагував миттєво.
   setStatus: (status) => set({ status }),
+
+  // Оптимістичне оновлення кольору тексту після успішного color:update.
+  setColor: (color) => set({ color }),
+
+  // Жирний/курсивний текст; undefined-поле лишає поточне значення.
+  setTextStyle: ({ bold, italic }) =>
+    set((state) => ({
+      bold: bold ?? state.bold,
+      italic: italic ?? state.italic,
+    })),
 
   // Точкове оновлення email/city/displayName після успішного
   // PATCH-запиту з EditableProfileField (аккордеон "Personal Info" в
@@ -58,6 +74,9 @@ export const useCurrentUserStore = create((set) => ({
       login: null,
       role: null,
       status: null,
+      color: null,
+      bold: false,
+      italic: false,
       email: null,
       city: null,
       displayName: null,

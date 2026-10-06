@@ -241,7 +241,15 @@ export function ChatConversation({
                       </>
                     )}{" "}
 
-                    <span className="message-text" style={{ color: messageColorHex }}>
+                    <span
+                      className="message-text"
+                      style={{
+                        color: messageColorHex,
+                        // Жирний/курсив — вибір автора, видно всім.
+                        ...(message.bold ? { fontWeight: 700 } : null),
+                        ...(message.italic ? { fontStyle: "italic" } : null),
+                      }}
+                    >
                       {renderMessageText(
                         message.text,
                         currentUser,

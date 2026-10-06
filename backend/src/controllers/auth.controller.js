@@ -7,6 +7,7 @@ import {
   toResetPasswordDto,
   toUpdateGenderDto,
   toUpdateColorDto,
+  toUpdateTextStyleDto,
   toUpdateStatusDto,
   toUpdateEmailDto,
   toUpdateCityDto,
@@ -22,6 +23,7 @@ import {
   validateResetPasswordRequest,
   validateUpdateGenderRequest,
   validateUpdateColorRequest,
+  validateUpdateTextStyleRequest,
   validateUpdateStatusRequest,
   validateUpdateEmailRequest,
   validateUpdateCityRequest,
@@ -138,6 +140,22 @@ export const AuthController = {
     next(err);
   }
 },
+  updateTextStyle: async (req, res, next) => {
+    try {
+      validateUpdateTextStyleRequest(req.body);
+      const dto = toUpdateTextStyleDto(req.body);
+      const result = await AuthService.updateTextStyle({
+        userId: req.userId,
+        bold: dto.bold,
+        italic: dto.italic,
+      });
+      res
+        .status(HTTP_STATUS.OK)
+        .json({ success: true, bold: result.bold, italic: result.italic });
+    } catch (err) {
+      next(err);
+    }
+  },
   updateColor: async (req, res, next) => {
     try {
       validateUpdateColorRequest(req.body);

@@ -49,6 +49,12 @@ router.patch(
   AuthController.updateColor,
 );
 router.patch(
+  "/text-style",
+  authGuard,
+  csrfProtection,
+  AuthController.updateTextStyle,
+);
+router.patch(
   "/status",
   authGuard,
   csrfProtection,

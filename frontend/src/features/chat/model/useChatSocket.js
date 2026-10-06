@@ -16,6 +16,8 @@ const MODERATION_KICKED = "moderation:kicked";
 const MODERATION_BANNED = "moderation:banned";
 const MODERATION_ROOM_BANNED = "moderation:room_banned";
 const STATUS_UPDATE = "status:update";
+const COLOR_UPDATE = "color:update";
+const TEXT_STYLE_UPDATE = "textStyle:update";
 
 /**
  * useChatSocket — тримає живе Socket.IO-з'єднання і поточну активну
@@ -521,6 +523,51 @@ export function useChatSocket({ enabled, initialRoom }) {
     });
   }, []);
 
+  /**
+   * updateColor — емітить color:update: сервер персистить колір у БД і
+   * оновлює socket.data.color, тож наступні повідомлення йдуть уже
+   * новим кольором (без перепідключення).
+   */
+  const updateColor = useCallback((color) => {
+    return new Promise((resolve, reject) => {
+      if (!chatSocket.connected) {
+        reject(new Error("Немає з'єднання з сервером"));
+        return;
+      }
+
+      chatSocket.emit(COLOR_UPDATE, { color }, (result) => {
+        if (result?.success) {
+          resolve(result.color);
+          return;
+        }
+
+        reject(new Error(result?.message || "Не вдалося оновити колір"));
+      });
+    });
+  }, []);
+
+  /**
+   * updateTextStyle — емітить textStyle:update ({ bold?, italic? }),
+   * аналогічно updateColor.
+   */
+  const updateTextStyle = useCallback((style) => {
+    return new Promise((resolve, reject) => {
+      if (!chatSocket.connected) {
+        reject(new Error("Немає з'єднання з сервером"));
+        return;
+      }
+
+      chatSocket.emit(TEXT_STYLE_UPDATE, style, (result) => {
+        if (result?.success) {
+          resolve(result);
+          return;
+        }
+
+        reject(new Error(result?.message || "Не вдалося оновити стиль тексту"));
+      });
+    });
+  }, []);
+
   return {
     activeRoom,
     switchRoom,
@@ -531,6 +578,8 @@ export function useChatSocket({ enabled, initialRoom }) {
     roomUsers,
     sendMessage,
     updateStatus,
+    updateColor,
+    updateTextStyle,
     cooldownMs,
     roomBan: isComposerDisabled ? roomBan : null,
     confinement,

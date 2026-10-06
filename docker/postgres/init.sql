@@ -375,3 +375,7 @@ BEGIN
     END IF;
 END $$;
 CREATE INDEX IF NOT EXISTS idx_users_points ON users(points DESC);
+
+-- Жирний/курсивний текст повідомлень ("Зовнішній вигляд"), видно всім.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS text_bold BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS text_italic BOOLEAN NOT NULL DEFAULT FALSE;

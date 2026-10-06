@@ -97,6 +97,16 @@ export const validateUpdateColorRequest = (body) => {
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
+export const validateUpdateTextStyleRequest = (body) => {
+  const errors = [];
+  const isBoolOrUndef = (v) => v === undefined || typeof v === "boolean";
+  if (!isBoolOrUndef(body?.bold)) errors.push("bold має бути true або false");
+  if (!isBoolOrUndef(body?.italic)) errors.push("italic має бути true або false");
+  if (body?.bold === undefined && body?.italic === undefined)
+    errors.push("потрібно передати bold та/або italic");
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
 export const validateUpdateStatusRequest = (body) => {
   const errors = [];
   if (!isValidStatus(body.status))

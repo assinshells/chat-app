@@ -179,6 +179,14 @@ export const SOCKET_EVENTS = Object.freeze({
   // ROOM_USERS її учасникам (див. sockets/chat.socket.js).
   STATUS_UPDATE: "status:update",
 
+  // Зміна кольору тексту ("Зовнішній вигляд") — клієнт емітить
+  // COLOR_UPDATE, сервер персистить у БД і оновлює socket.data.color,
+  // з якого береться колір НАСТУПНИХ повідомлень цього сокета.
+  COLOR_UPDATE: "color:update",
+
+  // Зміна жирного/курсивного тексту — аналогічно COLOR_UPDATE.
+  TEXT_STYLE_UPDATE: "textStyle:update",
+
   // Особисті повідомлення (DM) — окремий канал доставки, не пов'язаний
   // з ROOM_JOIN/currentRoom, див. dmChannel вище і sockets/dm.socket.js.
   DM_OPEN: "dm:open",

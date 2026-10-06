@@ -26,6 +26,8 @@ export function SidePanel({
   onNicknameClick,
   currentUserStatus,
   onStatusChange,
+  onColorChange,
+  onTextStyleChange,
   logoutModalId,
 }) {
   const isDarkTheme = useIsDarkTheme();
@@ -121,6 +123,8 @@ export function SidePanel({
           <ProfilePanel
             currentUserStatus={currentUserStatus}
             onStatusChange={onStatusChange}
+            onColorChange={onColorChange}
+            onTextStyleChange={onTextStyleChange}
             logoutModalId={logoutModalId}
           />
         )}

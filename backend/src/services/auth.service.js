@@ -97,6 +97,11 @@ export const AuthService = {
     if (!updated) throw new NotFoundException();
     return { success: true, color: updated.color };
   },
+  async updateTextStyle({ userId, bold, italic }) {
+    const updated = await UserRepository.updateTextStyle(userId, { bold, italic });
+    if (!updated) throw new NotFoundException();
+    return { success: true, bold: updated.text_bold, italic: updated.text_italic };
+  },
   async updateStatus({ userId, status }) {
     const updated = await UserRepository.updateStatus(userId, status);
     if (!updated) throw new NotFoundException();
@@ -173,6 +178,8 @@ export const AuthService = {
         email: user.email,
         gender: user.gender,
         color: user.color,
+        bold: user.text_bold,
+        italic: user.text_italic,
         status: user.status,
         city: user.city,
         displayName: user.display_name,

@@ -27,7 +27,7 @@ export const MessageService = {
    * замінюється на DEFAULT_ROOM — кімнати фіксовані списком на бекенді,
    * клієнт не може завести довільну.
    */
-  async sendMessage({ authorId, authorLogin, authorColor, text, image: rawImage, room = DEFAULT_ROOM }) {
+  async sendMessage({ authorId, authorLogin, authorColor, authorBold, authorItalic, text, image: rawImage, room = DEFAULT_ROOM }) {
     // Мут перевіряється раніше за нормалізацію тексту: замученому
     // користувачу не потрібне пояснення про порожнє/довге повідомлення —
     // йому потрібен лише код MUTED із часом, що залишився.
@@ -66,7 +66,7 @@ export const MessageService = {
       image,
     });
 
-    return toMessageDto({ ...created, author: authorLogin, color: authorColor });
+    return toMessageDto({ ...created, author: authorLogin, color: authorColor, bold: authorBold, italic: authorItalic });
   },
 
   async getHistory({ room = DEFAULT_ROOM, limit = CHAT_LIMITS.HISTORY_DEFAULT_LIMIT } = {}) {

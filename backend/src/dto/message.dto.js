@@ -13,6 +13,8 @@ import { QUIZ_BOT_LOGIN } from "../constants/quiz.constants.js";
  * @property {boolean} isBot - повідомлення бота вікторини (фронтенд виділяє його стилем)
  * @property {string} color - колір повідомлення/ніка автора на момент відправлення,
  *   одне з COLOR_OPTIONS (constants/auth.constants.js — повний спектр з 20 відтінків)
+ * @property {boolean} bold - жирний текст автора (users.text_bold)
+ * @property {boolean} italic - курсивний текст автора (users.text_italic)
  */
 
 export const toMessageDto = (row) => ({
@@ -23,5 +25,7 @@ export const toMessageDto = (row) => ({
   room: row.room,
   image: row.image_id ? { id: String(row.image_id) } : null,
   color: row.author_color ?? row.color ?? DEFAULT_COLOR,
+  bold: Boolean(row.author_bold ?? row.bold),
+  italic: Boolean(row.author_italic ?? row.italic),
   isBot: (row.author_login ?? row.author) === QUIZ_BOT_LOGIN,
 });

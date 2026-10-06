@@ -89,6 +89,16 @@ export const toUpdateGenderDto = (body) => ({
 });
 
 /**
+ * @typedef {Object} UpdateTextStyleDto
+ * @property {boolean|undefined} bold
+ * @property {boolean|undefined} italic
+ */
+export const toUpdateTextStyleDto = (body) => ({
+  bold: body.bold,
+  italic: body.italic,
+});
+
+/**
  * @typedef {Object} UpdateColorDto
  * @property {string} color - одне з COLOR_OPTIONS (constants/auth.constants.js —
  *   повний спектр з 20 відтінків)

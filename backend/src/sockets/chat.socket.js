@@ -1,6 +1,6 @@
 import { MessageService } from "../services/message.service.js";
 import { DEFAULT_ROOM, SOCKET_EVENTS, isValidRoom } from "../constants/chat.constants.js";
-import { STATUS_OPTIONS } from "../constants/auth.constants.js";
+import { STATUS_OPTIONS, COLOR_OPTIONS } from "../constants/auth.constants.js";
 import { RoomPresence } from "./presence.js";
 import { broadcastRoomUsers, broadcastRoomsState } from "./broadcast.js";
 import { BanRepository } from "../repositories/ban.repository.js";
@@ -304,6 +304,8 @@ export function registerChatSocket(io, socket) {
         authorId: socket.data.userId,
         authorLogin: socket.data.login,
         authorColor: socket.data.color,
+        authorBold: socket.data.bold,
+        authorItalic: socket.data.italic,
         text,
         image,
         room,
@@ -380,6 +382,83 @@ export function registerChatSocket(io, socket) {
         success: false,
         code: "STATUS_UPDATE_FAILED",
         message: "Не вдалося оновити статус",
+      });
+    }
+  });
+
+  // color:update — зміна кольору тексту (панель "Зовнішній вигляд").
+  // REST PATCH /api/auth/color лише пише в БД, а колір повідомлень
+  // береться із socket.data.color (виставляється один раз при
+  // підключенні, див. guards/socketAuth.guard.js) — тому без цього
+  // обробника новий колір діяв би лише після перепідключення.
+  socket.on(SOCKET_EVENTS.COLOR_UPDATE, async (payload, ack) => {
+    const color = typeof payload === "string" ? payload : payload?.color;
+    const respond = (result) => {
+      if (typeof ack === "function") ack(result);
+    };
+
+    if (!COLOR_OPTIONS.includes(color)) {
+      return respond({
+        success: false,
+        code: "COLOR_INVALID",
+        message: "Невірний колір",
+      });
+    }
+
+    try {
+      await AuthService.updateColor({ userId: socket.data.userId, color });
+      socket.data.color = color;
+      respond({ success: true, color });
+    } catch (err) {
+      logger.warn(
+        `color:update не вдався для користувача ${socket.data.userId}: ${err.message}`,
+      );
+      respond({
+        success: false,
+        code: "COLOR_UPDATE_FAILED",
+        message: "Не вдалося оновити колір",
+      });
+    }
+  });
+
+  // textStyle:update — жирний/курсивний текст ("Зовнішній вигляд"),
+  // той самий принцип, що й color:update: БД + socket.data.
+  socket.on(SOCKET_EVENTS.TEXT_STYLE_UPDATE, async (payload, ack) => {
+    const respond = (result) => {
+      if (typeof ack === "function") ack(result);
+    };
+    const isBoolOrUndef = (v) => v === undefined || typeof v === "boolean";
+    const { bold, italic } = payload ?? {};
+
+    if (
+      !isBoolOrUndef(bold) ||
+      !isBoolOrUndef(italic) ||
+      (bold === undefined && italic === undefined)
+    ) {
+      return respond({
+        success: false,
+        code: "TEXT_STYLE_INVALID",
+        message: "Невірні налаштування стилю тексту",
+      });
+    }
+
+    try {
+      const result = await AuthService.updateTextStyle({
+        userId: socket.data.userId,
+        bold,
+        italic,
+      });
+      socket.data.bold = result.bold;
+      socket.data.italic = result.italic;
+      respond({ success: true, bold: result.bold, italic: result.italic });
+    } catch (err) {
+      logger.warn(
+        `textStyle:update не вдався для користувача ${socket.data.userId}: ${err.message}`,
+      );
+      respond({
+        success: false,
+        code: "TEXT_STYLE_UPDATE_FAILED",
+        message: "Не вдалося оновити стиль тексту",
       });
     }
   });
