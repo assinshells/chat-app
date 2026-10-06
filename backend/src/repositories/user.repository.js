@@ -166,4 +166,32 @@ export const UserRepository = {
     );
     return rows[0] ?? null;
   },
+
+  // Бали вікторини (services/quiz.service.js). Додавання — одним
+  // атомарним UPDATE ... points = points + $1, щоб паралельні перемоги
+  // не затирали одна одну (read-modify-write тут був би гонкою).
+  async addPoints(id, amount) {
+    const { rows } = await pool.query(
+      "UPDATE users SET points = points + $1 WHERE id = $2 RETURNING points",
+      [amount, id],
+    );
+    return rows[0]?.points ?? null;
+  },
+
+  async getPoints(id) {
+    const { rows } = await pool.query("SELECT points FROM users WHERE id = $1", [id]);
+    return rows[0]?.points ?? 0;
+  },
+
+  // Топ за балами. Бота й нулі в рейтинг не включаємо.
+  async topByPoints(limit = 5, excludeLogin = null) {
+    const { rows } = await pool.query(
+      `SELECT login, points FROM users
+       WHERE points > 0 AND ($2::text IS NULL OR login <> $2)
+       ORDER BY points DESC, login ASC
+       LIMIT $1`,
+      [limit, excludeLogin],
+    );
+    return rows;
+  },
 };

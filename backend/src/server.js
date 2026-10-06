@@ -8,6 +8,7 @@ import { connectRedis, disconnectRedis } from "./config/redis.js";
 import { createSocketServer } from "./config/socket.js";
 import { initSockets } from "./sockets/index.js";
 import { ensureSuperadmin } from "./services/superadminBootstrap.service.js";
+import { ensureQuizBot } from "./services/quizBootstrap.service.js";
 
 try {
   assertRequiredEnv();
@@ -78,6 +79,7 @@ const start = async () => {
     await connectDatabase();
     await connectRedis();
     await ensureSuperadmin();
+    await ensureQuizBot();
     httpServer.listen(PORT, () => {
       logger.info(`Сервер запущено на порту ${PORT} [${process.env.NODE_ENV}]`);
     });

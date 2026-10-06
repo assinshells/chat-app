@@ -361,3 +361,17 @@ CREATE TABLE IF NOT EXISTS user_friends (
 
 CREATE INDEX IF NOT EXISTS idx_user_friends_owner ON user_friends(owner_id);
 CREATE INDEX IF NOT EXISTS idx_user_friends_friend ON user_friends(friend_id);
+
+-- Бали за перемоги у вікторині (див. backend/src/services/quiz.service.js).
+-- Накопичуються і надалі витрачатимуться в магазині (кастомний колір
+-- тощо) — тому окрема числова колонка, а не обчислення з журналу.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS points INTEGER NOT NULL DEFAULT 0;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_points_check'
+    ) THEN
+        ALTER TABLE users ADD CONSTRAINT users_points_check CHECK (points >= 0);
+    END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_users_points ON users(points DESC);

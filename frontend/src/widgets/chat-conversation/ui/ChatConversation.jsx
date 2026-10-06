@@ -200,7 +200,9 @@ export function ChatConversation({
               return (
                 <div
                   key={message.id}
-                  className={`message ${isOwn ? "message-user" : "message-other"}`}
+                  className={`message ${isOwn ? "message-user" : "message-other"}${
+                    message.isBot ? " message-bot" : ""
+                  }`}
                 >
 
                   <div className="message-content">

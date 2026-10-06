@@ -7,6 +7,7 @@ import { BanRepository } from "../repositories/ban.repository.js";
 import { ConfinementRepository } from "../repositories/confinement.repository.js";
 import { AuthService } from "../services/auth.service.js";
 import { BannedException, ConfinedException } from "../exceptions/chat.exceptions.js";
+import { QuizService } from "../services/quiz.service.js";
 import logger from "../config/logger.js";
 
 // Проста in-memory-защита від флуду: не більше N повідомлень за
@@ -314,6 +315,16 @@ export function registerChatSocket(io, socket) {
       io.to(room).emit(SOCKET_EVENTS.MESSAGE_NEW, message);
 
       respond({ success: true });
+
+      // Вікторина (команди !викторина/!очки/!топ та перевірка відповіді).
+      // Після respond і БЕЗ await: ack відправнику не залежить від бота,
+      // а QuizService.handleMessage сам ловить усі помилки.
+      QuizService.handleMessage(io, {
+        room,
+        userId: socket.data.userId,
+        login: socket.data.login,
+        text: message.text,
+      });
     } catch (err) {
       logger.warn(
         `message:send відхилено для користувача ${socket.data.userId}: ${err.message}`,

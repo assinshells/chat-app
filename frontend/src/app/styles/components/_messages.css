@@ -224,3 +224,20 @@
   color: var(--bs-secondary-color);
   text-align: center;
 }
+
+/* =========================================================
+    BOT MESSAGE (бот вікторини, message.isBot з бекенда)
+    ========================================================= */
+
+.message-bot .message-content {
+  padding: 0.25rem 0.5rem;
+
+  border-left: 3px solid var(--bs-primary);
+  border-radius: var(--bs-border-radius);
+
+  background: rgba(var(--bs-primary-rgb), 0.06);
+}
+
+.message-bot .message-author {
+  color: var(--bs-primary);
+}
