@@ -25,18 +25,23 @@ export const GalleryRepository = {
 
   /**
    * listFeed — стрічка фото ВСІХ користувачів із заданим статусом, нові
-   * першими, keyset-пагінація за id (before — id останнього отриманого).
+   * першими, keyset-пагінація за id (before — id останнього отриманого);
+   * за потреби — лише фото авторів, чий нік підходить під loginPattern.
    * Бере limit + 1 рядок, щоб сервіс знав, чи є ще сторінка.
    */
-  async listFeed({ status, before, limit }) {
+  async listFeed({ status, before, limit, loginPattern }) {
+    // loginPattern — готовий LIKE-шаблон (спецсимволи вже екрановано в
+    // сервісі) або null; пошук без урахування регістру, за частиною ніка.
     const { rows } = await pool.query(
       `SELECT ${FEED_COLUMNS}
        FROM user_gallery_photos p
        JOIN users u ON u.id = p.owner_id
-       WHERE p.status = $1 AND ($2::bigint IS NULL OR p.id < $2::bigint)
+       WHERE p.status = $1
+         AND ($2::bigint IS NULL OR p.id < $2::bigint)
+         AND ($4::text IS NULL OR u.login ILIKE $4::text ESCAPE '\\')
        ORDER BY p.id DESC
        LIMIT $3`,
-      [status, before ?? null, limit + 1],
+      [status, before ?? null, limit + 1, loginPattern ?? null],
     );
     return rows;
   },

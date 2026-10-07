@@ -41,6 +41,9 @@ export const GALLERY_PAGE = Object.freeze({
   MAX: 60,
 });
 
+// Пошук фото за ніком автора: найдовший запит, який має сенс (нік не довший).
+export const GALLERY_SEARCH_MAX_LENGTH = 32;
+
 /**
  * canReviewPhotos — чи може користувач перевіряти фото (бачити непройдені,
  * схвалювати, видаляти чужі). admin/superadmin — завжди; moderator — лише

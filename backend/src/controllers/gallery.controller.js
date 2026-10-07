@@ -42,6 +42,7 @@ export const GalleryController = {
       const result = await GalleryService.listPublic({
         before: req.query.before,
         limit: req.query.limit,
+        search: req.query.q,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, ...result });
     } catch (err) {
@@ -55,6 +56,7 @@ export const GalleryController = {
         userId: req.userId,
         before: req.query.before,
         limit: req.query.limit,
+        search: req.query.q,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, ...result });
     } catch (err) {

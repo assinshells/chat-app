@@ -5,6 +5,7 @@ import {
   GALLERY_ERRORS,
   GALLERY_LIMITS,
   GALLERY_PAGE,
+  GALLERY_SEARCH_MAX_LENGTH,
   PHOTO_STATUS,
   canReviewPhotos,
 } from "../constants/gallery.constants.js";
@@ -55,12 +56,26 @@ const parseLimit = (limit) => {
   return Math.min(n, GALLERY_PAGE.MAX);
 };
 
-async function loadFeed({ status, before, limit }) {
+/**
+ * parseSearch — запит "за ніком" -> LIKE-шаблон '%запит%' або null (без
+ * фільтра). Обрізає пробіли й довжину, екранує % _ \ — щоб запит "a_b"
+ * шукав саме "a_b", а не "a<будь-який символ>b", і не міг стати
+ * "%" для вибірки всього.
+ */
+const parseSearch = (search) => {
+  if (typeof search !== "string") return null;
+  const text = search.trim().slice(0, GALLERY_SEARCH_MAX_LENGTH);
+  if (!text) return null;
+  return `%${text.replace(/[\\%_]/g, "\\$&")}%`;
+};
+
+async function loadFeed({ status, before, limit, search }) {
   const size = parseLimit(limit);
   const rows = await GalleryRepository.listFeed({
     status,
     before: parseBefore(before),
     limit: size,
+    loginPattern: parseSearch(search),
   });
   return {
     photos: rows.slice(0, size).map(toFeedDto),
@@ -103,14 +118,15 @@ export const GalleryService = {
   },
 
   /** Загальна галерея: схвалені фото всіх користувачів, нові першими. */
-  listPublic({ before, limit }) {
-    return loadFeed({ status: PHOTO_STATUS.APPROVED, before, limit });
+  listPublic({ before, limit, search }) {
+    return loadFeed({ status: PHOTO_STATUS.APPROVED, before, limit, search });
   },
 
   /** Черга перевірки: непроверені фото всіх користувачів. Лише для reviewer. */
-  async listReview({ userId, before, limit }) {
+  async listReview({ userId, before, limit, search }) {
     await assertReviewer(userId);
-    const feed = await loadFeed({ status: PHOTO_STATUS.PENDING, before, limit });
+    const feed = await loadFeed({ status: PHOTO_STATUS.PENDING, before, limit, search });
+    // pendingCount — ЗАГАЛЬНА кількість (для бейджа), не залежить від пошуку.
     const pendingCount = await GalleryRepository.countByStatus(PHOTO_STATUS.PENDING);
     return { ...feed, pendingCount };
   },

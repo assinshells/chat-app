@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Trash2 } from "lucide-react";
+import { Check, Search, Trash2, X } from "lucide-react";
 
 import {
   approveGalleryPhoto,
@@ -17,17 +17,26 @@ import { GalleryThumb } from "./GalleryThumb.jsx";
 const MODE_APPROVED = "approved";
 const MODE_PENDING = "pending";
 
-const fetchFeedPage = (mode, before) =>
-  mode === MODE_PENDING ? fetchReviewGallery({ before }) : fetchPublicGallery({ before });
+// Скільки чекаємо після останнього натискання клавіші, перш ніж шукати.
+const SEARCH_DEBOUNCE_MS = 350;
+// Дзеркалить backend GALLERY_SEARCH_MAX_LENGTH (довший нік неможливий).
+const SEARCH_MAX_LENGTH = 32;
+
+const fetchFeedPage = (mode, before, query) =>
+  mode === MODE_PENDING
+    ? fetchReviewGallery({ before, query })
+    : fetchPublicGallery({ before, query });
 
 /**
  * GalleryFeed — сітка фото ВСІХ користувачів: схвалені (усім) або
  * непроверені (лише тим, хто перевіряє). Нові першими, "Показати ще" —
  * наступна сторінка. Клік по прев'ю відкриває фото на весь екран.
+ * query — пошук за ніком автора (змінюється разом з key у батька, тож
+ * стрічка просто завантажується заново).
  * Хто перевіряє: у черзі — "Схвалити" і "Видалити" (на плитці й у
  * повноекранному перегляді), у загальній — "Видалити".
  */
-function GalleryFeed({ mode, canReview }) {
+function GalleryFeed({ mode, canReview, query }) {
   const setPendingCount = useGalleryReviewStore((state) => state.setPendingCount);
   const adjustPending = useGalleryReviewStore((state) => state.adjust);
 
@@ -50,7 +59,7 @@ function GalleryFeed({ mode, canReview }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetchFeedPage(mode)
+    fetchFeedPage(mode, undefined, query)
       .then((data) => {
         if (cancelled) return;
         setPhotos(data.photos);
@@ -62,11 +71,11 @@ function GalleryFeed({ mode, canReview }) {
     return () => {
       cancelled = true;
     };
-  }, [mode, setPendingCount]);
+  }, [mode, query, setPendingCount]);
 
   const reload = () => {
     setStatus("loading");
-    fetchFeedPage(mode)
+    fetchFeedPage(mode, undefined, query)
       .then(applyFirstPage)
       .catch(() => setStatus("error"));
   };
@@ -76,7 +85,7 @@ function GalleryFeed({ mode, canReview }) {
     setLoadingMore(true);
     setNotice(null);
     try {
-      const data = await fetchFeedPage(mode, photos[photos.length - 1].id);
+      const data = await fetchFeedPage(mode, photos[photos.length - 1].id, query);
       // Сторінки йдуть за id, але між запитами список міг змінитись
       // (схвалили/видалили) — відсікаємо дублі за id.
       setPhotos((prev) => {
@@ -140,8 +149,10 @@ function GalleryFeed({ mode, canReview }) {
     }
   };
 
-  const emptyText =
-    mode === MODE_PENDING ? "Немає фото, що чекають перевірки" : "У галереї поки немає фото";
+  let emptyText;
+  if (query) emptyText = `Нічого не знайдено за ніком «${query}»`;
+  else if (mode === MODE_PENDING) emptyText = "Немає фото, що чекають перевірки";
+  else emptyText = "У галереї поки немає фото";
 
   return (
     <>
@@ -276,11 +287,32 @@ function GalleryFeed({ mode, canReview }) {
  * CommonGalleryPanel — загальна фотогалерея (іконка в шапці чату): фото всіх
  * користувачів, які пройшли перевірку. Ті, хто перевіряє (admin/superadmin
  * і модератори з правом), бачать ще вкладку "На перевірці" з кількістю.
+ * Над сіткою — пошук фото за ніком автора.
  */
 export function CommonGalleryPanel() {
   const canReview = useCurrentUserStore((state) => state.canReviewPhotos);
   const pendingCount = useGalleryReviewStore((state) => state.pendingCount);
   const [tab, setTab] = useState(MODE_APPROVED);
+
+  // search — те, що в полі; query — застосований (з затримкою) запит, за
+  // яким реально шукаємо. Пошук діє на обидві вкладки.
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setQuery(search.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const applySearchNow = (e) => {
+    e.preventDefault();
+    setQuery(search.trim());
+  };
+
+  const clearSearch = () => {
+    setSearch("");
+    setQuery("");
+  };
 
   // На випадок, якщо право зняли, поки вкладка "На перевірці" була відкрита.
   const mode = canReview ? tab : MODE_APPROVED;
@@ -313,8 +345,37 @@ export function CommonGalleryPanel() {
         </div>
       )}
 
-      {/* key: при зміні вкладки стрічка завантажується заново. */}
-      <GalleryFeed key={mode} mode={mode} canReview={canReview} />
+      <form className="gallery-search" role="search" onSubmit={applySearchNow}>
+        <div className="input-group">
+          <span className="input-group-text" aria-hidden="true">
+            <Search size={16} />
+          </span>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Пошук за ніком"
+            aria-label="Пошук фото за ніком"
+            maxLength={SEARCH_MAX_LENGTH}
+            autoComplete="off"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              title="Очистити"
+              aria-label="Очистити пошук"
+              onClick={clearSearch}
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* key: при зміні вкладки або пошуку стрічка завантажується заново. */}
+      <GalleryFeed key={`${mode}:${query}`} mode={mode} canReview={canReview} query={query} />
     </div>
   );
 }
