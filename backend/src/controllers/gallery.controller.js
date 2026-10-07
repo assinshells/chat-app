@@ -37,6 +37,40 @@ export const GalleryController = {
     }
   },
 
+  listPublic: async (req, res, next) => {
+    try {
+      const result = await GalleryService.listPublic({
+        before: req.query.before,
+        limit: req.query.limit,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  listReview: async (req, res, next) => {
+    try {
+      const result = await GalleryService.listReview({
+        userId: req.userId,
+        before: req.query.before,
+        limit: req.query.limit,
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  approve: async (req, res, next) => {
+    try {
+      await GalleryService.approve({ id: req.params.id, userId: req.userId });
+      res.status(HTTP_STATUS.OK).json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   getFull: async (req, res, next) => {
     try {
       sendFile(

@@ -188,3 +188,171 @@
     opacity: 1;
   }
 }
+
+/* =========================================================
+   ЗАГАЛЬНА ГАЛЕРЕЯ (іконка в шапці) і модерація фото
+   ========================================================= */
+
+.gallery-panel {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 100%;
+}
+
+/* ---------- вкладки "Галерея" / "На перевірці" ---------- */
+
+.gallery-tabs {
+  display: flex;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.gallery-tab {
+  flex: 1;
+
+  padding: 0.65rem 0.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-bottom: 2px solid transparent;
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.gallery-tab:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.gallery-tab.is-active {
+  border-bottom-color: var(--bs-primary);
+  color: var(--bs-body-color);
+}
+
+.gallery-grid-feed {
+  padding-top: 0.85rem;
+}
+
+.gallery-more {
+  padding: 0 1rem 1rem;
+
+  text-align: center;
+}
+
+.gallery-hint-note {
+  margin-top: -0.4rem;
+}
+
+/* ---------- підписи на плитці ---------- */
+
+/* Логін автора внизу плитки — на градієнті, щоб читався на будь-якому фото. */
+.gallery-tile-author {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 1rem 0.35rem 0.25rem;
+
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  color: #fff;
+
+  font-size: 0.7rem;
+  line-height: 1.1;
+  text-align: left;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  pointer-events: none;
+}
+
+/* Мітка "На перевірці" на власних ще не схвалених фото. */
+.gallery-tile-status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 0.2rem 0.35rem;
+
+  background: rgba(255, 193, 7, 0.92);
+  color: #000;
+
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+
+  pointer-events: none;
+}
+
+/* ---------- кнопка "Схвалити" на плитці (зліва вгорі) ---------- */
+
+.gallery-tile-approve {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+
+  width: 26px;
+  height: 26px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+
+  cursor: pointer;
+}
+
+.gallery-tile-approve:hover {
+  background: var(--bs-success);
+}
+
+.gallery-tile-approve:disabled,
+.gallery-tile-delete:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+@media (hover: hover) {
+  .gallery-tile-approve {
+    opacity: 0;
+  }
+
+  .gallery-tile:hover .gallery-tile-approve,
+  .gallery-tile:focus-within .gallery-tile-approve {
+    opacity: 1;
+  }
+}
+
+/* ---------- кнопки під фото в lightbox ---------- */
+
+.image-lightbox-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1rem;
+
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+
+  cursor: default;
+}

@@ -26,6 +26,9 @@ const parseBody = (req, res, next) =>
   });
 
 router.get("/", authGuard, GalleryController.list);
+// Статичні шляхи — ДО "/:id", інакше "public"/"review" сприйнялись би як id.
+router.get("/public", authGuard, GalleryController.listPublic);
+router.get("/review", authGuard, GalleryController.listReview);
 router.post(
   "/",
   authGuard,
@@ -34,6 +37,7 @@ router.post(
   parseBody,
   GalleryController.upload,
 );
+router.post("/:id/approve", authGuard, csrfProtection, GalleryController.approve);
 router.get("/:id/thumb", authGuard, GalleryController.getThumb);
 router.get("/:id", authGuard, GalleryController.getFull);
 router.delete("/:id", authGuard, csrfProtection, GalleryController.remove);

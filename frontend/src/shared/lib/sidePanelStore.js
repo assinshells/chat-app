@@ -5,7 +5,8 @@ import { create } from "zustand";
  *
  * Одночасно відкрита максимум одна: "users" (учасники кімнати),
  * "dm" (особисті повідомлення), "profile" (власний профіль і налаштування),
- * "userProfile" (профіль іншого користувача, див. userProfileLogin)
+ * "userProfile" (профіль іншого користувача, див. userProfileLogin),
+ * "gallery" (загальна фотогалерея всіх користувачів)
  * або null (панелі нема, чат на всю ширину). Окремий стор, а не
  * useState у ChatLayout, бо відкрити панель треба і з віддалених
  * місць — наприклад, пункт "Написати особисте повідомлення" біля
@@ -16,6 +17,7 @@ export const SIDE_PANELS = Object.freeze({
   DM: "dm",
   PROFILE: "profile",
   USER_PROFILE: "userProfile",
+  GALLERY: "gallery",
 });
 
 export const useSidePanelStore = create((set, get) => ({

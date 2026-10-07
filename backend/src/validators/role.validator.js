@@ -20,6 +20,13 @@ export const validateAssignRoleRequest = (body) => {
     }
   }
 
+  if (
+    body.canReviewPhotos !== undefined &&
+    typeof body.canReviewPhotos !== "boolean"
+  ) {
+    errors.push("canReviewPhotos має бути true або false");
+  }
+
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 

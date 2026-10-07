@@ -31,12 +31,14 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
     currentRole,
     selectedRole,
     selectedRooms,
+    canReviewPhotos,
     loading,
     saving,
     error,
     success,
     setSelectedRole,
     toggleRoom,
+    toggleCanReviewPhotos,
     submitAssign,
     submitRemove,
     clearStatus,
@@ -166,6 +168,34 @@ export function RoleManageModal({ modalId = "roleManageModal" }) {
                       ))}
                     </div>
                   </div>
+                )}
+
+                {selectedRole === ROLE_VALUES.MODERATOR && (
+                  <div className="form-check mb-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="role-manage-review-photos"
+                      checked={canReviewPhotos}
+                      disabled={targetIsLockedAdmin}
+                      onChange={toggleCanReviewPhotos}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="role-manage-review-photos"
+                    >
+                      Перевіряє фото в галереї
+                      <span className="d-block text-muted small">
+                        Бачить непроверені фото, може схвалювати та видаляти їх
+                      </span>
+                    </label>
+                  </div>
+                )}
+
+                {selectedRole === ROLE_VALUES.ADMIN && (
+                  <p className="text-muted small mb-3">
+                    Адміністратор завжди перевіряє фото в галереї.
+                  </p>
                 )}
 
                 {error && <p className="text-danger small mb-3">{error}</p>}

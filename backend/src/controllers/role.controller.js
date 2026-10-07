@@ -33,6 +33,7 @@ export const RoleController = {
         targetLogin: dto.login,
         role: dto.role,
         rooms: dto.rooms,
+        canReviewPhotos: dto.canReviewPhotos,
       });
       res.status(HTTP_STATUS.OK).json({ success: true, ...result });
     } catch (err) {

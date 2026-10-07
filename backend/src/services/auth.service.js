@@ -12,6 +12,7 @@ import {
   ValidationException,
 } from "../exceptions/auth.exceptions.js";
 import { AUTH_ERRORS, ROLE_VALUES } from "../constants/auth.constants.js";
+import { canReviewPhotos } from "../constants/gallery.constants.js";
 
 export const AuthService = {
   async login({ login, password }) {
@@ -218,6 +219,7 @@ export const AuthService = {
         maritalStatus: user.marital_status,
         role: user.role,
         moderatorRooms,
+        canReviewPhotos: canReviewPhotos(user),
       },
     };
   },

@@ -23,6 +23,8 @@ export const useRolesStore = create((set, get) => ({
   currentRole: ROLE_VALUES.USER,
   selectedRole: ROLE_VALUES.MODERATOR,
   selectedRooms: [],
+  // Право модератора перевіряти фото галереї (чекбокс в RoleManageModal).
+  canReviewPhotos: false,
   loading: false,
   saving: false,
   error: null,
@@ -39,6 +41,7 @@ export const useRolesStore = create((set, get) => ({
       currentRole: ROLE_VALUES.USER,
       selectedRole: ROLE_VALUES.MODERATOR,
       selectedRooms: [],
+      canReviewPhotos: false,
     });
 
     try {
@@ -55,6 +58,10 @@ export const useRolesStore = create((set, get) => ({
             ? ROLE_VALUES.ADMIN
             : ROLE_VALUES.MODERATOR,
         selectedRooms: info.rooms ?? [],
+        // Для admin бекенд віддає true (вони перевіряють завжди) — але як
+        // налаштування чекбокс має сенс лише для модератора.
+        canReviewPhotos:
+          info.role === ROLE_VALUES.MODERATOR && Boolean(info.canReviewPhotos),
       });
     } catch (err) {
       if (get().targetLogin !== login) return;
@@ -77,10 +84,17 @@ export const useRolesStore = create((set, get) => ({
       success: null,
     })),
 
+  toggleCanReviewPhotos: () =>
+    set((state) => ({
+      canReviewPhotos: !state.canReviewPhotos,
+      error: null,
+      success: null,
+    })),
+
   clearStatus: () => set({ error: null, success: null }),
 
   submitAssign: async () => {
-    const { targetLogin, selectedRole, selectedRooms, saving } = get();
+    const { targetLogin, selectedRole, selectedRooms, canReviewPhotos, saving } = get();
     if (!targetLogin || saving) return;
 
     set({ saving: true, error: null, success: null });
@@ -89,12 +103,16 @@ export const useRolesStore = create((set, get) => ({
         login: targetLogin,
         role: selectedRole,
         rooms: selectedRole === ROLE_VALUES.MODERATOR ? selectedRooms : [],
+        canReviewPhotos:
+          selectedRole === ROLE_VALUES.MODERATOR && canReviewPhotos,
       });
       set({
         saving: false,
         success: "Роль збережено",
         currentRole: result.role,
         selectedRooms: result.rooms ?? [],
+        canReviewPhotos:
+          result.role === ROLE_VALUES.MODERATOR && Boolean(result.canReviewPhotos),
       });
     } catch (err) {
       set({ saving: false, error: err.message || "Не вдалося зберегти роль" });
@@ -113,6 +131,7 @@ export const useRolesStore = create((set, get) => ({
         success: "Роль знято",
         currentRole: result.role,
         selectedRooms: [],
+        canReviewPhotos: false,
       });
     } catch (err) {
       set({ saving: false, error: err.message || "Не вдалося зняти роль" });

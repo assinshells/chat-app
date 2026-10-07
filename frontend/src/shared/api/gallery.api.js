@@ -61,6 +61,25 @@ export const uploadGalleryPhoto = async ({ image, thumb }) => {
     .then((r) => r.data);
 };
 
+/**
+ * Загальна галерея: схвалені фото ВСІХ користувачів, нові першими.
+ * Сторінки за id: before — id останнього отриманого фото.
+ *
+ * @returns {Promise<{ photos: Array<{ id: string, status: string, createdAt: string, owner: { login: string, color: string } }>, hasMore: boolean }>}
+ */
+export const fetchPublicGallery = ({ before } = {}) =>
+  apiClient.get("/api/gallery/public", { params: { before, limit: 30 } }).then((r) => r.data);
+
+/**
+ * Черга перевірки (лише admin/superadmin і модератори з правом): непроверені
+ * фото всіх користувачів. pendingCount — скільки всього чекає перевірки.
+ */
+export const fetchReviewGallery = ({ before, limit = 30 } = {}) =>
+  apiClient.get("/api/gallery/review", { params: { before, limit } }).then((r) => r.data);
+
+export const approveGalleryPhoto = (id) =>
+  apiClient.post(`/api/gallery/${encodeURIComponent(id)}/approve`).then((r) => r.data);
+
 function dropFromCache(cache, id) {
   const request = cache.get(id);
   cache.delete(id);

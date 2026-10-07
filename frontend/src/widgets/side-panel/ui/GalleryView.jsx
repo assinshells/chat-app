@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { ImageOff, ImagePlus, Trash2 } from "lucide-react";
+import { ImagePlus, Trash2 } from "lucide-react";
 
 import {
   deleteGalleryPhoto,
   fetchGallery,
   fetchGalleryPhotoUrl,
-  fetchGalleryThumbUrl,
   uploadGalleryPhoto,
 } from "@shared/api/gallery.api.js";
 import {
@@ -17,43 +16,19 @@ import {
 } from "@shared/lib/image.js";
 import { ImageLightbox } from "@shared/ui/image-viewer";
 
+import { GalleryThumb } from "./GalleryThumb.jsx";
 import { SubPanelView } from "./SubPanelView.jsx";
 
 // Дзеркалить backend GALLERY_LIMITS.MAX_PHOTOS; реальне значення приходить
 // із сервера разом зі списком (limit), це лише початкове.
 const DEFAULT_LIMIT = 10;
 
-/** GalleryThumb — мініатюра в плитці (завантажується з бекенда як blob). */
-function GalleryThumb({ id }) {
-  const [state, setState] = useState({ src: null, failed: false });
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchGalleryThumbUrl(id)
-      .then((src) => !cancelled && setState({ src, failed: false }))
-      .catch(() => !cancelled && setState({ src: null, failed: true }));
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  if (state.failed) {
-    return (
-      <span className="gallery-thumb-placeholder is-error" title="Не вдалося завантажити">
-        <ImageOff size={20} />
-      </span>
-    );
-  }
-  if (!state.src) {
-    return <span className="gallery-thumb-placeholder" aria-hidden="true" />;
-  }
-  return <img className="gallery-thumb-img" src={state.src} alt="Фото з галереї" />;
-}
-
 /**
  * GalleryView — вкладена панель "Фотогалерея" (Профіль → Фотогалерея):
  * кнопка "Завантажити фото", сітка прев'ю, клік по прев'ю відкриває фото
  * в повному розмірі (той самий ImageLightbox, що й для зображень чату).
+ * Нове фото одразу видно лише власнику (бейдж "На перевірці"); у загальній
+ * галереї (кнопка в шапці) воно з'являється після схвалення адміном/модератором.
  * До 10 фото; JPEG/PNG/WebP, файл до 10 МБ (на клієнті стискається до
  * 1 МБ, сервер перевіряє тип і розмір ще раз за самими байтами).
  */
@@ -189,6 +164,9 @@ export function GalleryView({ onBack }) {
         <p className="gallery-hint">
           JPEG, PNG або WebP · до {maxInputMb} МБ на файл · не більше {limit} фото
         </p>
+        <p className="gallery-hint gallery-hint-note">
+          Нові фото потрапляють у загальну галерею після перевірки.
+        </p>
 
         {notice && (
           <div className="alert alert-danger mx-3 py-2" role="alert">
@@ -227,6 +205,11 @@ export function GalleryView({ onBack }) {
                   onClick={() => handleOpen(photo.id)}
                 >
                   <GalleryThumb id={photo.id} />
+                  {photo.status === "pending" && (
+                    <span className="gallery-tile-status" title="Бачите лише ви, доки фото не перевірять">
+                      На перевірці
+                    </span>
+                  )}
                   {openingId === photo.id && (
                     <span className="gallery-tile-loading">
                       <span className="spinner-border spinner-border-sm" aria-hidden="true" />

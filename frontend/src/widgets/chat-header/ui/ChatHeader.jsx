@@ -1,11 +1,14 @@
-import { ChevronDown, MessageCircle, User, Users } from "lucide-react";
+import { useEffect } from "react";
+import { ChevronDown, Images, MessageCircle, User, Users } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
 import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
+import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
+import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
 
 /**
- * ChatHeader — шапка чату з трьома кнопками, які відкривають усе
+ * ChatHeader — шапка чату з кнопками, які відкривають усе
  * "додаткове" поверх/поруч із чатом (постійних колонок і табів нема):
  *
  *  - крапка статусу з'єднання (.chat-status-dot: зелена — онлайн, жовта
@@ -14,6 +17,10 @@ import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
  *    data-bs-toggle="modal");
  *  - "Учасники" + число онлайн — права панель (SidePanel, режим users);
  *  - "Особисті повідомлення" + бейдж непрочитаних — права панель, режим dm;
+
+ *  - "Фотогалерея" — права панель, режим gallery (фото всіх користувачів
+ *    після перевірки); у того, хто перевіряє фото, на іконці — бейдж із
+ *    кількістю непроверених;
  *  - "Профіль" — права панель, режим profile (профіль, тема, друзі,
  *    інформація, вихід);
  *
@@ -36,6 +43,17 @@ export function ChatHeader({
       0,
     ),
   );
+
+  // Бейдж "чекає перевірки" — лише для тих, хто перевіряє. Оновлюємо при
+  // монтуванні та щоразу, як галерею відкрили/закрили (дешевий запит).
+  const canReviewPhotos = useCurrentUserStore((state) => state.canReviewPhotos);
+  const pendingPhotos = useGalleryReviewStore((state) => state.pendingCount);
+  const refreshPendingPhotos = useGalleryReviewStore((state) => state.refresh);
+  const isGalleryOpen = panel === SIDE_PANELS.GALLERY;
+
+  useEffect(() => {
+    if (canReviewPhotos) refreshPendingPhotos();
+  }, [canReviewPhotos, isGalleryOpen, refreshPendingPhotos]);
 
   const panelButtonClass = (id) =>
     `chat-header-btn ${panel === id ? "is-active" : ""}`;
@@ -93,6 +111,23 @@ export function ChatHeader({
                 <span className="visually-hidden">
                   непрочитаних особистих повідомлень
                 </span>
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            className={`${panelButtonClass(SIDE_PANELS.GALLERY)} position-relative`}
+            title="Фотогалерея"
+            aria-label="Фотогалерея"
+            aria-pressed={isGalleryOpen}
+            onClick={() => togglePanel(SIDE_PANELS.GALLERY)}
+          >
+            <Images size={18} />
+            {canReviewPhotos && pendingPhotos > 0 && (
+              <span className="chat-header-badge badge bg-danger">
+                {pendingPhotos > 99 ? "99+" : pendingPhotos}
+                <span className="visually-hidden">фото очікують перевірки</span>
               </span>
             )}
           </button>

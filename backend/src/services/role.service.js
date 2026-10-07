@@ -6,6 +6,7 @@ import {
   AUTH_ERRORS,
 } from "../constants/auth.constants.js";
 import { ROOM_IDS, isValidRoom } from "../constants/chat.constants.js";
+import { canReviewPhotos } from "../constants/gallery.constants.js";
 import {
   NotFoundException,
   ValidationException,
@@ -57,10 +58,15 @@ export const RoleService = {
         ? await ModeratorRoomRepository.listByUserId(user.id)
         : [];
 
-    return { login: user.login, role: user.role, rooms };
+    return {
+      login: user.login,
+      role: user.role,
+      rooms,
+      canReviewPhotos: canReviewPhotos(user),
+    };
   },
 
-  async assignRole({ actorId, actorRole, targetLogin, role, rooms = [] }) {
+  async assignRole({ actorId, actorRole, targetLogin, role, rooms = [], canReviewPhotos: reviewPhotos = false }) {
     if (!ASSIGNABLE_ROLES.includes(role)) {
       throw new ValidationException(AUTH_ERRORS.ROLE_INVALID);
     }
@@ -94,7 +100,17 @@ export const RoleService = {
       await ModeratorRoomRepository.clearForUser(target.id);
     }
 
-    return { login: updated.login, role: updated.role, rooms: safeRooms };
+    // Право перевіряти фото — лише для модератора (admin/superadmin і так
+    // перевіряють завжди; для інших ролей прапорець скидається).
+    const photoReview = role === ROLE_VALUES.MODERATOR && reviewPhotos === true;
+    await UserRepository.setCanReviewPhotos(target.id, photoReview);
+
+    return {
+      login: updated.login,
+      role: updated.role,
+      rooms: safeRooms,
+      canReviewPhotos: canReviewPhotos({ role: updated.role, can_review_photos: photoReview }),
+    };
   },
 
   async removeRole({ actorId, actorRole, targetLogin }) {
@@ -105,7 +121,7 @@ export const RoleService = {
 
     if (target.role === ROLE_VALUES.USER) {
       // Уже без ролі — ідемпотентний no-op, а не помилка.
-      return { login: target.login, role: ROLE_VALUES.USER, rooms: [] };
+      return { login: target.login, role: ROLE_VALUES.USER, rooms: [], canReviewPhotos: false };
     }
 
     const updated = await UserRepository.updateRole(
@@ -113,8 +129,9 @@ export const RoleService = {
       ROLE_VALUES.USER,
     );
     await ModeratorRoomRepository.clearForUser(target.id);
+    await UserRepository.setCanReviewPhotos(target.id, false);
 
-    return { login: updated.login, role: updated.role, rooms: [] };
+    return { login: updated.login, role: updated.role, rooms: [], canReviewPhotos: false };
   },
 
   /**

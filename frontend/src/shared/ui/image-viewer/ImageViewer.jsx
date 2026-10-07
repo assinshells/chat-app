@@ -9,7 +9,7 @@ import { fetchImageUrl } from "@shared/api/image.api.js";
  * document.body, z-index вищий за сайдбар/модалки). Закривається
  * кліком по фону, кнопкою або Esc.
  */
-export function ImageLightbox({ src, onClose, alt = "Вкладення" }) {
+export function ImageLightbox({ src, onClose, alt = "Вкладення", actions = null }) {
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") onClose();
@@ -42,6 +42,13 @@ export function ImageLightbox({ src, onClose, alt = "Вкладення" }) {
         alt={alt}
         onClick={(e) => e.stopPropagation()}
       />
+      {/* Необов'язкові кнопки під фото (наприклад "Схвалити"/"Видалити" в
+          перевірці галереї); клік по панелі не закриває вікно. */}
+      {actions && (
+        <div className="image-lightbox-actions" onClick={(e) => e.stopPropagation()}>
+          {actions}
+        </div>
+      )}
     </div>,
     document.body,
   );

@@ -3,7 +3,7 @@ import { pool } from "../config/database.js";
 export const UserRepository = {
   async findByLogin(login) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, status, role, city, display_name, about, marital_status FROM users WHERE login = $1",
+      "SELECT id, login, email, password_hash, gender, color, status, role, can_review_photos, city, display_name, about, marital_status FROM users WHERE login = $1",
       [login],
     );
     return rows[0] ?? null;
@@ -19,7 +19,7 @@ export const UserRepository = {
 
   async findById(id) {
     const { rows } = await pool.query(
-      "SELECT id, login, email, password_hash, gender, color, text_bold, text_italic, status, role, city, display_name, about, marital_status FROM users WHERE id = $1",
+      "SELECT id, login, email, password_hash, gender, color, text_bold, text_italic, status, role, can_review_photos, city, display_name, about, marital_status FROM users WHERE id = $1",
       [id],
     );
     return rows[0] ?? null;
@@ -180,6 +180,15 @@ export const UserRepository = {
       [role, id],
     );
     return rows[0] ?? null;
+  },
+
+  // Право перевіряти фото галереї (services/role.service.js). Має сенс лише
+  // для role = 'moderator'; для інших ролей скидається в false.
+  async setCanReviewPhotos(id, value) {
+    await pool.query("UPDATE users SET can_review_photos = $1 WHERE id = $2", [
+      Boolean(value),
+      id,
+    ]);
   },
 
   // Бали вікторини (services/quiz.service.js). Додавання — одним

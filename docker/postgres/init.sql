@@ -394,3 +394,23 @@ CREATE TABLE IF NOT EXISTS user_gallery_photos (
 
 CREATE INDEX IF NOT EXISTS idx_user_gallery_photos_owner
     ON user_gallery_photos(owner_id, created_at DESC);
+
+-- Модерація фотогалереї (див. migrations/005_gallery_moderation.sql).
+ALTER TABLE user_gallery_photos ADD COLUMN IF NOT EXISTS status VARCHAR(16) NOT NULL DEFAULT 'pending';
+ALTER TABLE user_gallery_photos ADD COLUMN IF NOT EXISTS reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE user_gallery_photos ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'user_gallery_photos_status_check'
+    ) THEN
+        ALTER TABLE user_gallery_photos ADD CONSTRAINT user_gallery_photos_status_check
+            CHECK (status IN ('pending', 'approved'));
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_user_gallery_photos_status
+    ON user_gallery_photos(status, id DESC);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS can_review_photos BOOLEAN NOT NULL DEFAULT FALSE;

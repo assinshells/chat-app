@@ -19,3 +19,9 @@ export class GalleryPhotoNotFoundException extends BaseException {
     super(GALLERY_ERRORS.NOT_FOUND, HTTP_STATUS.NOT_FOUND, "GALLERY_PHOTO_NOT_FOUND");
   }
 }
+
+export class GalleryReviewForbiddenException extends BaseException {
+  constructor() {
+    super(GALLERY_ERRORS.REVIEW_FORBIDDEN, HTTP_STATUS.FORBIDDEN, "GALLERY_REVIEW_FORBIDDEN");
+  }
+}

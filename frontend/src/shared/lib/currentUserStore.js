@@ -26,6 +26,10 @@ export const useCurrentUserStore = create((set) => ({
   about: null,
   maritalStatus: null,
   moderatorRooms: [],
+  // Право перевіряти фото галереї: admin/superadmin завжди, moderator — лише
+  // з виданим адміном прапорцем (приходить з GET /api/auth/me). Це лише
+  // підказка для UI, реальна перевірка — на бекенді, наживо.
+  canReviewPhotos: false,
 
   setUser: (user) =>
     set({
@@ -42,6 +46,7 @@ export const useCurrentUserStore = create((set) => ({
       about: user.about ?? null,
       maritalStatus: user.maritalStatus ?? null,
       moderatorRooms: user.moderatorRooms ?? [],
+      canReviewPhotos: Boolean(user.canReviewPhotos),
     }),
 
   // Оптимістичне оновлення одразу після успішного status:update (див.
@@ -83,5 +88,6 @@ export const useCurrentUserStore = create((set) => ({
       about: null,
       maritalStatus: null,
       moderatorRooms: [],
+      canReviewPhotos: false,
     }),
 }));
