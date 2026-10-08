@@ -5,23 +5,448 @@
     max-width: 280px;
 }
 
-/* Логотип в AuthLayout: той самий розмір і позиція, що були, коли він
-   жив усередині .login-form (контейнер 280px, зсув угору на 60px). */
-.auth-brand-wrap {
-    max-width: 280px;
-    margin-top: -60px;
+/* ---------------------------------------------------------
+   БЛОК "НАЗАД + ЗАГОЛОВОК + ФОРМА" (.auth-section) —
+   одиночні сторінки авторизації (забули пароль, OTP, скидання).
+   Ширину задає панель .auth-split-panel (380px).
+   --------------------------------------------------------- */
+.auth-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 32px;
+}
+
+/* Усі дочірні елементи (заголовок, форма) тягнемо на всю ширину
+   секції — інакше при align-items: flex-start вони стискалися б до
+   ширини вмісту. Кнопка "Назад" лишається за розміром вмісту. */
+.auth-section > *:not(.auth-back-btn) {
+  width: 100%;
+}
+
+/* Блок тіла панелі одиночної сторінки: центрує секцію по вертикалі
+   всередині панелі. */
+.auth-panel-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+}
+
+/* Одиночна сторінка: колонка на всю висоту екрана. position:
+   relative — щоб логотип (.auth-split-name, absolute) стояв угорі
+   зліва саме в ній; панель по центру завдяки margin-block: auto
+   (див. .auth-split-panel). */
+.auth-single {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* ---------------------------------------------------------
-   LOGIN FORM: лінки "Забули пароль?" і "Зареєструватися"
-   (LoginForm.jsx) — без підкреслення завжди, і в звичайному стані,
-   і при наведенні/фокусі.
+   КНОПКА "НАЗАД" (.auth-back-btn): іконка + текст, лише на
+   одиночних сторінках. Від'ємні margin компенсують padding, щоб
+   текст стояв рівно по лівому краю форми.
    --------------------------------------------------------- */
-/*.forgot-password-link,
-.forgot-password-link:hover,
-.forgot-password-link:focus-visible {
+.auth-back-btn {
+  background: none;
+  border: 0px;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   text-decoration: none;
-}*/
+  border-radius: 8px;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  transition: color 70ms;
+}
+
+.auth-back-btn:hover {
+  color: var(--bs-secondary-color);
+}
+
+/* Блок заголовка: <h1> (спільний для обох режимів). */
+.auth-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+.auth-heading-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ---------------------------------------------------------
+   ПОЛЯ ФОРМ (усі форми авторизації): колонка з інпутами,
+   кнопками та допоміжними елементами, відступ 16px між ними.
+   Замінює колишні mb-3 / mb-4 / mb-5 на окремих блоках.
+   --------------------------------------------------------- */
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+/* Floating labels: батьківський form має .text-center, а підпис
+   Bootstrap позиціонує зліва — вирівнюємо й текст інпутів зліва,
+   щоб значення не роз'їжджалося з підписом. Комірки OTP мають
+   .text-center (!important) і цим правилом не зачіпаються. */
+.auth-fields .form-control,
+.auth-fields .form-select {
+  text-align: left;
+}
+
+/* Floating labels: плейсхолдер лише для умови :placeholder-shown,
+   сам він не має бути видимий — його роль виконує підпис. Глобальні
+   правила _forms.css (колір і прозорість плейсхолдера) інакше
+   просвічували б крізь підпис. */
+.form-floating > .form-control::placeholder,
+.form-floating > .form-control:focus::placeholder {
+  color: transparent;
+}
+
+/* ---------------------------------------------------------
+   ІНПУТИ АВТОРИЗАЦІЇ (.auth-input) — усі поля форм входу,
+   реєстрації, відновлення й скидання пароля, а також комірки OTP.
+   Подвійний клас (.form-control.auth-input) піднімає специфічність
+   над Bootstrap-правилами .form-control / .form-select.
+   background-color замість background — щоб не стерти шеврон
+   (background-image) у .form-select.
+   --------------------------------------------------------- */
+.form-control.auth-input,
+.form-select.auth-input {
+  width: 100%;
+  height: 52px;
+  background-color: rgba(0, 0, 0, 0.02);
+  color: rgb(0, 0, 0);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0px 12px;
+}
+
+/* Фокус: Bootstrap міняє тло на білe — лишаємо те саме, що й у
+   спокої, активний стан показує бордер (див. _forms.css). */
+.form-control.auth-input:focus,
+.form-select.auth-input:focus {
+  background-color: rgba(0, 0, 0, 0.02);
+  color: rgb(0, 0, 0);
+}
+
+/* Темна тема: чорний текст і чорнувате тло були б нечитабельні. */
+[data-bs-theme="dark"] .form-control.auth-input,
+[data-bs-theme="dark"] .form-select.auth-input,
+[data-bs-theme="dark"] .form-control.auth-input:focus,
+[data-bs-theme="dark"] .form-select.auth-input:focus {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--bs-body-color);
+}
+
+/* Floating label: висота 52px і padding: 0 12px залишають надто мало
+   місця для підпису, що спливає, — повертаємо верхній/нижній відступ
+   (горизонтальний лишається 12px, як у Bootstrap). */
+.form-floating > .form-control.auth-input,
+.form-floating > .form-select.auth-input {
+  padding-top: 22px;
+  padding-bottom: 6px;
+}
+
+/* form-select: місце під шеврон праворуч. */
+.form-select.auth-input {
+  padding-right: 36px;
+}
+
+/* Лічильник символів і глазик пароля лежать поверх інпута справа —
+   запас праворуч (див. _forms.css), підтверджений тут через вищу
+   специфічність. */
+.input-with-counter .form-control.auth-input {
+  padding-right: 3.25rem;
+}
+
+.input-with-toggle .form-control.auth-input {
+  padding-right: 2.5rem;
+}
+
+/* Комірки OTP вузькі — горизонтальні відступи не потрібні, цифра й
+   так по центру. */
+.auth-fields .auth-input.text-center {
+  padding-inline: 0;
+}
+
+/* ---------------------------------------------------------
+   КНОПКИ АВТОРИЗАЦІЇ (.auth-btn): повноширинні, заокруглені.
+   Колір задають Bootstrap-класи (.btn-primary / .btn-secondary),
+   тому .auth-btn використовується разом із .btn. Подвійний клас
+   (.btn.auth-btn) піднімає специфічність над .btn.
+   --------------------------------------------------------- */
+.btn.auth-btn {
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0px;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: normal;
+  transition:
+    box-shadow 200ms,
+    background-image 200ms,
+    transform 70ms,
+    color 300ms;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  text-box: cap alphabetic;
+  position: relative;
+  border-radius: 1000px;
+  height: 54px;
+  padding: 0px 20px;
+  font-size: 16px;
+  gap: 6px;
+  width: 100%;
+  min-width: 180px;
+}
+
+/* ---------------------------------------------------------
+   ЛІНК (.auth-link): "Забули пароль?", "Зареєструватися",
+   "Увійти" — чорний, з ледь помітним підкресленням, яке темнішає
+   при наведенні. a.auth-link:not(.btn) — специфічність не нижча за
+   глобальне правило a:not(.btn) з base-стилів, тож наші значення
+   не перебиваються при hover.
+   --------------------------------------------------------- */
+a.auth-link:not(.btn) {
+  color: rgb(0, 0, 0);
+  font: inherit;
+  text-decoration: underline 1px rgba(0, 0, 0, 0.08);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 100ms;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a.auth-link:not(.btn):hover,
+a.auth-link:not(.btn):focus-visible {
+  text-decoration-color: rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] a.auth-link:not(.btn) {
+  color: var(--bs-body-color);
+  text-decoration-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-bs-theme="dark"] a.auth-link:not(.btn):hover,
+[data-bs-theme="dark"] a.auth-link:not(.btn):focus-visible {
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ---------------------------------------------------------
+   РЯД ЛІНКІВ ПІД КНОПКОЮ (.auth-links):
+   логін — "Немає акаунта? Зареєструватися" ліворуч і
+   "Забули пароль?" праворуч в одному ряду; реєстрація —
+   "Вже є акаунт? Увійти" ліворуч. flex-wrap — щоб на вузьких
+   екранах частини переносились, а не наїжджали.
+   --------------------------------------------------------- */
+.auth-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Звичайний текст у ряду лінків ("Немає акаунта?", "Вже є акаунт?"). */
+.auth-links-text {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+[data-bs-theme="dark"] .auth-links-text {
+  color: var(--bs-secondary-color);
+}
+
+/* ---------------------------------------------------------
+   ІНФО-ТЕКСТ ПІД ФОРМОЮ (.auth-note): пояснення на реєстрації
+   (вік, правила, cookie) — дрібний, приглушений колір.
+   --------------------------------------------------------- */
+.auth-note {
+  margin: 0px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+[data-bs-theme="dark"] .auth-note {
+  color: var(--bs-secondary-color);
+}
+
+/* ---------------------------------------------------------
+   SPLIT-режим (AuthLayout split): лише логін і реєстрація.
+   Екран ділиться на 2 рівні частини: ліворуч секція з логотипом,
+   праворуч секція з формою. Колонка, логотип і панель нижче
+   спільні й для одиночних сторінок.
+   --------------------------------------------------------- */
+.auth-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0px, 1fr));
+  gap: 0px;
+}
+
+/* Спільний клас колонок (split і одиночні сторінки). */
+.auth-split-col {
+  min-width: 0px;
+  grid-column: span 1 / span 1;
+}
+
+/* ЛІВА секція: логотип. */
+.auth-split-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  height: 100vh;
+  overflow: hidden;
+  padding: 100px 32px;
+  background: transparent;
+}
+
+/* Позиція логотипа — угорі зліва найближчого position: relative
+   предка (.auth-split-left або .auth-single). */
+.auth-split-name {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  padding: 22px 26px;
+}
+
+/* Лінк логотипа. */
+.auth-split-logo {
+  display: inline-flex;
+  line-height: 0;
+}
+
+/* Саме зображення логотипа. */
+.auth-split-logo-img {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+
+/* ПРАВА секція: форма. */
+.auth-split-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: rgb(255, 255, 255);
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Темна тема: біле тло з макета не підходить (текст теж світлий) —
+   беремо тло теми. */
+[data-bs-theme="dark"] .auth-split-right {
+  background: var(--bs-body-bg);
+  border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Панель: обмежує ширину контенту та центрує його. margin-block: auto
+   ще й центрує панель по вертикалі всередині колонки. */
+.auth-split-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 32px;
+  margin-inline: auto;
+  margin-block: auto;
+  padding-block: 32px;
+  width: 100%;
+  max-width: 380px;
+}
+
+/* Стек: вертикальна колонка з проміжком 32px. Використовується двічі:
+   зовнішній (панель → блок форми) і внутрішній (заголовок + форма). */
+.auth-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 32px;
+}
+
+/* Блок форми. */
+.auth-split-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+
+/* Форма займає всю ширину панелі (380px) — і в split-режимі, і на
+   одиночних сторінках. Без цього mx-auto (!important у Bootstrap)
+   стискав би її до ширини вмісту, а max-width: 280px обрізав би. */
+.auth-split-form .auth-form,
+.auth-section .auth-form {
+  margin-inline: 0 !important;
+  max-width: 100%;
+}
+
+/* На вузьких екранах дві колонки не вміщуються — складаємо в одну:
+   зверху компактна смужка з логотипом, під нею форма. */
+@media (max-width: 767.98px) {
+  .auth-split {
+    grid-template-columns: minmax(0px, 1fr);
+  }
+
+  .auth-split-left {
+    height: auto;
+    align-items: flex-start;
+    padding: 20px 18px;
+  }
+
+  .auth-split-name {
+    position: static;
+    padding: 0;
+  }
+
+  .auth-split-right {
+    min-height: auto;
+    border-left: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .auth-split-panel {
+    padding-inline: 24px;
+  }
+}
 
 /* ---------------------------------------------------------
    LOGIN FORM: поле "Кімната" (LoginForm.jsx) — замінює колишній

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useVerifyOtpStore } from "@features/auth/verify-otp/model/useVerifyOtpStore.js";
 
-export function OtpForm({ email, onSuccess, onBack }) {
+export function OtpForm({ email, onSuccess }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
 
@@ -90,11 +90,19 @@ export function OtpForm({ email, onSuccess, onBack }) {
   const isComplete = otp.every(Boolean);
 
   return (
-    <>
-      {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit} role="form"
-        className="mx-auto text-center auth-form">
-        <div className="d-flex justify-content-between gap-2 mb-4">
+    <form
+      onSubmit={handleSubmit}
+      role="form"
+      className="mx-auto text-center auth-form"
+    >
+      <div className="auth-fields">
+        {error && <p className="text-danger text-center mb-0">{error}</p>}
+
+        {/* Шість окремих комірок коду. Floating label тут не
+            застосовується: підпис не має сенсу для кожної цифри
+            окремо, тому комірки лишаються окремими, але отримують
+            той самий стиль .auth-input. */}
+        <div className="d-flex justify-content-between gap-2">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -109,32 +117,20 @@ export function OtpForm({ email, onSuccess, onBack }) {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
-              className="form-control text-center"
-              
+              className="form-control auth-input text-center"
               aria-label={`OTP digit ${index + 1}`}
             />
           ))}
         </div>
-<div className="mb-5 d-grid gap-2">
+
         <button
           type="submit"
           disabled={loading || !isComplete}
-          className="btn btn-primary"
+          className="btn btn-primary auth-btn"
         >
           {loading ? "Верифікація..." : "Верифікувати"}
         </button>
-        <button
-            type="button"
-            onClick={(e) => {
-            e.preventDefault();
-            onBack();
-          }}
-            className="btn btn-secondary"
-          >
-            Увійти
-          </button>
-        </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }

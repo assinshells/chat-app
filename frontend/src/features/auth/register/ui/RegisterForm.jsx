@@ -45,6 +45,13 @@ const MIN_PASSWORD_LENGTH = 6;
  * чату: обидва значення йдуть одразу в тілі
  * POST /api/auth/register, окремих PATCH-запитів після логіну більше
  * не потрібно (див. useRegisterStore.js).
+ *
+ * Поля — Bootstrap Floating labels (.form-floating) зі стилем
+ * .auth-input; кнопка — .auth-btn; лінк — .auth-link; інфо-текст —
+ * .auth-note.
+ *
+ * Структура: .auth-stack (відступ 32px) → [.auth-fields (поля +
+ * кнопка), .auth-fields (лінк + інфо-текст)].
  */
 export function RegisterForm({ onSuccess, onBack }) {
   const [login, setLogin] = useState("");
@@ -90,159 +97,177 @@ export function RegisterForm({ onSuccess, onBack }) {
 
   return (
     <>
-      {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit} role="form"
-        className="mx-auto text-center auth-form">
-        <div className="mb-3">
-          {/* Лічильник символів нікнейма перенесено всередину інпута
-              (position: absolute відносно .input-with-counter, див.
-              app/styles/components/_forms.css) замість окремого
-              form-text під полем. */}
-          <div className="input-with-counter">
-            <input
-              id="loginInput"
-              type="text"
-              className="form-control"
-              placeholder="Введіть нікнейм"
-              value={login}
-              minLength={MIN_LOGIN_LENGTH}
-              maxLength={MAX_LOGIN_LENGTH}
-              onChange={(e) =>
-                setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))
-              }
-              required
-            />
-            <span className="input-inline-counter" aria-hidden="true">
-              {login.length}/{MAX_LOGIN_LENGTH}
-            </span>
-          </div>
-        </div>
-        <div className="mb-3">
-          {/* Глазик показати/сховати пароль — усередині інпута, справа
-              (.input-with-toggle, див. _forms.css). */}
-          <div className="input-with-toggle">
-            <input
-              id="passwordInput"
-              type={showPassword ? "text" : "password"}
-              className="form-control"
-              placeholder="Введіть пароль"
-              value={password}
-              minLength={MIN_PASSWORD_LENGTH}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+      <form
+        onSubmit={handleSubmit}
+        role="form"
+        className="mx-auto text-center auth-form"
+      >
+        <div className="auth-stack">
+          <div className="auth-fields">
+            {error && <p className="text-danger text-center mb-0">{error}</p>}
+
+            {/* Лічильник символів нікнейма — всередині інпута
+                (position: absolute відносно .input-with-counter, див.
+                app/styles/components/_forms.css). */}
+            <div className="form-floating input-with-counter">
+              <input
+                id="loginInput"
+                type="text"
+                className="form-control auth-input"
+                placeholder="Нікнейм"
+                value={login}
+                minLength={MIN_LOGIN_LENGTH}
+                maxLength={MAX_LOGIN_LENGTH}
+                onChange={(e) =>
+                  setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))
+                }
+                required
+              />
+              <label htmlFor="loginInput">Нікнейм</label>
+              <span className="input-inline-counter" aria-hidden="true">
+                {login.length}/{MAX_LOGIN_LENGTH}
+              </span>
+            </div>
+
+            {/* Глазик показати/сховати пароль — усередині інпута,
+                справа (.input-with-toggle, див. _forms.css). */}
+            <div className="form-floating input-with-toggle">
+              <input
+                id="passwordInput"
+                type={showPassword ? "text" : "password"}
+                className="form-control auth-input"
+                placeholder="Пароль"
+                value={password}
+                minLength={MIN_PASSWORD_LENGTH}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <label htmlFor="passwordInput">Пароль</label>
+              <button
+                type="button"
+                className="input-toggle-btn"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Сховати пароль" : "Показати пароль"}
+                aria-pressed={showPassword}
+                title={showPassword ? "Сховати пароль" : "Показати пароль"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <div className="form-floating">
+              <input
+                id="emailInput"
+                type="email"
+                className="form-control auth-input"
+                placeholder="Пошта (опціонально)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <label htmlFor="emailInput">Пошта (опціонально)</label>
+            </div>
+
+            {/* Стать — звичайні радіокнопки (без модалки). */}
+            <div className="d-flex align-items-center justify-content-between gender-radio-row">
+              {GENDER_OPTIONS.map((option) => (
+                <div className="form-check mb-0" key={option.value}>
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="registerGender"
+                    id={`registerGender-${option.value}`}
+                    value={option.value}
+                    checked={gender === option.value}
+                    onChange={() => setGender(option.value)}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor={`registerGender-${option.value}`}
+                  >
+                    {option.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            {/* Колір — той самий патерн, що й поле "Кімната" на формі
+                входу (LoginForm.jsx): readOnly-інпут з назвою кольору,
+                пофарбованою в обраний колір; клік (або Enter/Пробіл)
+                відкриває ColorPickerModal. form-select додає шеврон. */}
+            <div className="form-floating">
+              <input
+                id="colorInput"
+                type="text"
+                className="form-select auth-input room-select-input color-select-input"
+                value={getColorLabel(effectiveColor)}
+                readOnly
+                aria-haspopup="dialog"
+                data-bs-toggle="modal"
+                data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
+                style={{
+                  color: getEffectiveColorHex(effectiveColor, isDarkTheme),
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.currentTarget.click();
+                  }
+                }}
+              />
+              <label htmlFor="colorInput">Колір</label>
+            </div>
+
             <button
-              type="button"
-              className="input-toggle-btn"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Сховати пароль" : "Показати пароль"}
-              aria-pressed={showPassword}
-              title={showPassword ? "Сховати пароль" : "Показати пароль"}
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary auth-btn"
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {loading ? "Реєструємо..." : "Зареєструватися"}
             </button>
           </div>
-        </div>
-        <div className="mb-3">
-          <input
-            id="emailInput"
-            type="email"
-            className="form-control"
-            placeholder="Введіть пошту (опціонально)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
 
-        {/* Стать — звичайні радіокнопки (без модалки). */}
-        <div className="mb-3 d-flex align-items-center justify-content-between gender-radio-row">
-          {GENDER_OPTIONS.map((option) => (
-            <div className="form-check mb-0" key={option.value}>
-              <input
-                className="form-check-input"
-                type="radio"
-                name="registerGender"
-                id={`registerGender-${option.value}`}
-                value={option.value}
-                checked={gender === option.value}
-                onChange={() => setGender(option.value)}
-              />
-              <label
-                className="form-check-label"
-                htmlFor={`registerGender-${option.value}`}
-              >
-                {option.label}
-              </label>
+          {/* Лінк "Увійти" (ліворуч) і під ним інфо-текст. */}
+          <div className="auth-fields">
+            <div className="auth-links">
+              <span className="auth-links-text">
+                Вже є акаунт?{" "}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onBack();
+                  }}
+                  className="auth-link"
+                >
+                  Увійти
+                </a>
+              </span>
             </div>
-          ))}
-        </div>
 
-        {/* Колір — той самий патерн, що й поле "Кімната" на формі входу
-            (LoginForm.jsx): readOnly-інпут з назвою кольору, пофарбованою
-            в обраний колір; клік (або Enter/Пробіл) відкриває
-            ColorPickerModal. form-select додає шеврон. */}
-        <div className="mb-4">
-          <input
-            id="colorInput"
-            type="text"
-            className="form-select room-select-input color-select-input"
-            value={getColorLabel(effectiveColor)}
-            readOnly
-            aria-label="Колір"
-            aria-haspopup="dialog"
-            data-bs-toggle="modal"
-            data-bs-target={`#${REGISTER_COLOR_MODAL_ID}`}
-            style={{ color: getEffectiveColorHex(effectiveColor, isDarkTheme) }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.currentTarget.click();
-              }
-            }}
-          />
-        </div>
-
-        <p className="text-muted small mb-3 text-start">
-          Натискаючи «Зареєструватися», ви підтверджуєте, що вам виповнилося
-          18 років, і приймаєте{" "}
-          <a
-            href="#"
-            data-bs-toggle="modal"
-            data-bs-target={`#${REGISTER_RULES_MODAL_ID}`}
-            onClick={(e) => e.preventDefault()}
-          >
-            Правила чату
-          </a>
-          . Для роботи сайту використовуються необхідні файли cookie —
-          докладніше в{" "}
-          <a
-            href="#"
-            data-bs-toggle="modal"
-            data-bs-target={`#${REGISTER_COOKIES_MODAL_ID}`}
-            onClick={(e) => e.preventDefault()}
-          >
-            Політиці cookie
-          </a>
-          .
-        </p>
-        <div className="mb-5 d-grid gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary"
-          >
-            {loading ? "Реєструємо..." : "Зареєструватися"}
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-            e.preventDefault();
-            onBack();
-          }}
-            className="btn btn-secondary"
-          >
-            Увійти
-          </button>
+            <p className="auth-note text-start">
+              Натискаючи «Зареєструватися», ви підтверджуєте, що вам
+              виповнилося 18 років, і приймаєте{" "}
+              <a
+                href="#"
+                data-bs-toggle="modal"
+                data-bs-target={`#${REGISTER_RULES_MODAL_ID}`}
+                onClick={(e) => e.preventDefault()}
+              >
+                Правила чату
+              </a>
+              . Для роботи сайту використовуються необхідні файли cookie —
+              докладніше в{" "}
+              <a
+                href="#"
+                data-bs-toggle="modal"
+                data-bs-target={`#${REGISTER_COOKIES_MODAL_ID}`}
+                onClick={(e) => e.preventDefault()}
+              >
+                Політиці cookie
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </form>
 

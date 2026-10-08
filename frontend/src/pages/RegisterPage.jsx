@@ -4,7 +4,7 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 
 export function RegisterPage({ onNavigate }) {
   return (
-    <AuthLayout>
+    <AuthLayout split title="Створіть акаунт">
       <RegisterForm
         onSuccess={() => onNavigate(AUTH_SCREENS.LOGIN)}
         onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}

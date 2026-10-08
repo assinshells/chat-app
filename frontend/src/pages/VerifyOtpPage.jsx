@@ -4,13 +4,15 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 
 export function VerifyOtpPage({ onNavigate, email }) {
   return (
-    <AuthLayout>
+    <AuthLayout
+      title="Підтвердіть пошту"
+      onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
+    >
       <OtpForm
         email={email}
         onSuccess={(verifiedToken) =>
           onNavigate(AUTH_SCREENS.RESET, { verifiedToken })
         }
-        onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
       />
     </AuthLayout>
   );

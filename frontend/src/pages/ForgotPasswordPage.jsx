@@ -4,10 +4,12 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 
 export function ForgotPasswordPage({ onNavigate }) {
   return (
-    <AuthLayout>
+    <AuthLayout
+      title="Забули пароль?"
+      onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
+    >
       <ForgotPasswordForm
         onSuccess={(email) => onNavigate(AUTH_SCREENS.OTP, { email })}
-        onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
       />
     </AuthLayout>
   );

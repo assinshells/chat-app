@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForgotPasswordStore } from "@features/auth/forgot-password/model/useForgotPasswordStore.js";
 
-export function ForgotPasswordForm({ onSuccess, onBack }) {
+export function ForgotPasswordForm({ onSuccess }) {
   const [email, setEmail] = useState("");
   const { loading, error, submit, clearError } = useForgotPasswordStore();
 
@@ -12,41 +12,35 @@ export function ForgotPasswordForm({ onSuccess, onBack }) {
   };
 
   return (
-    <>
-      {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit} role="form"
-        className="mx-auto text-center auth-form">
-        <div className="mb-3">
+    <form
+      onSubmit={handleSubmit}
+      role="form"
+      className="mx-auto text-center auth-form"
+    >
+      <div className="auth-fields">
+        {error && <p className="text-danger text-center mb-0">{error}</p>}
+
+        <div className="form-floating">
           <input
             id="emailInput"
             type="email"
-            className="form-control"
-            placeholder="Введіть пошту"
+            className="form-control auth-input"
+            placeholder="Пошта"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+          <label htmlFor="emailInput">Пошта</label>
         </div>
-        <div className="mb-5 d-grid gap-2">
+
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary"
+          className="btn btn-primary auth-btn"
         >
           {loading ? "Відправляємо..." : "Відправити код"}
         </button>
-        <button
-            type="button"
-            onClick={(e) => {
-            e.preventDefault();
-            onBack();
-          }}
-            className="btn btn-secondary"
-          >
-            Увійти
-          </button>
-        </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }

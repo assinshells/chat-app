@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useResetPasswordStore } from "@features/auth/reset-password/model/useResetPasswordStore.js";
 
-export function ResetPasswordForm({ verifiedToken, onSuccess, onBack }) {
+export function ResetPasswordForm({ verifiedToken, onSuccess }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { loading, error, reset, clearError } = useResetPasswordStore();
@@ -13,52 +13,48 @@ export function ResetPasswordForm({ verifiedToken, onSuccess, onBack }) {
   };
 
   return (
-    <>
-      {error && <p className="text-danger text-center mb-3">{error}</p>}
-      <form onSubmit={handleSubmit} role="form"
-        className="mx-auto text-center auth-form">
-        <div className="mb-3">
+    <form
+      onSubmit={handleSubmit}
+      role="form"
+      className="mx-auto text-center auth-form"
+    >
+      <div className="auth-fields">
+        {error && <p className="text-danger text-center mb-0">{error}</p>}
+
+        <div className="form-floating">
           <input
             id="passwordInput"
             type="password"
-            className="form-control"
-            placeholder="Введіть новий пароль"
+            className="form-control auth-input"
+            placeholder="Новий пароль"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <label htmlFor="passwordInput">Новий пароль</label>
         </div>
-        <div className="mb-3">
+
+        <div className="form-floating">
           <input
             id="confirmPasswordInput"
             type="password"
-            className="form-control"
-            placeholder="Повторити пароль"
+            className="form-control auth-input"
+            placeholder="Повторіть пароль"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
+          <label htmlFor="confirmPasswordInput">Повторіть пароль</label>
         </div>
-        <div className="mb-5 d-grid gap-2">
+
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary"
+          className="btn btn-primary auth-btn"
         >
           {loading ? "Зберігаємо..." : "Зберегти"}
         </button>
-        <button
-            type="button"
-            onClick={(e) => {
-            e.preventDefault();
-            onBack();
-          }}
-            className="btn btn-secondary"
-          >
-            Увійти
-          </button>
-        </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }
