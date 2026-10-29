@@ -12,31 +12,28 @@ export function ForgotPasswordForm({ onSuccess }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      role="form"
-      className="mx-auto text-center auth-form"
-    >
+    <form onSubmit={handleSubmit} role="form" className="auth-form">
       <div className="auth-fields">
-        {error && <p className="text-danger text-center mb-0">{error}</p>}
+        {error && <p className="text-danger mb-0">{error}</p>}
 
-        <div className="form-floating">
+        <div>
+          <label htmlFor="emailInput" className="form-label">
+            Пошта
+          </label>
           <input
             id="emailInput"
             type="email"
-            className="form-control auth-input"
-            placeholder="Пошта"
+            className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <label htmlFor="emailInput">Пошта</label>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary auth-btn"
+          className="btn btn-primary w-100"
         >
           {loading ? "Відправляємо..." : "Відправити код"}
         </button>

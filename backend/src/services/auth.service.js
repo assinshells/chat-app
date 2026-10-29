@@ -4,6 +4,7 @@ import { TokenService } from "./token.service.js";
 import { OtpService } from "./otp.service.js";
 import { PasswordProvider } from "../providers/password.provider.js";
 import { EmailAdapter } from "../adapters/email.adapter.js";
+import logger from "../config/logger.js";
 import {
   AuthenticationException,
   ConflictException,
@@ -56,7 +57,14 @@ export const AuthService = {
     if (!user) return { success: true };
 
     const otp = await OtpService.generateOtp(user.id);
-    await EmailAdapter.sendOtp(email, otp);
+    try {
+      await EmailAdapter.sendOtp(email, otp);
+    } catch (err) {
+      // Відповідь однакова для існуючого й неіснуючого email, тому збій
+      // SMTP не віддаємо клієнту (інакше можна було б визначити, що
+      // акаунт існує) — лише логуємо.
+      logger.error(`Не вдалося надіслати OTP: ${err.message}`);
+    }
     return { success: true };
   },
 

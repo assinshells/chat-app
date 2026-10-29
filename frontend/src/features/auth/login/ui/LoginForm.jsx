@@ -18,8 +18,7 @@ const ROOM_MODAL_ID = "loginRoomSelectModal";
  * реєстрації (див. RegisterForm.jsx), а не тут — форма входу лише
  * автентифікує вже наявного користувача.
  *
- * Поля — Bootstrap Floating labels (.form-floating) зі стилем
- * .auth-input; кнопка — .auth-btn; лінки — .auth-link.
+ * Стандартні Bootstrap-форми: підпис над полем (.form-label).
  *
  * Структура: .auth-stack (відступ 32px) → [.auth-fields (поля +
  * кнопка, відступ 16px), .auth-links].
@@ -40,63 +39,68 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        role="form"
-        className="mx-auto text-center auth-form"
-      >
+      <form onSubmit={handleSubmit} role="form" className="auth-form">
         <div className="auth-stack">
           <div className="auth-fields">
-            {error && <p className="text-danger text-center mb-0">{error}</p>}
+            {error && <p className="text-danger mb-0">{error}</p>}
 
-            <div className="form-floating">
+            <div>
+              <label htmlFor="loginInput" className="form-label">
+                Нікнейм
+              </label>
               <input
                 id="loginInput"
                 type="text"
-                className="form-control auth-input"
-                placeholder="Нікнейм"
+                className="form-control"
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 required
               />
-              <label htmlFor="loginInput">Нікнейм</label>
             </div>
 
             {/* Глазик показати/сховати пароль — усередині інпута,
                 справа (.input-with-toggle, див. _forms.css) — так
                 само, як на формі реєстрації. */}
-            <div className="form-floating input-with-toggle">
-              <input
-                id="passwordInput"
-                type={showPassword ? "text" : "password"}
-                className="form-control auth-input"
-                placeholder="Пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <label htmlFor="passwordInput">Пароль</label>
-              <button
-                type="button"
-                className="input-toggle-btn"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Сховати пароль" : "Показати пароль"}
-                aria-pressed={showPassword}
-                title={showPassword ? "Сховати пароль" : "Показати пароль"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div>
+              <label htmlFor="passwordInput" className="form-label">
+                Пароль
+              </label>
+              <div className="input-with-toggle">
+                <input
+                  id="passwordInput"
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="input-toggle-btn"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={
+                    showPassword ? "Сховати пароль" : "Показати пароль"
+                  }
+                  aria-pressed={showPassword}
+                  title={showPassword ? "Сховати пароль" : "Показати пароль"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             {/* readOnly-інпут з кімнатою за замовчуванням: клік (або
                 Enter/Пробіл) відкриває RoomSelectModal, обрана кімната
                 підставляється в інпут. form-select додає шеврон, а
                 підпис "Кімната" завжди піднятий (значення є завжди). */}
-            <div className="form-floating">
+            <div>
+              <label htmlFor="roomInput" className="form-label">
+                Кімната
+              </label>
               <input
                 id="roomInput"
                 type="text"
-                className="form-select auth-input room-select-input"
+                className="form-select room-select-input"
                 value={
                   ROOMS_BY_ID[room]?.name ?? ROOMS_BY_ID[DEFAULT_ROOM].name
                 }
@@ -111,13 +115,12 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
                   }
                 }}
               />
-              <label htmlFor="roomInput">Кімната</label>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary auth-btn"
+              className="btn btn-primary w-100"
             >
               {loading ? "Заходимо..." : "Увійти"}
             </button>
@@ -134,7 +137,6 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
                   e.preventDefault();
                   onRegister();
                 }}
-                className="auth-link"
               >
                 Зареєструватися
               </a>
@@ -145,7 +147,6 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
                 e.preventDefault();
                 onForgot();
               }}
-              className="auth-link"
             >
               Забули пароль?
             </a>

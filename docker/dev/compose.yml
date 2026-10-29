@@ -46,6 +46,29 @@ services:
     networks:
       - chat-network
 
+  # Mailpit — локальний SMTP-сервер з веб-інтерфейсом для листів (OTP-коди).
+  # Усі листи, які надсилає backend, не йдуть назовні, а видно на
+  # http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: chat-mailpit-dev
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+    volumes:
+      - mailpit_data_dev:/data
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - chat-network
+
   backend:
     build:
       context: ../../backend
@@ -60,6 +83,10 @@ services:
       PORT: ${BACKEND_PORT:-3000}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgre}:${POSTGRES_PASSWORD:-root}@postgres:5432/${POSTGRES_DB:-postgre}
       REDIS_URL: redis://redis:6379
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_FROM: '"Балачка" <no-reply@chat.local>'
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     volumes:
@@ -71,6 +98,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      mailpit:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
@@ -111,5 +140,6 @@ networks:
 volumes:
   postgres_data_dev:
   redis_data_dev:
+  mailpit_data_dev:
   backend_node_modules_dev:
   frontend_node_modules_dev:

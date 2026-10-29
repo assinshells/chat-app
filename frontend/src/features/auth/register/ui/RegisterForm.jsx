@@ -46,9 +46,7 @@ const MIN_PASSWORD_LENGTH = 6;
  * POST /api/auth/register, окремих PATCH-запитів після логіну більше
  * не потрібно (див. useRegisterStore.js).
  *
- * Поля — Bootstrap Floating labels (.form-floating) зі стилем
- * .auth-input; кнопка — .auth-btn; лінк — .auth-link; інфо-текст —
- * .auth-note.
+ * Стандартні Bootstrap-форми: підпис над полем (.form-label).
  *
  * Структура: .auth-stack (відступ 32px) → [.auth-fields (поля +
  * кнопка), .auth-fields (лінк + інфо-текст)].
@@ -97,74 +95,79 @@ export function RegisterForm({ onSuccess, onBack }) {
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        role="form"
-        className="mx-auto text-center auth-form"
-      >
+      <form onSubmit={handleSubmit} role="form" className="auth-form">
         <div className="auth-stack">
           <div className="auth-fields">
-            {error && <p className="text-danger text-center mb-0">{error}</p>}
+            {error && <p className="text-danger mb-0">{error}</p>}
 
             {/* Лічильник символів нікнейма — всередині інпута
                 (position: absolute відносно .input-with-counter, див.
                 app/styles/components/_forms.css). */}
-            <div className="form-floating input-with-counter">
-              <input
-                id="loginInput"
-                type="text"
-                className="form-control auth-input"
-                placeholder="Нікнейм"
-                value={login}
-                minLength={MIN_LOGIN_LENGTH}
-                maxLength={MAX_LOGIN_LENGTH}
-                onChange={(e) =>
-                  setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))
-                }
-                required
-              />
-              <label htmlFor="loginInput">Нікнейм</label>
-              <span className="input-inline-counter" aria-hidden="true">
-                {login.length}/{MAX_LOGIN_LENGTH}
-              </span>
+            <div>
+              <label htmlFor="loginInput" className="form-label">
+                Нікнейм
+              </label>
+              <div className="input-with-counter">
+                <input
+                  id="loginInput"
+                  type="text"
+                  className="form-control"
+                  value={login}
+                  minLength={MIN_LOGIN_LENGTH}
+                  maxLength={MAX_LOGIN_LENGTH}
+                  onChange={(e) =>
+                    setLogin(e.target.value.slice(0, MAX_LOGIN_LENGTH))
+                  }
+                  required
+                />
+                <span className="input-inline-counter" aria-hidden="true">
+                  {login.length}/{MAX_LOGIN_LENGTH}
+                </span>
+              </div>
             </div>
 
             {/* Глазик показати/сховати пароль — усередині інпута,
                 справа (.input-with-toggle, див. _forms.css). */}
-            <div className="form-floating input-with-toggle">
-              <input
-                id="passwordInput"
-                type={showPassword ? "text" : "password"}
-                className="form-control auth-input"
-                placeholder="Пароль"
-                value={password}
-                minLength={MIN_PASSWORD_LENGTH}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <label htmlFor="passwordInput">Пароль</label>
-              <button
-                type="button"
-                className="input-toggle-btn"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Сховати пароль" : "Показати пароль"}
-                aria-pressed={showPassword}
-                title={showPassword ? "Сховати пароль" : "Показати пароль"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div>
+              <label htmlFor="passwordInput" className="form-label">
+                Пароль
+              </label>
+              <div className="input-with-toggle">
+                <input
+                  id="passwordInput"
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  value={password}
+                  minLength={MIN_PASSWORD_LENGTH}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="input-toggle-btn"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={
+                    showPassword ? "Сховати пароль" : "Показати пароль"
+                  }
+                  aria-pressed={showPassword}
+                  title={showPassword ? "Сховати пароль" : "Показати пароль"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
-            <div className="form-floating">
+            <div>
+              <label htmlFor="emailInput" className="form-label">
+                Пошта (опціонально)
+              </label>
               <input
                 id="emailInput"
                 type="email"
-                className="form-control auth-input"
-                placeholder="Пошта (опціонально)"
+                className="form-control"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <label htmlFor="emailInput">Пошта (опціонально)</label>
             </div>
 
             {/* Стать — звичайні радіокнопки (без модалки). */}
@@ -194,11 +197,14 @@ export function RegisterForm({ onSuccess, onBack }) {
                 входу (LoginForm.jsx): readOnly-інпут з назвою кольору,
                 пофарбованою в обраний колір; клік (або Enter/Пробіл)
                 відкриває ColorPickerModal. form-select додає шеврон. */}
-            <div className="form-floating">
+            <div>
+              <label htmlFor="colorInput" className="form-label">
+                Колір
+              </label>
               <input
                 id="colorInput"
                 type="text"
-                className="form-select auth-input room-select-input color-select-input"
+                className="form-select room-select-input color-select-input"
                 value={getColorLabel(effectiveColor)}
                 readOnly
                 aria-haspopup="dialog"
@@ -214,13 +220,12 @@ export function RegisterForm({ onSuccess, onBack }) {
                   }
                 }}
               />
-              <label htmlFor="colorInput">Колір</label>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary auth-btn"
+              className="btn btn-primary w-100"
             >
               {loading ? "Реєструємо..." : "Зареєструватися"}
             </button>
@@ -237,7 +242,6 @@ export function RegisterForm({ onSuccess, onBack }) {
                     e.preventDefault();
                     onBack();
                   }}
-                  className="auth-link"
                 >
                   Увійти
                 </a>
@@ -245,8 +249,8 @@ export function RegisterForm({ onSuccess, onBack }) {
             </div>
 
             <p className="auth-note text-start">
-              Натискаючи «Зареєструватися», ви підтверджуєте, що вам
-              виповнилося 18 років, і приймаєте{" "}
+              Натискаючи «Зареєструватися», ви підтверджуєте, що вам виповнилося
+              18 років, і приймаєте{" "}
               <a
                 href="#"
                 data-bs-toggle="modal"

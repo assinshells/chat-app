@@ -1,21 +1,23 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import {
   confirmPasswordChange,
   requestPasswordChange,
 } from "@shared/api/profile.api.js";
+import {
+  OTP_LENGTH,
+  OTP_TTL_SECONDS,
+  OTP_RESEND_COOLDOWN_SECONDS,
+} from "@shared/constants/auth.constants.js";
+import { useCountdown, formatMmSs } from "@shared/lib/useCountdown.js";
 
 import { SubPanelView } from "./SubPanelView.jsx";
 
-const OTP_LENGTH = 6;
-const EMPTY_OTP = Array(OTP_LENGTH).fill("");
-
 /**
- * PasswordOtpView — вкладка введення коду з листа при зміні пароля
- * (6 комірок, вставка з буфера, навігація стрілками/Backspace — так
- * само, як OtpForm на сторінці відновлення пароля). Кнопка
- * "Підтвердити" надсилає код разом із новим паролем; "Надіслати код
- * ще раз" генерує новий OTP.
+ * PasswordOtpView — вкладка введення коду з листа при зміні пароля.
+ * Одне поле для коду (як на сторінці відновлення пароля), код діє
+ * 3 хвилини, є посилання "Відправити код повторно". Кнопка
+ * "Підтвердити" надсилає код разом із новим паролем.
  */
 export function PasswordOtpView({
   email,
@@ -24,61 +26,31 @@ export function PasswordOtpView({
   onBack,
   onDone,
 }) {
-  const [otp, setOtp] = useState(EMPTY_OTP);
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
-  const inputRefs = useRef([]);
 
-  const isComplete = otp.every(Boolean);
+  const ttl = useCountdown(OTP_TTL_SECONDS);
+  const cooldown = useCountdown(OTP_RESEND_COOLDOWN_SECONDS);
 
-  const handleChange = (index, value) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
-    const next = [...otp];
-    next[index] = digit;
-    setOtp(next);
+  const expired = ttl.secondsLeft === 0;
+  const canResend = cooldown.secondsLeft === 0 && !resending;
+  const isComplete = code.length === OTP_LENGTH;
+
+  const handleChange = (e) => {
+    setCode(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH));
     setError("");
-    if (digit && index < OTP_LENGTH - 1) inputRefs.current[index + 1]?.focus();
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0)
-      inputRefs.current[index - 1]?.focus();
-    if (e.key === "ArrowLeft" && index > 0)
-      inputRefs.current[index - 1]?.focus();
-    if (e.key === "ArrowRight" && index < OTP_LENGTH - 1)
-      inputRefs.current[index + 1]?.focus();
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, OTP_LENGTH);
-    if (!pasted) return;
-
-    const next = [...EMPTY_OTP];
-    pasted.split("").forEach((digit, i) => {
-      next[i] = digit;
-    });
-    setOtp(next);
-    setError("");
-    inputRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
   };
 
   const handleConfirm = async () => {
-    if (!isComplete || loading) return;
+    if (!isComplete || expired || loading) return;
     setLoading(true);
     setError("");
     setInfo("");
     try {
-      await confirmPasswordChange({
-        otpCode: otp.join(""),
-        password,
-        confirmPassword,
-      });
+      await confirmPasswordChange({ otpCode: code, password, confirmPassword });
       onDone();
     } catch (err) {
       setError(err?.message || "Не вдалося змінити пароль. Спробуйте ще раз.");
@@ -87,15 +59,16 @@ export function PasswordOtpView({
   };
 
   const handleResend = async () => {
-    if (resending) return;
+    if (!canResend) return;
     setResending(true);
     setError("");
     setInfo("");
     try {
       await requestPasswordChange();
-      setOtp(EMPTY_OTP);
+      setCode("");
       setInfo("Новий код надіслано.");
-      inputRefs.current[0]?.focus();
+      ttl.restart();
+      cooldown.restart();
     } catch (err) {
       setError(err?.message || "Не вдалося надіслати код. Спробуйте ще раз.");
     } finally {
@@ -111,7 +84,7 @@ export function PasswordOtpView({
         <button
           type="button"
           className="btn btn-primary fw-bold w-100"
-          disabled={!isComplete || loading}
+          disabled={!isComplete || expired || loading}
           onClick={handleConfirm}
         >
           {loading ? "Перевіряємо..." : "Підтвердити"}
@@ -120,43 +93,50 @@ export function PasswordOtpView({
     >
       <div className="p-3">
         <p className="small mb-3">
-          Ми надіслали 6-значний код на <strong>{email}</strong>. Введіть
-          його, щоб змінити пароль.
+          Ми надіслали код на <strong>{email}</strong>. Введіть його, щоб
+          змінити пароль.
         </p>
 
-        <div className="d-flex justify-content-between gap-2 mb-3">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(element) => {
-                inputRefs.current[index] = element;
-              }}
-              type="text"
-              inputMode="numeric"
-              autoComplete={index === 0 ? "one-time-code" : "off"}
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              onPaste={handlePaste}
-              className="form-control text-center px-0"
-              style={{ minWidth: 0 }}
-              aria-label={`Цифра коду ${index + 1}`}
-            />
-          ))}
+        <label htmlFor="password-otp-input" className="form-label small">
+          Одноразовий код
+        </label>
+        <input
+          id="password-otp-input"
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={OTP_LENGTH}
+          className="form-control otp-input"
+          placeholder={"0".repeat(OTP_LENGTH)}
+          value={code}
+          onChange={handleChange}
+          autoFocus
+        />
+        <div className="form-text mb-3">
+          {expired
+            ? "Час дії коду минув — запросіть новий."
+            : `Діє ще ${formatMmSs(ttl.secondsLeft)}.`}
         </div>
 
         {error && <div className="text-danger small mb-2">{error}</div>}
-        {info && <div className="text-success small mb-2">{info}</div>}
+        {info && !error && (
+          <div className="text-success small mb-2">{info}</div>
+        )}
 
         <button
           type="button"
-          className="btn btn-link p-0 small"
-          disabled={resending}
+          className="btn btn-link p-0 small align-baseline"
+          disabled={!canResend}
           onClick={handleResend}
         >
-          {resending ? "Надсилаємо..." : "Надіслати код ще раз"}
+          {resending ? "Надсилаємо..." : "Відправити код повторно"}
         </button>
+        {cooldown.secondsLeft > 0 && (
+          <span className="text-muted small">
+            {" "}
+            (через {formatMmSs(cooldown.secondsLeft)})
+          </span>
+        )}
       </div>
     </SubPanelView>
   );

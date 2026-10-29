@@ -31,3 +31,10 @@ const GENDER_LABEL_BY_VALUE = Object.fromEntries(
  */
 export const getGenderLabel = (value) =>
   GENDER_LABEL_BY_VALUE[value] ?? GENDER_LABEL_BY_VALUE[DEFAULT_GENDER];
+
+// Параметри одноразового коду (мають збігатися з бекендом:
+// OTP_LENGTH і OTP_TTL_SECONDS у backend/.env).
+export const OTP_LENGTH = 6;
+export const OTP_TTL_SECONDS = 180;
+// Через скільки секунд після відправки можна запросити код повторно.
+export const OTP_RESEND_COOLDOWN_SECONDS = 30;

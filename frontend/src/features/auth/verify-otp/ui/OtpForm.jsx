@@ -1,135 +1,104 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useVerifyOtpStore } from "@features/auth/verify-otp/model/useVerifyOtpStore.js";
+import {
+  OTP_LENGTH,
+  OTP_TTL_SECONDS,
+  OTP_RESEND_COOLDOWN_SECONDS,
+} from "@shared/constants/auth.constants.js";
+import { useCountdown, formatMmSs } from "@shared/lib/useCountdown.js";
 
 export function OtpForm({ email, onSuccess }) {
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const inputRefs = useRef([]);
+  const [code, setCode] = useState("");
 
-  const { loading, error, verify, clearError } = useVerifyOtpStore();
+  const { loading, resending, error, info, verify, resend, clearError } =
+    useVerifyOtpStore();
 
-  const handleChange = (index, value) => {
-    // Лише цифри
-    const digit = value.replace(/\D/g, "").slice(-1);
+  // Час дії коду (3:00) і короткий кулдаун на повторну відправку.
+  const ttl = useCountdown(OTP_TTL_SECONDS);
+  const cooldown = useCountdown(OTP_RESEND_COOLDOWN_SECONDS);
 
-    if (!digit) {
-      const newOtp = [...otp];
-      newOtp[index] = "";
-      setOtp(newOtp);
-      return;
-    }
+  const expired = ttl.secondsLeft === 0;
+  const canResend = cooldown.secondsLeft === 0 && !resending;
+  const isComplete = code.length === OTP_LENGTH;
 
-    const newOtp = [...otp];
-    newOtp[index] = digit;
-
-    setOtp(newOtp);
+  const handleChange = (e) => {
+    // Лише цифри; вставка з буфера теж обрізається до потрібної довжини.
+    setCode(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH));
     clearError();
-
-    // Перейти до наступної комірки
-    if (index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    // Backspace — видалити поточну цифру
-    // Якщо комірка порожня — перейти назад
-    if (e.key === "Backspace") {
-      if (!otp[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      }
-    }
-
-    // Стрілка вліво
-    if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-
-    // Стрілка вправо
-    if (e.key === "ArrowRight" && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-
-    const pastedCode = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-
-    if (!pastedCode) return;
-
-    const newOtp = ["", "", "", "", "", ""];
-
-    pastedCode.split("").forEach((digit, index) => {
-      newOtp[index] = digit;
-    });
-
-    setOtp(newOtp);
-    clearError();
-
-    // Фокус на останню заповнену комірку
-    const focusIndex = Math.min(pastedCode.length, 5);
-    inputRefs.current[focusIndex]?.focus();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const otpCode = otp.join("");
-
-    if (otpCode.length !== 6) {
-      return;
-    }
-
+    if (!isComplete || expired) return;
     clearError();
-    verify({ email, otpCode }, onSuccess);
+    verify({ email, otpCode: code }, onSuccess);
   };
 
-  const isComplete = otp.every(Boolean);
+  const handleResend = () => {
+    if (!canResend) return;
+    resend({ email }, () => {
+      setCode("");
+      ttl.restart();
+      cooldown.restart();
+    });
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      role="form"
-      className="mx-auto text-center auth-form"
-    >
+    <form onSubmit={handleSubmit} role="form" className="auth-form">
       <div className="auth-fields">
-        {error && <p className="text-danger text-center mb-0">{error}</p>}
+        {error && <p className="text-danger mb-0">{error}</p>}
+        {info && !error && <p className="text-success mb-0">{info}</p>}
 
-        {/* Шість окремих комірок коду. Floating label тут не
-            застосовується: підпис не має сенсу для кожної цифри
-            окремо, тому комірки лишаються окремими, але отримують
-            той самий стиль .auth-input. */}
-        <div className="d-flex justify-content-between gap-2">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(element) => {
-                inputRefs.current[index] = element;
-              }}
-              type="text"
-              inputMode="numeric"
-              autoComplete={index === 0 ? "one-time-code" : "off"}
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              onPaste={handlePaste}
-              className="form-control auth-input text-center"
-              aria-label={`OTP digit ${index + 1}`}
-            />
-          ))}
+        <div>
+          <label htmlFor="otpInput" className="form-label d-block text-center">
+            Одноразовий код
+          </label>
+          <input
+            id="otpInput"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pattern="\d*"
+            maxLength={OTP_LENGTH}
+            className="form-control otp-input"
+            placeholder={"0".repeat(OTP_LENGTH)}
+            value={code}
+            onChange={handleChange}
+            autoFocus
+            required
+          />
+          <div className="form-text text-center">
+            Код надіслано на {email}.{" "}
+            {expired
+              ? "Час дії коду минув — запросіть новий."
+              : `Діє ще ${formatMmSs(ttl.secondsLeft)}.`}
+          </div>
         </div>
 
         <button
           type="submit"
-          disabled={loading || !isComplete}
-          className="btn btn-primary auth-btn"
+          disabled={loading || !isComplete || expired}
+          className="btn btn-primary w-100"
         >
           {loading ? "Верифікація..." : "Верифікувати"}
         </button>
+
+        <div className="small text-center">
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={!canResend}
+            className="btn btn-link p-0 align-baseline"
+          >
+            {resending ? "Надсилаємо..." : "Відправити код повторно"}
+          </button>
+          {cooldown.secondsLeft > 0 && (
+            <span className="text-muted">
+              {" "}
+              (через {formatMmSs(cooldown.secondsLeft)})
+            </span>
+          )}
+        </div>
       </div>
     </form>
   );

@@ -13,44 +13,42 @@ export function ResetPasswordForm({ verifiedToken, onSuccess }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      role="form"
-      className="mx-auto text-center auth-form"
-    >
+    <form onSubmit={handleSubmit} role="form" className="auth-form">
       <div className="auth-fields">
-        {error && <p className="text-danger text-center mb-0">{error}</p>}
+        {error && <p className="text-danger mb-0">{error}</p>}
 
-        <div className="form-floating">
+        <div>
+          <label htmlFor="passwordInput" className="form-label">
+            Новий пароль
+          </label>
           <input
             id="passwordInput"
             type="password"
-            className="form-control auth-input"
-            placeholder="Новий пароль"
+            className="form-control"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <label htmlFor="passwordInput">Новий пароль</label>
         </div>
 
-        <div className="form-floating">
+        <div>
+          <label htmlFor="confirmPasswordInput" className="form-label">
+            Повторіть пароль
+          </label>
           <input
             id="confirmPasswordInput"
             type="password"
-            className="form-control auth-input"
-            placeholder="Повторіть пароль"
+            className="form-control"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
-          <label htmlFor="confirmPasswordInput">Повторіть пароль</label>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary auth-btn"
+          className="btn btn-primary w-100"
         >
           {loading ? "Зберігаємо..." : "Зберегти"}
         </button>

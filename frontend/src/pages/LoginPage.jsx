@@ -4,7 +4,7 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 
 export function LoginPage({ onNavigate, onLoginSuccess }) {
   return (
-    <AuthLayout split title="З поверненням">
+    <AuthLayout title="З поверненням">
       <LoginForm
         onSuccess={(login, room) => {
           if (onLoginSuccess) {

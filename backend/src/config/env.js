@@ -48,12 +48,28 @@ export const env = {
     // `expiresIn` у jsonwebtoken приймає рядки на кшталт "7d", які Redis EX не розуміє.
     refreshTtlSeconds: Number(getEnv("JWT_REFRESH_TTL_SECONDS", 604800)),
   },
-  otpTtlSeconds: Number(getEnv("OTP_TTL_SECONDS", 600)),
+  // OTP живе 3 хвилини (фронт показує таймер на ті самі 180 с).
+  otpTtlSeconds: Number(getEnv("OTP_TTL_SECONDS", 180)),
+  // TTL одноразового "verified"-токена, який видається після успішної
+  // перевірки OTP і дає змогу встановити новий пароль. Окремий від TTL
+  // самого коду, щоб користувач встиг ввести новий пароль.
+  otpVerifiedTtlSeconds: Number(getEnv("OTP_VERIFIED_TTL_SECONDS", 600)),
   otpLength: Number(getEnv("OTP_LENGTH", 6)),
   // Максимум невірних спроб введення OTP до його примусової інвалідації.
   // Без цього ліміту OTP (6 цифр) можна підібрати перебором у межах TTL,
   // оскільки express-rate-limit обмежує запити за IP, а не за кодом.
   otpMaxAttempts: Number(getEnv("OTP_MAX_ATTEMPTS", 5)),
+  // SMTP для nodemailer (src/adapters/email.adapter.js). Якщо SMTP_HOST
+  // не заданий — у development листи не надсилаються, а OTP пишеться в лог.
+  smtp: {
+    host: getEnv("SMTP_HOST") || undefined,
+    port: Number(getEnv("SMTP_PORT", 587)),
+    // true — неявний TLS (зазвичай порт 465); false — STARTTLS (587).
+    secure: getEnv("SMTP_SECURE", "false") === "true",
+    user: getEnv("SMTP_USER") || undefined,
+    pass: getEnv("SMTP_PASS") || undefined,
+    from: getEnv("SMTP_FROM", '"Балачка" <no-reply@localhost>'),
+  },
   rateLimit: {
     loginMax: Number(getEnv("RATE_LIMIT_LOGIN_MAX", 10)),
     registerMax: Number(getEnv("RATE_LIMIT_REGISTER_MAX", 5)),

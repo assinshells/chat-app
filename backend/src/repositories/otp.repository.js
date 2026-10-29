@@ -40,7 +40,7 @@ export const OtpRepository = {
 
   async saveVerifiedToken(token, userId) {
     await redisClient.set(REDIS_KEYS.otpVerified(token), String(userId), {
-      EX: authConfig.otp.ttlSeconds,
+      EX: authConfig.otp.verifiedTtlSeconds,
     });
   },
 

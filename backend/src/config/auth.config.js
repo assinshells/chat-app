@@ -21,6 +21,7 @@ export const authConfig = {
   },
   otp: {
     ttlSeconds: env.otpTtlSeconds,
+    verifiedTtlSeconds: env.otpVerifiedTtlSeconds,
     length: env.otpLength,
     maxAttempts: env.otpMaxAttempts,
   },
