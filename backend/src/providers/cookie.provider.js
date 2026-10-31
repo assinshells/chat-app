@@ -43,6 +43,31 @@ export const CookieProvider = {
     });
   },
 
+  /**
+   * regSession — id тимчасової реєстраційної сесії (між "Увійти" і "В чат").
+   * httpOnly + SameSite=Strict: JS її не читає, а сторонній сайт не може
+   * змусити браузер надіслати її разом із запитом (CSRF на завершення
+   * реєстрації). Path обмежений /api/auth. TTL cookie = TTL сесії в Redis.
+   */
+  setRegistrationCookie(res, sessionId, ttlSeconds) {
+    res.cookie(COOKIE_NAMES.regSession, sessionId, {
+      secure: env.isProduction,
+      sameSite: "strict",
+      httpOnly: true,
+      path: "/api/auth",
+      maxAge: ttlSeconds * 1000,
+    });
+  },
+
+  clearRegistrationCookie(res) {
+    res.clearCookie(COOKIE_NAMES.regSession, {
+      path: "/api/auth",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: env.isProduction,
+    });
+  },
+
   clearAuthCookies(res) {
     res.clearCookie(COOKIE_NAMES.refreshToken, { path: "/api/auth" });
     res.clearCookie(COOKIE_NAMES.csrfToken, { path: "/" });

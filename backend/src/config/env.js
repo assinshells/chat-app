@@ -21,7 +21,24 @@ function getEnv(name, fallback) {
   return value;
 }
 
+// TRUST_PROXY: скільки reverse-proxy стоїть перед бекендом (nginx у prod = 1).
+// Без цього req.ip завжди дорівнює IP nginx, і всі IP-ліміти (вхід,
+// реєстрація) спільні для всіх користувачів одразу.
+function parseTrustProxy(raw) {
+  if (raw === undefined || raw === "") return process.env.NODE_ENV === "production" ? 1 : false;
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  if (/^\d+$/.test(raw)) return Number(raw);
+  return raw; // підмережі / ключові слова express: "loopback, 10.0.0.0/8"
+}
+
 function assertRequiredEnv() {
+  if (captchaEnabled && !process.env.TURNSTILE_SECRET_KEY) {
+    throw new Error(
+      "CAPTCHA_ENABLED=true, але TURNSTILE_SECRET_KEY не задано. " +
+        "Вкажіть ключ у .env або вимкніть CAPTCHA_ENABLED=false (лише для розробки).",
+    );
+  }
   const missing = REQUIRED_VARS.filter((name) => !process.env[name]);
   if (missing.length > 0) {
     throw new Error(
@@ -31,7 +48,15 @@ function assertRequiredEnv() {
   }
 }
 
+// CAPTCHA за замовчуванням увімкнена в production і вимкнена в dev/test;
+// явне CAPTCHA_ENABLED=true|false має пріоритет.
+const captchaEnabled =
+  process.env.CAPTCHA_ENABLED !== undefined && process.env.CAPTCHA_ENABLED !== ""
+    ? process.env.CAPTCHA_ENABLED === "true"
+    : process.env.NODE_ENV === "production";
+
 export const env = {
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   nodeEnv: getEnv("NODE_ENV", "development"),
   isProduction: process.env.NODE_ENV === "production",
   port: Number(getEnv("PORT", 3000)),
@@ -78,6 +103,28 @@ export const env = {
     resetMax: Number(getEnv("RATE_LIMIT_RESET_MAX", 5)),
     refreshMax: Number(getEnv("RATE_LIMIT_REFRESH_MAX", 30)),
     windowMs: Number(getEnv("RATE_LIMIT_WINDOW_MS", 900000)),
+  },
+  // Тимчасова реєстраційна сесія (між "Увійти" і "В чат").
+  registration: {
+    sessionTtlSeconds: Number(getEnv("REGISTRATION_SESSION_TTL_SECONDS", 900)),
+    // Захист від масового створення реєстраційних сесій з однієї IP.
+    startMaxPerIp: Number(getEnv("REGISTRATION_START_MAX_PER_IP", 10)),
+    startWindowSeconds: Number(getEnv("REGISTRATION_START_WINDOW_SECONDS", 900)),
+  },
+  // Підбір пароля до існуючого логіна: окремий від IP-лімітера лічильник
+  // по самому логіну (розподілений перебір з багатьох IP).
+  loginGuard: {
+    maxFailures: Number(getEnv("LOGIN_FAIL_MAX", 10)),
+    windowSeconds: Number(getEnv("LOGIN_FAIL_WINDOW_SECONDS", 900)),
+  },
+  captcha: {
+    enabled: captchaEnabled,
+    provider: "turnstile",
+    secret: getEnv("TURNSTILE_SECRET_KEY") || undefined,
+    // Необов'язково: якщо задано, hostname у відповіді Turnstile має збігатися.
+    expectedHostname: getEnv("TURNSTILE_EXPECTED_HOSTNAME") || undefined,
+    verifyUrl: "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    timeoutMs: Number(getEnv("CAPTCHA_TIMEOUT_MS", 5000)),
   },
   // Дефолтний суперадмін, що заводиться/оновлюється автоматично при
   // кожному старті бекенда (див. services/superadminBootstrap.service.js).

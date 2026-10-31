@@ -67,6 +67,11 @@ export const UserRepository = {
       return rows[0];
     } catch (err) {
       await client.query("ROLLBACK");
+      // 23505 (unique_violation): паралельний запит встиг створити такий
+      // самий логін/email між перевіркою вище і INSERT (SELECT ... FOR
+      // UPDATE по неіснуючому рядку нічого не блокує). Для виклику це
+      // те саме, що й "вже зайнято" — null, а не 500.
+      if (err.code === "23505") return null;
       throw err;
     } finally {
       client.release();

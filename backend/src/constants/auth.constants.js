@@ -15,6 +15,21 @@ export const AUTH_ERRORS = Object.freeze({
   VALIDATION_FAILED: "Помилка валідації",
   CSRF_TOKEN_INVALID: "Невірний або відсутній CSRF-токен",
 
+  // Єдиний потік "вхід -> завершення реєстрації" (services/authFlow.service.js).
+  LOGIN_TAKEN_WRONG_PASSWORD:
+    "Цей логін уже зайнято. Перевірте правильність пароля",
+  LOGIN_ATTEMPTS_EXCEEDED:
+    "Забагато невдалих спроб входу для цього логіна. Спробуйте пізніше",
+  REGISTRATION_SESSION_EXPIRED:
+    "Сесію реєстрації завершено або не знайдено. Почніть спочатку зі сторінки входу",
+  REGISTRATION_IN_PROGRESS: "Реєстрація вже виконується, зачекайте",
+  EMAIL_REQUIRED:
+    "Вкажіть email або позначте, що не хочете залишати електронну пошту",
+  CAPTCHA_REQUIRED: "Підтвердіть, що ви не робот",
+  CAPTCHA_FAILED: "Перевірку «я не робот» не пройдено. Спробуйте ще раз",
+  CAPTCHA_UNAVAILABLE:
+    "Не вдалося перевірити CAPTCHA. Спробуйте ще раз трохи згодом",
+
   // Керування ролями (routes/role.routes.js, services/role.service.js).
   ROLE_FORBIDDEN: "Недостатньо прав для цієї дії",
   ROLE_INVALID: "Невірна роль",
@@ -32,6 +47,9 @@ export const AUTH_ERRORS = Object.freeze({
 export const COOKIE_NAMES = Object.freeze({
   refreshToken: "refreshToken",
   csrfToken: "csrfToken",
+  // Непрозорий id тимчасової реєстраційної сесії (httpOnly, див.
+  // CookieProvider.setRegistrationCookie). Сам пароль у ній не зберігається.
+  regSession: "regSession",
 });
 
 // Стать — обов'язкове поле реєстрації без значення за замовчуванням —
@@ -153,6 +171,27 @@ export const REDIS_KEYS = Object.freeze({
   otp: (uid) => `otp:${uid}`,
   otpVerified: (tok) => `otp_verified:${tok}`,
   otpAttempts: (uid) => `otp_attempts:${uid}`,
+  // Тимчасова реєстраційна сесія. Ключ — sha256 від id із cookie, тому
+  // дамп Redis не дає змоги підставити чужий id.
+  regSession: (idHash) => `reg_session:${idHash}`,
+  regLock: (idHash) => `reg_lock:${idHash}`,
+  // Лічильник невдалих входів по логіну (sha256 від логіна у нижньому регістрі).
+  loginFail: (loginHash) => `login_fail:${loginHash}`,
+  // Лічильник стартів реєстрації з однієї IP-адреси.
+  regStartIp: (ip) => `reg_start_ip:${ip}`,
+});
+
+// Значення профілю нового користувача, створеного через "В чат".
+// Колір у проєкті зберігається іменованим токеном ('black' =
+// #000000, див. users_color_check у init.sql), а не hex-рядком.
+export const NEW_USER_DEFAULTS = Object.freeze({
+  gender: "unknown",
+  color: "black",
+});
+
+export const LOGIN_STATUS = Object.freeze({
+  AUTHENTICATED: "authenticated",
+  REGISTRATION_REQUIRED: "registration_required",
 });
 
 export const HTTP_STATUS = Object.freeze({
@@ -163,6 +202,8 @@ export const HTTP_STATUS = Object.freeze({
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  GONE: 410,
   TOO_MANY: 429,
   INTERNAL: 500,
+  SERVICE_UNAVAILABLE: 503,
 });

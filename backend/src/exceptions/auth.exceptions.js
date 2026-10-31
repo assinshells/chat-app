@@ -27,8 +27,24 @@ export class NotFoundException extends BaseException {
 }
 
 export class ConflictException extends BaseException {
-  constructor(message) {
-    super(message, HTTP_STATUS.CONFLICT, "CONFLICT");
+  // code необов'язковий: за замовчуванням "CONFLICT" (як було), а потік
+  // реєстрації передає точні коди, щоб фронт не розбирав текст повідомлення.
+  constructor(message, code = "CONFLICT") {
+    super(message, HTTP_STATUS.CONFLICT, code);
+  }
+}
+
+// 410, а не 401: на 401 axios-інтерсептор фронта намагається оновити
+// access-токен і при невдачі перезавантажує сторінку.
+export class RegistrationSessionExpiredException extends BaseException {
+  constructor(message = AUTH_ERRORS.REGISTRATION_SESSION_EXPIRED) {
+    super(message, HTTP_STATUS.GONE, "REGISTRATION_SESSION_EXPIRED");
+  }
+}
+
+export class CaptchaUnavailableException extends BaseException {
+  constructor(message = AUTH_ERRORS.CAPTCHA_UNAVAILABLE) {
+    super(message, HTTP_STATUS.SERVICE_UNAVAILABLE, "CAPTCHA_UNAVAILABLE");
   }
 }
 

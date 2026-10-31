@@ -119,6 +119,7 @@ services:
     environment:
       VITE_API_URL: http://localhost:${BACKEND_PORT:-3000}
       VITE_SOCKET_URL: http://localhost:${BACKEND_PORT:-3000}
+      VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:-}
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     volumes:

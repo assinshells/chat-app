@@ -1,7 +1,7 @@
 import { AuthService } from "../services/auth.service.js";
 import {
   toLoginRequestDto,
-  toRegisterRequestDto,
+  toCompleteRegistrationDto,
   toForgotPasswordDto,
   toVerifyOtpDto,
   toResetPasswordDto,
@@ -18,7 +18,7 @@ import {
 } from "../dto/auth.dto.js";
 import {
   validateLoginRequest,
-  validateRegisterRequest,
+  validateCompleteRegistrationRequest,
   validateForgotPasswordRequest,
   validateVerifyOtpRequest,
   validateResetPasswordRequest,
@@ -35,7 +35,11 @@ import {
   validateProfileLoginParam,
 } from "../validators/auth.validator.js";
 import { CookieProvider } from "../providers/cookie.provider.js";
-import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
+import {
+  HTTP_STATUS,
+  COOKIE_NAMES,
+  LOGIN_STATUS,
+} from "../constants/auth.constants.js";
 
 /**
  * AuthController — лише routing-логіка:
@@ -48,25 +52,90 @@ import { HTTP_STATUS, COOKIE_NAMES } from "../constants/auth.constants.js";
  * значення, що й у cookie). refreshToken у тілі відповіді ніколи не повертається.
  */
 export const AuthController = {
+  // Єдина точка входу: або авторизує існуючого користувача, або (для
+  // нового логіна) починає тимчасову реєстраційну сесію — див.
+  // AuthFlowService.loginOrStartRegistration. Рішення приймає сервер.
   login: async (req, res, next) => {
     try {
       validateLoginRequest(req.body);
       const dto = toLoginRequestDto(req.body);
-      const { accessToken, refreshToken, csrfToken } =
-        await AuthService.login(dto);
+      const result = await AuthService.login({
+        ...dto,
+        ip: req.ip,
+        previousSessionId: req.cookies?.[COOKIE_NAMES.regSession],
+      });
+
+      if (result.status === LOGIN_STATUS.REGISTRATION_REQUIRED) {
+        CookieProvider.setRegistrationCookie(
+          res,
+          result.registrationSessionId,
+          result.expiresInSeconds,
+        );
+        // id сесії йде лише в httpOnly cookie, у тілі його немає.
+        return res.status(HTTP_STATUS.OK).json({
+          success: true,
+          status: result.status,
+          expiresInSeconds: result.expiresInSeconds,
+        });
+      }
+
+      const { accessToken, refreshToken, csrfToken } = result;
       CookieProvider.setAuthCookies(res, { refreshToken, csrfToken });
-      res.status(HTTP_STATUS.OK).json({ success: true, accessToken, csrfToken });
+      CookieProvider.clearRegistrationCookie(res);
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        status: result.status,
+        accessToken,
+        csrfToken,
+      });
     } catch (err) {
       next(err);
     }
   },
 
+  // Завершення реєстрації ("В чат"): створює користувача й одразу
+  // авторизує його (ті самі cookie/токени, що й при звичайному вході).
   register: async (req, res, next) => {
     try {
-      validateRegisterRequest(req.body);
-      const dto = toRegisterRequestDto(req.body);
-      const result = await AuthService.register(dto);
-      res.status(HTTP_STATUS.CREATED).json({ success: true, ...result });
+      validateCompleteRegistrationRequest(req.body);
+      const dto = toCompleteRegistrationDto(req.body);
+      const { accessToken, refreshToken, csrfToken, status, login } =
+        await AuthService.register({
+          ...dto,
+          sessionId: req.cookies?.[COOKIE_NAMES.regSession],
+          ip: req.ip,
+        });
+      CookieProvider.setAuthCookies(res, { refreshToken, csrfToken });
+      CookieProvider.clearRegistrationCookie(res);
+      res
+        .status(HTTP_STATUS.CREATED)
+        .json({ success: true, status, login, accessToken, csrfToken });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Логін для сторінки завершення реєстрації береться із серверної
+  // сесії, а не з клієнтського стану — клієнт не може його підмінити.
+  getRegistrationSession: async (req, res, next) => {
+    try {
+      const result = await AuthService.getRegistrationSession({
+        sessionId: req.cookies?.[COOKIE_NAMES.regSession],
+      });
+      res.status(HTTP_STATUS.OK).json({ success: true, ...result });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // "Назад до входу": скасовує незавершену реєстрацію (ідемпотентно).
+  cancelRegistration: async (req, res, next) => {
+    try {
+      await AuthService.cancelRegistration({
+        sessionId: req.cookies?.[COOKIE_NAMES.regSession],
+      });
+      CookieProvider.clearRegistrationCookie(res);
+      res.status(HTTP_STATUS.OK).json({ success: true });
     } catch (err) {
       next(err);
     }

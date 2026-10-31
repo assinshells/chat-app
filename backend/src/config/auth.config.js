@@ -25,6 +25,9 @@ export const authConfig = {
     length: env.otpLength,
     maxAttempts: env.otpMaxAttempts,
   },
+  registration: env.registration,
+  loginGuard: env.loginGuard,
+  captcha: env.captcha,
   rateLimit: {
     windowMs: env.rateLimit.windowMs,
     login: { max: env.rateLimit.loginMax },

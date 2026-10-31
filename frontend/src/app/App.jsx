@@ -8,7 +8,7 @@ import { useLogoutStore } from "@features/auth/logout/model/useLogoutStore.js";
 import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
 import { LoginPage } from "@pages/LoginPage.jsx";
-import { RegisterPage } from "@pages/RegisterPage.jsx";
+import { CompleteRegistrationPage } from "@pages/CompleteRegistrationPage.jsx";
 import { ForgotPasswordPage } from "@pages/ForgotPasswordPage.jsx";
 import { VerifyOtpPage } from "@pages/VerifyOtpPage.jsx";
 import { ResetPasswordPage } from "@pages/ResetPasswordPage.jsx";
@@ -101,8 +101,25 @@ export default function App() {
   }
 
   switch (screen) {
-    case AUTH_SCREENS.REGISTER:
-      return <RegisterPage onNavigate={navigate} />;
+    case AUTH_SCREENS.COMPLETE_REGISTRATION:
+      // Другий крок входу для нового логіна. Логін/пароль/кімната живуть
+      // лише в пам'яті (screenParams) — після оновлення сторінки їх уже
+      // немає, і користувач повертається на екран входу (пароль не
+      // відновлюється свідомо: ні URL, ні localStorage його не зберігають).
+      if (!screenParams.login || !screenParams.password) {
+        return (
+          <LoginPage onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />
+        );
+      }
+      return (
+        <CompleteRegistrationPage
+          login={screenParams.login}
+          password={screenParams.password}
+          room={screenParams.room}
+          onNavigate={navigate}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      );
 
     case AUTH_SCREENS.FORGOT:
       return <ForgotPasswordPage onNavigate={navigate} />;

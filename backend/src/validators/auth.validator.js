@@ -1,5 +1,6 @@
 import { ValidationException } from "../exceptions/auth.exceptions.js";
 import {
+  AUTH_ERRORS,
   GENDER_OPTIONS,
   COLOR_OPTIONS,
   STATUS_OPTIONS,
@@ -35,23 +36,53 @@ export const validateLoginRequest = (body) => {
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 
-export const validateRegisterRequest = (body) => {
+// Максимальна довжина пароля нового акаунта: scrypt не залежить від
+// довжини, але розумна межа відсікає сміття й гігантські тіла запитів.
+export const MAX_PASSWORD_LENGTH = 128;
+export const MAX_EMAIL_LENGTH = 255; // users.email VARCHAR(255)
+
+/**
+ * Правила для НОВОГО акаунта (логін, якого ще немає в БД). До існуючих
+ * користувачів вони не застосовуються: у старих записів логін/пароль
+ * могли бути створені за іншими правилами, і вхід не повинен їх ламати.
+ * Викликається з AuthFlowService лише у гілці "логін не знайдено".
+ */
+export const validateNewAccountCredentials = ({ login, password }) => {
   const errors = [];
-  if (!isNonEmptyString(body.login)) errors.push("логін обов'язковий");
-  else if (body.login.trim().length < MIN_LOGIN_LENGTH)
+  if (login !== login.trim())
+    errors.push("нікнейм не може починатися чи закінчуватися пробілом");
+  else if (login.length < MIN_LOGIN_LENGTH)
     errors.push(`нікнейм має бути не коротшим за ${MIN_LOGIN_LENGTH} символи`);
-  else if (body.login.trim().length > MAX_LOGIN_LENGTH)
+  else if (login.length > MAX_LOGIN_LENGTH)
     errors.push(`нікнейм має бути не довшим за ${MAX_LOGIN_LENGTH} символів`);
-  if (!isValidPassword(body.password))
-    errors.push("пароль має містити щонайменше 6 символів");
-  if (body.email && !isValidEmail(body.email)) errors.push("email недійсний");
-  // Стать тепер обов'язково обирається на формі реєстрації (select).
-  if (!isValidGender(body.gender))
-    errors.push(`стать обов'язкова і має бути однією з: ${GENDER_OPTIONS.join(", ")}`);
-  // Колір необов'язковий: якщо не переданий, застосовується DEFAULT
-  // з БД ('black'); але якщо переданий — має бути валідним значенням.
-  if (body.color !== undefined && !isValidColor(body.color))
-    errors.push(`колір має бути одним із: ${COLOR_OPTIONS.join(", ")}`);
+  if (password.length > MAX_PASSWORD_LENGTH)
+    errors.push(`пароль має бути не довшим за ${MAX_PASSWORD_LENGTH} символів`);
+  if (errors.length) throw new ValidationException("Помилка валідації", errors);
+};
+
+/**
+ * Тіло POST /api/auth/register (завершення реєстрації): логін і пароль
+ * сюди НЕ приходять — вони беруться із серверної реєстраційної сесії.
+ *  - noEmail: true  -> email не потрібен (ігнорується, якщо переданий);
+ *  - noEmail: false -> email обов'язковий і має бути коректним.
+ */
+export const validateCompleteRegistrationRequest = (body) => {
+  const errors = [];
+  if (typeof body?.noEmail !== "boolean")
+    errors.push("noEmail має бути true або false");
+  else if (body.noEmail === false) {
+    if (!isNonEmptyString(body.email)) errors.push(AUTH_ERRORS.EMAIL_REQUIRED);
+    else if (
+      body.email.trim().length > MAX_EMAIL_LENGTH ||
+      !isValidEmail(body.email.trim())
+    )
+      errors.push("email недійсний");
+  }
+  if (
+    body?.captchaToken !== undefined &&
+    typeof body.captchaToken !== "string"
+  )
+    errors.push("некоректний токен перевірки");
   if (errors.length) throw new ValidationException("Помилка валідації", errors);
 };
 

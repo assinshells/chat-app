@@ -46,5 +46,6 @@ export const RateLimitProvider = {
   verifyOtp: makeRateLimiter(authConfig.rateLimit.verifyOtp.max),
   resetPassword: makeRateLimiter(authConfig.rateLimit.resetPassword.max),
   refresh: makeRateLimiter(authConfig.rateLimit.refresh.max),
+  registrationSession: makeRateLimiter(authConfig.rateLimit.refresh.max),
   galleryUpload: galleryUploadLimiter,
 };

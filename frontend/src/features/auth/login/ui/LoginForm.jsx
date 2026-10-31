@@ -10,20 +10,22 @@ import { RoomSelectModal } from "./RoomSelectModal.jsx";
 const ROOM_MODAL_ID = "loginRoomSelectModal";
 
 /**
- * LoginForm — "тупий" компонент.
- * onSuccess(login, room) — викликається з логіном і обраною кімнатою
- * після успішного входу, щоб одразу відкрити чат у потрібній кімнаті.
+ * LoginForm — єдина форма входу й початку реєстрації: нікнейм, пароль,
+ * вибір кімнати та кнопка входу. Окремого посилання на реєстрацію немає.
  *
- * Стать і колір нікнейма/повідомлень тепер обираються на формі
- * реєстрації (див. RegisterForm.jsx), а не тут — форма входу лише
- * автентифікує вже наявного користувача.
+ * Що буде далі, вирішує сервер (POST /api/auth/login):
+ *  - логін є, пароль вірний   -> onSuccess(login, room) -> чат у кімнаті room;
+ *  - логін є, пароль хибний   -> повідомлення про помилку на цій формі;
+ *  - логіна немає             -> onRegistrationRequired({ login, password, room })
+ *    -> сторінка завершення реєстрації (кімната обирається тут і
+ *    переноситься далі, щоб після реєстрації відкрити чат у ній).
  *
  * Стандартні Bootstrap-форми: підпис над полем (.form-label).
  *
  * Структура: .auth-stack (відступ 32px) → [.auth-fields (поля +
  * кнопка, відступ 16px), .auth-links].
  */
-export function LoginForm({ onSuccess, onRegister, onForgot }) {
+export function LoginForm({ onSuccess, onRegistrationRequired, onForgot }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +36,14 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     clearError();
-    doLogin({ login, password }, () => onSuccess(login, room));
+    doLogin(
+      { login, password },
+      {
+        onSuccess: () => onSuccess(login, room),
+        onRegistrationRequired: () =>
+          onRegistrationRequired({ login, password, room }),
+      },
+    );
   };
 
   return (
@@ -122,25 +131,13 @@ export function LoginForm({ onSuccess, onRegister, onForgot }) {
               disabled={loading}
               className="btn btn-primary w-100"
             >
-              {loading ? "Заходимо..." : "Увійти"}
+              {loading ? "Заходимо..." : "Увійти в чат"}
             </button>
           </div>
 
-          {/* Один ряд під кнопкою: "Немає акаунта? Зареєструватися"
-              ліворуч, "Забули пароль?" праворуч. */}
+          {/* Під кнопкою лишається лише "Забули пароль?" — відновлення
+              пароля не належить до старого процесу реєстрації. */}
           <div className="auth-links">
-            <span className="auth-links-text">
-              Немає акаунта?{" "}
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onRegister();
-                }}
-              >
-                Зареєструватися
-              </a>
-            </span>
             <a
               href="#"
               onClick={(e) => {

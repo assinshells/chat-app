@@ -1,12 +1,12 @@
 import { UserRepository } from "../repositories/user.repository.js";
 import { ModeratorRoomRepository } from "../repositories/moderatorRoom.repository.js";
 import { TokenService } from "./token.service.js";
+import { AuthFlowService } from "./authFlow.service.js";
 import { OtpService } from "./otp.service.js";
 import { PasswordProvider } from "../providers/password.provider.js";
 import { EmailAdapter } from "../adapters/email.adapter.js";
 import logger from "../config/logger.js";
 import {
-  AuthenticationException,
   ConflictException,
   NotFoundException,
   AuthorizationException,
@@ -16,41 +16,13 @@ import { AUTH_ERRORS, ROLE_VALUES } from "../constants/auth.constants.js";
 import { canReviewPhotos } from "../constants/gallery.constants.js";
 
 export const AuthService = {
-  async login({ login, password }) {
-    const user = await UserRepository.findByLogin(login);
-    if (!user) throw new AuthenticationException();
-
-    const valid = await PasswordProvider.verify(password, user.password_hash);
-    if (!valid) throw new AuthenticationException();
-
-    return TokenService.issueTokenPair(user.id);
-  },
-
-  async register({ login, password, email, gender, color }) {
-    const existingLogin = await UserRepository.findByLogin(login);
-    if (existingLogin) throw new ConflictException(AUTH_ERRORS.LOGIN_TAKEN);
-
-    if (email) {
-      const existingEmail = await UserRepository.findByEmail(email);
-      if (existingEmail) throw new ConflictException(AUTH_ERRORS.EMAIL_TAKEN);
-    }
-
-    const passwordHash = await PasswordProvider.hash(password);
-    const created = await UserRepository.create({
-      login,
-      passwordHash,
-      email,
-      // Стать і колір тепер обираються прямо на формі реєстрації
-      // (RegisterForm.jsx) і приходять у тілі запиту — окремих
-      // PATCH-запитів після першого логіну більше не потрібно.
-      gender,
-      color,
-    });
-
-    if (!created) throw new ConflictException(AUTH_ERRORS.LOGIN_TAKEN);
-
-    return { success: true };
-  },
+  // Вхід і реєстрація — один потік (див. services/authFlow.service.js):
+  // login() або входить, або починає тимчасову реєстраційну сесію;
+  // register() завершує її ("В чат") і одразу авторизує користувача.
+  login: (dto) => AuthFlowService.loginOrStartRegistration(dto),
+  register: (dto) => AuthFlowService.completeRegistration(dto),
+  getRegistrationSession: (dto) => AuthFlowService.getRegistrationSession(dto),
+  cancelRegistration: (dto) => AuthFlowService.cancelRegistration(dto),
 
   async forgotPassword({ email }) {
     const user = await UserRepository.findByEmail(email);

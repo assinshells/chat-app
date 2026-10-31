@@ -68,7 +68,13 @@ const normalizeError = (error) => {
 // власним окремим запитом.
 let refreshPromise = null;
 
-const AUTH_ENDPOINTS_WITHOUT_RETRY = ["/api/auth/login", "/api/auth/refresh"];
+// Реєстраційні ендпоінти працюють без access-токена: їхня помилка не
+// привід оновлювати токен чи перезавантажувати сторінку.
+const AUTH_ENDPOINTS_WITHOUT_RETRY = [
+  "/api/auth/login",
+  "/api/auth/refresh",
+  "/api/auth/register",
+];
 
 /**
  * refreshAccessToken — викликає /api/auth/refresh (refreshToken йде

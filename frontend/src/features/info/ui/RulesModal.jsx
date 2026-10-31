@@ -23,7 +23,7 @@ import SimpleBar from "simplebar-react";
  * DeveloperModal/RoomSelectModal (.modal-header лишається технічно
  * заради коректного data-bs-dismiss на хрестику, але візуально
  * порожній, кнопки "Зрозуміло" нема). У сайдбарі (ChatLeftSidebar.jsx)
- * і на самій формі реєстрації (RegisterForm.jsx) модалка й далі
+ * і на сторінці завершення реєстрації (CompleteRegistrationForm.jsx) модалка й далі
  * монтується у звичайному вигляді — bare там не передається.
  */
 export function RulesModal({ modalId = "rulesModal", bare = false }) {

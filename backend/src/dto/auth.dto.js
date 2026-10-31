@@ -11,15 +11,13 @@
  */
 
 /**
- * @typedef {Object} RegisterRequestDto
- * @property {string} login
- * @property {string} password
- * @property {string|undefined} email
- * @property {string} gender - одне з GENDER_OPTIONS (constants/auth.constants.js)
- * @property {string|undefined} color - одне з COLOR_OPTIONS, за відсутності
- *   на рівні БД застосовується DEFAULT 'black'
+ * @typedef {Object} CompleteRegistrationDto
+ * @property {string|null} email - null, якщо користувач відмовився від пошти
+ * @property {string|undefined} captchaToken
  *
- * Стать і колір обираються прямо на формі реєстрації.
+ * Логін і пароль у цьому DTO відсутні свідомо — вони беруться з
+ * серверної реєстраційної сесії (див. services/authFlow.service.js).
+ * Стать і колір виставляються за замовчуванням (NEW_USER_DEFAULTS).
  */
 
 /**
@@ -43,6 +41,9 @@
 /**
  * @typedef {Object} AuthResponseDto
  * @property {boolean} success
+ * @property {"authenticated"|"registration_required"|undefined} status
+ *   - POST /login: "authenticated" (є accessToken) або "registration_required"
+ *     (логіна немає — id реєстраційної сесії лише в httpOnly cookie regSession)
  * @property {string|undefined} accessToken
  * @property {string|undefined} csrfToken
  * @property {string|undefined} verifiedToken
@@ -62,12 +63,9 @@ export const toLoginRequestDto = (body) => ({
   password: body.password,
 });
 
-export const toRegisterRequestDto = (body) => ({
-  login: body.login,
-  password: body.password,
-  email: body.email || undefined,
-  gender: body.gender,
-  color: body.color || undefined,
+export const toCompleteRegistrationDto = (body) => ({
+  email: body.noEmail === true ? null : body.email.trim(),
+  captchaToken: body.captchaToken,
 });
 
 export const toForgotPasswordDto = (body) => ({

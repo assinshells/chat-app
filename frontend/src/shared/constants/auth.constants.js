@@ -1,6 +1,7 @@
 export const AUTH_SCREENS = Object.freeze({
   LOGIN: "login",
-  REGISTER: "register",
+  // Другий крок єдиного потоку входу (замість окремої сторінки реєстрації).
+  COMPLETE_REGISTRATION: "complete-registration",
   FORGOT: "forgot",
   OTP: "otp",
   RESET: "reset",
@@ -9,17 +10,16 @@ export const AUTH_SCREENS = Object.freeze({
 
 export const APP_NAME = "Балачка";
 
-// Обов'язкове поле — обирається на формі реєстрації звичайними
-// радіокнопками. Значення збігаються з backend GENDER_VALUES.
+// Значення збігаються з backend GENDER_VALUES. На реєстрації стать більше
+// не обирається: новий акаунт отримує "unknown" (backend NEW_USER_DEFAULTS).
 export const GENDER_OPTIONS = Object.freeze([
   { value: "male", label: "Чоловік" },
   { value: "female", label: "Жінка" },
-  { value: "unknown", label: "Не вказано" },
+  { value: "unknown", label: "Невідомо" },
 ]);
 
-// Значення статі, обране на формі реєстрації за замовчуванням, доки
-// користувач не обере інше явно на формі реєстрації.
-export const DEFAULT_GENDER = "male";
+// Стать за замовчуванням для відображення, якщо значення не прийшло.
+export const DEFAULT_GENDER = "unknown";
 
 const GENDER_LABEL_BY_VALUE = Object.fromEntries(
   GENDER_OPTIONS.map((option) => [option.value, option.label]),

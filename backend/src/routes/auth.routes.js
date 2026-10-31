@@ -8,7 +8,19 @@ import { RateLimitProvider } from "../providers/rateLimit.provider.js";
 const router = Router();
 
 router.post("/login", RateLimitProvider.login, AuthController.login);
+// /register — це другий крок єдиного потоку входу: завершення реєстрації
+// за тимчасовою серверною сесією (логін і пароль у запиті не передаються).
 router.post("/register", RateLimitProvider.register, AuthController.register);
+router.get(
+  "/register/session",
+  RateLimitProvider.registrationSession,
+  AuthController.getRegistrationSession,
+);
+router.delete(
+  "/register/session",
+  RateLimitProvider.registrationSession,
+  AuthController.cancelRegistration,
+);
 router.post(
   "/forgot-password",
   RateLimitProvider.forgotPassword,

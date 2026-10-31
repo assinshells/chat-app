@@ -4,6 +4,7 @@ import helmet from "helmet";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import logger from "./config/logger.js";
+import { env } from "./config/env.js";
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import imageRoutes from "./routes/image.routes.js";
@@ -20,6 +21,10 @@ if (!CLIENT_URL) {
 }
 
 const app = express();
+
+// Без trust proxy за nginx req.ip завжди = IP nginx, і IP-ліміти входу/
+// реєстрації були б спільними для всіх користувачів (див. env.trustProxy).
+app.set("trust proxy", env.trustProxy);
 
 app.use(helmet());
 app.use(
