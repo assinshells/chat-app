@@ -5,7 +5,8 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 export function ResetPasswordPage({ onNavigate, verifiedToken }) {
   return (
     <AuthLayout
-      title="Скидання пароля"
+      title="Час для нового пароля"
+      subtitle="Створи надійний пароль і повертайся до спілкування."
       onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
     >
       <ResetPasswordForm

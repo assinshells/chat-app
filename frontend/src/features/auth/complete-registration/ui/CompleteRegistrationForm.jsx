@@ -137,13 +137,12 @@ export function CompleteRegistrationForm({
             )}
 
             <div>
-              <label htmlFor="completeLoginInput" className="form-label">
-                Нікнейм
-              </label>
               <input
                 id="completeLoginInput"
                 type="text"
                 className="form-control"
+                placeholder="Нікнейм"
+                aria-label="Нікнейм"
                 value={serverLogin ?? login}
                 readOnly
                 autoComplete="off"
@@ -151,14 +150,13 @@ export function CompleteRegistrationForm({
             </div>
 
             <div>
-              <label htmlFor="completePasswordInput" className="form-label">
-                Пароль
-              </label>
               <div className="input-with-toggle">
                 <input
                   id="completePasswordInput"
                   type={showPassword ? "text" : "password"}
                   className="form-control"
+                  placeholder="Пароль"
+                  aria-label="Пароль"
                   value={password}
                   readOnly
                   autoComplete="off"
@@ -179,13 +177,12 @@ export function CompleteRegistrationForm({
             </div>
 
             <div>
-              <label htmlFor="completeEmailInput" className="form-label">
-                Email
-              </label>
               <input
                 id="completeEmailInput"
                 type="email"
                 className={`form-control ${emailError ? "is-invalid" : ""}`}
+                placeholder="Email"
+                aria-label="Email"
                 value={email}
                 disabled={noEmail || loading}
                 autoComplete="email"

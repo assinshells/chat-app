@@ -17,13 +17,13 @@ export function ForgotPasswordForm({ onSuccess }) {
         {error && <p className="text-danger mb-0">{error}</p>}
 
         <div>
-          <label htmlFor="emailInput" className="form-label">
-            Пошта
-          </label>
           <input
             id="emailInput"
             type="email"
             className="form-control"
+            placeholder="Електронна пошта"
+            aria-label="Електронна пошта"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

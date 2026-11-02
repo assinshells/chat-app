@@ -38,3 +38,17 @@ export const ROOMS = [
 export const DEFAULT_ROOM = "general";
 
 export const ROOMS_BY_ID = Object.fromEntries(ROOMS.map((room) => [room.id, room]));
+
+// Групи кімнат для форми входу (LoginForm). Не змінюють id/порядок у ROOMS —
+// лише визначають, у якому блоці кімната показується.
+// 1-й блок: радіокнопки в стовпчик.
+export const MAIN_ROOM_IDS = ["general", "kyiv", "bespredel"];
+// 2-й блок, перший селект: тематичні кімнати.
+export const THEMATIC_ROOM_IDS = ["dating", "sex", "lgbt"];
+
+export const MAIN_ROOMS = MAIN_ROOM_IDS.map((id) => ROOMS_BY_ID[id]);
+export const THEMATIC_ROOMS = THEMATIC_ROOM_IDS.map((id) => ROOMS_BY_ID[id]);
+// 2-й блок, другий селект: міста (Київ винесено в 1-й блок).
+export const CITY_ROOMS = ROOMS.filter(
+  (r) => !MAIN_ROOM_IDS.includes(r.id) && !THEMATIC_ROOM_IDS.includes(r.id),
+);

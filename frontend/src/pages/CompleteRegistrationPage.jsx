@@ -27,7 +27,11 @@ export function CompleteRegistrationPage({
   };
 
   return (
-    <AuthLayout title="Майже готово" onBack={handleBack}>
+    <AuthLayout
+      title="Ще мить — і готово"
+      subtitle="Заверши останній крок, щоб продовжити."
+      onBack={handleBack}
+    >
       <CompleteRegistrationForm
         login={login}
         password={password}

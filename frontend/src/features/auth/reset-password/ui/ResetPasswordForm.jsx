@@ -18,13 +18,13 @@ export function ResetPasswordForm({ verifiedToken, onSuccess }) {
         {error && <p className="text-danger mb-0">{error}</p>}
 
         <div>
-          <label htmlFor="passwordInput" className="form-label">
-            Новий пароль
-          </label>
           <input
             id="passwordInput"
             type="password"
             className="form-control"
+            placeholder="Новий пароль"
+            aria-label="Новий пароль"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -32,13 +32,13 @@ export function ResetPasswordForm({ verifiedToken, onSuccess }) {
         </div>
 
         <div>
-          <label htmlFor="confirmPasswordInput" className="form-label">
-            Повторіть пароль
-          </label>
           <input
             id="confirmPasswordInput"
             type="password"
             className="form-control"
+            placeholder="Повторіть пароль"
+            aria-label="Повторіть пароль"
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required

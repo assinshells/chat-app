@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useLoginStore } from "@features/auth/login/model/useLoginStore.js";
 import {
-  ROOMS_BY_ID,
   DEFAULT_ROOM,
+  MAIN_ROOMS,
+  MAIN_ROOM_IDS,
+  THEMATIC_ROOMS,
+  THEMATIC_ROOM_IDS,
+  CITY_ROOMS,
 } from "@features/chat/constants/rooms.constants.js";
-import { RoomSelectModal } from "./RoomSelectModal.jsx";
-
-const ROOM_MODAL_ID = "loginRoomSelectModal";
 
 /**
  * LoginForm — єдина форма входу й початку реєстрації: нікнейм, пароль,
@@ -20,7 +21,10 @@ const ROOM_MODAL_ID = "loginRoomSelectModal";
  *    -> сторінка завершення реєстрації (кімната обирається тут і
  *    переноситься далі, щоб після реєстрації відкрити чат у ній).
  *
- * Стандартні Bootstrap-форми: підпис над полем (.form-label).
+ * Без підписів над полями — замість них placeholder (+ aria-label).
+ * Кімната — один блок із двох частин: радіокнопки (Головна, Київ,
+ * Бєспрєдєл) і два селекти (тематичні та міста). Обрана кімната
+ * завжди одна: вибір в одній частині скидає вибір в іншій.
  *
  * Структура: .auth-stack (відступ 32px) → [.auth-fields (поля +
  * кнопка, відступ 16px), .auth-links].
@@ -54,13 +58,12 @@ export function LoginForm({ onSuccess, onRegistrationRequired, onForgot }) {
             {error && <p className="text-danger mb-0">{error}</p>}
 
             <div>
-              <label htmlFor="loginInput" className="form-label">
-                Нікнейм
-              </label>
               <input
                 id="loginInput"
                 type="text"
                 className="form-control"
+                placeholder="Нікнейм"
+                aria-label="Нікнейм"
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 required
@@ -71,14 +74,13 @@ export function LoginForm({ onSuccess, onRegistrationRequired, onForgot }) {
                 справа (.input-with-toggle, див. _forms.css) — так
                 само, як на формі реєстрації. */}
             <div>
-              <label htmlFor="passwordInput" className="form-label">
-                Пароль
-              </label>
               <div className="input-with-toggle">
                 <input
                   id="passwordInput"
                   type={showPassword ? "text" : "password"}
                   className="form-control"
+                  placeholder="Пароль"
+                  aria-label="Пароль"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -98,32 +100,71 @@ export function LoginForm({ onSuccess, onRegistrationRequired, onForgot }) {
               </div>
             </div>
 
-            {/* readOnly-інпут з кімнатою за замовчуванням: клік (або
-                Enter/Пробіл) відкриває RoomSelectModal, обрана кімната
-                підставляється в інпут. form-select додає шеврон, а
-                підпис "Кімната" завжди піднятий (значення є завжди). */}
-            <div>
-              <label htmlFor="roomInput" className="form-label">
-                Кімната
-              </label>
-              <input
-                id="roomInput"
-                type="text"
-                className="form-select room-select-input"
-                value={
-                  ROOMS_BY_ID[room]?.name ?? ROOMS_BY_ID[DEFAULT_ROOM].name
-                }
-                readOnly
-                aria-haspopup="dialog"
-                data-bs-toggle="modal"
-                data-bs-target={`#${ROOM_MODAL_ID}`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    e.currentTarget.click();
+            {/* Кімната: блок із двох частин. Ліва/верхня — радіокнопки
+                в стовпчик, права/нижня — два селекти в стовпчик.
+                room — єдине джерело істини: у кожній частині значення
+                показується лише якщо кімната належить її групі. */}
+            <div className="room-block" role="group" aria-label="Кімната">
+              <div className="room-block-part">
+                {MAIN_ROOMS.map((r) => (
+                  <div className="form-check mb-0" key={r.id}>
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="loginRoom"
+                      id={`loginRoom-${r.id}`}
+                      value={r.id}
+                      checked={room === r.id}
+                      onChange={() => setRoom(r.id)}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`loginRoom-${r.id}`}
+                    >
+                      {r.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div className="room-block-part">
+                <select
+                  className="form-select"
+                  aria-label="Тематична кімната"
+                  value={THEMATIC_ROOM_IDS.includes(room) ? room : ""}
+                  onChange={(e) => setRoom(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Тематичні
+                  </option>
+                  {THEMATIC_ROOMS.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  className="form-select"
+                  aria-label="Місто"
+                  value={
+                    !MAIN_ROOM_IDS.includes(room) &&
+                    !THEMATIC_ROOM_IDS.includes(room)
+                      ? room
+                      : ""
                   }
-                }}
-              />
+                  onChange={(e) => setRoom(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Місто
+                  </option>
+                  {CITY_ROOMS.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <button
@@ -150,12 +191,6 @@ export function LoginForm({ onSuccess, onRegistrationRequired, onForgot }) {
           </div>
         </div>
       </form>
-
-      <RoomSelectModal
-        modalId={ROOM_MODAL_ID}
-        room={room}
-        onConfirm={setRoom}
-      />
     </>
   );
 }

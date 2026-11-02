@@ -50,9 +50,6 @@ export function OtpForm({ email, onSuccess }) {
         {info && !error && <p className="text-success mb-0">{info}</p>}
 
         <div>
-          <label htmlFor="otpInput" className="form-label d-block text-center">
-            Одноразовий код
-          </label>
           <input
             id="otpInput"
             type="text"
@@ -62,6 +59,7 @@ export function OtpForm({ email, onSuccess }) {
             maxLength={OTP_LENGTH}
             className="form-control otp-input"
             placeholder={"0".repeat(OTP_LENGTH)}
+            aria-label="Одноразовий код"
             value={code}
             onChange={handleChange}
             autoFocus

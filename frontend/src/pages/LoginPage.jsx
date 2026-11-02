@@ -9,7 +9,10 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
  */
 export function LoginPage({ onNavigate, onLoginSuccess }) {
   return (
-    <AuthLayout title="Вхід">
+    <AuthLayout
+      title="Раді бачити знову"
+      subtitle="Твої розмови вже чекають на тебе."
+    >
       <LoginForm
         onSuccess={(login, room) => {
           if (onLoginSuccess) {

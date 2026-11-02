@@ -5,7 +5,8 @@ import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 export function VerifyOtpPage({ onNavigate, email }) {
   return (
     <AuthLayout
-      title="Підтвердіть пошту"
+      title="Перевірмо, що це ти"
+      subtitle="Введи код підтвердження, який ми тобі надіслали."
       onBack={() => onNavigate(AUTH_SCREENS.LOGIN)}
     >
       <OtpForm
