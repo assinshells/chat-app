@@ -3,9 +3,8 @@
 
    Структура (ChatLayout.jsx):
      .layout-wrapper.app-layout
-       .icon-rail + .left-sidebar — див. _left-sidebar.css
-       .user-chat > .chat-main   — шапка, стрічка, композер
-       .app-panel                — учасники / особисті / профіль
+       .user-chat > .chat-main   — шапка (з іконками панелей), стрічка, композер
+       .app-panel                — кімнати / учасники / особисті / профіль / галерея
                                     (рендериться лише коли відкрита)
 
    Десктоп (від 992px): панель — колонка 360px поруч із чатом, чат
@@ -579,4 +578,95 @@
   font-weight: 400;
   font-style: normal;
   opacity: 0.75;
+}
+
+.room-group-label {
+  margin: 0;
+  padding: 0.75rem 0.75rem 0.3rem;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: var(--bs-secondary-color);
+}
+
+/* =========================================================
+   ROOMS LIST (права панель, режим "rooms" — RoomsPanel.jsx)
+   ========================================================= */
+
+.room-list {
+  padding: 0 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.room-item {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  border: 0;
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--bs-body-color);
+
+  font-size: 0.92rem;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.room-item:hover,
+.room-item:focus-visible {
+  background: var(--bs-secondary-bg);
+}
+
+.room-item:focus {
+  outline: none;
+}
+
+.room-item.is-active {
+  font-weight: 600;
+
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.14);
+}
+
+.room-item-hash {
+  flex: 0 0 auto;
+
+  color: var(--bs-secondary-color);
+}
+
+.room-item.is-active .room-item-hash {
+  color: inherit;
+}
+
+.room-item-name {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-item-count {
+  flex: 0 0 auto;
+
+  font-size: 0.75rem;
+
+  color: var(--bs-secondary-color);
+}
+
+.room-item.is-active .room-item-count {
+  color: inherit;
 }

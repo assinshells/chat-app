@@ -3,7 +3,8 @@ import { create } from "zustand";
 /**
  * useSidePanelStore — яка саме права панель зараз відкрита в чаті.
  *
- * Одночасно відкрита максимум одна: "dm" (особисті повідомлення), "profile" (власний профіль і налаштування),
+ * Одночасно відкрита максимум одна: "rooms" (список кімнат), "users"
+ * (учасники кімнати), "dm" (особисті повідомлення), "profile" (власний профіль і налаштування),
  * "userProfile" (профіль іншого користувача, див. userProfileLogin),
  * "gallery" (загальна фотогалерея всіх користувачів)
  * або null (панелі нема, чат на всю ширину). Окремий стор, а не
@@ -12,14 +13,22 @@ import { create } from "zustand";
  * ніка (DmTriggerButton) відкриває панель "dm" без прокидання пропів.
  */
 export const SIDE_PANELS = Object.freeze({
+  ROOMS: "rooms",
+  USERS: "users",
   DM: "dm",
   PROFILE: "profile",
   USER_PROFILE: "userProfile",
   GALLERY: "gallery",
 });
 
+const isDesktop = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(min-width: 992px)").matches;
+
 export const useSidePanelStore = create((set, get) => ({
-  panel: null,
+  // На десктопі одразу відкритий список кімнат, на телефоні панель
+  // згорнута (відкривається на весь екран кнопкою в шапці).
+  panel: isDesktop() ? SIDE_PANELS.ROOMS : null,
 
   // Чий профіль показує панель "userProfile".
   userProfileLogin: null,

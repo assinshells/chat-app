@@ -9,10 +9,12 @@ import { SIDE_PANELS, useSidePanelStore } from "@shared/lib/sidePanelStore.js";
 import { ProfilePanel } from "./ProfilePanel.jsx";
 import { UserProfileView } from "./UserProfileView.jsx";
 import { CommonGalleryPanel } from "./CommonGalleryPanel.jsx";
+import { RoomsPanel } from "./RoomsPanel.jsx";
+import { UsersPanel } from "./UsersPanel.jsx";
 
 /**
- * SidePanel — єдина права панель чату: "Особисті
- * повідомлення", "Фотогалерея", "Профіль" або профіль іншого користувача (який саме режим — вирішує
+ * SidePanel — єдина права панель чату: "Кімнати", "Учасники кімнати",
+ * "Особисті повідомлення", "Фотогалерея", "Профіль" або профіль іншого користувача (який саме режим — вирішує
  * useSidePanelStore). На десктопі це колонка поруч із чатом (чат
  * лишається доступним), на телефоні — на весь екран під навбаром.
  */
@@ -26,6 +28,12 @@ export function SidePanel({
   onColorChange,
   onTextStyleChange,
   logoutModalId,
+  activeRoom,
+  activeRoomName,
+  roomCounts,
+  selectedNicknames,
+  onSelectRoom,
+  onNicknameClick,
 }) {
   const isDarkTheme = useIsDarkTheme();
 
@@ -60,6 +68,10 @@ export function SidePanel({
       users.find((user) => user.login === userProfileLogin)?.color ??
       (loadedProfile?.login === userProfileLogin ? loadedProfile.color : null);
     titleStyle = { color: getEffectiveColorHex(color, isDarkTheme) };
+  } else if (panel === SIDE_PANELS.ROOMS) {
+    title = "Кімнати";
+  } else if (panel === SIDE_PANELS.USERS) {
+    title = `У кімнаті${activeRoomName ? ` «${activeRoomName}»` : ""}: ${users.length}`;
   } else if (panel === SIDE_PANELS.GALLERY) {
     title = "Фотогалерея";
   } else if (panel === SIDE_PANELS.DM) {
@@ -100,6 +112,23 @@ export function SidePanel({
       </div>
 
       <div className="app-panel-body">
+        {panel === SIDE_PANELS.ROOMS && (
+          <RoomsPanel
+            activeRoom={activeRoom}
+            roomCounts={roomCounts}
+            onSelectRoom={onSelectRoom}
+          />
+        )}
+
+        {panel === SIDE_PANELS.USERS && (
+          <UsersPanel
+            login={login}
+            users={users}
+            selectedNicknames={selectedNicknames}
+            onNicknameClick={onNicknameClick}
+          />
+        )}
+
         {panel === SIDE_PANELS.DM && <PrivateMessagesPanel />}
 
         {panel === SIDE_PANELS.GALLERY && <CommonGalleryPanel />}

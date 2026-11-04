@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Images, MessageCircle, User } from "lucide-react";
+import { Hash, Images, MessageCircle, User, Users } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
@@ -9,11 +9,12 @@ import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
 
 /**
  * ChatHeader — шапка чату з кнопками, які відкривають усе
- * "додаткове" поверх/поруч із чатом (постійних колонок і табів нема):
+ * "додаткове" в одній правій панелі поруч із чатом (постійних колонок і табів нема):
  *
  *  - крапка статусу з'єднання (.chat-status-dot: зелена — онлайн, жовта
- *    пульсуюча — підключення) + назва поточної кімнати. Вибір кімнати
- *    і список учасників живуть у лівому сайдбарі (@widgets/left-sidebar);
+ *    пульсуюча — підключення) + назва поточної кімнати;
+ *  - "Кімнати" і "Учасники кімнати" (з бейджем кількості) — права панель,
+ *    режими rooms / users;
  *  - "Особисті повідомлення" + бейдж непрочитаних — права панель, режим dm;
 
  *  - "Фотогалерея" — права панель, режим gallery (фото всіх користувачів
@@ -25,7 +26,7 @@ import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
  * Яка панель відкрита — у useSidePanelStore; повторний клік по тій
  * самій кнопці закриває панель.
  */
-export function ChatHeader({ title, online }) {
+export function ChatHeader({ title, online, usersCount = 0 }) {
   const panel = useSidePanelStore((state) => state.panel);
   const togglePanel = useSidePanelStore((state) => state.toggle);
 
@@ -72,6 +73,34 @@ export function ChatHeader({ title, online }) {
         <div className="chat-header-actions">
           <button
             type="button"
+            className={panelButtonClass(SIDE_PANELS.ROOMS)}
+            title="Кімнати"
+            aria-label="Кімнати"
+            aria-pressed={panel === SIDE_PANELS.ROOMS}
+            onClick={() => togglePanel(SIDE_PANELS.ROOMS)}
+          >
+            <Hash size={18} />
+          </button>
+
+          <button
+            type="button"
+            className={`${panelButtonClass(SIDE_PANELS.USERS)} position-relative`}
+            title="Учасники кімнати"
+            aria-label="Учасники кімнати"
+            aria-pressed={panel === SIDE_PANELS.USERS}
+            onClick={() => togglePanel(SIDE_PANELS.USERS)}
+          >
+            <Users size={18} />
+            {usersCount > 0 && (
+              <span className="chat-header-badge badge bg-secondary">
+                {usersCount > 99 ? "99+" : usersCount}
+                <span className="visually-hidden">учасників у кімнаті</span>
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
             className={`${panelButtonClass(SIDE_PANELS.DM)} position-relative`}
             title="Особисті повідомлення"
             aria-label="Особисті повідомлення"
@@ -116,7 +145,6 @@ export function ChatHeader({ title, online }) {
           >
             <User size={18} />
           </button>
-
         </div>
       </div>
     </header>
