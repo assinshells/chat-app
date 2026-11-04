@@ -1,6 +1,8 @@
 export const AUTH_SCREENS = Object.freeze({
   LOGIN: "login",
-  // Другий крок єдиного потоку входу (замість окремої сторінки реєстрації).
+  // Проміжний крок: попередження + "Прочитав, приймаю" перед реєстрацією.
+  REGISTRATION_NOTICE: "registration-notice",
+  // Останній крок єдиного потоку входу (замість окремої сторінки реєстрації).
   COMPLETE_REGISTRATION: "complete-registration",
   FORGOT: "forgot",
   OTP: "otp",

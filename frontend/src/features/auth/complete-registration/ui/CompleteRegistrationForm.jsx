@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { useCompleteRegistrationStore } from "@features/auth/complete-registration/model/useCompleteRegistrationStore.js";
 import { getRegistrationSession } from "@features/auth/complete-registration/api/completeRegistration.api.js";
-import { RulesModal } from "@features/info/ui/RulesModal.jsx";
-import { CookiesModal } from "@features/info/ui/CookiesModal.jsx";
 import { TurnstileWidget, TURNSTILE_SITE_KEY } from "@shared/ui/captcha";
-
-const RULES_MODAL_ID = "completeRegistrationRulesModal";
-const COOKIES_MODAL_ID = "completeRegistrationCookiesModal";
 
 // Той самий формат, що й на бекенді (validators/auth.validator.js).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,21 +23,15 @@ const validateEmail = (value) => {
  * (див. LoginForm.jsx): логін вільний, тож лишилося вказати email (або
  * відмовитися від нього) і пройти перевірку на бота.
  *
- * Логін і пароль показуються лише для читання. Пароль приходить із
- * пам'яті застосунку (App.jsx, screenParams) — він НЕ потрапляє в URL,
- * localStorage/sessionStorage, консоль чи логи, а на сервері зберігається
- * тільки як хеш (реєстраційна сесія). Створення акаунта на сервері
- * використовує дані цієї сесії, а не поля форми: підміна стану на
- * фронті нічого не дає.
+ * Замість полів логіна й пароля показується лише напис «Реєстрація нового
+ * ніка» з самим ніком. Пароль на клієнті більше не потрібен: на сервері він
+ * зберігається тільки як хеш (реєстраційна сесія). Створення акаунта на
+ * сервері використовує дані цієї сесії, а не поля форми: підміна стану на
+ * фронті нічого не дає. Попередження й «Прочитав, приймаю» — на попередньому
+ * кроці (RegistrationNoticeForm).
  */
-export function CompleteRegistrationForm({
-  login,
-  password,
-  onSuccess,
-  onBack,
-}) {
+export function CompleteRegistrationForm({ login, onSuccess, onBack }) {
   const [serverLogin, setServerLogin] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [noEmail, setNoEmail] = useState(false);
   const [emailError, setEmailError] = useState(null);
@@ -136,45 +124,10 @@ export function CompleteRegistrationForm({
               </p>
             )}
 
-            <div>
-              <input
-                id="completeLoginInput"
-                type="text"
-                className="form-control"
-                placeholder="Нікнейм"
-                aria-label="Нікнейм"
-                value={serverLogin ?? login}
-                readOnly
-                autoComplete="off"
-              />
-            </div>
-
-            <div>
-              <div className="input-with-toggle">
-                <input
-                  id="completePasswordInput"
-                  type={showPassword ? "text" : "password"}
-                  className="form-control"
-                  placeholder="Пароль"
-                  aria-label="Пароль"
-                  value={password}
-                  readOnly
-                  autoComplete="off"
-                />
-                <button
-                  type="button"
-                  className="input-toggle-btn"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={
-                    showPassword ? "Сховати пароль" : "Показати пароль"
-                  }
-                  aria-pressed={showPassword}
-                  title={showPassword ? "Сховати пароль" : "Показати пароль"}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
+            <p className="mb-0" id="completeNewNick">
+              Реєстрація нового ніка{" "}
+              <strong className="text-break">{serverLogin ?? login}</strong>
+            </p>
 
             <div>
               <input
@@ -250,37 +203,8 @@ export function CompleteRegistrationForm({
               {loading ? "Заходимо..." : "В чат"}
             </button>
           </div>
-
-          <div className="auth-fields">
-            <p className="auth-note text-start">
-              Натискаючи «В чат», ви підтверджуєте, що вам виповнилося 18 років,
-              і приймаєте{" "}
-              <a
-                href="#"
-                data-bs-toggle="modal"
-                data-bs-target={`#${RULES_MODAL_ID}`}
-                onClick={(e) => e.preventDefault()}
-              >
-                Правила чату
-              </a>
-              . Для роботи сайту використовуються необхідні файли cookie —
-              докладніше в{" "}
-              <a
-                href="#"
-                data-bs-toggle="modal"
-                data-bs-target={`#${COOKIES_MODAL_ID}`}
-                onClick={(e) => e.preventDefault()}
-              >
-                Політиці cookie
-              </a>
-              .
-            </p>
-          </div>
         </div>
       </form>
-
-      <RulesModal modalId={RULES_MODAL_ID} bare />
-      <CookiesModal modalId={COOKIES_MODAL_ID} />
     </>
   );
 }

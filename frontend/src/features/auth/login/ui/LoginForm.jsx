@@ -17,7 +17,7 @@ import {
  * Що буде далі, вирішує сервер (POST /api/auth/login):
  *  - логін є, пароль вірний   -> onSuccess(login, room) -> чат у кімнаті room;
  *  - логін є, пароль хибний   -> повідомлення про помилку на цій формі;
- *  - логіна немає             -> onRegistrationRequired({ login, password, room })
+ *  - логіна немає             -> onRegistrationRequired({ login, room })
  *    -> сторінка завершення реєстрації (кімната обирається тут і
  *    переноситься далі, щоб після реєстрації відкрити чат у ній).
  *
@@ -45,7 +45,7 @@ export function LoginForm({ onSuccess, onRegistrationRequired, onForgot }) {
       {
         onSuccess: () => onSuccess(login, room),
         onRegistrationRequired: () =>
-          onRegistrationRequired({ login, password, room }),
+          onRegistrationRequired({ login, room }),
       },
     );
   };

@@ -8,6 +8,7 @@ import { useLogoutStore } from "@features/auth/logout/model/useLogoutStore.js";
 import { DEFAULT_ROOM } from "@features/chat/constants/rooms.constants.js";
 
 import { LoginPage } from "@pages/LoginPage.jsx";
+import { RegistrationNoticePage } from "@pages/RegistrationNoticePage.jsx";
 import { CompleteRegistrationPage } from "@pages/CompleteRegistrationPage.jsx";
 import { ForgotPasswordPage } from "@pages/ForgotPasswordPage.jsx";
 import { VerifyOtpPage } from "@pages/VerifyOtpPage.jsx";
@@ -101,12 +102,27 @@ export default function App() {
   }
 
   switch (screen) {
+    case AUTH_SCREENS.REGISTRATION_NOTICE:
+      // Проміжний крок між входом і реєстрацією. Логін/кімната живуть лише
+      // в пам'яті (screenParams): після оновлення сторінки повертаємось
+      // на екран входу.
+      if (!screenParams.login) {
+        return (
+          <LoginPage onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />
+        );
+      }
+      return (
+        <RegistrationNoticePage
+          login={screenParams.login}
+          room={screenParams.room}
+          onNavigate={navigate}
+        />
+      );
+
     case AUTH_SCREENS.COMPLETE_REGISTRATION:
-      // Другий крок входу для нового логіна. Логін/пароль/кімната живуть
-      // лише в пам'яті (screenParams) — після оновлення сторінки їх уже
-      // немає, і користувач повертається на екран входу (пароль не
-      // відновлюється свідомо: ні URL, ні localStorage його не зберігають).
-      if (!screenParams.login || !screenParams.password) {
+      // Останній крок для нового логіна. Пароль на клієнті вже не потрібен
+      // (він у серверній реєстраційній сесії), тому достатньо логіна/кімнати.
+      if (!screenParams.login) {
         return (
           <LoginPage onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />
         );
@@ -114,7 +130,6 @@ export default function App() {
       return (
         <CompleteRegistrationPage
           login={screenParams.login}
-          password={screenParams.password}
           room={screenParams.room}
           onNavigate={navigate}
           onLoginSuccess={handleLoginSuccess}

@@ -4,21 +4,19 @@ import { useCompleteRegistrationStore } from "@features/auth/complete-registrati
 import { AUTH_SCREENS } from "@shared/constants/auth.constants.js";
 
 /**
- * Сторінка завершення реєстрації (екран COMPLETE_REGISTRATION) — другий
- * крок процесу, розпочатого на сторінці входу. Дані (логін, пароль,
- * кімната) приходять від App.jsx лише в пам'яті; без них екран не
- * показується (див. App.jsx).
+ * Сторінка завершення реєстрації (екран COMPLETE_REGISTRATION) — останній
+ * крок процесу: вхід -> попередження (RegistrationNoticePage) -> цей екран.
+ * Дані (логін, кімната) приходять від App.jsx лише в пам'яті; без них
+ * екран не показується (див. App.jsx).
  */
 export function CompleteRegistrationPage({
   login,
-  password,
   room,
   onNavigate,
   onLoginSuccess,
 }) {
   // "Назад": скасовуємо незавершену реєстрацію на сервері (сесія в Redis
-  // і cookie) і повертаємось на сторінку входу. Пароль з пам'яті
-  // зникає разом із параметрами екрана (App.navigate).
+  // і cookie) і повертаємось на сторінку входу. 
   const handleBack = async () => {
     const store = useCompleteRegistrationStore.getState();
     await store.cancel();
@@ -34,7 +32,6 @@ export function CompleteRegistrationPage({
     >
       <CompleteRegistrationForm
         login={login}
-        password={password}
         onSuccess={(registeredLogin) => onLoginSuccess(registeredLogin, room)}
         onBack={handleBack}
       />
