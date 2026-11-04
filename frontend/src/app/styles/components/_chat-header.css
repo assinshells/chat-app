@@ -114,35 +114,18 @@
 }
 
 
-/* Назва кімнати — кнопка, що відкриває вибір кімнати (RoomPickerModal). */
-.chat-room-btn {
+/* Назва поточної кімнати з крапкою статусу з'єднання. */
+.chat-room-title {
   min-width: 0;
-
-  margin-left: -0.5rem;
-  padding: 0.25rem 0.5rem;
 
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
 
-  border: 0;
-  border-radius: var(--bs-border-radius);
-
-  background: transparent;
   color: var(--bs-body-color);
-
-  text-align: left;
-  cursor: pointer;
-
-  transition: background-color 0.15s ease;
 }
 
-.chat-room-btn:hover,
-.chat-room-btn:focus-visible {
-  background: var(--bs-secondary-bg);
-}
-
-.chat-room-btn .chat-brand-info {
+.chat-room-title .chat-brand-info {
   min-width: 0;
 }
 
@@ -157,21 +140,7 @@
   background: var(--bs-secondary-bg);
 }
 
-/* "Учасники" — іконка + число онлайн, тому ширша за квадратну. */
-.chat-header-btn.chat-header-btn-wide {
-  width: auto;
-
-  padding: 0 0.6rem;
-
-  gap: 0.35rem;
-}
-
-.chat-header-count {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* Крапка статусу з'єднання перед назвою кімнати в .chat-room-btn
+/* Крапка статусу з'єднання перед назвою кімнати в .chat-room-title
    (замість тексту "Онлайн / Підключення…" під назвою). Звичайний
    flex-елемент у потоці кнопки — без absolute-позиціонування.
    Колір: success / warning. */

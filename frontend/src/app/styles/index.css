@@ -24,6 +24,7 @@
 
 @import "./layout/_authentication.css";
 @import "./layout/_app-layout.css";
+@import "./layout/_left-sidebar.css";
 
 @import "./components/_chat-header.css";
 @import "./components/_chat-conversation.css";
@@ -37,7 +38,6 @@
 @import "./components/_dm-modal.css";
 @import "./components/_color-picker.css";
 @import "./components/_modals.css";
-@import "./components/_room-picker.css";
 @import "./components/_dm-toast.css";
 @import "./components/_image-attachment.css";
 @import "./components/_photo-gallery.css";

@@ -9,7 +9,7 @@ import {
   updateColor as updateColorRest,
   updateTextStyle as updateTextStyleRest,
 } from "@shared/api/profile.api.js";
-import { RoomPickerModal, ROOM_PICKER_MODAL_ID } from "@widgets/room-picker";
+import { IconRail, LeftSidebar } from "@widgets/left-sidebar";
 import { useChatSocket } from "@features/chat";
 import { useDmStore, DmToast } from "@features/dm";
 import { useBlockStore, BlockConfirmModal } from "@features/block";
@@ -39,6 +39,7 @@ import {
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
 import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
+import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
@@ -161,6 +162,19 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const sidePanel = useSidePanelStore((state) => state.panel);
   const closeSidePanel = useSidePanelStore((state) => state.close);
 
+  // Лівий сайдбар (кімнати / учасники): активна pill-вкладка рейки.
+  const leftTab = useLeftSidebarStore((state) => state.tab);
+  const toggleLeftTab = useLeftSidebarStore((state) => state.toggle);
+  const closeLeftSidebar = useLeftSidebarStore((state) => state.close);
+
+  // На телефоні лівий сайдбар виїжджає поверх чату — після вибору
+  // кімнати/адресата його треба згорнути, щоб одразу було видно чат.
+  const collapseLeftOnMobile = () => {
+    if (window.matchMedia("(max-width: 991.98px)").matches) {
+      closeLeftSidebar();
+    }
+  };
+
   // Панель особистих закрита — діалог більше не "переглядається":
   // нові повідомлення знову рахуються непрочитаними, а наступне
   // відкриття починається зі списку діалогів (див. useDmStore).
@@ -235,6 +249,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   const handleSelectRoom = (roomId) => {
     switchRoom(roomId);
+    collapseLeftOnMobile();
     // Ніки/час обиралися з повідомлень поточної кімнати — при переході
     // в іншу кімнату вони втрачають сенс.
     setTargetNicknames([]);
@@ -248,12 +263,12 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     });
   };
 
-  // Клік по ніку в панелі учасників. На телефоні панель займає весь
-  // екран і закрила б форму відправлення, тож після вибору адресата
-  // закриваємо її, щоб одразу можна було писати.
+  // Клік по ніку в списку учасників (лівий сайдбар). На телефоні він
+  // накриває чат і форму відправлення, тож після вибору адресата
+  // згортаємо його, щоб одразу можна було писати.
   const handlePanelNicknameClick = (nickname) => {
     handleNicknameClick(nickname);
-    if (window.matchMedia("(max-width: 991.98px)").matches) closeSidePanel();
+    collapseLeftOnMobile();
   };
 
   const handleTimeClick = (time) => {
@@ -295,14 +310,28 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper app-layout">
+      <IconRail
+        activeTab={leftTab}
+        onSelect={toggleLeftTab}
+        usersCount={visibleRoomUsers.length}
+      />
+
+      <LeftSidebar
+        tab={leftTab}
+        onClose={closeLeftSidebar}
+        login={login}
+        users={visibleRoomUsers}
+        activeRoom={activeRoom}
+        activeRoomName={activeRoomName}
+        roomCounts={roomCounts}
+        selectedNicknames={targetNicknames}
+        onSelectRoom={handleSelectRoom}
+        onNicknameClick={handlePanelNicknameClick}
+      />
+
       <div className="user-chat">
         <div className="chat-main">
-          <ChatHeader
-            title={activeRoomName}
-            online={connected}
-            roomPickerModalId={ROOM_PICKER_MODAL_ID}
-            usersCount={visibleRoomUsers.length}
-          />
+          <ChatHeader title={activeRoomName} online={connected} />
           <ConfinementBanner confinement={confinement} />
           <RoomBanNoticeBanner notice={roomBanNotice} />
           {roomBan && (
@@ -363,17 +392,14 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         </div>
       </div>
 
-      {/* Права панель: на десктопі — колонка поруч із чатом (чат лишається
-          доступним), на телефоні — на весь екран. */}
+      {/* Права панель (особисті / профіль / галерея): на десктопі — колонка
+          поруч із чатом, на телефоні — на весь екран. */}
       {sidePanel && (
         <SidePanel
           panel={sidePanel}
           onClose={closeSidePanel}
           login={login}
           users={visibleRoomUsers}
-          activeRoom={activeRoom}
-          selectedNicknames={targetNicknames}
-          onNicknameClick={handlePanelNicknameClick}
           currentUserStatus={currentUserStatus}
           onStatusChange={handleStatusChange}
           onColorChange={handleColorChange}
@@ -384,11 +410,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
       <DmToast />
 
-      <RoomPickerModal
-        activeRoom={activeRoom}
-        roomCounts={roomCounts}
-        onSelectRoom={handleSelectRoom}
-      />
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
       <BlockConfirmModal onBlocked={handleRemoveNickname} />
       <RulesModal modalId={RULES_MODAL_ID} />

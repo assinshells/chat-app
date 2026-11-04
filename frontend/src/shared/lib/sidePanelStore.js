@@ -3,8 +3,7 @@ import { create } from "zustand";
 /**
  * useSidePanelStore — яка саме права панель зараз відкрита в чаті.
  *
- * Одночасно відкрита максимум одна: "users" (учасники кімнати),
- * "dm" (особисті повідомлення), "profile" (власний профіль і налаштування),
+ * Одночасно відкрита максимум одна: "dm" (особисті повідомлення), "profile" (власний профіль і налаштування),
  * "userProfile" (профіль іншого користувача, див. userProfileLogin),
  * "gallery" (загальна фотогалерея всіх користувачів)
  * або null (панелі нема, чат на всю ширину). Окремий стор, а не
@@ -13,7 +12,6 @@ import { create } from "zustand";
  * ніка (DmTriggerButton) відкриває панель "dm" без прокидання пропів.
  */
 export const SIDE_PANELS = Object.freeze({
-  USERS: "users",
   DM: "dm",
   PROFILE: "profile",
   USER_PROFILE: "userProfile",

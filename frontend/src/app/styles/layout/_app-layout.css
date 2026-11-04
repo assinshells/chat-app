@@ -3,6 +3,7 @@
 
    Структура (ChatLayout.jsx):
      .layout-wrapper.app-layout
+       .icon-rail + .left-sidebar — див. _left-sidebar.css
        .user-chat > .chat-main   — шапка, стрічка, композер
        .app-panel                — учасники / особисті / профіль
                                     (рендериться лише коли відкрита)

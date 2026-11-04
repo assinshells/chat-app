@@ -6,13 +6,12 @@ import { PrivateMessagesPanel } from "@widgets/private-chat";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { SIDE_PANELS, useSidePanelStore } from "@shared/lib/sidePanelStore.js";
-import { UsersPanel } from "./UsersPanel.jsx";
 import { ProfilePanel } from "./ProfilePanel.jsx";
 import { UserProfileView } from "./UserProfileView.jsx";
 import { CommonGalleryPanel } from "./CommonGalleryPanel.jsx";
 
 /**
- * SidePanel — єдина права панель чату: "Учасники", "Особисті
+ * SidePanel — єдина права панель чату: "Особисті
  * повідомлення", "Фотогалерея", "Профіль" або профіль іншого користувача (який саме режим — вирішує
  * useSidePanelStore). На десктопі це колонка поруч із чатом (чат
  * лишається доступним), на телефоні — на весь екран під навбаром.
@@ -22,9 +21,6 @@ export function SidePanel({
   onClose,
   login,
   users,
-  activeRoom,
-  selectedNicknames,
-  onNicknameClick,
   currentUserStatus,
   onStatusChange,
   onColorChange,
@@ -58,8 +54,6 @@ export function SidePanel({
         isDarkTheme,
       ),
     };
-  } else if (panel === SIDE_PANELS.USERS) {
-    title = `У кімнаті: ${users.length}`;
   } else if (panel === SIDE_PANELS.USER_PROFILE) {
     title = userProfileLogin ?? "Профіль";
     const color =
@@ -106,16 +100,6 @@ export function SidePanel({
       </div>
 
       <div className="app-panel-body">
-        {panel === SIDE_PANELS.USERS && (
-          <UsersPanel
-            login={login}
-            users={users}
-            activeRoom={activeRoom}
-            selectedNicknames={selectedNicknames}
-            onNicknameClick={onNicknameClick}
-          />
-        )}
-
         {panel === SIDE_PANELS.DM && <PrivateMessagesPanel />}
 
         {panel === SIDE_PANELS.GALLERY && <CommonGalleryPanel />}

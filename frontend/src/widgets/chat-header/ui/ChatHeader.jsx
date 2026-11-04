@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ChevronDown, Images, MessageCircle, User, Users } from "lucide-react";
+import { Images, MessageCircle, User } from "lucide-react";
 
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 import { useDmStore } from "@features/dm";
@@ -12,10 +12,8 @@ import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
  * "додаткове" поверх/поруч із чатом (постійних колонок і табів нема):
  *
  *  - крапка статусу з'єднання (.chat-status-dot: зелена — онлайн, жовта
- *    пульсуюча — підключення) + назва кімнати з ▾ — відкриває вибір кімнати (RoomPickerModal,
- *    id передається в roomPickerModalId, відкриття — штатний
- *    data-bs-toggle="modal");
- *  - "Учасники" + число онлайн — права панель (SidePanel, режим users);
+ *    пульсуюча — підключення) + назва поточної кімнати. Вибір кімнати
+ *    і список учасників живуть у лівому сайдбарі (@widgets/left-sidebar);
  *  - "Особисті повідомлення" + бейдж непрочитаних — права панель, режим dm;
 
  *  - "Фотогалерея" — права панель, режим gallery (фото всіх користувачів
@@ -27,12 +25,7 @@ import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
  * Яка панель відкрита — у useSidePanelStore; повторний клік по тій
  * самій кнопці закриває панель.
  */
-export function ChatHeader({
-  title,
-  online,
-  roomPickerModalId,
-  usersCount = 0,
-}) {
+export function ChatHeader({ title, online }) {
   const panel = useSidePanelStore((state) => state.panel);
   const togglePanel = useSidePanelStore((state) => state.toggle);
 
@@ -62,16 +55,7 @@ export function ChatHeader({
     <header className="chat-header">
       <div className="chat-header-inner">
         <div className="chat-header-start">
-          <button
-            type="button"
-            className="chat-room-btn"
-            data-bs-toggle="modal"
-            data-bs-target={`#${roomPickerModalId}`}
-            title={`Змінити кімнату · ${online ? "Онлайн" : "Підключення…"}`}
-            aria-label={`Кімната ${title ?? ""}. ${
-              online ? "Онлайн" : "Підключення…"
-            }. Змінити кімнату`}
-          >
+          <div className="chat-room-title" title={online ? "Онлайн" : "Підключення…"}>
             <span
               className={`chat-status-dot ${online ? "is-online" : "is-offline"}`}
               aria-hidden="true"
@@ -79,23 +63,13 @@ export function ChatHeader({
             <span className="chat-brand-info">
               <span className="chat-brand-title">{title || APP_NAME}</span>
             </span>
-            <ChevronDown size={18} aria-hidden="true" />
-          </button>
+            <span className="visually-hidden">
+              {online ? "Онлайн" : "Підключення…"}
+            </span>
+          </div>
         </div>
 
         <div className="chat-header-actions">
-          <button
-            type="button"
-            className={`${panelButtonClass(SIDE_PANELS.USERS)} chat-header-btn-wide`}
-            title="Учасники кімнати"
-            aria-label={`Учасники кімнати: ${usersCount}`}
-            aria-pressed={panel === SIDE_PANELS.USERS}
-            onClick={() => togglePanel(SIDE_PANELS.USERS)}
-          >
-            <Users size={18} />
-            <span className="chat-header-count">{usersCount}</span>
-          </button>
-
           <button
             type="button"
             className={`${panelButtonClass(SIDE_PANELS.DM)} position-relative`}
