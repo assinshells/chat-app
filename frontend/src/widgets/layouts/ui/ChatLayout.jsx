@@ -6,6 +6,7 @@ import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { SidePanel } from "@widgets/side-panel";
 import { LeftSidebar } from "@widgets/left-sidebar";
+import { PrivateChat } from "@widgets/private-chat";
 import {
   updateColor as updateColorRest,
   updateTextStyle as updateTextStyleRest,
@@ -38,7 +39,10 @@ import {
   COOKIES_MODAL_ID,
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
-import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
+import { useSidePanelStore } from "@shared/lib/sidePanelStore.js";
+import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
+import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
+import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
@@ -155,29 +159,32 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       }
     : null;
 
-  // Права панель (кімнати / учасники / особисті / профіль / галерея) — стан у спільному
-  // сторі (useSidePanelStore), бо її відкривають і з шапки, і з меню
-  // біля ніка (DmTriggerButton), і з тосту нового особистого.
+  // Права панель — лише профіль іншого користувача (useSidePanelStore);
+  // кімнати, учасники, особисті, галерея, профіль і налаштування живуть
+  // у вкладках лівої рейки (LeftSidebar).
   const sidePanel = useSidePanelStore((state) => state.panel);
   const closeSidePanel = useSidePanelStore((state) => state.close);
 
-  // На телефоні права панель накриває весь екран — після вибору
-  // кімнати/адресата її треба згорнути, щоб одразу було видно чат.
-  const collapsePanelOnMobile = () => {
-    if (window.matchMedia("(max-width: 991.98px)").matches) {
-      closeSidePanel();
-    }
+  // Телефон: чат відкривається на весь екран поверх списків, а кнопка
+  // "Назад" у шапці повертає до списків із нижньою рейкою.
+  const chatOpen = useLeftSidebarStore((state) => state.chatOpen);
+  const openChat = useLeftSidebarStore((state) => state.openChat);
+  const closeChat = useLeftSidebarStore((state) => state.closeChat);
+
+  // Особистий діалог, відкритий в основній області замість кімнати.
+  const dmLogin = useDmStore((state) => state.panelLogin);
+  const dmColor = useDmStore((state) =>
+    state.panelLogin ? state.conversations[state.panelLogin]?.color : null,
+  );
+  const isDarkTheme = useIsDarkTheme();
+
+  const handleBack = () => {
+    useDmStore.getState().closeConversation();
+    closeChat();
   };
 
-  // Панель особистих закрита — діалог більше не "переглядається":
-  // нові повідомлення знову рахуються непрочитаними, а наступне
-  // відкриття починається зі списку діалогів (див. useDmStore).
-  useEffect(() => {
-    if (sidePanel !== SIDE_PANELS.DM) useDmStore.getState().closeConversation();
-  }, [sidePanel]);
-
-  // Escape закриває панель — але не поверх відкритої модалки, яка
-  // сама обробляє Escape.
+  // Escape закриває праву панель профілю — але не поверх відкритої
+  // модалки, яка сама обробляє Escape.
   useEffect(() => {
     if (!sidePanel) return undefined;
 
@@ -242,8 +249,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
   const handleSelectRoom = (roomId) => {
+    // Вибір кімнати повертає основну область від особистого діалогу
+    // до публічного чату.
+    useDmStore.getState().closeConversation();
     switchRoom(roomId);
-    collapsePanelOnMobile();
+    openChat();
     // Ніки/час обиралися з повідомлень поточної кімнати — при переході
     // в іншу кімнату вони втрачають сенс.
     setTargetNicknames([]);
@@ -257,12 +267,13 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     });
   };
 
-  // Клік по ніку в списку учасників (права панель). На телефоні вона
-  // накриває чат і форму відправлення, тож після вибору адресата
-  // згортаємо його, щоб одразу можна було писати.
+  // Клік по ніку у вкладці "Користувачі". Нік додається адресатом у
+  // форму публічного чату — тож повертаємося до нього (і на телефоні
+  // відкриваємо чат), щоб одразу можна було писати.
   const handlePanelNicknameClick = (nickname) => {
+    useDmStore.getState().closeConversation();
     handleNicknameClick(nickname);
-    collapsePanelOnMobile();
+    openChat();
   };
 
   const handleTimeClick = (time) => {
@@ -303,98 +314,109 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   }
 
   return (
-    <div className="layout-wrapper app-layout">
-      {/* Ліва рейка з іконками-табами + сайдбар з вмістом вкладки. */}
-      <LeftSidebar />
+    <div className={`layout-wrapper app-layout${chatOpen ? " is-chat-open" : ""}`}>
+      {/* Навігація: рейка з іконками-табами + сайдбар з вмістом вкладки. */}
+      <LeftSidebar
+        login={login}
+        users={visibleRoomUsers}
+        activeRoom={dmLogin ? null : activeRoom}
+        activeRoomName={activeRoomName}
+        roomCounts={roomCounts}
+        selectedNicknames={targetNicknames}
+        onSelectRoom={handleSelectRoom}
+        onOpenDialog={openChat}
+        onNicknameClick={handlePanelNicknameClick}
+        currentUserStatus={currentUserStatus}
+        onStatusChange={handleStatusChange}
+        onColorChange={handleColorChange}
+        onTextStyleChange={handleTextStyleChange}
+        logoutModalId={LOGOUT_MODAL_ID}
+      />
 
       <div className="user-chat">
         <div className="chat-main">
-          <ChatHeader
-            title={activeRoomName}
-            online={connected}
-            usersCount={visibleRoomUsers.length}
-          />
-          <ConfinementBanner confinement={confinement} />
-          <RoomBanNoticeBanner notice={roomBanNotice} />
-          {roomBan && (
-            <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
-              Вас заблоковано в цій кімнаті
-              {roomBan.expiresAt
-                ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
-                : " назавжди"}
-              {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
-            </div>
-          )}
-          {joinError && (
-            <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
-              <span>
-                {joinError.message || "Не вдалося приєднатися до кімнати"}
-                {joinError.details?.expiresAt &&
-                  ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
-              </span>
-              <button
-                type="button"
-                className="btn-close ms-2"
-                aria-label="Закрити"
-                onClick={dismissJoinError}
+          {dmLogin ? (
+            <>
+              <ChatHeader
+                title={dmLogin}
+                titleStyle={{ color: getEffectiveColorHex(dmColor, isDarkTheme) }}
+                online={connected}
+                onBack={handleBack}
               />
-            </div>
+              <PrivateChat key={dmLogin} login={dmLogin} />
+            </>
+          ) : (
+            <>
+              <ChatHeader
+                title={activeRoomName}
+                online={connected}
+                onBack={handleBack}
+              />
+              <ConfinementBanner confinement={confinement} />
+              <RoomBanNoticeBanner notice={roomBanNotice} />
+              {roomBan && (
+                <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
+                  Вас заблоковано в цій кімнаті
+                  {roomBan.expiresAt
+                    ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                    : " назавжди"}
+                  {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
+                </div>
+              )}
+              {joinError && (
+                <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
+                  <span>
+                    {joinError.message || "Не вдалося приєднатися до кімнати"}
+                    {joinError.details?.expiresAt &&
+                      ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn-close ms-2"
+                    aria-label="Закрити"
+                    onClick={dismissJoinError}
+                  />
+                </div>
+              )}
+              <ChatConversation
+                messages={visibleMessages}
+                currentUser={login}
+                onNicknameClick={handleNicknameClick}
+                onTimeClick={handleTimeClick}
+                onRoomClick={handleSelectRoom}
+                selectedNicknames={targetNicknames}
+                selectedTimes={targetTimes}
+                roomUsers={visibleRoomUsers}
+              />
+              <ChatComposer
+                onSend={sendMessage}
+                cooldownMs={cooldownMs}
+                targetNicknames={targetNicknames}
+                targetTimes={targetTimes}
+                onRemoveNickname={handleRemoveNickname}
+                onRemoveTime={handleRemoveTime}
+                onClearTargets={handleClearTargets}
+                onRestoreTargets={handleRestoreTargets}
+                actionTarget={actionTarget}
+                activeRoom={activeRoom}
+                disabled={Boolean(roomBan)}
+                disabledReason={
+                  roomBan &&
+                  `Вас заблоковано в цій кімнаті${
+                    roomBan.expiresAt
+                      ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                      : " назавжди"
+                  }`
+                }
+              />
+            </>
           )}
-          <ChatConversation
-            messages={visibleMessages}
-            currentUser={login}
-            onNicknameClick={handleNicknameClick}
-            onTimeClick={handleTimeClick}
-            onRoomClick={handleSelectRoom}
-            selectedNicknames={targetNicknames}
-            selectedTimes={targetTimes}
-            roomUsers={visibleRoomUsers}
-          />
-          <ChatComposer
-            onSend={sendMessage}
-            cooldownMs={cooldownMs}
-            targetNicknames={targetNicknames}
-            targetTimes={targetTimes}
-            onRemoveNickname={handleRemoveNickname}
-            onRemoveTime={handleRemoveTime}
-            onClearTargets={handleClearTargets}
-            onRestoreTargets={handleRestoreTargets}
-            actionTarget={actionTarget}
-            activeRoom={activeRoom}
-            disabled={Boolean(roomBan)}
-            disabledReason={
-              roomBan &&
-              `Вас заблоковано в цій кімнаті${
-                roomBan.expiresAt
-                  ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
-                  : " назавжди"
-              }`
-            }
-          />
         </div>
       </div>
 
-      {/* Права панель (кімнати / учасники / особисті / профіль / галерея): на десктопі — колонка
+      {/* Права панель — профіль іншого користувача: на десктопі колонка
           поруч із чатом, на телефоні — на весь екран. */}
-      {sidePanel && (
-        <SidePanel
-          panel={sidePanel}
-          onClose={closeSidePanel}
-          login={login}
-          users={visibleRoomUsers}
-          currentUserStatus={currentUserStatus}
-          onStatusChange={handleStatusChange}
-          onColorChange={handleColorChange}
-          onTextStyleChange={handleTextStyleChange}
-          logoutModalId={LOGOUT_MODAL_ID}
-          activeRoom={activeRoom}
-          activeRoomName={activeRoomName}
-          roomCounts={roomCounts}
-          selectedNicknames={targetNicknames}
-          onSelectRoom={handleSelectRoom}
-          onNicknameClick={handlePanelNicknameClick}
-        />
-      )}
+      {sidePanel && <SidePanel onClose={closeSidePanel} users={visibleRoomUsers} />}
 
       <DmToast />
 

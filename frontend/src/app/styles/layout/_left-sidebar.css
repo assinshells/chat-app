@@ -1,14 +1,16 @@
 /* =========================================================
-   LEFT SIDEBAR — вузька рейка з іконками (.icon-rail) + звичайний
-   сайдбар (.left-sidebar) поруч, обидва на всю висоту.
+   LEFT SIDEBAR — рейка з іконками (.icon-rail) + сайдбар
+   (.left-sidebar) поруч, обидва на всю висоту.
 
    Структура (widgets/left-sidebar/ui/LeftSidebar.jsx):
      .left-sidebar-wrap
-       .icon-rail      — вертикальні таби-іконки
-       .left-sidebar   — вміст активної вкладки (поки заглушка)
+       .icon-rail      — таби-іконки
+       .left-sidebar   — вміст активної вкладки
 
-   Лише десктоп (від 992px): на телефоні ліві блоки сховані,
-   щоб не забирати ширину в чату.
+   Десктоп (від 992px): рейка вертикальна зліва, іконки по центру висоти.
+   Телефон: сайдбар на весь екран, рейка горизонтально внизу; коли
+   відкрито чат (.app-layout.is-chat-open) — рейка і списки сховані,
+   чат на весь екран з кнопкою "Назад" у шапці.
    ========================================================= */
 
 .left-sidebar-wrap {
@@ -31,6 +33,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Іконки по центру висоти рейки. */
+  justify-content: center;
 
   background: var(--bs-tertiary-bg, var(--bs-secondary-bg));
   border-right: 1px solid var(--bs-border-color);
@@ -100,9 +104,12 @@
 /* ---------- Сайдбар ---------- */
 
 .left-sidebar {
-  flex: 0 0 260px;
+  /* Для вкладених панелей (.app-panel-overlay — absolute inset 0). */
+  position: relative;
 
-  width: 260px;
+  flex: 0 0 320px;
+
+  width: 320px;
   min-height: 0;
   height: 100%;
 
@@ -162,8 +169,167 @@
   color: var(--bs-secondary-color);
 }
 
+/* Бейдж-лічильник на іконці рейки. */
+.icon-rail-badge {
+  position: absolute;
+  top: 1px;
+  right: 0;
+
+  min-width: 1.05rem;
+  padding: 0.2em 0.35em;
+
+  font-size: 0.62rem;
+  line-height: 1;
+  color: #fff;
+}
+
+/* ---------- Підтаби "Чати": Усі / Кімнати / Особисті ---------- */
+
+.chats-filter {
+  flex: 0 0 auto;
+
+  padding: 0.5rem 0.75rem;
+
+  display: flex;
+  gap: 0.25rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.chats-filter-btn {
+  flex: 1 1 0;
+
+  padding: 0.3rem 0.4rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.chats-filter-btn:hover {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+}
+
+.chats-filter-btn.is-active {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.14);
+}
+
+/* "Усі": кімнати зверху, діалоги знизу — дві рівні половини, кожна
+   прокручується окремо. */
+.chats-section {
+  flex: 1 1 0;
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.chats-section + .chats-section {
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.chats-section-title {
+  flex: 0 0 auto;
+
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.15rem;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: var(--bs-secondary-color);
+}
+
+/* ---------- Телефон ---------- */
+
 @media (max-width: 991.98px) {
   .left-sidebar-wrap {
+    flex: 1 1 auto;
+
+    width: 100%;
+    min-width: 0;
+
+    flex-direction: column;
+  }
+
+  /* Сайдбар — на весь екран над рейкою. */
+  .left-sidebar {
+    order: 1;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    border-right: 0;
+  }
+
+  /* Рейка — горизонтальна панель внизу. */
+  .icon-rail {
+    order: 2;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+    height: auto;
+    padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+
+    flex-direction: row;
+    justify-content: center;
+
+    border-right: 0;
+    border-top: 1px solid var(--bs-border-color);
+  }
+
+  .icon-rail-tabs {
+    width: 100%;
+    max-width: 480px;
+
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
+  }
+
+  .icon-rail-btn {
+    flex: 1 1 0;
+
+    max-width: 64px;
+  }
+
+  /* Індикатор активної вкладки — смужка зверху. */
+  .icon-rail-btn.is-active::before {
+    top: -0.35rem;
+    right: 8px;
+    bottom: auto;
+    left: 8px;
+
+    width: auto;
+    height: 3px;
+
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* Відкритий чат ховає списки з рейкою, і навпаки. */
+  .app-layout.is-chat-open .left-sidebar-wrap {
+    display: none;
+  }
+
+  .app-layout:not(.is-chat-open) .user-chat {
     display: none;
   }
 }

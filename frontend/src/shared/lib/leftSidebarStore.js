@@ -1,22 +1,40 @@
 import { create } from "zustand";
 
 /**
- * useLeftSidebarStore — яка вкладка лівої рейки (IconRail) зараз активна.
+ * useLeftSidebarStore — навігація застосунку: яка вкладка рейки (IconRail)
+ * активна, який підтаб у "Чатах" і чи відкритий чат на телефоні.
  *
- * Ліва рейка і лівий сайдбар — окремий від правої панелі (useSidePanelStore)
- * блок навігації: рейка містить іконки-таби, а сайдбар поруч показує
- * вміст активної вкладки.
+ * Рейка — вертикальна по центру зліва на десктопі і горизонтальна
+ * внизу на телефоні. Сайдбар поруч показує вміст активної вкладки.
  */
 export const LEFT_TABS = Object.freeze({
-  HOME: "home",
   CHATS: "chats",
-  FAVORITES: "favorites",
+  USERS: "users",
+  GALLERY: "gallery",
   NOTIFICATIONS: "notifications",
+  PROFILE: "profile",
   SETTINGS: "settings",
 });
 
+// Підтаби вкладки "Чати": усе разом (кімнати зверху, діалоги знизу),
+// лише кімнати, лише особисті.
+export const CHAT_FILTERS = Object.freeze({
+  ALL: "all",
+  ROOMS: "rooms",
+  DIALOGS: "dialogs",
+});
+
 export const useLeftSidebarStore = create((set) => ({
-  activeTab: LEFT_TABS.HOME,
+  activeTab: LEFT_TABS.CHATS,
+  chatsFilter: CHAT_FILTERS.ALL,
+
+  // Телефон: true — на весь екран відкритий чат (кімната або діалог),
+  // рейка і списки сховані; false — показано список з рейкою внизу.
+  // На десктопі прапорець ні на що не впливає.
+  chatOpen: false,
 
   setActiveTab: (tab) => set({ activeTab: tab }),
+  setChatsFilter: (filter) => set({ chatsFilter: filter }),
+  openChat: () => set({ chatOpen: true }),
+  closeChat: () => set({ chatOpen: false }),
 }));

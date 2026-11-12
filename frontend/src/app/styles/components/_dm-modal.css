@@ -13,6 +13,8 @@
 
 .private-modal-empty {
   margin: auto;
+  padding: 1rem;
+  text-align: center;
   font-size: 0.85rem;
   color: var(--bs-secondary-color);
 }
@@ -35,6 +37,10 @@
 .private-modal-dialog:hover,
 .private-modal-dialog:focus-visible {
   background: var(--bs-secondary-bg);
+}
+
+.private-modal-dialog.is-active {
+  background: rgba(var(--bs-primary-rgb), 0.14);
 }
 
 .private-modal-dialog-row {

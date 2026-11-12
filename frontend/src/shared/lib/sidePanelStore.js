@@ -1,45 +1,27 @@
 import { create } from "zustand";
 
 /**
- * useSidePanelStore — яка саме права панель зараз відкрита в чаті.
+ * useSidePanelStore — права панель поруч із чатом. Кімнати, учасники,
+ * особисті, галерея, профіль і налаштування переїхали у вкладки лівої
+ * рейки (див. leftSidebarStore), тож тут лишився один режим:
+ * "userProfile" — профіль іншого користувача (див. userProfileLogin)
+ * або null (панелі нема, чат на всю ширину).
  *
- * Одночасно відкрита максимум одна: "rooms" (список кімнат), "users"
- * (учасники кімнати), "dm" (особисті повідомлення), "profile" (власний профіль і налаштування),
- * "userProfile" (профіль іншого користувача, див. userProfileLogin),
- * "gallery" (загальна фотогалерея всіх користувачів)
- * або null (панелі нема, чат на всю ширину). Окремий стор, а не
- * useState у ChatLayout, бо відкрити панель треба і з віддалених
- * місць — наприклад, пункт "Написати особисте повідомлення" біля
- * ніка (DmTriggerButton) відкриває панель "dm" без прокидання пропів.
+ * Окремий стор, а не useState у ChatLayout, бо відкрити профіль треба
+ * з віддаленого місця — пункт "Профіль" біля ніка (DmTriggerButton).
  */
 export const SIDE_PANELS = Object.freeze({
-  ROOMS: "rooms",
-  USERS: "users",
-  DM: "dm",
-  PROFILE: "profile",
   USER_PROFILE: "userProfile",
-  GALLERY: "gallery",
 });
 
-const isDesktop = () =>
-  typeof window !== "undefined" &&
-  window.matchMedia("(min-width: 992px)").matches;
-
-export const useSidePanelStore = create((set, get) => ({
-  // На десктопі одразу відкритий список кімнат, на телефоні панель
-  // згорнута (відкривається на весь екран кнопкою в шапці).
-  panel: isDesktop() ? SIDE_PANELS.ROOMS : null,
+export const useSidePanelStore = create((set) => ({
+  panel: null,
 
   // Чий профіль показує панель "userProfile".
   userProfileLogin: null,
 
   openUserProfile: (login) =>
     set({ panel: SIDE_PANELS.USER_PROFILE, userProfileLogin: login }),
-
-  open: (panel) => set({ panel }),
-
-  // Повторний клік по тій самій кнопці в шапці закриває панель.
-  toggle: (panel) => set({ panel: get().panel === panel ? null : panel }),
 
   close: () => set({ panel: null }),
 }));

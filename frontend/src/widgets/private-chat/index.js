@@ -1,2 +1,2 @@
 export { PrivateChat } from "./ui/PrivateChat.jsx";
-export { PrivateMessagesPanel } from "./ui/PrivateMessagesPanel.jsx";
+export { DialogsList } from "./ui/PrivateMessagesPanel.jsx";

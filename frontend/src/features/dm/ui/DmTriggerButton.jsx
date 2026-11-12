@@ -11,7 +11,8 @@ import { ROLE_MANAGER_ROLES } from "@shared/constants/role.constants.js";
 import { canModerateRoom } from "@shared/constants/moderationAction.constants.js";
 // Пункт "Написати особисте повідомлення" відкриває діалог у модалці
 // приватних повідомлень (її тригер — іконка message-circle в навбарі).
-import { useSidePanelStore, SIDE_PANELS } from "@shared/lib/sidePanelStore.js";
+import { useSidePanelStore } from "@shared/lib/sidePanelStore.js";
+import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
 
 /**
  * DmTriggerButton — кнопка "три горизонтальні крапки" у формі
@@ -104,9 +105,9 @@ export function DmTriggerButton({
     onAction?.(login);
   };
 
-  // Особисті повідомлення живуть у правій панелі (SidePanel): відкриваємо
-  // її в режимі "dm" через спільний стор, діалог уже розгорнутий
-  // openConversation вище.
+  // Особисті повідомлення розгортаються в основній області чату
+  // (useDmStore.panelLogin); на телефоні додатково відкриваємо чат
+  // на весь екран.
   const handleOpenProfile = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -118,7 +119,7 @@ export function DmTriggerButton({
     e.preventDefault();
     e.stopPropagation();
     openConversation(login, color);
-    useSidePanelStore.getState().open(SIDE_PANELS.DM);
+    useLeftSidebarStore.getState().openChat();
     finish();
   };
 

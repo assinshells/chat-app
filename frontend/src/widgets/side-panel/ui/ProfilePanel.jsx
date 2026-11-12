@@ -1,12 +1,7 @@
 import { useState } from "react";
 import {
-  Moon,
-  Palette,
-  ShieldCheck,
-  UserPen,
   ChevronDown,
   ChevronRight,
-  Settings,
   CircleHelp,
   TriangleAlert,
   ScrollText,
@@ -30,18 +25,7 @@ import {
   DEVELOPER_MODAL_ID,
 } from "@shared/constants/infoModals.constants.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
-import { ProfileEditView } from "./ProfileEditView.jsx";
-import { DarkModeView } from "./DarkModeView.jsx";
-import { AppearanceView } from "./AppearanceView.jsx";
-import { SecurityView } from "./SecurityView.jsx";
 import { GalleryView } from "./GalleryView.jsx";
-
-const SETTINGS_ITEMS = [
-  { id: "profile", label: "Інформація профілю", icon: UserPen },
-  { id: "dark-mode", label: "Темний режим", icon: Moon },
-  { id: "appearance", label: "Зовнішній вигляд", icon: Palette },
-  { id: "security", label: "Безпека", icon: ShieldCheck },
-];
 
 const INFO_LINKS = [
   { label: "Попередження", icon: TriangleAlert, modalId: WARNING_MODAL_ID },
@@ -56,16 +40,13 @@ const INFO_LINKS = [
 ];
 
 /**
- * ProfilePanel — "усе про мене" в одній панелі: статус, профіль,
- * налаштування (інформація профілю, темний режим), допомога (правила,
- * зворотний зв'язок), вихід — кнопка, закріплена внизу панелі.
- * Замінює колишні таби "Профіль" і "Налаштування" лівого сайдбара.
+ * ProfilePanel — вкладка "Профіль": статус, мої фото, допомога
+ * (правила, зворотний зв'язок), вихід — кнопка, закріплена внизу.
+ * Налаштування винесено в окрему вкладку (SettingsPanel).
  */
 export function ProfilePanel({
   currentUserStatus,
   onStatusChange,
-  onColorChange,
-  onTextStyleChange,
   logoutModalId,
 }) {
   // Яка вкладена панель відкрита поверх профілю (null — жодна).
@@ -115,30 +96,9 @@ export function ProfilePanel({
         onClick={() => setSubView("gallery")}
       >
         <Images size={18} />
-        <span className="app-panel-summary-label">Фотогалерея</span>
+        <span className="app-panel-summary-label">Мої фото</span>
         <ChevronRight size={16} />
       </button>
-
-      <details className="app-panel-details">
-        <summary className="app-panel-summary">
-          <Settings size={18} />
-          <span className="app-panel-summary-label">Налаштування</span>
-          <ChevronDown size={16} className="app-panel-summary-chevron" />
-        </summary>
-
-        {SETTINGS_ITEMS.map(({ id, label, icon: ItemIcon }) => (
-          <button
-            key={id}
-            type="button"
-            className="app-sidebar-theme-btn"
-            onClick={() => setSubView(id)}
-          >
-            <ItemIcon size={18} />
-            <span>{label}</span>
-            <ChevronRight size={16} className="ms-auto" />
-          </button>
-        ))}
-      </details>
 
       <details className="app-panel-details">
         <summary className="app-panel-summary">
@@ -175,17 +135,7 @@ export function ProfilePanel({
       </button>
     </div>
 
-    {subView === "profile" && <ProfileEditView onBack={closeSubView} />}
-    {subView === "dark-mode" && <DarkModeView onBack={closeSubView} />}
-    {subView === "security" && <SecurityView onBack={closeSubView} />}
     {subView === "gallery" && <GalleryView onBack={closeSubView} />}
-    {subView === "appearance" && (
-      <AppearanceView
-        onBack={closeSubView}
-        onColorChange={onColorChange}
-        onTextStyleChange={onTextStyleChange}
-      />
-    )}
     </>
   );
 }

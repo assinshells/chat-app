@@ -1,23 +1,15 @@
 import { useDmStore } from "@features/dm";
-import { PrivateChat } from "./PrivateChat.jsx";
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
 
 /**
- * PrivateMessagesPanel — вміст правої панелі "Особисті повідомлення"
- * (шапка з назвою/"назад"/закриттям належить SidePanel).
- *
- * Два стани, ключ — useDmStore.panelLogin:
- *  - panelLogin === null: список діалогів (з лічильниками непрочитаних);
- *  - panelLogin заданий: листування з цією людиною (PrivateChat).
- *
- * Коли панель закривається, ChatLayout викликає closeConversation —
- * тож повідомлення не вважаються "переглянутими", поки панель
- * закрита (див. useDmStore._handleIncoming), а наступне відкриття
- * починається зі списку.
+ * DialogsList — список особистих діалогів (з лічильниками непрочитаних)
+ * у вкладці "Чати" лівого сайдбара. Клік відкриває листування в основній
+ * області чату (useDmStore.panelLogin → PrivateChat у ChatLayout).
+ * Активний діалог підсвічено.
  */
-export function PrivateMessagesPanel() {
+export function DialogsList({ onOpen }) {
   const panelLogin = useDmStore((state) => state.panelLogin);
   const conversations = useDmStore((state) => state.conversations);
   const order = useDmStore((state) => state.order);
@@ -25,10 +17,6 @@ export function PrivateMessagesPanel() {
   const openConversation = useDmStore((state) => state.openConversation);
 
   const isDarkTheme = useIsDarkTheme();
-
-  if (panelLogin) {
-    return <PrivateChat key={panelLogin} login={panelLogin} />;
-  }
 
   if (order.length === 0) {
     return (
@@ -56,8 +44,14 @@ export function PrivateMessagesPanel() {
           <button
             key={dialogLogin}
             type="button"
-            className="private-modal-dialog"
-            onClick={() => openConversation(dialogLogin, convo.color)}
+            className={`private-modal-dialog ${
+              dialogLogin === panelLogin ? "is-active" : ""
+            }`}
+            aria-current={dialogLogin === panelLogin ? "true" : undefined}
+            onClick={() => {
+              openConversation(dialogLogin, convo.color);
+              onOpen?.(dialogLogin);
+            }}
           >
             <span className="private-modal-dialog-row">
               <span
