@@ -5,6 +5,7 @@ import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { SidePanel } from "@widgets/side-panel";
+import { LeftSidebar } from "@widgets/left-sidebar";
 import {
   updateColor as updateColorRest,
   updateTextStyle as updateTextStyleRest,
@@ -303,6 +304,9 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   return (
     <div className="layout-wrapper app-layout">
+      {/* Ліва рейка з іконками-табами + сайдбар з вмістом вкладки. */}
+      <LeftSidebar />
+
       <div className="user-chat">
         <div className="chat-main">
           <ChatHeader
