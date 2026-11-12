@@ -241,4 +241,9 @@ export const SOCKET_EVENTS = Object.freeze({
   // room:join, як і будь-який інший room-бан) — тому це окрема подія,
   // а не варіант MODERATION_KICKED.
   MODERATION_ROOM_BANNED: "moderation:room_banned",
+
+  // Одна активна сесія на користувача: нове підключення того самого
+  // акаунта витісняє старі — див. sockets/singleSession.js. Старий
+  // сокет отримує цю подію безпосередньо перед серверним розривом.
+  SESSION_REPLACED: "session:replaced",
 });

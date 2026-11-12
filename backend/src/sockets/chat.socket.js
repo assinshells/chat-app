@@ -471,6 +471,11 @@ export function registerChatSocket(io, socket) {
     broadcastRoomUsers(io, room);
     broadcastRoomsState(io);
 
+    // Сокет витіснено новою сесією того самого акаунта (див.
+    // sockets/singleSession.js) — користувач нікуди не пішов, тож
+    // "Покидає чат" не показуємо.
+    if (socket.data.replaced) return;
+
     // "Покидає чат" — бачать ті, хто залишився в кімнаті, де користувач
     // був перед дисконнектом (сам той, хто пішов, вже відключився і цього не побачить).
     broadcastSystemEvent(io, room, {

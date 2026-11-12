@@ -15,6 +15,7 @@ const SYSTEM_EVENT = "system:event";
 const MODERATION_KICKED = "moderation:kicked";
 const MODERATION_BANNED = "moderation:banned";
 const MODERATION_ROOM_BANNED = "moderation:room_banned";
+const SESSION_REPLACED = "session:replaced";
 const STATUS_UPDATE = "status:update";
 const COLOR_UPDATE = "color:update";
 const TEXT_STYLE_UPDATE = "textStyle:update";
@@ -81,6 +82,10 @@ export function useChatSocket({ enabled, initialRoom }) {
   // сокет уже був підключений. Заміняє весь чат на BannedScreen (див.
   // ChatLayout).
   const [banInfo, setBanInfo] = useState(null);
+
+  // sessionReplaced — цей акаунт відкрито в іншому браузері/вкладці,
+  // сервер витіснив це з'єднання (одна активна сесія на акаунт).
+  const [sessionReplaced, setSessionReplaced] = useState(false);
 
   // roomBanNotice — інформаційний банер після "бан кімнати" (BAN_ROOM):
   // на відміну від confinement, це НЕ блокує клієнту спроби перейти в
@@ -233,6 +238,7 @@ export function useChatSocket({ enabled, initialRoom }) {
       // (інакше сервер відхилив би на етапі socketAuthGuard) — знімаємо
       // застарілий banInfo, якщо він лишився з попереднього сеансу.
       setBanInfo(null);
+      setSessionReplaced(false);
 
       // При (пере)підключенні явно (пере)заходимо в поточну кімнату —
       // presence на сервері прив'язаний до socket.id, після реконекту
@@ -246,6 +252,13 @@ export function useChatSocket({ enabled, initialRoom }) {
     };
 
     const handleDisconnect = () => setConnected(false);
+
+    // Сервер розриває це з'єднання — клієнт НЕ перепідключається сам
+    // (io server disconnect), тож показуємо екран з кнопкою "Використати тут".
+    const handleSessionReplaced = () => {
+      setSessionReplaced(true);
+      setConnected(false);
+    };
 
     const handleMessageNew = (message) => {
       // Повідомлення приходить лише тим, хто перебуває в Socket.IO room
@@ -344,6 +357,7 @@ export function useChatSocket({ enabled, initialRoom }) {
     chatSocket.on("connect", handleConnect);
     chatSocket.on("disconnect", handleDisconnect);
     chatSocket.on("connect_error", handleConnectError);
+    chatSocket.on(SESSION_REPLACED, handleSessionReplaced);
     chatSocket.on(MESSAGE_NEW, handleMessageNew);
     chatSocket.on(SYSTEM_EVENT, handleSystemEvent);
     chatSocket.on(ROOM_USERS, handleRoomUsers);
@@ -359,6 +373,7 @@ export function useChatSocket({ enabled, initialRoom }) {
       chatSocket.off("connect", handleConnect);
       chatSocket.off("disconnect", handleDisconnect);
       chatSocket.off("connect_error", handleConnectError);
+      chatSocket.off(SESSION_REPLACED, handleSessionReplaced);
       chatSocket.off(MESSAGE_NEW, handleMessageNew);
       chatSocket.off(SYSTEM_EVENT, handleSystemEvent);
       chatSocket.off(ROOM_USERS, handleRoomUsers);
@@ -418,6 +433,12 @@ export function useChatSocket({ enabled, initialRoom }) {
     },
     [applyJoinOutcome],
   );
+
+  // Свідоме повернення в цю вкладку: нове підключення витісне іншу сесію.
+  const reclaimSession = useCallback(() => {
+    setSessionReplaced(false);
+    chatSocket.connect();
+  }, []);
 
   const { remainingMs: cooldownMs, startCooldown } = useMessageCooldown();
 
@@ -585,6 +606,8 @@ export function useChatSocket({ enabled, initialRoom }) {
     confinement,
     roomBanNotice,
     banInfo,
+    sessionReplaced,
+    reclaimSession,
     joinError,
     dismissJoinError: useCallback(() => setJoinError(null), []),
   };

@@ -27,6 +27,7 @@ import {
   KickModal,
   BanModal,
   BannedScreen,
+  SessionReplacedScreen,
   ConfinementBanner,
   RoomBanNoticeBanner,
 } from "@features/moderation";
@@ -71,6 +72,8 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     confinement,
     roomBanNotice,
     banInfo,
+    sessionReplaced,
+    reclaimSession,
     joinError,
     dismissJoinError,
     updateStatus,
@@ -311,6 +314,10 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   // Rules of Hooks). Тут гілкується лише JSX, hooks усі й завжди викликані.
   if (banInfo) {
     return <BannedScreen banInfo={banInfo} onLogout={onLogout} />;
+  }
+
+  if (sessionReplaced) {
+    return <SessionReplacedScreen onReclaim={reclaimSession} onLogout={onLogout} />;
   }
 
   return (

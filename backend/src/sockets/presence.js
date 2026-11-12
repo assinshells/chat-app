@@ -30,6 +30,20 @@ function getRoomMap(room) {
   return roomUsers.get(room);
 }
 
+/**
+ * uniqueByUser — захист другого рівня: навіть якщо з якоїсь причини в
+ * кімнаті опинилося кілька сокетів одного userId (гонка двох
+ * одночасних підключень), користувач рахується і показується ОДИН раз.
+ */
+function uniqueByUser(map) {
+  if (!map) return [];
+  const byUser = new Map();
+  for (const entry of map.values()) {
+    byUser.set(entry.id, entry);
+  }
+  return Array.from(byUser.values());
+}
+
 export const RoomPresence = {
   join(room, socketId, user) {
     getRoomMap(room).set(socketId, user);
@@ -60,20 +74,18 @@ export const RoomPresence = {
   },
 
   listUsers(room) {
-    const map = roomUsers.get(room);
-    return map ? Array.from(map.values()) : [];
+    return uniqueByUser(roomUsers.get(room));
   },
 
   countUsers(room) {
-    const map = roomUsers.get(room);
-    return map ? map.size : 0;
+    return uniqueByUser(roomUsers.get(room)).length;
   },
 
   /** countsByRoom — знімок {roomId: count} по УСІХ відомих кімнатах, включно з порожніми (count: 0). */
   countsByRoom() {
     const result = {};
     for (const [room, map] of roomUsers.entries()) {
-      result[room] = map.size;
+      result[room] = uniqueByUser(map).length;
     }
     return result;
   },

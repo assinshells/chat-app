@@ -3,10 +3,15 @@ import { registerChatSocket } from "./chat.socket.js";
 import { registerDmSocket } from "./dm.socket.js";
 import { registerBlockSocket } from "./block.socket.js";
 import { registerFriendSocket } from "./friend.socket.js";
+import { singleSessionGuard } from "./singleSession.js";
 import logger from "../config/logger.js";
 
 export function initSockets(io) {
   io.use(socketAuthGuard);
+  // ПІСЛЯ авторизації (потрібен socket.data.userId) і ДО події
+  // "connection": старі сокети цього акаунта витісняються раніше, ніж
+  // новий встигне зробити room:join.
+  io.use(singleSessionGuard(io));
 
   io.on("connection", (socket) => {
     logger.debug(`Сокет підключено: user=${socket.data.userId} login=${socket.data.login}`);
