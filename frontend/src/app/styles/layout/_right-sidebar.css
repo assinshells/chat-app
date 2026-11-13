@@ -1,0 +1,133 @@
+/* =========================================================
+   RIGHT SIDEBAR — правий сайдбар на всю висоту чату з вкладками
+   "Усі / Кімнати / Користувачі" (widgets/right-sidebar).
+
+   Структура (ChatLayout.jsx):
+     .right-sidebar-wrap       — позиціонувальний контекст
+       .right-sidebar          — вкладки + вміст
+       .app-panel              — профіль іншого користувача; при
+                                 відкритті лягає поверх сайдбара
+
+   Десктоп (від 992px): колонка 300px праворуч. Телефон: сайдбара нема
+   (той самий вміст — у вкладці "Чати" лівої рейки), а панель профілю
+   рендериться без обгортки і лишається на весь екран (.app-panel —
+   position: fixed у _app-layout.css).
+   ========================================================= */
+
+.right-sidebar-wrap {
+  position: relative;
+
+  flex: 0 0 300px;
+
+  width: 300px;
+  height: 100%;
+
+  display: flex;
+}
+
+.right-sidebar {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bs-body-bg);
+  border-left: 1px solid var(--bs-border-color);
+}
+
+/* Панель профілю лягає на сайдбар, а не штовхає чат. */
+.right-sidebar-wrap > .app-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+
+  flex: none;
+
+  width: auto;
+}
+
+/* ---------- Вкладки "Усі / Кімнати / Користувачі" ---------- */
+
+.sidebar-tabs {
+  flex: 0 0 auto;
+
+  /* Та сама висота, що й шапка чату, щоб лінії збігались. */
+  min-height: 69px;
+  padding: 0.75rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.sidebar-tab {
+  /* За вмістом, а не порівну: "Користувачі" довше за "Усі". */
+  flex: 1 1 auto;
+
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+
+  border: 0;
+  border-radius: var(--bs-border-radius);
+
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  cursor: pointer;
+}
+
+.sidebar-tab:hover {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+}
+
+.sidebar-tab.is-active {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.14);
+}
+
+/* ---------- "Усі": верх/низ 30/70 ---------- */
+
+.sidebar-split {
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-split-top {
+  flex: 3 1 0;
+}
+
+.sidebar-split-bottom {
+  flex: 7 1 0;
+
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.sidebar-split-title {
+  flex: 0 0 auto;
+
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.15rem;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: var(--bs-secondary-color);
+}

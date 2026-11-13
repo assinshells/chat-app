@@ -6,6 +6,7 @@ import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { SidePanel, SettingsModal, GalleryModal } from "@widgets/side-panel";
 import { LeftSidebar } from "@widgets/left-sidebar";
+import { RightSidebar, RoomsUsersPanel } from "@widgets/right-sidebar";
 import { PrivateMessagesModal } from "@widgets/private-chat";
 import {
   updateColor as updateColorRest,
@@ -42,6 +43,7 @@ import {
 } from "@shared/constants/infoModals.constants.js";
 import { useSidePanelStore } from "@shared/lib/sidePanelStore.js";
 import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
+import { useMediaQuery } from "@shared/lib/useMediaQuery.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
@@ -292,6 +294,27 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     setTargetTimes(times);
   };
 
+  // Права панель — профіль іншого користувача.
+  const sidePanelNode = sidePanel ? (
+    <SidePanel onClose={closeSidePanel} users={visibleRoomUsers} />
+  ) : null;
+
+  // Кімнати і користувачі: правий сайдбар (десктоп) або вкладка "Чати"
+  // лівої рейки (телефон) — той самий вміст.
+  const isDesktop = useMediaQuery("(min-width: 992px)");
+  const roomsUsers = (
+    <RoomsUsersPanel
+      login={login}
+      users={visibleRoomUsers}
+      activeRoom={activeRoom}
+      activeRoomName={activeRoomName}
+      roomCounts={roomCounts}
+      selectedNicknames={targetNicknames}
+      onSelectRoom={handleSelectRoom}
+      onNicknameClick={handlePanelNicknameClick}
+    />
+  );
+
   // Глобальний бан — рендеримо ЗАМІСТЬ усього чату. Важливо: перевірка
   // йде ПІСЛЯ всіх hooks вище (useState/useEffect для сайдбара, цілей
   // тощо) — banInfo може з'явитися вже після монтування (жива подія
@@ -310,14 +333,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     <div className={`layout-wrapper app-layout${chatOpen ? " is-chat-open" : ""}`}>
       {/* Навігація: рейка з іконками-табами + сайдбар з вмістом вкладки. */}
       <LeftSidebar
-        login={login}
-        users={visibleRoomUsers}
-        activeRoom={activeRoom}
-        activeRoomName={activeRoomName}
-        roomCounts={roomCounts}
-        selectedNicknames={targetNicknames}
-        onSelectRoom={handleSelectRoom}
-        onNicknameClick={handlePanelNicknameClick}
+        chatsContent={isDesktop ? null : roomsUsers}
         currentUserStatus={currentUserStatus}
         onStatusChange={handleStatusChange}
         logoutModalId={LOGOUT_MODAL_ID}
@@ -390,9 +406,15 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         </div>
       </div>
 
-      {/* Права панель — профіль іншого користувача: на десктопі колонка
-          поруч із чатом, на телефоні — на весь екран. */}
-      {sidePanel && <SidePanel onClose={closeSidePanel} users={visibleRoomUsers} />}
+      {/* Десктоп: правий сайдбар (кімнати/користувачі) на всю висоту;
+          профіль іншого користувача лягає поверх нього. Телефон: сайдбара
+          нема (кімнати й користувачі — у вкладці "Чати" лівої рейки),
+          профіль — на весь екран. */}
+      {isDesktop ? (
+        <RightSidebar overlay={sidePanelNode}>{roomsUsers}</RightSidebar>
+      ) : (
+        sidePanelNode
+      )}
 
       <DmToast />
       <PrivateMessagesModal />

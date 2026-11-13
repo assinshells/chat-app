@@ -190,7 +190,9 @@
 /* Іконки модалок у шапці сайдбара — лише на телефоні: на десктопі
    вони є в шапці чату, що завжди видно поруч. */
 @media (min-width: 992px) {
-  .left-sidebar-actions {
+  /* Два класи: .chat-header-actions { display: flex } підключається
+     пізніше і без цього перебивав би display: none. */
+  .chat-header-actions.left-sidebar-actions {
     display: none;
   }
 }

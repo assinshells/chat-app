@@ -1,31 +1,24 @@
-import { Bell, Construction, MessageSquare, User, Users } from "lucide-react";
+import { Bell, Construction, MessageSquare, User } from "lucide-react";
 
 import { LEFT_TABS, useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
 import { HeaderActions } from "@widgets/chat-header";
-import { UsersPanel, ProfilePanel } from "@widgets/side-panel";
+import { ProfilePanel } from "@widgets/side-panel";
 import { IconRail } from "./IconRail.jsx";
-import { ChatsPanel } from "./ChatsPanel.jsx";
 
 /**
  * LeftSidebar — навігація застосунку: рейка з іконками (IconRail) +
- * сайдбар із вмістом активної вкладки:
- *  Чати (кімнати), Користувачі, Сповіщення (заглушка), Профіль.
- *  Особисті повідомлення, фотогалерея й налаштування — модалки з іконок
- *  у шапці (HeaderActions).
+ * сайдбар із вмістом активної вкладки: Профіль, Сповіщення (заглушка) і —
+ * лише на телефоні — Чати (chatsContent: кімнати й користувачі, які на
+ * десктопі живуть у правому сайдбарі, див. @widgets/right-sidebar).
+ * Особисті повідомлення, фотогалерея й налаштування — модалки з іконок
+ * у шапці (HeaderActions).
  * Десктоп: рейка зліва по центру висоти. Телефон: рейка горизонтально
  * внизу, а коли відкрито чат — усе це сховано (див. .is-chat-open).
  * На телефоні в шапці сайдбара дублюються іконки модалок (у списку
  * немає шапки чату з ними).
  */
 export function LeftSidebar({
-  login,
-  users,
-  activeRoom,
-  activeRoomName,
-  roomCounts,
-  selectedNicknames,
-  onSelectRoom,
-  onNicknameClick,
+  chatsContent,
   currentUserStatus,
   onStatusChange,
   logoutModalId,
@@ -33,40 +26,22 @@ export function LeftSidebar({
   const activeTab = useLeftSidebarStore((state) => state.activeTab);
   const setActiveTab = useLeftSidebarStore((state) => state.setActiveTab);
 
+  // "Чати" є лише коли передано chatsContent (телефон).
   const tabs = [
-    { id: LEFT_TABS.CHATS, label: "Чати", Icon: MessageSquare },
-    { id: LEFT_TABS.USERS, label: "Користувачі", Icon: Users },
-    { id: LEFT_TABS.NOTIFICATIONS, label: "Сповіщення", Icon: Bell },
+    ...(chatsContent
+      ? [{ id: LEFT_TABS.CHATS, label: "Чати", Icon: MessageSquare }]
+      : []),
     { id: LEFT_TABS.PROFILE, label: "Профіль", Icon: User },
+    { id: LEFT_TABS.NOTIFICATIONS, label: "Сповіщення", Icon: Bell },
   ];
 
   const current = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
-
-  let title = current.label;
-  if (current.id === LEFT_TABS.USERS) {
-    title = `У кімнаті${activeRoomName ? ` «${activeRoomName}»` : ""}: ${users.length}`;
-  }
+  const title = current.label;
 
   let content;
   switch (current.id) {
     case LEFT_TABS.CHATS:
-      content = (
-        <ChatsPanel
-          activeRoom={activeRoom}
-          roomCounts={roomCounts}
-          onSelectRoom={onSelectRoom}
-        />
-      );
-      break;
-    case LEFT_TABS.USERS:
-      content = (
-        <UsersPanel
-          login={login}
-          users={users}
-          selectedNicknames={selectedNicknames}
-          onNicknameClick={onNicknameClick}
-        />
-      );
+      content = chatsContent;
       break;
     case LEFT_TABS.PROFILE:
       content = (

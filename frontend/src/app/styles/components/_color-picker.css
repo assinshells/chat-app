@@ -9,9 +9,8 @@
    .color-radio-option, без додаткового JS), а під усією палітрою —
    назва поточно обраного кольору (див. .color-radio-selected-name,
    текст рендериться через getColorLabel(color), не в CSS).
-   Рендериться в ColorPickerModal.jsx (форма реєстрації відкриває цю
-   модалку через інпут .color-select-input) — самої палітри
-   на формі більше нема.
+   Рендериться в розкривному меню "Змінити колір тексту"
+   (widgets/side-panel/ui/AppearanceView.jsx).
    ========================================================= */
 
 .color-radio-options {

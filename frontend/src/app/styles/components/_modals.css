@@ -164,27 +164,24 @@
 }
 
 /* =========================================================
-   COLOR PICKER MODAL — вибір кольору нікнейма/повідомлень на
-   реєстрації (ColorPickerModal.jsx), відкривається кліком на
-   .color-select-input (RegisterForm.jsx). Той самий "безшапковий"
-   патерн, що й RoomSelectModal вище: .modal-header лишається лише
-   заради хрестика закриття, футера нема — кнопка "Прийняти" лежить
-   прямо в .modal-body, під палітрою кольорів і прикладом тексту.
+   COLOR PICKER — палітра кольору тексту всередині розкривного меню
+   "Змінити колір тексту" (Налаштування → Зовнішній вигляд,
+   AppearanceView.jsx). Самі кружки — _color-picker.css.
    ========================================================= */
-.color-picker-modal-body {
-  min-height: 0;
-  /* Відступ зверху, щоб хрестик закриття не наїжджав на палітру. */
-  padding-top: 0.5rem;
-}
-
-.color-picker-modal-body .color-radio-options {
-  margin-bottom: 0.25rem;
-}
 
 /* Приклад фрази, пофарбованої обраним кольором (PREVIEW_TEXT у
-   ColorPickerModal.jsx) — трохи більший за назву кольору над ним,
+   AppearanceView.jsx) — трохи більший за назву кольору над ним,
    щоб читабельність кольору на тексті було справді видно. */
 .color-picker-preview-text {
   font-size: 1rem;
   font-weight: 700;
+}
+
+/* Тіло розкривного меню з палітрою. */
+.app-appearance-color-body {
+  padding: 0.25rem 1rem 1rem;
+}
+
+.app-appearance-color-body .color-radio-options {
+  margin-bottom: 0.85rem;
 }
