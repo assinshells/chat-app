@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
 import { useIsDarkTheme } from "@shared/lib/theme.js";
-import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
 import { useDmStore } from "../model/useDmStore.js";
 
 // Скільки плашка висить на екрані, якщо по ній не клікнули.
@@ -12,7 +11,7 @@ const TOAST_VISIBLE_MS = 5000;
  * DmToast — коротка плашка "Ім'я: текст" поверх чату, коли приходить
  * особисте повідомлення, а цей діалог зараз не відкритий (без неї
  * повідомлення легко пропустити — інакше сигнал лише бейдж у шапці).
- * Клік відкриває цей діалог в основній області чату.
+ * Клік відкриває цей діалог у модалці особистих повідомлень.
  *
  * Тост спрацьовує, лише якщо після першого syncList зросло значення
  * unreadCount конкретного діалогу — тож початкове завантаження списку,
@@ -56,7 +55,6 @@ export function DmToast() {
 
   const handleOpen = () => {
     useDmStore.getState().openConversation(toast.login, toast.color);
-    useLeftSidebarStore.getState().openChat();
     setToast(null);
   };
 

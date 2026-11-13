@@ -128,11 +128,15 @@
 
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 
   border-bottom: 1px solid var(--bs-border-color);
 }
 
 .left-sidebar-title {
+  flex: 1 1 auto;
+
+  min-width: 0;
   margin: 0;
 
   font-size: 0.95rem;
@@ -183,77 +187,12 @@
   color: #fff;
 }
 
-/* ---------- Підтаби "Чати": Усі / Кімнати / Особисті ---------- */
-
-.chats-filter {
-  flex: 0 0 auto;
-
-  padding: 0.5rem 0.75rem;
-
-  display: flex;
-  gap: 0.25rem;
-
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
-.chats-filter-btn {
-  flex: 1 1 0;
-
-  padding: 0.3rem 0.4rem;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 0;
-  border-radius: var(--bs-border-radius);
-
-  background: transparent;
-  color: var(--bs-secondary-color);
-
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-.chats-filter-btn:hover {
-  color: var(--bs-body-color);
-  background: var(--bs-secondary-bg);
-}
-
-.chats-filter-btn.is-active {
-  color: var(--bs-primary);
-  background: rgba(var(--bs-primary-rgb), 0.14);
-}
-
-/* "Усі": кімнати зверху, діалоги знизу — дві рівні половини, кожна
-   прокручується окремо. */
-.chats-section {
-  flex: 1 1 0;
-
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-}
-
-.chats-section + .chats-section {
-  border-top: 1px solid var(--bs-border-color);
-}
-
-.chats-section-title {
-  flex: 0 0 auto;
-
-  margin: 0;
-  padding: 0.5rem 0.75rem 0.15rem;
-
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-
-  color: var(--bs-secondary-color);
+/* Іконка особистих повідомлень у шапці сайдбара — лише на телефоні:
+   на десктопі вона є в шапці чату, що завжди видно поруч. */
+@media (min-width: 992px) {
+  .left-sidebar-dm {
+    display: none;
+  }
 }
 
 /* ---------- Телефон ---------- */

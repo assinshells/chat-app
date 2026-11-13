@@ -196,6 +196,13 @@
   }
 }
 
+/* Іконка особистих повідомлень (DmHeaderButton): relative — для бейджа. */
+.chat-header-dm {
+  position: relative;
+
+  flex: 0 0 auto;
+}
+
 /* Бейдж непрочитаних особистих на іконці повідомлень. */
 .chat-header-badge {
   position: absolute;

@@ -6,7 +6,7 @@ import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { SidePanel } from "@widgets/side-panel";
 import { LeftSidebar } from "@widgets/left-sidebar";
-import { PrivateChat } from "@widgets/private-chat";
+import { PrivateMessagesModal } from "@widgets/private-chat";
 import {
   updateColor as updateColorRest,
   updateTextStyle as updateTextStyleRest,
@@ -42,8 +42,6 @@ import {
 } from "@shared/constants/infoModals.constants.js";
 import { useSidePanelStore } from "@shared/lib/sidePanelStore.js";
 import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
-import { getEffectiveColorHex } from "@shared/constants/color.constants.js";
-import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
@@ -174,15 +172,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const openChat = useLeftSidebarStore((state) => state.openChat);
   const closeChat = useLeftSidebarStore((state) => state.closeChat);
 
-  // Особистий діалог, відкритий в основній області замість кімнати.
-  const dmLogin = useDmStore((state) => state.panelLogin);
-  const dmColor = useDmStore((state) =>
-    state.panelLogin ? state.conversations[state.panelLogin]?.color : null,
-  );
-  const isDarkTheme = useIsDarkTheme();
-
   const handleBack = () => {
-    useDmStore.getState().closeConversation();
     closeChat();
   };
 
@@ -252,9 +242,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   const activeRoomName = ROOMS_BY_ID[activeRoom]?.name;
 
   const handleSelectRoom = (roomId) => {
-    // Вибір кімнати повертає основну область від особистого діалогу
-    // до публічного чату.
-    useDmStore.getState().closeConversation();
     switchRoom(roomId);
     openChat();
     // Ніки/час обиралися з повідомлень поточної кімнати — при переході
@@ -274,7 +261,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   // форму публічного чату — тож повертаємося до нього (і на телефоні
   // відкриваємо чат), щоб одразу можна було писати.
   const handlePanelNicknameClick = (nickname) => {
-    useDmStore.getState().closeConversation();
     handleNicknameClick(nickname);
     openChat();
   };
@@ -326,12 +312,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       <LeftSidebar
         login={login}
         users={visibleRoomUsers}
-        activeRoom={dmLogin ? null : activeRoom}
+        activeRoom={activeRoom}
         activeRoomName={activeRoomName}
         roomCounts={roomCounts}
         selectedNicknames={targetNicknames}
         onSelectRoom={handleSelectRoom}
-        onOpenDialog={openChat}
         onNicknameClick={handlePanelNicknameClick}
         currentUserStatus={currentUserStatus}
         onStatusChange={handleStatusChange}
@@ -342,82 +327,68 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
       <div className="user-chat">
         <div className="chat-main">
-          {dmLogin ? (
-            <>
-              <ChatHeader
-                title={dmLogin}
-                titleStyle={{ color: getEffectiveColorHex(dmColor, isDarkTheme) }}
-                online={connected}
-                onBack={handleBack}
-              />
-              <PrivateChat key={dmLogin} login={dmLogin} />
-            </>
-          ) : (
-            <>
-              <ChatHeader
-                title={activeRoomName}
-                online={connected}
-                onBack={handleBack}
-              />
-              <ConfinementBanner confinement={confinement} />
-              <RoomBanNoticeBanner notice={roomBanNotice} />
-              {roomBan && (
-                <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
-                  Вас заблоковано в цій кімнаті
-                  {roomBan.expiresAt
-                    ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
-                    : " назавжди"}
-                  {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
-                </div>
-              )}
-              {joinError && (
-                <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
-                  <span>
-                    {joinError.message || "Не вдалося приєднатися до кімнати"}
-                    {joinError.details?.expiresAt &&
-                      ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
-                  </span>
-                  <button
-                    type="button"
-                    className="btn-close ms-2"
-                    aria-label="Закрити"
-                    onClick={dismissJoinError}
-                  />
-                </div>
-              )}
-              <ChatConversation
-                messages={visibleMessages}
-                currentUser={login}
-                onNicknameClick={handleNicknameClick}
-                onTimeClick={handleTimeClick}
-                onRoomClick={handleSelectRoom}
-                selectedNicknames={targetNicknames}
-                selectedTimes={targetTimes}
-                roomUsers={visibleRoomUsers}
-              />
-              <ChatComposer
-                onSend={sendMessage}
-                cooldownMs={cooldownMs}
-                targetNicknames={targetNicknames}
-                targetTimes={targetTimes}
-                onRemoveNickname={handleRemoveNickname}
-                onRemoveTime={handleRemoveTime}
-                onClearTargets={handleClearTargets}
-                onRestoreTargets={handleRestoreTargets}
-                actionTarget={actionTarget}
-                activeRoom={activeRoom}
-                disabled={Boolean(roomBan)}
-                disabledReason={
-                  roomBan &&
-                  `Вас заблоковано в цій кімнаті${
-                    roomBan.expiresAt
-                      ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
-                      : " назавжди"
-                  }`
-                }
-              />
-            </>
+          <ChatHeader
+            title={activeRoomName}
+            online={connected}
+            onBack={handleBack}
+          />
+          <ConfinementBanner confinement={confinement} />
+          <RoomBanNoticeBanner notice={roomBanNotice} />
+          {roomBan && (
+            <div className="alert alert-danger m-2 mb-0 py-2 px-3 small">
+              Вас заблоковано в цій кімнаті
+              {roomBan.expiresAt
+                ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                : " назавжди"}
+              {roomBan.reason ? ` · Причина: ${roomBan.reason}` : ""}
+            </div>
           )}
+          {joinError && (
+            <div className="alert alert-warning m-2 mb-0 py-2 px-3 small d-flex align-items-center justify-content-between">
+              <span>
+                {joinError.message || "Не вдалося приєднатися до кімнати"}
+                {joinError.details?.expiresAt &&
+                  ` · до ${new Date(joinError.details.expiresAt).toLocaleString()}`}
+              </span>
+              <button
+                type="button"
+                className="btn-close ms-2"
+                aria-label="Закрити"
+                onClick={dismissJoinError}
+              />
+            </div>
+          )}
+          <ChatConversation
+            messages={visibleMessages}
+            currentUser={login}
+            onNicknameClick={handleNicknameClick}
+            onTimeClick={handleTimeClick}
+            onRoomClick={handleSelectRoom}
+            selectedNicknames={targetNicknames}
+            selectedTimes={targetTimes}
+            roomUsers={visibleRoomUsers}
+          />
+          <ChatComposer
+            onSend={sendMessage}
+            cooldownMs={cooldownMs}
+            targetNicknames={targetNicknames}
+            targetTimes={targetTimes}
+            onRemoveNickname={handleRemoveNickname}
+            onRemoveTime={handleRemoveTime}
+            onClearTargets={handleClearTargets}
+            onRestoreTargets={handleRestoreTargets}
+            actionTarget={actionTarget}
+            activeRoom={activeRoom}
+            disabled={Boolean(roomBan)}
+            disabledReason={
+              roomBan &&
+              `Вас заблоковано в цій кімнаті${
+                roomBan.expiresAt
+                  ? ` до ${new Date(roomBan.expiresAt).toLocaleString()}`
+                  : " назавжди"
+              }`
+            }
+          />
         </div>
       </div>
 
@@ -426,6 +397,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       {sidePanel && <SidePanel onClose={closeSidePanel} users={visibleRoomUsers} />}
 
       <DmToast />
+      <PrivateMessagesModal />
 
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
       <BlockConfirmModal onBlocked={handleRemoveNickname} />

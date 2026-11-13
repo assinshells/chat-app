@@ -5,9 +5,9 @@ import { AppScrollbar } from "@shared/ui/scrollbar";
 
 /**
  * DialogsList — список особистих діалогів (з лічильниками непрочитаних)
- * у вкладці "Чати" лівого сайдбара. Клік відкриває листування в основній
- * області чату (useDmStore.panelLogin → PrivateChat у ChatLayout).
- * Активний діалог підсвічено.
+ * у лівій колонці модалки (PrivateMessagesModal). Клік відкриває
+ * листування праворуч (на телефоні — замість списку), див.
+ * useDmStore.panelLogin. Активний діалог підсвічено.
  */
 export function DialogsList({ onOpen }) {
   const panelLogin = useDmStore((state) => state.panelLogin);

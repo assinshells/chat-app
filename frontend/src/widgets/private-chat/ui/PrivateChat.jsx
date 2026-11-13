@@ -13,10 +13,10 @@ import { formatMessageTime, normalizeMessageText } from "@shared/lib/message.js"
 const MAX_MESSAGE_LENGTH = 300;
 
 /**
- * PrivateChat — листування з одним співрозмовником усередині правої панелі
- * особистих повідомлень (@widgets/private-chat/ui/PrivateMessagesPanel).
- * Шапка (назва/"Назад"/закриття) належить SidePanel, тут лише
- * повідомлення і форма відправлення.
+ * PrivateChat — листування з одним співрозмовником у правій частині
+ * модалки особистих повідомлень (PrivateMessagesModal). Шапка
+ * (назва/"Назад"/закриття) належить модалці, тут лише повідомлення і
+ * форма відправлення.
  *
  * Джерело даних — useDmStore (персональний сокет-канал dm:*), той
  * самий, що наповнює список діалогів і лічильник у навбарі.
@@ -46,7 +46,7 @@ export function PrivateChat({ login }) {
   useEffect(() => () => revokePreview(imageRef.current), []);
 
   // Чернетка навмисно НЕ скидається тут ефектом: компонент
-  // монтується заново на кожен діалог (key={login} у ChatLayout),
+  // монтується заново на кожен діалог (key={login} у PrivateMessagesModal),
   // тому при перемиканні співрозмовника draft і так починається
   // порожнім, без зайвого каскадного рендеру.
 

@@ -12,7 +12,7 @@ import {
 import { LEFT_TABS, useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
 import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
-import { useDmStore } from "@features/dm";
+import { DmHeaderButton } from "@features/dm";
 import {
   UsersPanel,
   ProfilePanel,
@@ -25,10 +25,12 @@ import { ChatsPanel } from "./ChatsPanel.jsx";
 /**
  * LeftSidebar — навігація застосунку: рейка з іконками (IconRail) +
  * сайдбар із вмістом активної вкладки:
- *  Чати (Усі / Кімнати / Особисті), Користувачі, Фотогалерея,
+ *  Чати (кімнати), Користувачі, Фотогалерея,
  *  Сповіщення (заглушка), Профіль, Налаштування.
  * Десктоп: рейка зліва по центру висоти. Телефон: рейка горизонтально
  * внизу, а коли відкрито чат — усе це сховано (див. .is-chat-open).
+ * На телефоні в шапці сайдбара є іконка особистих повідомлень (у
+ * списку немає шапки чату з такою іконкою).
  */
 export function LeftSidebar({
   login,
@@ -38,7 +40,6 @@ export function LeftSidebar({
   roomCounts,
   selectedNicknames,
   onSelectRoom,
-  onOpenDialog,
   onNicknameClick,
   currentUserStatus,
   onStatusChange,
@@ -48,13 +49,6 @@ export function LeftSidebar({
 }) {
   const activeTab = useLeftSidebarStore((state) => state.activeTab);
   const setActiveTab = useLeftSidebarStore((state) => state.setActiveTab);
-
-  const dmUnread = useDmStore((state) =>
-    Object.values(state.conversations).reduce(
-      (sum, convo) => sum + (convo.unreadCount || 0),
-      0,
-    ),
-  );
 
   // Бейдж "чекає перевірки" — лише для тих, хто перевіряє. Оновлюємо при
   // монтуванні та щоразу, як галерею відкрили/закрили (дешевий запит).
@@ -68,7 +62,7 @@ export function LeftSidebar({
   }, [canReviewPhotos, isGalleryOpen, refreshPendingPhotos]);
 
   const tabs = [
-    { id: LEFT_TABS.CHATS, label: "Чати", Icon: MessageSquare, badge: dmUnread },
+    { id: LEFT_TABS.CHATS, label: "Чати", Icon: MessageSquare },
     { id: LEFT_TABS.USERS, label: "Користувачі", Icon: Users },
     {
       id: LEFT_TABS.GALLERY,
@@ -96,7 +90,6 @@ export function LeftSidebar({
           activeRoom={activeRoom}
           roomCounts={roomCounts}
           onSelectRoom={onSelectRoom}
-          onOpenDialog={onOpenDialog}
         />
       );
       break;
@@ -146,6 +139,7 @@ export function LeftSidebar({
       <aside className="left-sidebar">
         <div className="left-sidebar-header">
           <h5 className="left-sidebar-title">{title}</h5>
+          <DmHeaderButton className="left-sidebar-dm" />
         </div>
 
         <div

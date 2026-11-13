@@ -56,16 +56,23 @@ function emitWithAck(event, payload) {
  *   активний діалог першим (джерело списку в табі "Приватні
  *   повідомлення", див. ChatLeftSidebar).
  *
- * panelLogin — діалог, розгорнутий зараз в ОСНОВНІЙ області чату замість
- *   стрічки кімнати (@widgets/private-chat). Єдина точка показу
- *   листування: окремої модалки більше немає, тому немає й
- *   activeLogin/modalOpen/mobileView, які були потрібні лише їй.
+ * modalOpen — чи відкрита модалка особистих повідомлень
+ *   (@widgets/private-chat/ui/PrivateMessagesModal). Тригер — іконка
+ *   в шапці (DmHeaderButton) або пункт \"Написати особисте
+ *   повідомлення\" біля ніка / тост нового повідомлення.
+ *
+ * panelLogin — діалог, відкритий у правій частині модалки (null —
+ *   жоден: на десктопі показується заглушка, на телефоні — лише
+ *   список діалогів). Тому мобільне \"список -> чат -> назад\" не
+ *   потребує окремого стану: вибір діалогу ставить panelLogin,
+ *   кнопка \"Назад\" (closeConversation) скидає його.
  */
 export const useDmStore = create((set, get) => ({
   currentUser: null,
   conversations: {},
   order: [],
   panelLogin: null,
+  modalOpen: false,
   listLoading: false,
   listLoaded: false,
   sendError: null,
@@ -104,10 +111,24 @@ export const useDmStore = create((set, get) => ({
       conversations: {},
       order: [],
       panelLogin: null,
+      modalOpen: false,
       listLoading: false,
       listLoaded: false,
       sendError: null,
     }),
+
+  /**
+   * openModal — відкриває модалку зі списком діалогів (іконка в шапці).
+   * Обраний раніше діалог не зберігається: на телефоні завжди
+   * починаємо зі списку.
+   */
+  openModal: () => set({ modalOpen: true, panelLogin: null, sendError: null }),
+
+  /**
+   * closeModal — закриває модалку і скидає відкритий діалог, щоб нові
+   * повідомлення в ньому знову рахувалися непрочитаними.
+   */
+  closeModal: () => set({ modalOpen: false, panelLogin: null, sendError: null }),
 
   /**
    * markAsRead — обнуляє лічильник непрочитаних конкретного діалогу.
@@ -135,13 +156,12 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
-   * openConversation — відкриває діалог в основній області чату
+   * openConversation — відкриває модалку (якщо закрита) з цим діалогом
    * (panelLogin) і, якщо історія ще не підвантажувалась у цій сесії,
    * запитує її через dm:open.
    *
-   * Два входи, обидва ведуть сюди: вибір діалогу в табі "Приватні
-   * повідомлення" лівого сайдбара і пункт "Написати особисте
-   * повідомлення" у меню біля ніка (DmTriggerButton). color —
+   * Входи: вибір діалогу у списку модалки, пункт "Написати особисте
+   * повідомлення" у меню біля ніка (DmTriggerButton) і клік по тосту. color —
    * колір співрозмовника з місця кліку: потрібен, поки історія не
    * прийшла і/або якщо діалог зовсім новий (повідомлень ще не було в
    * жодну сторону).
@@ -159,6 +179,7 @@ export const useDmStore = create((set, get) => ({
       },
       order: order.includes(login) ? order : [login, ...order],
       panelLogin: login,
+      modalOpen: true,
       sendError: null,
     });
     get().markAsRead(login);
@@ -169,10 +190,9 @@ export const useDmStore = create((set, get) => ({
   },
 
   /**
-   * closeConversation — повернення основної області до публічної
-   * кімнати (кнопка "Назад" у шапці приватного чату, вибір кімнати в
-   * табі "Чати"). Історію не скидає — при повторному відкритті вона вже
-   * буде в conversations.
+   * closeConversation — повернення до списку діалогів (кнопка "Назад"
+   * в шапці листування на телефоні). Модалку не закриває. Історію не
+   * скидає — при повторному відкритті вона вже буде в conversations.
    */
   closeConversation: () => set({ panelLogin: null, sendError: null }),
 
@@ -331,7 +351,7 @@ export const useDmStore = create((set, get) => ({
   // Викликається з module-level підписки на dm:new нижче — не
   // експортується окремо, назовні використовується лише сам факт підписки.
   _handleIncoming: (message) => {
-    const { currentUser, conversations, order, panelLogin } = get();
+    const { currentUser, conversations, order, panelLogin, modalOpen } = get();
     if (!currentUser) return;
 
     const isOwn = message.sender === currentUser;
@@ -343,8 +363,8 @@ export const useDmStore = create((set, get) => ({
     if (existing?.messages.some((m) => m.id === message.id)) return;
 
     // Не рахуємо непрочитаним: своє ж повідомлення (луна) і повідомлення
-    // в діалог, розгорнутий прямо зараз в основній області чату.
-    const isBeingViewed = panelLogin === otherLogin;
+    // в діалог, відкритий прямо зараз у модалці.
+    const isBeingViewed = modalOpen && panelLogin === otherLogin;
     const unreadCount =
       isOwn || isBeingViewed ? existing?.unreadCount ?? 0 : (existing?.unreadCount ?? 0) + 1;
 

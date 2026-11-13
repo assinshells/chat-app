@@ -1,10 +1,164 @@
 /* =========================================================
-   PRIVATE MESSAGES PANEL — вміст правої панелі особистих
-   повідомлень (@widgets/private-chat/ui/PrivateMessagesPanel):
-   список діалогів; відкрите листування — див. _private-chat.css.
-   Шапку панелі (назва, "назад", закриття) малює SidePanel
-   (layout/_app-layout.css).
+   DM MODAL — модалка особистих повідомлень
+   (@widgets/private-chat/ui/PrivateMessagesModal).
+
+   Десктоп: ліворуч список діалогів (.dm-modal-sidebar), праворуч
+   листування (.dm-modal-main).
+   Телефон (< 768px): модалка на весь екран; спочатку лише список,
+   після вибору діалогу (.has-chat) — лише листування з кнопкою
+   "Назад". Список діалогів — .private-modal-* нижче.
    ========================================================= */
+
+.dm-modal-dialog {
+  width: calc(100% - 2rem);
+  max-width: 960px;
+
+  /* Фіксована висота, щоб скрол усередині списку й листування
+     працював, а вікно не стрибало від кількості повідомлень. */
+  height: min(720px, calc(100dvh - 3rem));
+  margin: 0 auto;
+}
+
+.dm-modal-content {
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+}
+
+.dm-modal-layout {
+  flex: 1 1 auto;
+
+  min-height: 0;
+  height: 100%;
+
+  display: flex;
+}
+
+.dm-modal-sidebar {
+  flex: 0 0 320px;
+
+  width: 320px;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  border-right: 1px solid var(--bs-border-color);
+}
+
+.dm-modal-main {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.dm-modal-header {
+  flex: 0 0 auto;
+
+  min-height: 56px;
+  padding: 0.5rem 0.75rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.dm-modal-title {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  margin: 0;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-modal-back {
+  flex: 0 0 auto;
+
+  margin-left: -0.4rem;
+}
+
+.dm-modal-close {
+  flex: 0 0 auto;
+}
+
+/* Хрестик у шапці списку потрібен лише на телефоні. */
+.dm-modal-close-list {
+  display: none;
+}
+
+/* Заглушка, поки діалог не обрано (лише десктоп). */
+.dm-modal-placeholder {
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  font-size: 0.9rem;
+  color: var(--bs-secondary-color);
+}
+
+@media (min-width: 768px) {
+  .dm-modal-back {
+    display: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .dm-modal-dialog {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+  }
+
+  .dm-modal-content {
+    border-radius: 0;
+  }
+
+  .dm-modal-sidebar {
+    flex: 1 1 auto;
+
+    width: auto;
+
+    border-right: 0;
+  }
+
+  .dm-modal-close-list {
+    display: flex;
+  }
+
+  /* Список -> чат: показуємо лише одну з двох колонок. */
+  .dm-modal-main {
+    display: none;
+  }
+
+  .dm-modal-layout.has-chat .dm-modal-sidebar {
+    display: none;
+  }
+
+  .dm-modal-layout.has-chat .dm-modal-main {
+    display: flex;
+  }
+}
+
+/* ---------------------------------------------------------
+   Список діалогів (DialogsList)
+   --------------------------------------------------------- */
 
 .private-modal-list {
   flex: 1 1 auto;
