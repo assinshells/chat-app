@@ -1,0 +1,196 @@
+/* =========================================================
+   SPLIT MODAL — оболонка модалок «список ліворуч / вміст праворуч»
+   (@shared/ui/split-modal): особисті повідомлення, налаштування,
+   фотогалерея.
+
+   Десктоп: ліворуч список (.split-modal-sidebar), праворуч вміст
+   (.split-modal-main).
+   Телефон (< 768px): модалка на весь екран; спочатку лише список,
+   після вибору (.has-detail) — лише вміст із кнопкою "Назад".
+   ========================================================= */
+
+.split-modal-dialog {
+  width: calc(100% - 2rem);
+  max-width: 960px;
+
+  /* Фіксована висота, щоб скрол усередині списку й вмісту працював,
+     а вікно не стрибало від кількості повідомлень/фото. */
+  height: min(720px, calc(100dvh - 3rem));
+  margin: 0 auto;
+}
+
+.split-modal-content {
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+}
+
+.split-modal-layout {
+  flex: 1 1 auto;
+
+  min-height: 0;
+  height: 100%;
+
+  display: flex;
+}
+
+.split-modal-sidebar {
+  flex: 0 0 320px;
+
+  width: 320px;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  border-right: 1px solid var(--bs-border-color);
+}
+
+.split-modal-main {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.split-modal-header {
+  flex: 0 0 auto;
+
+  min-height: 56px;
+  padding: 0.5rem 0.75rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.split-modal-title {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  margin: 0;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.split-modal-back {
+  flex: 0 0 auto;
+
+  margin-left: -0.4rem;
+}
+
+.split-modal-close {
+  flex: 0 0 auto;
+}
+
+/* Хрестик у шапці списку потрібен лише на телефоні. */
+.split-modal-close-list {
+  display: none;
+}
+
+/* Тіло вмісту: relative — щоб вкладені панелі (.app-panel-overlay,
+   position: absolute; inset: 0) лягали саме на нього, а не на всю
+   модалку, і не перекривали шапку з "Назад"/хрестиком. */
+.split-modal-body {
+  position: relative;
+
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* Верхня вкладена панель (перша в тілі) не малює свою шапку з
+   "Назад" і назвою — це робить шапка модалки. Вкладені глибше
+   панелі (наступні сусіди) зберігають свою шапку. */
+.split-modal-body > .app-panel-overlay:first-child > .app-panel-header {
+  display: none;
+}
+
+/* Заглушка, поки вміст не обрано (лише десктоп). */
+.split-modal-placeholder {
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  font-size: 0.9rem;
+  color: var(--bs-secondary-color);
+}
+
+@media (min-width: 768px) {
+  .split-modal-back {
+    display: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .split-modal-dialog {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+  }
+
+  .split-modal-content {
+    border-radius: 0;
+  }
+
+  .split-modal-sidebar {
+    flex: 1 1 auto;
+
+    width: auto;
+
+    border-right: 0;
+  }
+
+  .split-modal-close-list {
+    display: flex;
+  }
+
+  /* Список -> вміст: показуємо лише одну з двох колонок. */
+  .split-modal-main {
+    display: none;
+  }
+
+  .split-modal-layout.has-detail .split-modal-sidebar {
+    display: none;
+  }
+
+  .split-modal-layout.has-detail .split-modal-main {
+    display: flex;
+  }
+}
+
+/* Список пунктів у лівій колонці (налаштування, розділи галереї). */
+.split-modal-nav {
+  flex: 1 1 auto;
+
+  min-height: 0;
+}
+
+.split-modal-nav .app-sidebar-theme-btn {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.split-modal-nav .app-sidebar-theme-btn.is-active {
+  background: rgba(var(--bs-primary-rgb), 0.14);
+}

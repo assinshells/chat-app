@@ -196,8 +196,10 @@
   }
 }
 
-/* Іконка особистих повідомлень (DmHeaderButton): relative — для бейджа. */
-.chat-header-dm {
+/* Іконки з бейджем (особисті повідомлення, фотогалерея): relative —
+   для позиціонування .chat-header-badge. */
+.chat-header-dm,
+.chat-header-gallery {
   position: relative;
 
   flex: 0 0 auto;

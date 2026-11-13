@@ -4,7 +4,7 @@ import { ChatHeader } from "@widgets/chat-header";
 import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
-import { SidePanel } from "@widgets/side-panel";
+import { SidePanel, SettingsModal, GalleryModal } from "@widgets/side-panel";
 import { LeftSidebar } from "@widgets/left-sidebar";
 import { PrivateMessagesModal } from "@widgets/private-chat";
 import {
@@ -320,8 +320,6 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         onNicknameClick={handlePanelNicknameClick}
         currentUserStatus={currentUserStatus}
         onStatusChange={handleStatusChange}
-        onColorChange={handleColorChange}
-        onTextStyleChange={handleTextStyleChange}
         logoutModalId={LOGOUT_MODAL_ID}
       />
 
@@ -398,6 +396,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
       <DmToast />
       <PrivateMessagesModal />
+      <GalleryModal />
+      <SettingsModal
+        onColorChange={handleColorChange}
+        onTextStyleChange={handleTextStyleChange}
+      />
 
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
       <BlockConfirmModal onBlocked={handleRemoveNickname} />

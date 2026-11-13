@@ -10,10 +10,8 @@ import { create } from "zustand";
 export const LEFT_TABS = Object.freeze({
   CHATS: "chats",
   USERS: "users",
-  GALLERY: "gallery",
   NOTIFICATIONS: "notifications",
   PROFILE: "profile",
-  SETTINGS: "settings",
 });
 
 export const useLeftSidebarStore = create((set) => ({

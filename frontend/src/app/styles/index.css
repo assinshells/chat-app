@@ -35,6 +35,7 @@
 @import "./components/_dm-trigger.css";
 @import "./components/_private-chat.css";
 @import "./components/_dm-modal.css";
+@import "./components/_split-modal.css";
 @import "./components/_color-picker.css";
 @import "./components/_modals.css";
 @import "./components/_dm-toast.css";

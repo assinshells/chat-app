@@ -1,36 +1,21 @@
-import { useEffect } from "react";
-import {
-  Bell,
-  Construction,
-  Images,
-  MessageSquare,
-  Settings,
-  User,
-  Users,
-} from "lucide-react";
+import { Bell, Construction, MessageSquare, User, Users } from "lucide-react";
 
 import { LEFT_TABS, useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
-import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
-import { useGalleryReviewStore } from "@shared/lib/galleryReviewStore.js";
-import { DmHeaderButton } from "@features/dm";
-import {
-  UsersPanel,
-  ProfilePanel,
-  SettingsPanel,
-  CommonGalleryPanel,
-} from "@widgets/side-panel";
+import { HeaderActions } from "@widgets/chat-header";
+import { UsersPanel, ProfilePanel } from "@widgets/side-panel";
 import { IconRail } from "./IconRail.jsx";
 import { ChatsPanel } from "./ChatsPanel.jsx";
 
 /**
  * LeftSidebar — навігація застосунку: рейка з іконками (IconRail) +
  * сайдбар із вмістом активної вкладки:
- *  Чати (кімнати), Користувачі, Фотогалерея,
- *  Сповіщення (заглушка), Профіль, Налаштування.
+ *  Чати (кімнати), Користувачі, Сповіщення (заглушка), Профіль.
+ *  Особисті повідомлення, фотогалерея й налаштування — модалки з іконок
+ *  у шапці (HeaderActions).
  * Десктоп: рейка зліва по центру висоти. Телефон: рейка горизонтально
  * внизу, а коли відкрито чат — усе це сховано (див. .is-chat-open).
- * На телефоні в шапці сайдбара є іконка особистих повідомлень (у
- * списку немає шапки чату з такою іконкою).
+ * На телефоні в шапці сайдбара дублюються іконки модалок (у списку
+ * немає шапки чату з ними).
  */
 export function LeftSidebar({
   login,
@@ -43,36 +28,16 @@ export function LeftSidebar({
   onNicknameClick,
   currentUserStatus,
   onStatusChange,
-  onColorChange,
-  onTextStyleChange,
   logoutModalId,
 }) {
   const activeTab = useLeftSidebarStore((state) => state.activeTab);
   const setActiveTab = useLeftSidebarStore((state) => state.setActiveTab);
 
-  // Бейдж "чекає перевірки" — лише для тих, хто перевіряє. Оновлюємо при
-  // монтуванні та щоразу, як галерею відкрили/закрили (дешевий запит).
-  const canReviewPhotos = useCurrentUserStore((state) => state.canReviewPhotos);
-  const pendingPhotos = useGalleryReviewStore((state) => state.pendingCount);
-  const refreshPendingPhotos = useGalleryReviewStore((state) => state.refresh);
-  const isGalleryOpen = activeTab === LEFT_TABS.GALLERY;
-
-  useEffect(() => {
-    if (canReviewPhotos) refreshPendingPhotos();
-  }, [canReviewPhotos, isGalleryOpen, refreshPendingPhotos]);
-
   const tabs = [
     { id: LEFT_TABS.CHATS, label: "Чати", Icon: MessageSquare },
     { id: LEFT_TABS.USERS, label: "Користувачі", Icon: Users },
-    {
-      id: LEFT_TABS.GALLERY,
-      label: "Фотогалерея",
-      Icon: Images,
-      badge: canReviewPhotos ? pendingPhotos : 0,
-    },
     { id: LEFT_TABS.NOTIFICATIONS, label: "Сповіщення", Icon: Bell },
     { id: LEFT_TABS.PROFILE, label: "Профіль", Icon: User },
-    { id: LEFT_TABS.SETTINGS, label: "Налаштування", Icon: Settings },
   ];
 
   const current = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
@@ -103,23 +68,12 @@ export function LeftSidebar({
         />
       );
       break;
-    case LEFT_TABS.GALLERY:
-      content = <CommonGalleryPanel />;
-      break;
     case LEFT_TABS.PROFILE:
       content = (
         <ProfilePanel
           currentUserStatus={currentUserStatus}
           onStatusChange={onStatusChange}
           logoutModalId={logoutModalId}
-        />
-      );
-      break;
-    case LEFT_TABS.SETTINGS:
-      content = (
-        <SettingsPanel
-          onColorChange={onColorChange}
-          onTextStyleChange={onTextStyleChange}
         />
       );
       break;
@@ -139,7 +93,7 @@ export function LeftSidebar({
       <aside className="left-sidebar">
         <div className="left-sidebar-header">
           <h5 className="left-sidebar-title">{title}</h5>
-          <DmHeaderButton className="left-sidebar-dm" />
+          <HeaderActions className="left-sidebar-actions" />
         </div>
 
         <div

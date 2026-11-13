@@ -1,15 +1,15 @@
 import { ArrowLeft } from "lucide-react";
 
-import { DmHeaderButton } from "@features/dm";
+import { HeaderActions } from "./HeaderActions.jsx";
 import { APP_NAME } from "@shared/constants/auth.constants.js";
 
 /**
  * ChatHeader — шапка чату: на телефоні кнопка "Назад" (повертає до
  * списків із нижньою рейкою), крапка статусу з'єднання (.chat-status-dot:
  * зелена — онлайн, жовта пульсуюча — підключення) і назва кімнати або
- * ім'я співрозмовника (titleStyle — його колір). Праворуч — іконка
- * особистих повідомлень (DmHeaderButton), яка відкриває їх модалку.
- * Решта навігації — в лівій рейці (@widgets/left-sidebar).
+ * ім'я співрозмовника (titleStyle — його колір). Праворуч — іконки
+ * модалок: особисті повідомлення, фотогалерея, налаштування
+ * (HeaderActions). Решта навігації — в лівій рейці (@widgets/left-sidebar).
  */
 export function ChatHeader({ title, titleStyle, online, onBack }) {
   return (
@@ -44,9 +44,7 @@ export function ChatHeader({ title, titleStyle, online, onBack }) {
           </div>
         </div>
 
-        <div className="chat-header-actions">
-          <DmHeaderButton />
-        </div>
+        <HeaderActions />
       </div>
     </header>
   );
