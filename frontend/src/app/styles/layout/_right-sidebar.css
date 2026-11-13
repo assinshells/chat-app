@@ -1,17 +1,19 @@
 /* =========================================================
    RIGHT SIDEBAR — правий сайдбар на всю висоту чату з вкладками
-   "Усі / Кімнати / Користувачі" (widgets/right-sidebar).
+   "Кімнати / Користувачі" (widgets/right-sidebar).
 
    Структура (ChatLayout.jsx):
      .right-sidebar-wrap       — позиціонувальний контекст
        .right-sidebar          — вкладки + вміст
-       .app-panel              — профіль іншого користувача; при
-                                 відкритті лягає поверх сайдбара
+       .app-panel              — профіль іншого користувача (лише
+                                 десктоп); лягає поверх сайдбара
+     .right-sidebar-backdrop   — затемнення під висувним сайдбаром (телефон)
 
-   Десктоп (від 992px): колонка 300px праворуч. Телефон: сайдбара нема
-   (той самий вміст — у вкладці "Чати" лівої рейки), а панель профілю
-   рендериться без обгортки і лишається на весь екран (.app-panel —
-   position: fixed у _app-layout.css).
+   Десктоп (від 992px): колонка 300px праворуч, завжди видна.
+   Телефон: сайдбар схований за правим краєм; іконка в шапці
+   (HeaderActions) додає .is-open — він висувається поверх чату. Панель
+   профілю на телефоні рендериться без обгортки і лишається на весь екран
+   (.app-panel — position: fixed у _app-layout.css).
    ========================================================= */
 
 .right-sidebar-wrap {
@@ -50,7 +52,7 @@
   width: auto;
 }
 
-/* ---------- Вкладки "Усі / Кімнати / Користувачі" ---------- */
+/* ---------- Вкладки "Кімнати / Користувачі" ---------- */
 
 .sidebar-tabs {
   flex: 0 0 auto;
@@ -67,8 +69,7 @@
 }
 
 .sidebar-tab {
-  /* За вмістом, а не порівну: "Користувачі" довше за "Усі". */
-  flex: 1 1 auto;
+  flex: 1 1 0;
 
   min-width: 0;
   padding: 0.35rem 0.5rem;
@@ -99,35 +100,69 @@
   background: rgba(var(--bs-primary-rgb), 0.14);
 }
 
-/* ---------- "Усі": верх/низ 30/70 ---------- */
-
-.sidebar-split {
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-split-top {
-  flex: 3 1 0;
-}
-
-.sidebar-split-bottom {
-  flex: 7 1 0;
-
-  border-top: 1px solid var(--bs-border-color);
-}
-
-.sidebar-split-title {
+/* Хрестик закриття — лише у висувному сайдбарі (телефон). */
+.sidebar-close {
   flex: 0 0 auto;
+}
 
-  margin: 0;
-  padding: 0.5rem 0.75rem 0.15rem;
+/* ---------- Телефон: висувний сайдбар ---------- */
 
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.right-sidebar-backdrop {
+  display: none;
+}
 
-  color: var(--bs-secondary-color);
+@media (max-width: 991.98px) {
+  .right-sidebar-wrap {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    width: min(320px, 85vw);
+    height: auto;
+
+    /* Нижче за повноекранну панель профілю (.app-panel, 1020) і
+       Bootstrap-модалки (1055). */
+    z-index: 1010;
+
+    transform: translateX(100%);
+    visibility: hidden;
+
+    box-shadow: none;
+
+    transition:
+      transform 0.2s ease,
+      visibility 0s linear 0.2s;
+  }
+
+  .right-sidebar-wrap.is-open {
+    transform: translateX(0);
+    visibility: visible;
+
+    box-shadow: var(--bs-box-shadow-lg);
+
+    transition: transform 0.2s ease;
+  }
+
+  .right-sidebar {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .right-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1009;
+
+    display: block;
+
+    background: rgba(0, 0, 0, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .right-sidebar-wrap,
+  .right-sidebar-wrap.is-open {
+    transition: none;
+  }
 }

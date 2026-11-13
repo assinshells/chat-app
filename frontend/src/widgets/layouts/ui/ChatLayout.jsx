@@ -5,7 +5,6 @@ import { ChatConversation } from "@widgets/chat-conversation";
 import { ChatComposer } from "@widgets/chat-composer";
 import { LogoutConfirmModal } from "@features/auth/logout/ui/LogoutConfirmModal.jsx";
 import { SidePanel, SettingsModal, GalleryModal } from "@widgets/side-panel";
-import { LeftSidebar } from "@widgets/left-sidebar";
 import { RightSidebar, RoomsUsersPanel } from "@widgets/right-sidebar";
 import { PrivateMessagesModal } from "@widgets/private-chat";
 import {
@@ -16,13 +15,6 @@ import { useChatSocket } from "@features/chat";
 import { useDmStore, DmToast } from "@features/dm";
 import { useBlockStore, BlockConfirmModal } from "@features/block";
 import { useFriendStore } from "@features/friends";
-import {
-  RulesModal,
-  FeedbackModal,
-  WarningModal,
-  CookiesModal,
-  DeveloperModal,
-} from "@features/info";
 import { RoleManageModal } from "@features/roles";
 import {
   KickModal,
@@ -34,22 +26,16 @@ import {
 } from "@features/moderation";
 import { ROOMS_BY_ID } from "@features/chat/constants/rooms.constants.js";
 import { useCurrentUserStore } from "@shared/lib/currentUserStore.js";
-import {
-  RULES_MODAL_ID,
-  FEEDBACK_MODAL_ID,
-  WARNING_MODAL_ID,
-  COOKIES_MODAL_ID,
-  DEVELOPER_MODAL_ID,
-} from "@shared/constants/infoModals.constants.js";
 import { useSidePanelStore } from "@shared/lib/sidePanelStore.js";
-import { useLeftSidebarStore } from "@shared/lib/leftSidebarStore.js";
+import { useRightSidebarStore } from "@shared/lib/rightSidebarStore.js";
 import { useMediaQuery } from "@shared/lib/useMediaQuery.js";
 
 // Скільки ніків/міток часу можна одночасно прикріпити до повідомлення
 // через клік по ніку/часу в ChatConversation.
 const MAX_TARGETS = 3;
 
-// id модалки підтвердження виходу (кнопка-тригер — в ChatHeader).
+// id модалки підтвердження виходу (кнопка-тригер — остання іконка в шапці,
+// див. HeaderActions).
 const LOGOUT_MODAL_ID = "logoutConfirmModal";
 
 export function ChatLayout({ login, initialRoom, onLogout }) {
@@ -163,20 +149,14 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     : null;
 
   // Права панель — лише профіль іншого користувача (useSidePanelStore);
-  // кімнати, учасники, особисті, галерея, профіль і налаштування живуть
-  // у вкладках лівої рейки (LeftSidebar).
+  // кімнати й користувачі живуть у правому сайдбарі, налаштування,
+  // галерея й особисті — у модалках з іконок шапки.
   const sidePanel = useSidePanelStore((state) => state.panel);
   const closeSidePanel = useSidePanelStore((state) => state.close);
 
-  // Телефон: чат відкривається на весь екран поверх списків, а кнопка
-  // "Назад" у шапці повертає до списків із нижньою рейкою.
-  const chatOpen = useLeftSidebarStore((state) => state.chatOpen);
-  const openChat = useLeftSidebarStore((state) => state.openChat);
-  const closeChat = useLeftSidebarStore((state) => state.closeChat);
-
-  const handleBack = () => {
-    closeChat();
-  };
+  // Телефон: правий сайдбар схований і висувається за іконкою в шапці.
+  const sidebarOpen = useRightSidebarStore((state) => state.mobileOpen);
+  const closeSidebar = useRightSidebarStore((state) => state.closeMobile);
 
   // Escape закриває праву панель профілю — але не поверх відкритої
   // модалки, яка сама обробляє Escape.
@@ -193,13 +173,25 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [sidePanel, closeSidePanel]);
 
-  // Статус доступності поточного користувача (панель "Профіль",
-  // див. @widgets/side-panel/ui/ProfilePanel). Джерело
-  // правди — useCurrentUserStore: заповнюється
-  // з GET /api/auth/me при завантаженні і оптимістично оновлюється
-  // одразу після успішного status:update (handleStatusChange нижче).
-  const currentUserStatus = useCurrentUserStore((state) => state.status);
+  // Escape закриває висувний сайдбар (телефон).
+  useEffect(() => {
+    if (!sidebarOpen) return undefined;
 
+    const handleKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      if (document.querySelector(".modal.show")) return;
+      closeSidebar();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen, closeSidebar]);
+
+  // Статус доступності поточного користувача (Налаштування → Статус,
+  // див. @widgets/side-panel/ui/StatusView). Джерело правди —
+  // useCurrentUserStore: заповнюється з GET /api/auth/me при завантаженні
+  // і оптимістично оновлюється одразу після успішного status:update
+  // (handleStatusChange нижче).
   const handleStatusChange = (status) => {
     updateStatus(status)
       .then(() => useCurrentUserStore.getState().setStatus(status))
@@ -245,7 +237,7 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
 
   const handleSelectRoom = (roomId) => {
     switchRoom(roomId);
-    openChat();
+    closeSidebar();
     // Ніки/час обиралися з повідомлень поточної кімнати — при переході
     // в іншу кімнату вони втрачають сенс.
     setTargetNicknames([]);
@@ -260,11 +252,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   };
 
   // Клік по ніку у вкладці "Користувачі". Нік додається адресатом у
-  // форму публічного чату — тож повертаємося до нього (і на телефоні
-  // відкриваємо чат), щоб одразу можна було писати.
+  // форму публічного чату — тож на телефоні ховаємо сайдбар, щоб одразу
+  // можна було писати.
   const handlePanelNicknameClick = (nickname) => {
     handleNicknameClick(nickname);
-    openChat();
+    closeSidebar();
   };
 
   const handleTimeClick = (time) => {
@@ -299,19 +291,19 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
     <SidePanel onClose={closeSidePanel} users={visibleRoomUsers} />
   ) : null;
 
-  // Кімнати і користувачі: правий сайдбар (десктоп) або вкладка "Чати"
-  // лівої рейки (телефон) — той самий вміст.
+  // Кімнати і користувачі — правий сайдбар: на десктопі завжди видно,
+  // на телефоні схований і висувається за іконкою в шапці.
   const isDesktop = useMediaQuery("(min-width: 992px)");
   const roomsUsers = (
     <RoomsUsersPanel
       login={login}
       users={visibleRoomUsers}
       activeRoom={activeRoom}
-      activeRoomName={activeRoomName}
       roomCounts={roomCounts}
       selectedNicknames={targetNicknames}
       onSelectRoom={handleSelectRoom}
       onNicknameClick={handlePanelNicknameClick}
+      onClose={closeSidebar}
     />
   );
 
@@ -330,21 +322,13 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
   }
 
   return (
-    <div className={`layout-wrapper app-layout${chatOpen ? " is-chat-open" : ""}`}>
-      {/* Навігація: рейка з іконками-табами + сайдбар з вмістом вкладки. */}
-      <LeftSidebar
-        chatsContent={isDesktop ? null : roomsUsers}
-        currentUserStatus={currentUserStatus}
-        onStatusChange={handleStatusChange}
-        logoutModalId={LOGOUT_MODAL_ID}
-      />
-
+    <div className="layout-wrapper app-layout">
       <div className="user-chat">
         <div className="chat-main">
           <ChatHeader
             title={activeRoomName}
             online={connected}
-            onBack={handleBack}
+            logoutModalId={LOGOUT_MODAL_ID}
           />
           <ConfinementBanner confinement={confinement} />
           <RoomBanNoticeBanner notice={roomBanNotice} />
@@ -406,15 +390,18 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
         </div>
       </div>
 
-      {/* Десктоп: правий сайдбар (кімнати/користувачі) на всю висоту;
-          профіль іншого користувача лягає поверх нього. Телефон: сайдбара
-          нема (кімнати й користувачі — у вкладці "Чати" лівої рейки),
-          профіль — на весь екран. */}
-      {isDesktop ? (
-        <RightSidebar overlay={sidePanelNode}>{roomsUsers}</RightSidebar>
-      ) : (
-        sidePanelNode
-      )}
+      {/* Правий сайдбар (кімнати/користувачі). Десктоп: колонка на всю
+          висоту, профіль іншого користувача лягає поверх неї. Телефон:
+          сайдбар схований і висувається за іконкою в шапці, профіль — на
+          весь екран. */}
+      <RightSidebar
+        open={sidebarOpen}
+        onClose={closeSidebar}
+        overlay={isDesktop ? sidePanelNode : null}
+      >
+        {roomsUsers}
+      </RightSidebar>
+      {!isDesktop && sidePanelNode}
 
       <DmToast />
       <PrivateMessagesModal />
@@ -422,15 +409,11 @@ export function ChatLayout({ login, initialRoom, onLogout }) {
       <SettingsModal
         onColorChange={handleColorChange}
         onTextStyleChange={handleTextStyleChange}
+        onStatusChange={handleStatusChange}
       />
 
       <LogoutConfirmModal modalId={LOGOUT_MODAL_ID} onConfirm={onLogout} />
       <BlockConfirmModal onBlocked={handleRemoveNickname} />
-      <RulesModal modalId={RULES_MODAL_ID} />
-      <FeedbackModal modalId={FEEDBACK_MODAL_ID} />
-      <WarningModal modalId={WARNING_MODAL_ID} />
-      <CookiesModal modalId={COOKIES_MODAL_ID} />
-      <DeveloperModal modalId={DEVELOPER_MODAL_ID} />
       <RoleManageModal />
       <KickModal />
       <BanModal />

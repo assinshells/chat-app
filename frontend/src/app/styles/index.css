@@ -24,7 +24,6 @@
 
 @import "./layout/_authentication.css";
 @import "./layout/_app-layout.css";
-@import "./layout/_left-sidebar.css";
 @import "./layout/_right-sidebar.css";
 
 @import "./components/_chat-header.css";

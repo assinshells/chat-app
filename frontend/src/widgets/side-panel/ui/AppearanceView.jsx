@@ -12,11 +12,6 @@ import { useIsDarkTheme } from "@shared/lib/theme.js";
 
 import { SubPanelView } from "./SubPanelView.jsx";
 
-// Приклад фрази, якою показується, як виглядатиме нік/повідомлення
-// обраним кольором (самі кружки й назва не дають уявлення про
-// читабельність кольору на реальному тексті).
-const PREVIEW_TEXT = "Ось так виглядатиме ваш текст у чаті";
-
 /**
  * AppearanceView — вкладена панель "Зовнішній вигляд" (Налаштування →
  * Зовнішній вигляд):
@@ -132,17 +127,6 @@ export function AppearanceView({ onBack, onColorChange, onTextStyleChange }) {
                 </label>
               ))}
             </div>
-
-            <p
-              className="color-picker-preview-text mb-0"
-              style={{
-                color: colorHex,
-                fontWeight: bold ? 700 : undefined,
-                fontStyle: italic ? "italic" : undefined,
-              }}
-            >
-              {PREVIEW_TEXT}
-            </p>
           </div>
         </details>
 

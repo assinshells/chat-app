@@ -1,6 +1,8 @@
 import { createPortal } from "react-dom";
 import SimpleBar from "simplebar-react";
 
+import { CookiesContent } from "./CookiesContent.jsx";
+
 /**
  * CookiesModal — модалка "Файли cookie" у футері сторінок авторизації
  * (AuthLayout.jsx). Той самий "безшапковий" патерн, що й
@@ -38,28 +40,7 @@ export function CookiesModal({ modalId = "cookiesModal" }) {
 
           <div className="modal-body rules-modal-body">
             <SimpleBar style={{ flex: "1 1 auto", minHeight: 0 }} autoHide={false}>
-            <section className="rules-modal-section mb-0">
-              <h6>Технічні дані та cookie</h6>
-              <p>
-                Для роботи сервісу можуть використовуватися технічно
-                необхідні cookie, local storage та інші механізми
-                браузера. Вони застосовуються для:
-              </p>
-              <ul className="info-modal-list">
-                <li>авторизації;</li>
-                <li>підтримання сесії;</li>
-                <li>забезпечення безпеки;</li>
-                <li>запобігання зловживанням;</li>
-                <li>збереження локальних налаштувань (наприклад, теми).</li>
-              </ul>
-              <p className="mb-0">
-                Такі технічні механізми не призначені для рекламного або
-                міжсайтового відстеження, якщо інше прямо не зазначено в
-                окремих документах сервісу. Без них сервіс не зможе
-                коректно працювати, тому їх не можна відключити окремо
-                від використання чату.
-              </p>
-            </section>
+              <CookiesContent />
             </SimpleBar>
           </div>
         </div>

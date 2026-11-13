@@ -1,34 +1,31 @@
+import { X } from "lucide-react";
+
 import { RoomsPanel, UsersPanel } from "@widgets/side-panel";
 import { SIDEBAR_TABS, useRightSidebarStore } from "@shared/lib/rightSidebarStore.js";
 
 const TABS = [
-  { id: SIDEBAR_TABS.ALL, label: "Усі" },
   { id: SIDEBAR_TABS.ROOMS, label: "Кімнати" },
   { id: SIDEBAR_TABS.USERS, label: "Користувачі" },
 ];
 
 /**
- * RoomsUsersPanel — вміст правого сайдбара: три вкладки.
- *  - "Усі": кімнати зверху (30% висоти), користувачі знизу (70%), кожна
- *    половина прокручується окремо;
- *  - "Кімнати": лише список кімнат;
- *  - "Користувачі": лише учасники поточної кімнати.
- * На телефоні той самий вміст показується у вкладці "Чати" лівої рейки.
+ * RoomsUsersPanel — вміст правого сайдбара: дві вкладки.
+ *  - "Кімнати": список кімнат;
+ *  - "Користувачі": учасники поточної кімнати.
+ * onClose — лише на телефоні (сайдбар висувний): хрестик у ряду вкладок.
  */
 export function RoomsUsersPanel({
   login,
   users,
   activeRoom,
-  activeRoomName,
   roomCounts,
   selectedNicknames,
   onSelectRoom,
   onNicknameClick,
+  onClose,
 }) {
   const tab = useRightSidebarStore((state) => state.tab);
   const setTab = useRightSidebarStore((state) => state.setTab);
-
-  const usersTitle = `У кімнаті${activeRoomName ? ` «${activeRoomName}»` : ""}: ${users.length}`;
 
   const rooms = (
     <RoomsPanel
@@ -64,22 +61,22 @@ export function RoomsUsersPanel({
             </button>
           );
         })}
+
+        {onClose && (
+          <button
+            type="button"
+            className="chat-header-btn sidebar-close d-lg-none"
+            title="Закрити"
+            aria-label="Закрити"
+            onClick={onClose}
+          >
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       {tab === SIDEBAR_TABS.ROOMS && rooms}
       {tab === SIDEBAR_TABS.USERS && usersList}
-      {tab === SIDEBAR_TABS.ALL && (
-        <>
-          <section className="sidebar-split sidebar-split-top" aria-label="Кімнати">
-            <h6 className="sidebar-split-title">Кімнати</h6>
-            {rooms}
-          </section>
-          <section className="sidebar-split sidebar-split-bottom" aria-label="Користувачі">
-            <h6 className="sidebar-split-title">{usersTitle}</h6>
-            {usersList}
-          </section>
-        </>
-      )}
     </>
   );
 }

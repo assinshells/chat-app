@@ -169,19 +169,11 @@
    AppearanceView.jsx). Самі кружки — _color-picker.css.
    ========================================================= */
 
-/* Приклад фрази, пофарбованої обраним кольором (PREVIEW_TEXT у
-   AppearanceView.jsx) — трохи більший за назву кольору над ним,
-   щоб читабельність кольору на тексті було справді видно. */
-.color-picker-preview-text {
-  font-size: 1rem;
-  font-weight: 700;
-}
-
 /* Тіло розкривного меню з палітрою. */
 .app-appearance-color-body {
   padding: 0.25rem 1rem 1rem;
 }
 
 .app-appearance-color-body .color-radio-options {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0;
 }

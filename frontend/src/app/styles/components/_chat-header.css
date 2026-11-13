@@ -137,19 +137,6 @@
   gap: 0.5rem;
 }
 
-/* Кнопка "Назад" — лише на телефоні (на десктопі списки завжди видно). */
-.chat-header-back {
-  flex: 0 0 auto;
-
-  margin-left: -0.4rem;
-}
-
-@media (min-width: 992px) {
-  .chat-header-back {
-    display: none;
-  }
-}
-
 /* Кнопка відкритої панелі в шапці. */
 .chat-header-btn.is-active {
   color: var(--bs-primary);

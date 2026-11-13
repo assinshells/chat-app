@@ -1,19 +1,23 @@
 import { create } from "zustand";
 
 /**
- * useRightSidebarStore — активна вкладка правого сайдбара (кімнати і
- * користувачі): "all" — обидва списки разом (30/70), "rooms" — лише
- * кімнати, "users" — лише користувачі. Окремий стор, бо той самий вміст
- * показується в правому сайдбарі (десктоп) і у вкладці "Чати" лівої
- * рейки (телефон) — вибір вкладки не має губитись при перемиканні.
+ * useRightSidebarStore — стан правого сайдбара (кімнати і користувачі).
+ *
+ *  - tab: активна вкладка — "rooms" (кімнати) або "users" (користувачі);
+ *  - mobileOpen: на телефоні (< 992px) сайдбар схований і висувається
+ *    поверх чату за іконкою в шапці; на десктопі прапорець ні на що не
+ *    впливає (сайдбар завжди видно).
  */
 export const SIDEBAR_TABS = Object.freeze({
-  ALL: "all",
   ROOMS: "rooms",
   USERS: "users",
 });
 
 export const useRightSidebarStore = create((set) => ({
-  tab: SIDEBAR_TABS.ALL,
+  tab: SIDEBAR_TABS.ROOMS,
+  mobileOpen: false,
+
   setTab: (tab) => set({ tab }),
+  toggleMobile: () => set((state) => ({ mobileOpen: !state.mobileOpen })),
+  closeMobile: () => set({ mobileOpen: false }),
 }));

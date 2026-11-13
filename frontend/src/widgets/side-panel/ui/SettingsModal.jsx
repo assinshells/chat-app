@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { ChevronRight, Moon, Palette, Settings, ShieldCheck, UserPen } from "lucide-react";
+import {
+  ChevronRight,
+  CircleDot,
+  CircleHelp,
+  Moon,
+  Palette,
+  Settings,
+  ShieldCheck,
+  UserPen,
+} from "lucide-react";
 
 import { useAppModalStore } from "@shared/lib/appModalStore.js";
 import { AppScrollbar } from "@shared/ui/scrollbar";
@@ -8,23 +17,32 @@ import { ProfileEditView } from "./ProfileEditView.jsx";
 import { DarkModeView } from "./DarkModeView.jsx";
 import { AppearanceView } from "./AppearanceView.jsx";
 import { SecurityView } from "./SecurityView.jsx";
+import { StatusView } from "./StatusView.jsx";
+import { HelpView } from "./HelpView.jsx";
 
 const SETTINGS_ITEMS = [
   { id: "profile", label: "Інформація профілю", icon: UserPen },
+  { id: "status", label: "Статус", icon: CircleDot },
   { id: "dark-mode", label: "Темний режим", icon: Moon },
   { id: "appearance", label: "Зовнішній вигляд", icon: Palette },
   { id: "security", label: "Безпека", icon: ShieldCheck },
+  { id: "help", label: "Допомога", icon: CircleHelp },
 ];
 
 /**
  * SettingsModal — модалка "Налаштування" (іконка в шапці): ліворуч
- * розділи (інформація профілю, темний режим, зовнішній вигляд, безпека),
+ * розділи (інформація профілю, статус, темний режим, зовнішній вигляд,
+ * безпека, допомога),
  * праворуч — вибраний розділ; на телефоні — список, а після вибору
  * розділ із кнопкою "Назад". Самі розділи — ті ж вкладені панелі
  * (SubPanelView), що й раніше; їх верхня шапка ховається, бо назву й
  * "Назад" показує шапка модалки (див. _split-modal.css).
  */
-export function SettingsModal({ onColorChange, onTextStyleChange }) {
+export function SettingsModal({
+  onColorChange,
+  onTextStyleChange,
+  onStatusChange,
+}) {
   const open = useAppModalStore((state) => state.settingsOpen);
   const close = useAppModalStore((state) => state.closeSettings);
 
@@ -74,6 +92,10 @@ export function SettingsModal({ onColorChange, onTextStyleChange }) {
     >
       {/* key: інший розділ — чистий стан вкладених панелей. */}
       {selected === "profile" && <ProfileEditView key={selected} onBack={handleBack} />}
+      {selected === "status" && (
+        <StatusView key={selected} onBack={handleBack} onStatusChange={onStatusChange} />
+      )}
+      {selected === "help" && <HelpView key={selected} onBack={handleBack} />}
       {selected === "dark-mode" && <DarkModeView key={selected} onBack={handleBack} />}
       {selected === "security" && <SecurityView key={selected} onBack={handleBack} />}
       {selected === "appearance" && (
